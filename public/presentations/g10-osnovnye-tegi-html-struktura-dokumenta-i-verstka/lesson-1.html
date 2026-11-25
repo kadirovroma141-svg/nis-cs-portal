@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>10.2А · Урок 1 · Язык HTML и структура HTML-документа</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+</head>
+<body>
+<script src="../_engine/deck.js"></script>
+<script>
+const L1_TAGS = [
+  { tag: "<html>...</html>", kind: "paired", hint: "корневой контейнер" },
+  { tag: "<br>", kind: "void", hint: "перенос строки" },
+  { tag: "<body>...</body>", kind: "paired", hint: "видимое содержимое" },
+  { tag: "<meta charset=\"utf-8\">", kind: "void", hint: "кодировка UTF-8" },
+  { tag: "<title>...</title>", kind: "paired", hint: "имя вкладки браузера" },
+  { tag: "<hr>", kind: "void", hint: "горизонтальная линия" },
+  { tag: "<img>", kind: "void", hint: "изображение" },
+  { tag: "<p>...</p>", kind: "paired", hint: "абзац текста" }
+];
+
+const L1_SKELETON = [
+  { code: "<!DOCTYPE html>", title: "Объявление типа документа (HTML5)", zone: "До <html>", desc: "Сообщает браузеру, что страница написана по стандарту HTML5. Одиночная директива." },
+  { code: "<html lang=\"ru\"> ... </html>", title: "Корневой контейнер веб-страницы", zone: "Весь документ", desc: "Содержит ровно две части: <head> и <body>. Атрибут lang=\"ru\" задаёт язык документа." },
+  { code: "<head> ... </head>", title: "Служебный заголовок", zone: "Не виден на странице", desc: "Описывает кодировку, название вкладки, стили CSS. Видимый текст (<h1>, <p>) сюда писать нельзя." },
+  { code: "<meta charset=\"utf-8\">", title: "Кодировка символов UTF-8", zone: "Внутри <head>", desc: "Нужна для правильного отображения кириллицы и казахского алфавита." },
+  { code: "<title>Моя первая страница</title>", title: "Название вкладки браузера", zone: "Внутри <head>", desc: "Отображается на вкладке браузера (а не на самой странице — для неё есть <h1>)." },
+  { code: "<body> ... </body>", title: "Тело документа", zone: "Окно браузера", desc: "Всё видимое содержимое страницы: заголовки, абзацы, списки, ссылки, таблицы, медиа." }
+];
+
+initDeck({
+  badge: "</> 10.2А · Урок 1",
+  title: "Язык разметки HTML и структура HTML-документа",
+  subtitle: "10 класс · 2 четверть · Цели 10.1.2.2, 10.1.2.5 · 80 мин · Мини-HTML",
+  initialState: {
+    tabs: { s1: "criteria" },
+    selected: { skel: 0, bg: "#FFF8DC", text: "#000080", align: "center" },
+    revealed: { s2Code: false, s6Comment: true }
+  },
+  slides: [
+    {
+      badge: "Этап 1 · Введение",
+      shortTitle: "Титул и цели урока",
+      timing: "0–2 мин",
+      source: "КСП 10.2А Урок 1 · SB 10 кл. стр. 70–74",
+      notes: "Поприветствуйте класс. Озвучьте тему, цели 10.1.2.2 и 10.1.2.5. Переключите вкладку «Критерии / Терминология».",
+      render(st) {
+        const tab = st.tabs.s1 || "criteria";
+        return `
+          <div class="grid-12">
+            <div class="col-7 stack">
+              <div class="text-xs font-bold text-muted" style="text-transform:uppercase;">Информатика · 10 класс · Раздел 10.2А · Урок 1 из 10</div>
+              <h1 class="slide-h1">Язык разметки HTML и структура документа</h1>
+              <p class="lead">Узнаем, как браузер читает веб-страницы, соберём базовый каркас HTML5, настроим атрибуты фона и комментарии и выполним задания в <strong>Мини-HTML</strong>.</p>
+              <div class="grid-2">
+                <div class="box-primary">
+                  <div class="box-title mono">Цель 10.1.2.2</div>
+                  <div class="text-xs">Использовать основные теги при разработке веб-страниц и формировать структуру HTML5-документа.</div>
+                </div>
+                <div class="box-accent">
+                  <div class="box-title mono" style="color:var(--accent);">Цель 10.1.2.5</div>
+                  <div class="text-xs">Применять атрибуты тегов (<span class="mono">bgcolor, text, lang</span>) и комментарии <span class="mono">&lt;!-- ... --&gt;</span>.</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-5 stack">
+              <div class="box stack">
+                <div class="flex-row">
+                  <button type="button" class="btn ${tab === "criteria" ? "btn-primary" : ""}" onclick="DECK.setTab('s1','criteria')">Критерии</button>
+                  <button type="button" class="btn ${tab === "vocab" ? "btn-primary" : ""}" onclick="DECK.setTab('s1','vocab')">Термины</button>
+                </div>
+                ${tab === "criteria" ? `
+                  <ul class="text-xs mt-0 mb-0" style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
+                    <li>Объясняет назначение HTML и отличие парных тегов от одиночных.</li>
+                    <li>Создаёт каркас HTML5 с UTF-8 и <span class="mono">&lt;title&gt;</span>.</li>
+                    <li>Применяет комментарии <span class="mono">&lt;!-- ... --&gt;</span> и <span class="mono">bgcolor</span> (именем и <span class="mono">#RRGGBB</span>).</li>
+                  </ul>
+                ` : `
+                  <div class="flex-row">
+                    ${["HTML","гипертекст","парный тег","одиночный тег","атрибут","<head>","<body>","UTF-8","<!-- -->"].map(w => `<span class="pill mono">${DECK.esc(w)}</span>`).join("")}
+                  </div>
+                `}
+              </div>
+              <div class="box-success text-xs">
+                <strong>Мини-приложение на уроке:</strong> на слайдах 7 и 8 встроен живой <strong>Мини-HTML</strong> сайта с автопроверкой!
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 1 · Стартер",
+      shortTitle: "Приём «Исследуй код (Ctrl+U)»",
+      timing: "2–10 мин",
+      source: "КСП 10.2А · 1 ур 2 четв, слайды 1–3",
+      notes: "Нажмите кнопку «Нажать Ctrl + U» — покажите классу исходный код. Обсудите, что сообщают браузеру слова в угловых скобках.",
+      render(st) {
+        const showCode = !!st.revealed.s2Code;
+        const code = `<!DOCTYPE html>\n<html lang="ru">\n<head>\n    <meta charset="utf-8">\n    <title>НИШ г. Кызылорда</title>\n</head>\n<body bgcolor="#E0F2FE">\n    <h1 align="center">Добро пожаловать в 10 класс!</h1>\n    <p align="center">Каждая веб-страница — это текстовый файл с тегами HTML.</p>\n</body>\n</html>`;
+        return `
+          <div class="flex-between">
+            <div>
+              <h2 class="slide-h2">Стартер: «Исследуй код страницы»</h2>
+              <p class="lead">Нажмите кнопку, чтобы переключить вид браузера и исходный HTML-код (<span class="mono font-bold">Ctrl + U</span>).</p>
+            </div>
+            <button type="button" class="btn ${showCode ? "" : "btn-accent"}" onclick="DECK.toggleReveal('s2Code')">
+              ${showCode ? "👁 Показать вид в браузере" : "⌨️ Нажать Ctrl + U (Исходный код)"}
+            </button>
+          </div>
+          <div class="browser-frame">
+            <div class="browser-bar">
+              <div class="browser-dots"><span style="background:#ef4444"></span><span style="background:#f59e0b"></span><span style="background:#22c55e"></span></div>
+              <span class="browser-tab">${showCode ? "view-source:index.html" : "НИШ г. Кызылорда"}</span>
+              <span class="mono text-xs text-muted">index.html</span>
+            </div>
+            ${showCode
+              ? `<pre class="code-block" style="border-radius:0;">${DECK.esc(code)}</pre>`
+              : `<div style="padding:44px 20px;text-align:center;background:#E0F2FE;color:#0F172A;">
+                   <h1 style="margin:0 0 10px;font-size:26px;">Добро пожаловать в 10 класс!</h1>
+                   <p style="margin:0;font-size:15px;">Каждая веб-страница — это текстовый файл с тегами HTML.</p>
+                 </div>`
+            }
+          </div>
+          <div class="grid-2 text-xs">
+            <div class="box"><strong>Вопрос 1:</strong> Почему вместо оформления мы видим слова в угловых скобках <span class="mono">&lt;html&gt;, &lt;head&gt;, &lt;body&gt;</span>?</div>
+            <div class="box"><strong>Вопрос 2:</strong> Какой именно тег задал текст на вкладке браузера «НИШ г. Кызылорда»?</div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Теория + Мини-тест",
+      shortTitle: "HTML, парные и одиночные теги",
+      timing: "10–18 мин",
+      source: "SB 10 кл. стр. 70–71",
+      notes: "Подчеркните: HTML — язык разметки, НЕ программирования. Проверьте вместе с классом 8 тегов справа.",
+      render(st) {
+        let ok = 0;
+        L1_TAGS.forEach(t => { if (st.quiz[t.tag] === t.kind) ok++; });
+        return `
+          <h2 class="slide-h2">HTML и правила записи тегов</h2>
+          <div class="grid-12">
+            <div class="col-6 stack">
+              <div class="box-primary text-xs">
+                <div class="font-bold" style="margin-bottom:4px;">HTML (HyperText Markup Language)</div>
+                Язык разметки гипертекста. <strong>НЕ является языком программирования</strong> — задаёт браузеру инструкции отображения страницы. Расширение: <span class="mono font-bold">.html</span> или <span class="mono font-bold">.htm</span>.
+              </div>
+              <div class="box text-xs stack">
+                <div>• <strong>Парные (контейнеры):</strong> <span class="mono">&lt;тег&gt; … &lt;/тег&gt;</span> (закрывающий со слэшем <span class="mono">/</span>). Строгая вложенность («матрёшка»).</div>
+                <div>• <strong>Одиночные (непарные):</strong> только открывающий тег (<span class="mono">&lt;meta&gt;, &lt;br&gt;, &lt;hr&gt;, &lt;img&gt;</span>).</div>
+                <div>• Хороший тон: писать имена тегов <strong>строчными буквами</strong>.</div>
+              </div>
+              <div class="box-warning text-xs"><strong>Важно (SB стр. 70):</strong> проверяйте готовую страницу в разных браузерах — отображение может отличаться.</div>
+            </div>
+            <div class="col-6 box stack">
+              <div class="flex-between">
+                <strong class="text-xs" style="text-transform:uppercase;color:var(--primary);">Тренажёр: парный или одиночный?</strong>
+                <span class="pill pill-success mono">${ok} / ${L1_TAGS.length}</span>
+              </div>
+              ${L1_TAGS.map(t => {
+                const p = st.quiz[t.tag];
+                const cls = p ? (p === t.kind ? "ok" : "bad") : "";
+                return `
+                  <div class="quiz-row ${cls}">
+                    <div><strong class="mono">${DECK.esc(t.tag)}</strong> <span class="text-muted text-xs">— ${t.hint}</span></div>
+                    <div class="flex-row" style="gap:4px;">
+                      <button type="button" class="btn ${p === "paired" ? "btn-primary" : ""}" style="padding:3px 8px;" onclick="DECK.pickQuiz('${DECK.esc(t.tag)}','paired')">Парный</button>
+                      <button type="button" class="btn ${p === "void" ? "btn-primary" : ""}" style="padding:3px 8px;" onclick="DECK.pickQuiz('${DECK.esc(t.tag)}','void')">Одиночный</button>
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Теория",
+      shortTitle: "Структура HTML5-документа",
+      timing: "18–26 мин",
+      source: "SB 10 кл. стр. 70–72 · 1 ур 2 четв, слайды 4–6",
+      notes: "Нажимайте на строки каркаса слева. Акцентируйте разницу <head> (служебное) vs <body> (видимое) и <title> vs <h1>.",
+      render(st) {
+        const idx = st.selected.skel || 0;
+        const cur = L1_SKELETON[idx];
+        return `
+          <div>
+            <h2 class="slide-h2">Обязательная структура HTML5-документа</h2>
+            <p class="lead">Нажмите на любую строку каркаса слева, чтобы разобрать её роль.</p>
+          </div>
+          <div class="grid-12">
+            <div class="col-6 stack">
+              ${L1_SKELETON.map((item, i) => `
+                <button type="button" class="interactive-card mono text-xs ${idx === i ? "active" : ""}" onclick="DECK.setSelected('skel', ${i})">
+                  <div class="flex-between"><span>${DECK.esc(item.code)}</span><span>#${i + 1}</span></div>
+                </button>
+              `).join("")}
+            </div>
+            <div class="col-6 stack">
+              <div class="box-primary stack">
+                <div class="flex-between">
+                  <strong>${DECK.esc(cur.title)}</strong>
+                  <span class="pill">${DECK.esc(cur.zone)}</span>
+                </div>
+                <pre class="code-block" style="padding:8px 10px;">${DECK.esc(cur.code)}</pre>
+                <div class="text-xs">${DECK.esc(cur.desc)}</div>
+              </div>
+              <div class="grid-2 text-xs">
+                <div class="box"><strong class="mono">&lt;head&gt;</strong> (служебная)<br>• &lt;meta charset="utf-8"&gt;<br>• &lt;title&gt; (вкладка)</div>
+                <div class="box"><strong class="mono">&lt;body&gt;</strong> (видимая)<br>• &lt;h1&gt;–&lt;h6&gt;, &lt;p&gt;<br>• списки, ссылки, таблицы</div>
+              </div>
+              <div class="box-warning text-xs"><strong>Совет к СОР/СОЧ:</strong> <span class="mono">&lt;title&gt;</span> всегда в <span class="mono">&lt;head&gt;</span> и задаёт имя вкладки браузера.</div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Конструктор",
+      shortTitle: "Атрибуты тегов (bgcolor, text, align)",
+      timing: "26–33 мин",
+      source: "SB 10 кл. стр. 72–74 · Цель 10.1.2.5",
+      notes: "Попереключайте цвета (словесные и HEX #RRGGBB) и выравнивание. Напомните: атрибут пишется только в открывающем теге.",
+      render(st) {
+        const bg = st.selected.bg || "#FFF8DC";
+        const tx = st.selected.text || "#000080";
+        const al = st.selected.align || "center";
+        return `
+          <div>
+            <h2 class="slide-h2">Атрибуты тегов: <span class="mono">имя="значение"</span></h2>
+            <p class="lead">Кликайте по кнопкам — смотрите, как меняется HTML-код и страница.</p>
+          </div>
+          <div class="grid-12">
+            <div class="col-6 stack">
+              <div class="box stack text-xs">
+                <div><strong>1. Фон страницы (<span class="mono">bgcolor</span>):</strong></div>
+                <div class="flex-row">
+                  ${["lightblue","#FFF8DC","#E0FFFF","yellow","#1E293B"].map(c => `<button type="button" class="btn mono ${bg === c ? "btn-primary" : ""}" onclick="DECK.setSelected('bg','${c}')">${c}</button>`).join("")}
+                </div>
+                <div><strong>2. Цвет текста (<span class="mono">text</span>):</strong></div>
+                <div class="flex-row">
+                  ${["#000080","black","maroon","#FFFFFF"].map(c => `<button type="button" class="btn mono ${tx === c ? "btn-primary" : ""}" onclick="DECK.setSelected('text','${c}')">${c}</button>`).join("")}
+                </div>
+                <div><strong>3. Выравнивание (<span class="mono">align</span>):</strong></div>
+                <div class="flex-row">
+                  ${["left","center","right"].map(a => `<button type="button" class="btn mono ${al === a ? "btn-primary" : ""}" onclick="DECK.setSelected('align','${a}')">${a}</button>`).join("")}
+                </div>
+              </div>
+              <div class="box-danger text-xs"><strong>Ошибка:</strong> атрибут НЕЛЬЗЯ писать в закрывающем теге! Верно: <span class="mono">&lt;p align="center"&gt;…&lt;/p&gt;</span>.</div>
+            </div>
+            <div class="col-6 stack">
+              <pre class="code-block">${DECK.esc(`<body bgcolor="${bg}" text="${tx}">\n    <h1 align="${al}">Привет, МИР!!!</h1>\n    <p align="${al}">Фон и цвет заданы атрибутами.</p>\n</body>`)}</pre>
+              <div class="browser-frame">
+                <div class="browser-bar"><span class="text-xs text-muted">Предпросмотр &lt;body&gt;</span></div>
+                <div style="padding:26px 18px;background:${bg};color:${tx};text-align:${al};">
+                  <div style="font-size:20px;font-weight:700;margin-bottom:6px;">Привет, МИР!!!</div>
+                  <div style="font-size:14px;">Фон и цвет заданы атрибутами.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Демо",
+      shortTitle: "Комментарии <!-- ... -->",
+      timing: "33–38 мин",
+      source: "КСП 10.2А · SB стр. 73–74",
+      notes: "Нажмите кнопку «Закомментировать / Раскомментировать», чтобы показать скрытие блока без удаления кода.",
+      render(st) {
+        const comm = !!st.revealed.s6Comment;
+        return `
+          <div class="flex-between">
+            <div>
+              <h2 class="slide-h2">Комментарии в HTML: <span class="mono">&lt;!-- ... --&gt;</span></h2>
+              <p class="lead">Браузер игнорирует комментарии на экране, но они видны разработчику и в <span class="mono">Ctrl + U</span>.</p>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="DECK.toggleReveal('s6Comment')">
+              ${comm ? "🔓 Раскомментировать 2-й абзац" : "🔒 Закомментировать 2-й абзац"}
+            </button>
+          </div>
+          <div class="grid-2">
+            <pre class="code-block">${DECK.esc(`<body>\n  <!-- Основной контент, автор: 10 класс -->\n  <h1>Моя страница</h1>\n  <p>Этот абзац виден всем.</p>\n\n  ${comm ? "<!-- <p>Черновик: временно скрыт!</p> -->" : "<p>Черновик: временно скрыт!</p>"}\n</body>`)}</pre>
+            <div class="browser-frame">
+              <div class="browser-bar"><span class="browser-tab">🌐 Моя страница</span></div>
+              <div style="padding:20px;background:#fff;color:#111;">
+                <h2 style="margin:0 0 8px;">Моя страница</h2>
+                <p style="margin:0 0 8px;">Этот абзац виден всем.</p>
+                ${comm
+                  ? `<div style="color:#666;font-style:italic;font-size:12px;">(Второй абзац закомментирован — браузер его скрыл)</div>`
+                  : `<p style="margin:0;padding:8px;background:#e4e6f7;color:#1f2c8c;border-radius:6px;font-weight:600;">Черновик: временно скрыт!</p>`
+                }
+              </div>
+            </div>
+          </div>
+          <div class="grid-2 text-xs">
+            <div class="box-success"><strong>1. Пояснение кода:</strong> подписываем разделы (<span class="mono">&lt;!-- Шапка --&gt;</span>).</div>
+            <div class="box-primary"><strong>2. Отладка:</strong> временно выключаем участок разметки без удаления.</div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Мини-HTML №1 · Практика",
+      pillClass: "pill-accent",
+      shortTitle: "Мини-HTML: Первая веб-страница",
+      timing: "38–53 мин",
+      source: "Мини-HTML (/html?task=g10-html-pervaya-stranitsa) · 5 баллов",
+      notes: "Живое мини-приложение сайта встроено прямо в слайд! Покажите ввод каркаса и кнопку «Проверить» в панели заданий.",
+      render(st, api) {
+        return api.renderMiniHtmlTask({
+          taskId: "g10-html-pervaya-stranitsa",
+          title: "Практика 1: Первая веб-страница (структура документа)",
+          summary: "Соберите каркас HTML5 в index.html и проверьте работу кнопкой «Проверить» справа.",
+          steps: ["<!DOCTYPE html>", "<html lang=\"ru\">", "UTF-8 + <title> «Моя первая страница»", "<h1> «Добро пожаловать!» + <p>"],
+          meta: "5 баллов · 8 мин · Работа в парах"
+        });
+      }
+    },
+    {
+      badge: "Мини-HTML №2 · Отладка",
+      pillClass: "pill-accent",
+      shortTitle: "Мини-HTML: Исправьте структуру",
+      timing: "53–68 мин",
+      source: "Мини-HTML (/html?task=g10-html-ispravte-strukturu) · 5 баллов",
+      notes: "Обратите внимание класса на панель «Проблемы» внизу редактора: 4 ошибки (<h1> в <head>, <title> в <body>, перехлёст <b><i>, <html> в конце).",
+      render(st, api) {
+        return api.renderMiniHtmlTask({
+          taskId: "g10-html-ispravte-strukturu",
+          title: "Практика 2: Исправьте структуру («Школьная библиотека»)",
+          summary: "Найдите 4 ошибки в коде с помощью панели «Проблемы», исправьте их и ответьте на вопрос задания.",
+          steps: ["<title> → в <head>", "<h1> → в <body>", "<b><i>17:00</i></b>", "</html> в конце"],
+          meta: "5 баллов · 8 мин · Отладка"
+        });
+      }
+    },
+    {
+      badge: "Этап 3 · Блиц и ДЗ",
+      shortTitle: "Блиц-опрос «Найди ошибку» и ДЗ",
+      timing: "68–80 мин",
+      source: "КСП 10.2А · Мини-HTML (g10-html-dz-hobbi)",
+      notes: "Нажимайте на 4 карточки блиц-опроса после ответов учеников. Выдайте ДЗ в Мини-HTML (g10-html-dz-hobbi).",
+      render(st) {
+        const qa = [
+          { k: "q1", code: "<body><title>Сайт</title></body>", ans: "<title> задаёт имя вкладки и должен быть в <head>, а не в <body>." },
+          { k: "q2", code: "<p>Текст</p align=\"center\">", ans: "Атрибут пишется в открывающем теге: <p align=\"center\">Текст</p>." },
+          { k: "q3", code: "<b><i>17:00</b></i>", ans: "Нарушен порядок вложенности: закрываем в обратном порядке — <b><i>17:00</i></b>." },
+          { k: "q4", code: "<head><title>Привет</title></head>", ans: "Нет <meta charset=\"utf-8\"> — русские и казахские буквы могут сломаться." }
+        ];
+        return `
+          <h2 class="slide-h2">Блиц «Найди ошибку» и домашнее задание</h2>
+          <div class="grid-2">
+            ${qa.map((item, i) => `
+              <button type="button" class="interactive-card ${st.revealed[item.k] ? "revealed" : ""}" onclick="DECK.toggleReveal('${item.k}')">
+                <div class="text-xs font-bold" style="margin-bottom:6px;">Ошибка #${i + 1}</div>
+                <pre class="code-block" style="padding:8px 10px;margin-bottom:8px;">${DECK.esc(item.code)}</pre>
+                <div class="text-xs">${st.revealed[item.k] ? "✓ " + DECK.esc(item.ans) : "Нажмите, чтобы показать разбор →"}</div>
+              </button>
+            `).join("")}
+          </div>
+          <div class="box-primary flex-between text-xs">
+            <div>
+              <strong>Домашнее задание:</strong> повторить структуру HTML5 (SB стр. 70–74) и выполнить в Мини-HTML страницу <strong>«Моё хобби»</strong> (каркас, <span class="mono">bgcolor</span>, <span class="mono">&lt;h1 align="center"&gt;</span>, 2+ абзаца, комментарий).
+            </div>
+            <a class="btn btn-accent" href="/html?task=g10-html-dz-hobbi" target="_blank" rel="noopener noreferrer">ДЗ в Мини-HTML ↗</a>
+          </div>
+        `;
+      }
+    }
+  ]
+});
+</script>
+</body>
+</html>

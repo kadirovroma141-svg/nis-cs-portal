@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9.2А · Урок 3 · Маски ввода и свойства полей в таблице БД</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+</head>
+<body>
+<script src="../_engine/deck.js"></script>
+<script>
+const L3_MASK_SYMS = [
+  { sym: "0", cat: "num", req: "Обязательно", desc: "Только цифра (от 0 до 9). Знаки + и − запрещены." },
+  { sym: "9", cat: "num", req: "Необязательно", desc: "Цифра (0–9) или пробел. Можно пропустить позицию." },
+  { sym: "#", cat: "num", req: "Необязательно", desc: "Цифра, пробел, плюс (+) или минус (−)." },
+  { sym: "L", cat: "chr", req: "Обязательно", desc: "Только буква (от A до Z или А до Я)." },
+  { sym: "?", cat: "chr", req: "Необязательно", desc: "Буква (или пустое место, можно пропустить)." },
+  { sym: "A", cat: "chr", req: "Обязательно", desc: "Любая буква или цифра." },
+  { sym: "a", cat: "chr", req: "Необязательно", desc: "Буква, цифра или пусто." },
+  { sym: "&", cat: "chr", req: "Обязательно", desc: "Любой печатный символ или пробел." },
+  { sym: "C", cat: "chr", req: "Необязательно", desc: "Любой печатный символ, пробел или пусто." },
+  { sym: "!", cat: "ctrl", req: "Спецсимвол", desc: "Заполнение маски происходит справа налево (полезно для кодов городов)." },
+  { sym: ">", cat: "ctrl", req: "Спецсимвол", desc: "Все следующие буквы автоматически переводятся в ПРОПИСНЫЕ (ЗАГЛАВНЫЕ)." },
+  { sym: "<", cat: "ctrl", req: "Спецсимвол", desc: "Все следующие буквы автоматически переводятся в строчные." },
+  { sym: "\\", cat: "ctrl", req: "Спецсимвол", desc: "Экранирование: следующий 1 символ выводится буквально (напр. \\- для дефиса)." }
+];
+
+const L3_EXAMPLES = {
+  tel: {
+    mask: "!(9999) 00-00-00",
+    title: "Городской телефон с необязательным кодом",
+    good: "(7242) 23-45-67  или  (    ) 23-45-67",
+    parts: [
+      { tok: "!", why: "Заполнение справа налево" },
+      { tok: "( )", why: "Литеральные скобки" },
+      { tok: "9999", why: "4 необязат. цифры кода города" },
+      { tok: "00-00-00", why: "6 обязат. цифр номера с дефисами" }
+    ]
+  },
+  mob: {
+    mask: "0(000)0-00-00-00 vs 9(999)9-99-99-99",
+    title: "Жёсткий (0) против гибкого (9) формата номера",
+    good: "8(701)5-12-34-56",
+    parts: [
+      { tok: "0(000)...", why: "Нельзя пропустить ни одной из 11 цифр!" },
+      { tok: "9(999)...", why: "Допускает неполный ввод (пробелы вместо цифр)" },
+      { tok: "Разница 0 и 9", why: "Для строгого контроля длины используют 0" }
+    ]
+  },
+  date: {
+    mask: "00.00.0000",
+    title: "Дата по шаблону ДД.ММ.ГГГГ",
+    good: "09.05.2025",
+    parts: [
+      { tok: "00", why: "2 обязательные цифры дня" },
+      { tok: ".", why: "Буквальная точка-разделитель" },
+      { tok: "00", why: "2 обязательные цифры месяца" },
+      { tok: "0000", why: "4 обязательные цифры года" }
+    ]
+  },
+  iin: {
+    mask: "000000000000",
+    title: "ИИН гражданина РК (ровно 12 цифр)",
+    good: "090512500123",
+    parts: [
+      { tok: "12 раз «0»", why: "Ни одна цифра не может быть пропущена или заменена буквой" },
+      { tok: "Тип: Текстовый", why: "Чтобы первый ноль (0905...) не пропал!" }
+    ]
+  },
+  cls: {
+    mask: "00\\-L",
+    title: "Школьный класс (07-А, 09-В)",
+    good: "09-A",
+    parts: [
+      { tok: "00", why: "2 обязат. цифры (07, 09, 11)" },
+      { tok: "\\-", why: "Буквальный дефис (экранирован обратным слэшем)" },
+      { tok: "L", why: "1 обязат. буква литера класса" }
+    ]
+  },
+  fio: {
+    mask: "!>L<L??????????",
+    title: "Фамилия: первая буква ЗАГЛАВНАЯ, далее строчные",
+    good: "Ахметов  (даже если набрали аХМЕТОВ!)",
+    parts: [
+      { tok: ">L", why: "1-я обязат. буква принудительно ВЕРХНЕГО регистра" },
+      { tok: "<L", why: "2-я обязат. буква переводится в нижний регистр" },
+      { tok: "??????????", why: "До 10 необязательных строчных букв" }
+    ]
+  }
+};
+
+const L3_PRESETS = {
+  gos: {
+    label: "Госномер: 000 >LLL 00",
+    mask: "000 >LLL 00",
+    good: "745 >KZM 02 -> 745 KZM 02 (вводите: 745 kzm 02)",
+    testGood: "745 kzm 02",
+    testBad: "74 kzm 02",
+    check(val) {
+      const clean = val.replace(/\s+/g, "").toUpperCase();
+      if (!/^\d{3}[A-ZА-ЯЁ]{3}\d{2}$/i.test(clean)) {
+        return { ok: false, out: val, msg: "Нужно ровно 3 цифры + 3 буквы + 2 цифры (например 745kzm02)." };
+      }
+      const formatted = clean.slice(0,3) + " " + clean.slice(3,6) + " " + clean.slice(6,8);
+      return { ok: true, out: formatted, msg: "✓ Верно! >LLL перевёл буквы в верхний регистр: " + formatted };
+    }
+  },
+  cls: {
+    label: "Класс: 00\\-L",
+    mask: "00\\-L",
+    good: "09-A",
+    testGood: "09-A",
+    testBad: "9-A",
+    check(val) {
+      const m = val.trim().match(/^(\d{2})-([A-Za-zА-Яа-яЁё])$/);
+      if (!m) return { ok: false, out: val, msg: "Формат 00\\-L требует ДВЕ обязательные цифры (напр. 09), дефис и 1 букву!" };
+      return { ok: true, out: m[1] + "-" + m[2], msg: "✓ Принято маской 00\\-L: " + m[1] + "-" + m[2] };
+    }
+  },
+  iin: {
+    label: "ИИН: 000000000000",
+    mask: "000000000000",
+    good: "090512500123",
+    testGood: "090512500123",
+    testBad: "09051250",
+    check(val) {
+      if (!/^\d{12}$/.test(val.trim())) return { ok: false, out: val, msg: "Введено символов: " + val.trim().length + ". Маска 000000000000 требует ровно 12 цифр!" };
+      return { ok: true, out: val.trim(), msg: "✓ Принято! Ведущий ноль сохранён (Текстовый тип)." };
+    }
+  },
+  date: {
+    label: "Дата: 00.00.0000",
+    mask: "00.00.0000",
+    good: "09.05.2025",
+    testGood: "09.05.2025",
+    testBad: "9.5.2025",
+    check(val) {
+      if (!/^\d{2}\.\d{2}\.\d{4}$/.test(val.trim())) return { ok: false, out: val, msg: "Обязательны 2 цифры дня, точка, 2 цифры месяца, точка, 4 цифры года!" };
+      return { ok: true, out: val.trim(), msg: "✓ Формат даты соблюдён: " + val.trim() };
+    }
+  },
+  tel: {
+    label: "Телефон: +7 (000) 000-00-00",
+    mask: "+7 (000) 000-00-00",
+    good: "+7 (701) 123-45-67",
+    testGood: "+7 (701) 123-45-67",
+    testBad: "87011234567",
+    check(val) {
+      const digits = val.replace(/\D/g, "");
+      if (digits.length !== 11 || (digits[0] !== "7" && digits[0] !== "8")) {
+        return { ok: false, out: val, msg: "Нужен полный 10-значный номер после +7 (например +7 (701) 123-45-67)." };
+      }
+      const f = `+7 (${digits.slice(1,4)}) ${digits.slice(4,7)}-${digits.slice(7,9)}-${digits.slice(9,11)}`;
+      return { ok: true, out: f, msg: "✓ Единый стандарт сохранён: " + f };
+    }
+  }
+};
+
+const L3_QUIZ = [
+  { id: "q1", q: "Нужно ввести индекс строго из 6 цифр, пропуск запрещён.", ans: "000000", opts: ["000000", "999999", "######"], why: "«0» делает каждую цифру обязательной." },
+  { id: "q2", q: "Все буквы в коде серии паспорта должны автоматически стать ЗАГЛАВНЫМИ.", ans: ">LL", opts: [">LL", "<LL", "??"], why: "Спецсимвол «>» переводит следующие буквы в верхний регистр." },
+  { id: "q3", q: "Разрешить ввод оценок только от 2 до 5 с подсказкой при ошибке.", ans: "rule", opts: ["Маска ввода", "rule", "Подпись"], why: "Диапазон значений задаёт «Условие на значение»: >=2 And <=5." },
+  { id: "q4", q: "Чтобы оператор не вводил слово «Казахстан» вручную в каждую строку.", ans: "def", opts: ["Обязательное", "def", "Маска >L"], why: "«Значение по умолчанию» подставляет величину автоматически." },
+  { id: "q5", q: "Вычисляемое поле для числа ночей в гостинице ([Дата выезда]-[Дата заезда]).", ans: "calc", opts: ["Счётчик", "calc", "MEMO"], why: "«Вычисляемое поле» автоматически считает разность дат." }
+];
+
+window.L3_SET_PRESET = function(k) {
+  const st = window.DECK_STATE;
+  st.custom.preset = k;
+  st.custom.input = L3_PRESETS[k].testGood;
+  window.DECK.render();
+};
+
+window.L3_SET_INPUT = function(val) {
+  window.DECK_STATE.custom.input = val;
+  const outEl = document.getElementById("l3-live-res");
+  if (outEl) {
+    const res = L3_PRESETS[window.DECK_STATE.custom.preset].check(val);
+    outEl.className = (res.ok ? "box-success" : "box-danger") + " text-xs";
+    outEl.innerHTML = `<strong>Результат проверки:</strong> ${window.DECK_ESC(res.msg)}`;
+  }
+};
+
+initDeck({
+  badge: "🗄 9.2А · Урок 3",
+  title: "Маски ввода и свойства полей в таблице БД",
+  subtitle: "9 класс · 2 четверть · Цель 9.1.2.3 · 80 мин · Мини-СУБД",
+  footer: "НИШ ЕМН г. Кызылорда · 9 класс · 2 четверть · Мини-СУБД (/subd)",
+  initialState: {
+    tabs: { symCat: "all", ex: "tel", propSet: "1" },
+    custom: { preset: "gos", input: "745 kzm 02" }
+  },
+  slides: [
+    {
+      badge: "Этап 1 · Проблема и цель",
+      shortTitle: "Почему без ограничений база портится",
+      timing: "0–6 мин",
+      source: "КСП 9.2А Урок 3 · SB 9 кл. стр. 62–65",
+      notes: "Покажите стартер: 4 разных оператора записали телефон, класс и оценку в разнобой. Если потом запустить поиск или фильтр, половина записей не найдётся! Именно поэтому в Access настраивают маски ввода и свойства полей.",
+      render() {
+        return `
+          <div class="stack">
+            <div class="text-xs font-bold text-muted" style="text-transform:uppercase;">Информатика · 9 класс · Раздел 9.2А «Однотабличные БД» · Урок 3 из 6</div>
+            <h1 class="slide-h1">Маски ввода и свойства полей в MS Access</h1>
+            <p class="lead">Научимся задавать точный шаблон ввода (маску) для телефонов, ИИН, госномеров и дат, а также настраивать все 8 ключевых свойств поля для защиты данных от опечаток.</p>
+            <div class="box-danger text-xs">
+              <strong>Проблема «грязных данных»:</strong> четыре оператора заполнили одну и ту же таблицу:<br>
+              <span class="mono">Оператор 1: 87011234567 · Оценка: 5</span> &nbsp;|&nbsp;
+              <span class="mono">Оператор 2: +7 (701) 123-45-67 · Оценка: 55</span><br>
+              <span class="mono">Оператор 3: 701-1234567 · Класс: 9а</span> &nbsp;|&nbsp;
+              <span class="mono">Оператор 4: (пусто) · Класс: 09-А</span>
+            </div>
+            <div class="grid-2 text-xs">
+              <div class="box-primary"><div class="box-title mono">9.1.2.3 (Маски ввода)</div>Задавать единый формат ввода символов (цифры, буквы, разделители, регистр).</div>
+              <div class="box-accent"><div class="box-title mono" style="color:var(--accent);">9.1.2.3 (Свойства полей)</div>Настраивать Размер, Подпись, Значение по умолчанию, Обязательность, Условие на значение и Вычисления.</div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Понятие маски",
+      shortTitle: "Что такое маска и 4 шага настройки",
+      timing: "6–15 мин",
+      source: "SB 9 кл. стр. 62 · Свойство «Маска ввода»",
+      notes: "Подчеркните 3 вещи: (1) маска работает для Текст, Число, Денежный и Дата/время; (2) она контролирует ТОЛЬКО ввод, не меняет тип хранения; (3) в Access шаблон состоит из заполнителей, спецсимволов и литералов.",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Маска ввода: принцип работы и 3 категории символов</h2>
+            <div class="box-primary text-xs">
+              <strong>Маска ввода</strong> — шаблон, определяющий формат вводимых пользователем данных. Применяется для полей типов <strong>Текстовый, Числовой, Денежный и Дата/время</strong>. <strong>Важно:</strong> маска влияет ТОЛЬКО на ввод данных (не меняет тип данных поля).
+            </div>
+            <div class="grid-3 text-xs">
+              <div class="box-white">
+                <div class="box-title">1. Заполнители</div>
+                Определяют, какие символы разрешены на каждой позиции: <span class="mono">0, 9, #, L, ?, A, a, &amp;, C</span>.
+              </div>
+              <div class="box-white">
+                <div class="box-title" style="color:var(--accent);">2. Спецсимволы</div>
+                Управляют направлением, регистром и экранированием: <span class="mono">!, &gt;, &lt;, \</span>.
+              </div>
+              <div class="box-white">
+                <div class="box-title" style="color:var(--success);">3. Литералы</div>
+                Неизменяемые разделители, подставляемые самой маской: <span class="mono">-  ( )  .  /  +7  пробел</span>.
+              </div>
+            </div>
+            <div class="box text-xs">
+              <div class="box-title">4 шага настройки Мастера масок в MS Access</div>
+              <strong>1.</strong> Откройте таблицу в <strong>Режиме конструктора</strong> и выделите нужное поле.<br>
+              <strong>2.</strong> На нижней панели «Свойства поля» найдите строку <strong>Маска ввода</strong> и нажмите кнопку <span class="mono">…</span> справа.<br>
+              <strong>3.</strong> В окне <strong>«Создание масок ввода»</strong> выберите готовый шаблон («Индекс», «Телефон») или нажмите <strong>«Список»</strong> для своего.<br>
+              <strong>4.</strong> Проверьте шаблон в строке <strong>«Проба»</strong> и завершите Мастер.
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Символы маски",
+      shortTitle: "Полная таблица: 13 символов маски SB",
+      timing: "15–25 мин",
+      source: "SB 9 кл. стр. 63 · Таблица символов маски ввода",
+      notes: "Используйте кнопки фильтра, чтобы разобрать с учениками сначала символы для цифр (0, 9, #), затем для букв (L, ?, A, a, &, C) и управляющие спецсимволы (!, >, <, \\).",
+      render(st) {
+        const cat = st.tabs.symCat || "all";
+        const rows = L3_MASK_SYMS.filter(x => cat === "all" || x.cat === cat);
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <h2 class="slide-h2">Все символы маски ввода MS Access (учебник SB)</h2>
+              <div class="flex-row">
+                <button type="button" class="btn ${cat === "all" ? "btn-primary" : ""}" onclick="DECK.setTab('symCat','all')">Все (${L3_MASK_SYMS.length})</button>
+                <button type="button" class="btn ${cat === "num" ? "btn-accent" : ""}" onclick="DECK.setTab('symCat','num')">Цифры (0, 9, #)</button>
+                <button type="button" class="btn ${cat === "chr" ? "btn-primary" : ""}" onclick="DECK.setTab('symCat','chr')">Буквы/симв. (L, ?, A…)</button>
+                <button type="button" class="btn ${cat === "ctrl" ? "btn-accent" : ""}" onclick="DECK.setTab('symCat','ctrl')">Управление (!, &gt;, &lt;, \)</button>
+              </div>
+            </div>
+            <table class="data-table">
+              <thead><tr><th>Символ</th><th>Обязательность / тип</th><th>Что разрешает на этой позиции</th></tr></thead>
+              <tbody>
+                ${rows.map(r => `<tr><td class="mono font-bold" style="font-size:14px;">${r.sym}</td><td><span class="pill ${r.req === "Обязательно" ? "pill-accent" : r.req === "Спецсимвол" ? "pill-warning" : ""}">${r.req}</span></td><td>${r.desc}</td></tr>`).join("")}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Примеры SB",
+      shortTitle: "Посимвольный разбор 6 масок из учебника",
+      timing: "25–34 мин",
+      source: "SB 9 кл. стр. 63–64 · Практические маски",
+      notes: "Разберите все 6 примеров масок из учебника. Особо обратите внимание на пару 0(000)... vs 9(999)... и составную маску фамилии !>L<L??????????.",
+      render(st) {
+        const cur = st.tabs.ex || "tel";
+        const ex = L3_EXAMPLES[cur];
+        const btns = [
+          ["tel","!(9999) 00-00-00"], ["mob","0(...) vs 9(...)"], ["date","00.00.0000"],
+          ["iin","ИИН (12 нулей)"], ["cls","00\\-L"], ["fio","!>L<L????"]
+        ];
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Посимвольный разбор 6 масок из учебника</h2>
+            <div class="flex-row">
+              ${btns.map(([k, lbl]) => `<button type="button" class="btn mono ${cur === k ? "btn-primary" : ""}" onclick="DECK.setTab('ex','${k}')">${lbl}</button>`).join("")}
+            </div>
+            <div class="box-primary stack">
+              <div class="flex-between">
+                <strong class="text-sm">${ex.title}</strong>
+                <span class="pill pill-accent mono">${ex.mask}</span>
+              </div>
+              <div class="grid-2" style="gap:8px;">
+                ${ex.parts.map(p => `
+                  <div class="box-white text-xs">
+                    <div class="mono font-bold" style="color:var(--primary);">${p.tok}</div>
+                    <div style="margin-top:3px;">${p.why}</div>
+                  </div>
+                `).join("")}
+              </div>
+              <div class="box-success text-xs"><strong>Образец корректного ввода:</strong> <span class="mono">${ex.good}</span></div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Живой тестер",
+      shortTitle: "Интерактивный тестер масок ввода",
+      timing: "34–43 мин",
+      source: "Тренажёр урока 3 · Проверка масок в реальном времени",
+      notes: "Вызывайте учеников к доске или пусть пробуют на ноутбуках: выберите маску госномера 000 >LLL 00 и проверьте, что маленькие буквы kzm автоматически превращаются в KZM!",
+      render(st) {
+        const pk = st.custom.preset || "gos";
+        const p = L3_PRESETS[pk];
+        const val = st.custom.input ?? p.testGood;
+        const res = p.check(val);
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Живой тестер масок ввода</h2>
+            <div class="flex-row">
+              ${Object.keys(L3_PRESETS).map(k => `<button type="button" class="btn ${pk === k ? "btn-primary" : ""}" onclick="L3_SET_PRESET('${k}')">${L3_PRESETS[k].label}</button>`).join("")}
+            </div>
+            <div class="box stack">
+              <div class="flex-between text-xs">
+                <span>Активная маска: <strong class="mono">${p.mask}</strong></span>
+                <div class="flex-row">
+                  <button type="button" class="btn" onclick="L3_SET_INPUT('${p.testGood}');DECK.render()">Вставить верный</button>
+                  <button type="button" class="btn" onclick="L3_SET_INPUT('${p.testBad}');DECK.render()">Вставить с ошибкой</button>
+                </div>
+              </div>
+              <input type="text" value="${DECK_ESC(val)}" oninput="L3_SET_INPUT(this.value)" class="mono" style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--fg);font-size:15px;" />
+              <div id="l3-live-res" class="${res.ok ? "box-success" : "box-danger"} text-xs">
+                <strong>Результат проверки:</strong> ${DECK_ESC(res.msg)}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Свойства поля",
+      shortTitle: "Все 8 свойств поля в MS Access",
+      timing: "43–52 мин",
+      source: "SB 9 кл. стр. 64–65 · Нижняя панель Конструктора «Свойства поля»",
+      notes: "Разберите все 8 свойств нижней панели Конструктора. Обратите особое внимание на пару «Условие на значение + Сообщение об ошибке» и на «Вычисляемое поле» ([Дата выезда]-[Дата заезда]).",
+      render(st) {
+        const page = st.tabs.propSet || "1";
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <h2 class="slide-h2">Панель «Свойства поля»: все 8 ключевых настроек</h2>
+              <div class="flex-row">
+                <button type="button" class="btn ${page === "1" ? "btn-primary" : ""}" onclick="DECK.setTab('propSet','1')">Свойства 1–4</button>
+                <button type="button" class="btn ${page === "2" ? "btn-accent" : ""}" onclick="DECK.setTab('propSet','2')">Свойства 5–8</button>
+              </div>
+            </div>
+            ${page === "1" ? `
+              <table class="data-table">
+                <thead><tr><th>№ и Свойство</th><th>Назначение</th><th>Пример настройки</th></tr></thead>
+                <tbody>
+                  <tr><td><strong>1. Размер поля</strong></td><td>Задаёт макс. длину Текста (1–255) или подтип Числа (Байт, Целое, Длинное целое, С плавающей точкой).</td><td class="mono text-xs">12 (для ИИН), 30 (для Фамилии)</td></tr>
+                  <tr><td><strong>2. Подпись</strong></td><td>Человекочитаемый заголовок столбца в таблице/форме/отчёте (вместо технического имени поля).</td><td class="mono text-xs">Поле Kod_kl → Подпись: «Код клиента»</td></tr>
+                  <tr><td><strong>3. Значение по умолчанию</strong></td><td>Автоматически подставляется в каждую новую созданную запись (экономит время ввода).</td><td class="mono text-xs">"Кызылорда", Date(), =0</td></tr>
+                  <tr><td><strong>4. Обязательное поле</strong></td><td>При значении <strong>Да</strong> запрещает оставлять ячейку пустой (<span class="mono">NULL</span>) при сохранении строки.</td><td class="mono text-xs">Фамилия → Обязательное поле: Да</td></tr>
+                </tbody>
+              </table>
+            ` : `
+              <table class="data-table">
+                <thead><tr><th>№ и Свойство</th><th>Назначение</th><th>Пример настройки</th></tr></thead>
+                <tbody>
+                  <tr><td><strong>5. Условие на значение</strong></td><td>Логическое выражение, проверяющее допустимость введённого значения.</td><td class="mono text-xs">&gt;=2 And &lt;=5 ; &gt;0 ; &gt;=#01.01.2000#</td></tr>
+                  <tr><td><strong>6. Сообщение об ошибке</strong></td><td>Понятная подсказка пользователю, если нарушено «Условие на значение».</td><td class="text-xs">«Оценка должна быть от 2 до 5!»</td></tr>
+                  <tr><td><strong>7. Мастер подстановок</strong></td><td>Создаёт выпадающий список фиксированных значений или значений из другой таблицы.</td><td class="mono text-xs">Список: «9A; 9B; 9C»</td></tr>
+                  <tr><td><strong>8. Вычисляемое поле</strong></td><td>Значение вычисляется автоматически по формуле с другими полями текущей записи.</td><td class="mono text-xs">[Дата выезда]-[Дата заезда]</td></tr>
+                </tbody>
+              </table>
+            `}
+            <div class="box-primary text-xs">
+              <strong>В формулах и условиях</strong> имена существующих полей таблицы заключают в квадратные скобки: <span class="mono">[Цена]*0.9</span>, даты в решётки: <span class="mono">#01.09.2025#</span>, текст в кавычки: <span class="mono">"Да"</span>.
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Мини-СУБД · Практика",
+      pillClass: "pill-accent",
+      shortTitle: "Мини-СУБД: Маска ввода и свойства полей",
+      timing: "52–68 мин",
+      source: "Мини-СУБД (/subd) · t2, g9a-l3-gosnomer, g9a-p3-svoystva",
+      notes: "Ученики открывают в Мини-СУБД задание «Маска ввода и ввод записей» (t2), затем «Маска госномера автомобиля» (g9a-l3-gosnomer) и при наличии времени — «Свойства полей: обязательное поле, условие на значение».",
+      render(st, api) {
+        return api.renderMiniSubdTask({
+          key: "g9a3",
+          title: "Практика в Мини-СУБД: Маски ввода и свойства полей",
+          summary: "Настройте маску ввода, введите записи по шаблону и проверьте срабатывание условий на значение.",
+          taskName: "1) Маска ввода и ввод записей (t2) · 2) Маска госномера автомобиля (g9a-l3-gosnomer) · 3) g9a-p3-svoystva",
+          steps: ["Откройте «✓ Задания»", "Выполните «Маска ввода и ввод записей»", "Затем: «Маска госномера автомобиля»"],
+          meta: "Цель 9.1.2.3 · Практика"
+        });
+      }
+    },
+    {
+      badge: "Этап 3 · Мини-квиз",
+      shortTitle: "Квиз: подбери маску или свойство (5 кейсов)",
+      timing: "68–75 мин",
+      source: "КСП 9.2А Урок 3 · Формативное оценивание",
+      notes: "Быстрая индивидуальная или парная проверка понимания: отличие 0 от 9, > от <, Условие на значение от Маски ввода.",
+      render(st) {
+        let ok = 0;
+        L3_QUIZ.forEach(item => { if (st.quiz[item.id] === item.ans) ok++; });
+        const labels = { rule: "Условие на значение", def: "Значение по умолчанию", calc: "Вычисляемое поле" };
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <h2 class="slide-h2">Проверь себя: маска ввода или свойство поля?</h2>
+              <span class="pill pill-success mono">${ok} / ${L3_QUIZ.length}</span>
+            </div>
+            <div class="stack" style="gap:7px;">
+              ${L3_QUIZ.map((item, i) => {
+                const picked = st.quiz[item.id];
+                const cls = picked ? (picked === item.ans ? "ok" : "bad") : "";
+                return `
+                  <div class="quiz-row ${cls}">
+                    <div style="flex:1;">
+                      <strong>${i + 1}. ${item.q}</strong>
+                      ${picked === item.ans ? `<div class="text-xs text-muted">${item.why}</div>` : ""}
+                    </div>
+                    <div class="flex-row" style="gap:4px;">
+                      ${item.opts.map(o => `<button type="button" class="btn ${picked === o ? "btn-primary" : ""}" style="padding:3px 8px;font-size:11px;" onclick="DECK.pickQuiz('${item.id}','${o}')">${labels[o] || o}</button>`).join("")}
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 3 · Памятка и ДЗ",
+      shortTitle: "Когда маска, а когда условие? + ДЗ",
+      timing: "75–80 мин",
+      source: "КСП 9.2А Урок 3 · ДЗ g9a-hw3-dolzhnost, g9a-p3-pasport",
+      notes: "Обобщите: маска проверяет ФОРМАТ символов (сколько цифр/букв и где дефисы), а Условие на значение — ЧИСЛОВОЙ/ЛОГИЧЕСКИЙ смысл (>0, >=2 And <=5). Выдайте ДЗ.",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Памятка урока 3 и домашнее задание</h2>
+            <div class="grid-2 text-xs">
+              <div class="box-primary">
+                <div class="box-title">Маска ввода</div>
+                Контролирует <strong>форму и порядок символов</strong>:<br>
+                • телефон, ИИН, индекс, класс <span class="mono">00\-L</span>, госномер <span class="mono">000 &gt;LLL 00</span>.<br>
+                • НЕ может проверить «цена > 1000» или «оценка от 2 до 5».
+              </div>
+              <div class="box-accent">
+                <div class="box-title" style="color:var(--accent);">Условие на значение + Сообщение об ошибке</div>
+                Контролирует <strong>смысл и диапазон значений</strong>:<br>
+                • <span class="mono">&gt;=2 And &lt;=5</span>, <span class="mono">&gt;0</span>, <span class="mono">"Администратор" Or "Менеджер"</span>.<br>
+                • Сообщение об ошибке объясняет пользователю, почему ввод отклонён.
+              </div>
+            </div>
+            <div class="box-primary flex-between text-xs">
+              <div>
+                <strong>Домашнее задание в Мини-СУБД (/subd):</strong><br>
+                1. <strong>«Условие на значение и значение по умолчанию»</strong> (g9a-hw3-dolzhnost)<br>
+                2. Дополнительно: <strong>«Маска для паспорта»</strong> (g9a-p3-pasport)
+              </div>
+              <a class="btn btn-accent" href="/subd" target="_blank" rel="noopener noreferrer">Открыть Мини-СУБД ↗</a>
+            </div>
+          </div>
+        `;
+      }
+    }
+  ]
+});
+</script>
+</body>
+</html>

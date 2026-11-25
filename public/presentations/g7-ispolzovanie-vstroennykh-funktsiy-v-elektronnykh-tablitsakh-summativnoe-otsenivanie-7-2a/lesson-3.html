@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>7.2А · Урок 5 · СЧЁТЕСЛИ и СУММЕСЛИ. Суммативное оценивание 7.2А</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+</head>
+<body>
+<script src="../_engine/deck.js"></script>
+<script>
+const G7FN3_COMM = [
+  { row: 2, prop: 100000, comm: 7000 },
+  { row: 3, prop: 200000, comm: 14000 },
+  { row: 4, prop: 300000, comm: 21000 },
+  { row: 5, prop: 400000, comm: 28000 }
+];
+
+const G7FN3_SIM = {
+  cnt1: {
+    label: 'СЧЁТЕСЛИ(>160000)',
+    formula: '=СЧЁТЕСЛИ(A2:A5;">160000")',
+    res: "3 сделки",
+    hit: (r) => r.prop > 160000,
+    why: "Считает количество строк в A2:A5, где стоимость имущества строго больше 160 000 (200k, 300k, 400k → 3)."
+  },
+  sum1: {
+    label: 'СУММЕСЛИ(A2:A5;">160000")',
+    formula: '=СУММЕСЛИ(A2:A5;">160000")',
+    res: "900 000 ₸",
+    hit: (r) => r.prop > 160000,
+    why: "3-й аргумент не указан → складываются сами ячейки A2:A5 (200 000 + 300 000 + 400 000 = 900 000)."
+  },
+  sum2: {
+    label: 'СУММЕСЛИ(A2:A5;">160000";B2:B5)',
+    formula: '=СУММЕСЛИ(A2:A5;">160000";B2:B5)',
+    res: "63 000 ₸",
+    hit: (r) => r.prop > 160000,
+    why: "Условие проверяется в A2:A5, а складываются соответствующие комиссионные из B2:B5 (14 000 + 21 000 + 28 000 = 63 000)!"
+  }
+};
+
+const G7FN3_SOR = [
+  { id: "s1", q: "1. Какая функция подсчитает, сколько раз «Криштиану Роналду» встречается в B2:B12?", ans: "cnt", opts: [["cnt","=СЧЁТЕСЛИ(B2:B12;\"Криштиану Роналду\")"],["sum","=СУММЕСЛИ(B2:B12;\"Криштиану Роналду\")"]], why: "Количество совпадений находит СЧЁТЕСЛИ (4 раза: 2013, 2014, 2016, 2017)." },
+  { id: "s2", q: "2. Как записать критерий «не равно красный» в СЧЁТЕСЛИ / СУММЕСЛИ?", ans: "neq", opts: [["neq","\"<>красный\""],["not","НЕ(\"красный\")"]], why: "Оператор сравнения ставится прямо внутри кавычек: \"<>красный\"." },
+  { id: "s3", q: "3. Средний рост записан в $C$2. Как посчитать число учеников выше среднего?", ans: "amp", opts: [["amp","=СЧЁТЕСЛИ($B$2:$B$6;\">\"&$C$2)"],["bad","=СЧЁТЕСЛИ($B$2:$B$6;\">$C$2\")"]], why: "Знак \">\" берут в кавычки и соединяют с адресом ячейки амперсандом &!" },
+  { id: "s4", q: "4. В формуле =СУММЕСЛИ(A2:A13;\"молоко\";B2:B13) что находится в B2:B13?", ans: "vals", opts: [["vals","Диапазон суммирования (цены)"],["crit","Названия товаров"]], why: "1-й аргумент — диапазон проверки («молоко»), 3-й — диапазон суммирования (стоимость)." },
+  { id: "s5", q: "5. Какая функция нужна, если условий отбора ДВА или больше?", ans: "mn", opts: [["mn","СЧЁТЕСЛИМН / СУММЕСЛИМН"],["one","Обычная СЧЁТЕСЛИ"]], why: "Для нескольких условий одновременно используют функции с окончанием -МН!" }
+];
+
+initDeck({
+  badge: "📊 7.2А · Урок 5",
+  title: "Функции СЧЁТЕСЛИ и СУММЕСЛИ. Итоги и СОР 7.2А",
+  subtitle: "7 класс · 2 четверть · Цели 7.1.1.3, 7.4.2.3 · 80 мин · Мини-Таблицы",
+  footer: "НИШ ЕМН г. Кызылорда · 7 класс · 2 четверть · Мини-Таблицы (/excel)",
+  initialState: {
+    tabs: { sim: "sum2" }
+  },
+  slides: [
+    {
+      badge: "Этап 1 · Постановка задачи",
+      shortTitle: "Зачем нужны СЧЁТЕСЛИ и СУММЕСЛИ",
+      timing: "0–7 мин",
+      source: "КСП 7.2А Урок 5 · Теория g7-ispolzovanie-vstroennykh-funktsiy",
+      notes: "Подведите от обычных СУММ/СЧЁТ к условным: «СУММ складывает ВСЁ подряд. А если нужно сложить продажи ТОЛЬКО по товару «молоко» или посчитать ТОЛЬКО тех, кто «Не сдал»?» Цель 7.4.2.3.",
+      render() {
+        return `
+          <div class="stack">
+            <div class="text-xs font-bold text-muted" style="text-transform:uppercase;">Информатика · 7 класс · Раздел 7.2А «Электронные таблицы» · Урок 5 из 5</div>
+            <h1 class="slide-h1">Условные функции СЧЁТЕСЛИ и СУММЕСЛИ. Подготовка к СОР 7.2А</h1>
+            <p class="lead">Научимся подсчитывать количество и сумму ячеек по заданному условию, правильно писать критерии в кавычках и разберём задания СОР 7.2А.</p>
+            <div class="grid-2 text-xs">
+              <div class="box-primary"><div class="box-title mono">СЧЁТЕСЛИ (COUNTIF)</div>Подсчитывает <strong>КОЛИЧЕСТВО</strong> ячеек в диапазоне, удовлетворяющих 1 условию.</div>
+              <div class="box-accent"><div class="box-title mono" style="color:var(--accent);">СУММЕСЛИ (SUMIF)</div>Находит <strong>СУММУ</strong> значений в диапазоне, удовлетворяющих 1 условию.</div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Функция СЧЁТЕСЛИ",
+      shortTitle: "Синтаксис СЧЁТЕСЛИ + примеры SB (Роналду, рост выше среднего)",
+      timing: "7–16 мин",
+      source: "Теория 7.2А · Примеры СЧЁТЕСЛИ",
+      notes: "Разберите все 4 примера из учебника, особенно связку \">\"&$C$2 для сравнения со значением в отдельной ячейке!",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Функция <span class="mono">СЧЁТЕСЛИ(диапазон; условие)</span></h2>
+            <div class="grid-2 text-xs">
+              <div class="box-primary stack">
+                <div class="box-title">Примеры из учебника 7 класса</div>
+                <div>• <span class="mono">=СЧЁТЕСЛИ(A2:A5;"Лондон")</span> — сколько людей из Лондона.</div>
+                <div>• <span class="mono">=СЧЁТЕСЛИ(B3:D12;"Не сдал")</span> — сколько раз встречается «Не сдал».</div>
+                <div>• <span class="mono">=СЧЁТЕСЛИ(B2:B12;"Криштиану Роналду")</span> — <strong>4 раза</strong> (2013, 2014, 2016, 2017).</div>
+              </div>
+              <div class="box-accent stack">
+                <div class="box-title" style="color:var(--accent);">Продвинутый приём: условие в ячейке ($C$2)</div>
+                <div>Если средний рост вычислен в <span class="mono">C2</span> (<span class="mono">=СРЗНАЧ($B$2:$B$6)</span>), то число учеников выше среднего:</div>
+                <div class="code-block" style="font-size:12px;">=СЧЁТЕСЛИ($B$2:$B$6;"&gt;"&amp;$C$2)</div>
+                <div>Знак <span class="mono">"&gt;"</span> в кавычках соединяется с абсолютной ссылкой <span class="mono">$C$2</span> символом <span class="mono font-bold">&amp;</span>!</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Функция СУММЕСЛИ",
+      shortTitle: "Аргументы СУММЕСЛИ и таблица записи критериев",
+      timing: "16–25 мин",
+      source: "Теория 7.2А · Аргументы и критерии СУММЕСЛИ",
+      notes: "Покажите, что 3-й аргумент [диапазон_суммирования] необязателен: если его нет — складывается 1-й диапазон; если он есть — условие проверяют в 1-м, а складывают 3-й!",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Функция <span class="mono">СУММЕСЛИ</span> и правила записи критериев</h2>
+            <div class="code-block" style="font-size:13px;">=СУММЕСЛИ( диапазон_проверки ; критерий ; [диапазон_суммирования] )</div>
+            <div class="grid-2 text-xs">
+              <table class="data-table">
+                <thead><tr><th>Условие словами</th><th>Запись критерия</th></tr></thead>
+                <tbody>
+                  <tr><td>больше 75</td><td class="mono font-bold">"&gt;75"</td></tr>
+                  <tr><td>равные 100</td><td class="mono font-bold">100 или "100"</td></tr>
+                  <tr><td>меньше или равные 100</td><td class="mono font-bold">"&lt;=100"</td></tr>
+                  <tr><td>равные «красный»</td><td class="mono font-bold">"красный"</td></tr>
+                  <tr><td>не равные «красный»</td><td class="mono font-bold">"&lt;&gt;красный"</td></tr>
+                </tbody>
+              </table>
+              <div class="box-primary stack">
+                <div class="box-title">СЧЁТЕСЛИ vs СУММЕСЛИ</div>
+                <div>• <strong>СЧЁТЕСЛИ</strong> → сколько штук (2 аргумента).</div>
+                <div>• <strong>СУММЕСЛИ</strong> → общая сумма (2 или 3 аргумента).</div>
+                <div>• <strong>Несколько условий?</strong> Используют <span class="mono font-bold">СЧЁТЕСЛИМН</span> и <span class="mono font-bold">СУММЕСЛИМН</span>!</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Живой симулятор SB",
+      shortTitle: "Интерактивный пример SB: таблица «Комиссионные»",
+      timing: "25–36 мин",
+      source: "Теория 7.2А · Точная таблица «Комиссионные» (100k..400k)",
+      notes: "Переключайте 3 формулы на таблице «Комиссионные» из учебника — ученики наглядно видят разницу между СЧЁТЕСЛИ (3), СУММЕСЛИ с 2 аргументами (900 000) и СУММЕСЛИ с 3 аргументами (63 000)!",
+      render(st) {
+        const cur = st.tabs.sim || "sum2";
+        const s = G7FN3_SIM[cur];
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <h2 class="slide-h2">Пример учебника: таблица «Комиссионные»</h2>
+              <div class="flex-row">
+                ${Object.keys(G7FN3_SIM).map(k => `<button type="button" class="btn mono ${cur === k ? "btn-primary" : ""}" style="font-size:11px;" onclick="DECK.setTab('sim','${k}')">${G7FN3_SIM[k].label}</button>`).join("")}
+              </div>
+            </div>
+            <div class="grid-2">
+              <table class="data-table">
+                <thead><tr><th>Строка</th><th>A (Стоимость имущества)</th><th>B (Комиссионные)</th></tr></thead>
+                <tbody>
+                  ${G7FN3_COMM.map(r => {
+                    const hit = s.hit(r);
+                    return `<tr style="${hit ? "background:var(--success-soft);font-weight:700;" : "opacity:0.6;"}"><td class="mono">${r.row}</td><td class="mono">${r.prop.toLocaleString("ru-RU")}</td><td class="mono">${r.comm.toLocaleString("ru-RU")}</td></tr>`;
+                  }).join("")}
+                </tbody>
+              </table>
+              <div class="box-primary stack text-xs">
+                <div class="box-title">Активная формула</div>
+                <div class="code-block" style="font-size:13px;">${DECK_ESC(s.formula)}</div>
+                <div class="box-success" style="font-size:15px;">Результат: <strong class="mono">${s.res}</strong></div>
+                <p style="margin:0;">${s.why}</p>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Мини-Таблицы · Практика",
+      pillClass: "pill-accent",
+      shortTitle: "Мини-Таблицы: СУММЕСЛИ и СЧЁТЕСЛИ (числа и продукты)",
+      timing: "36–56 мин",
+      source: "Мини-Таблицы (/excel?task=g7-fn-l3-summesli)",
+      notes: "Живой тренажёр Мини-Таблицы: «СУММЕСЛИ и СЧЁТЕСЛИ: числа и продукты» (g7-fn-l3-summesli). Дополнительно: g7-fn-schetesli (продажи по городам) и g7-fn-p-ekzameny.",
+      render(st, api) {
+        return api.renderMiniExcelTask({
+          key: "g7fn3",
+          taskId: "g7-fn-l3-summesli",
+          title: "Практика в Мини-Таблицах: СУММЕСЛИ и СЧЁТЕСЛИ",
+          summary: "Посчитайте количество и общую стоимость выбранных продуктов с помощью СЧЁТЕСЛИ и СУММЕСЛИ.",
+          steps: ["Задайте диапазон проверки и критерий в кавычках", "Для суммы цен укажите 3-й аргумент", "Нажмите «Проверить»"],
+          meta: "Цели 7.1.1.3 · 7.4.2.3"
+        });
+      }
+    },
+    {
+      badge: "Этап 3 · Доп. задания",
+      shortTitle: "Ещё 2 практики: Продажи по городам и Оценки экзамена",
+      timing: "56–62 мин",
+      source: "Мини-Таблицы · g7-fn-schetesli, g7-fn-p-ekzameny",
+      notes: "Для тех, кто справился быстрее.",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Дополнительные тренажёры к СОР 7.2А</h2>
+            <div class="grid-2 text-xs">
+              <div class="box-primary stack"><strong>1. Продажи по городам</strong><div>СЧЁТЕСЛИ и СУММЕСЛИ по таблице заказов.</div><a class="btn btn-primary" href="/excel?task=g7-fn-schetesli" target="_blank" rel="noopener noreferrer">Открыть ↗</a></div>
+              <div class="box-accent stack"><strong>2. Сколько каких оценок</strong><div>СЧЁТЕСЛИ + абсолютные ссылки на диапазон.</div><a class="btn btn-accent" href="/excel?task=g7-fn-p-ekzameny" target="_blank" rel="noopener noreferrer">Открыть ↗</a></div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 3 · Тест СОР 7.2А",
+      shortTitle: "Тренировочный тест перед СОР 7.2А (5 вопросов)",
+      timing: "62–72 мин",
+      source: "Подготовка к СОР 7.2А",
+      notes: "Пройдите 5 вопросов формата СОР 7.2А.",
+      render(st) {
+        let ok = 0;
+        G7FN3_SOR.forEach(q => { if (st.quiz[q.id] === q.ans) ok++; });
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <h2 class="slide-h2">Тренировка к СОР 7.2А (5 вопросов)</h2>
+              <span class="pill pill-success mono">${ok} / ${G7FN3_SOR.length}</span>
+            </div>
+            <div class="stack" style="gap:6px;">
+              ${G7FN3_SOR.map(q => {
+                const p = st.quiz[q.id];
+                const cls = p ? (p === q.ans ? "ok" : "bad") : "";
+                return `
+                  <div class="quiz-row ${cls}">
+                    <div style="flex:1;"><strong>${q.q}</strong>${p === q.ans ? `<div class="text-xs text-muted">${q.why}</div>` : ""}</div>
+                    <div class="flex-row" style="gap:4px;">
+                      ${q.opts.map(([k,lbl]) => `<button type="button" class="btn ${p === k ? "btn-primary" : ""}" style="padding:2px 7px;font-size:11px;" onclick="DECK.pickQuiz('${q.id}','${k}')">${lbl}</button>`).join("")}
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 3 · Шпаргалка 7.2А",
+      shortTitle: "Вся шпаргалка раздела 7.2А на одном слайде",
+      timing: "72–76 мин",
+      source: "Обобщение 7.2А",
+      notes: "Краткое повторение всех 5 уроков раздела «Электронные таблицы».",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Шпаргалка раздела 7.2А «Электронные таблицы»</h2>
+            <div class="grid-3 text-xs">
+              <div class="box-primary"><strong>Форматы и ссылки</strong><br>Числовой, Денежный, %, Дата.<br><span class="mono">A1</span> (отн.), <span class="mono">$A$1</span> (абс., F4), <span class="mono">$A1 / A$1</span> (смеш.).</div>
+              <div class="box-accent"><strong>Базовые и логические</strong><br><span class="mono">СУММ, СРЗНАЧ, МИН, МАКС</span>.<br><span class="mono">ЕСЛИ, И, ИЛИ, НЕ</span>.</div>
+              <div class="box-success"><strong>Условные и ошибки</strong><br><span class="mono">СЧЁТЕСЛИ, СУММЕСЛИ</span>.<br><span class="mono">#####, #ИМЯ?, #ЗНАЧ!, #ДЕЛ/0!, #ССЫЛКА!</span></div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 3 · ДЗ",
+      shortTitle: "Домашнее задание: Благотворительная ярмарка",
+      timing: "76–80 мин",
+      source: "Мини-Таблицы · g7-fn-dz-yarmarka",
+      notes: "Выдайте ДЗ «Благотворительная ярмарка: СУММЕСЛИ».",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Домашнее задание и переход к разделу 7.2В</h2>
+            <div class="box-primary flex-between text-xs">
+              <div><strong>Домашнее задание в Мини-Таблицах (/excel):</strong> <strong>«ДЗ. Благотворительная ярмарка: СУММЕСЛИ»</strong> (<span class="mono">g7-fn-dz-yarmarka</span>).</div>
+              <a class="btn btn-accent" href="/excel?task=g7-fn-dz-yarmarka" target="_blank" rel="noopener noreferrer">Открыть ДЗ ↗</a>
+            </div>
+          </div>
+        `;
+      }
+    }
+  ]
+});
+</script>
+</body>
+</html>

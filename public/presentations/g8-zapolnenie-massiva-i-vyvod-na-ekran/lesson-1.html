@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>8.3В · Урок 3 · Заполнение элементов одномерного массива</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+  <link rel="stylesheet" href="../_engine/lesson.css" />
+</head>
+<body class="lesson">
+<script src="../_engine/deck.js"></script>
+<script src="../_engine/lesson.js"></script>
+<script>
+/*
+ * 8.3В «Массивы (язык программирования C++)», тема «Заполнение массива и вывод на экран», урок 1 (КТП) —
+ * «Заполнение элементов одномерного массива». Цель обучения 8.4.3.7 программировать заполнение элементов одномерного массива.
+ * Ход урока — КСП content/lesson-plans/g8-zapolnenie-massiva-i-vyvod-na-ekran.json, урок 1 (начало 10 мин, середина 60, конец 10).
+ * Содержание — только из материалов: SB 8 кл. стр. 160–163; TG 8 кл. стр. 131–132; презентация «массив» стр. 15;
+ * практикумы «массив задачи 1» стр. 5–6 и «массив задачи 2» стр. 4–5.
+ * Код C++ — только конструкции из материалов. Задания СОР/СОЧ не повторяются (формат и командные слова — по спецификации СОЧ 3 четв.).
+ */
+const SB = "Учебник 8 кл., ";
+const TG = "Руководство для учителя 8 кл., ";
+const PR = "Презентация «массив», ";
+const Z1 = "Практикум «массив задачи 1», ";
+const Z2 = "Практикум «массив задачи 2», ";
+const { src, reveal, quiz, matcher } = LESSON;
+const S = () => window.DECK_STATE;
+const escH = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const code = (t, fs = 17) => `<pre class="code-block" style="font-size:${fs}px;line-height:1.45;">${escH(t)}</pre>`;
+
+/* Ряд ячеек массива: значение сверху, индекс снизу; hiTo — сколько ячеек уже заполнено. */
+function cells(vals, opts = {}) {
+  return `<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end;">${opts.name ? `<div class="font-bold mono" style="align-self:center;margin-right:6px;">${opts.name}</div>` : ""}${vals
+    .map((v, i) => {
+      const on = opts.cur === i;
+      return `<div style="display:grid;gap:4px;text-align:center;">
+        <div class="mono" style="min-width:${opts.w || 62}px;padding:9px 6px;border-radius:10px;border:2px solid ${on ? "var(--accent)" : "var(--primary)"};background:${on ? "var(--accent-soft)" : "var(--surface)"};font-weight:700;">${v}</div>
+        <div class="mono text-xs" style="color:var(--primary);font-weight:800;">[${i}]</div></div>`;
+    })
+    .join("")}</div>`;
+}
+
+/* Пошаговое выполнение цикла for: каждая кнопка — одна итерация; растёт трассировочная таблица. */
+function stepper(key, name, rows, label) {
+  const k = Number(S().selected[key] || 0);
+  const vals = rows.map((r, i) => (i < k ? r[1] : "?"));
+  const body = rows.slice(0, k).map((r) => `<tr><td class="mono">${r[0]}</td><td class="mono">${r[2] ?? r[1]}</td></tr>`).join("");
+  const btn = k < rows.length
+    ? `<button type="button" class="btn btn-primary" onclick="DECK.setSelected('${key}','${k + 1}')">${label} (i = ${k})</button>`
+    : `<button type="button" class="btn" onclick="DECK.setSelected('${key}','0')">Сначала</button> <span class="text-sm">Цикл завершён: i = ${rows.length}, условие i &lt; ${rows.length} ложно.</span>`;
+  return `<div class="stack">${cells(vals, { name, cur: k < rows.length ? k : undefined })}
+    <div>${btn}</div>
+    <table class="t" style="max-width:420px;"><tr><th>i</th><th>${name}[i]</th></tr>${body || '<tr><td colspan="2" class="text-muted">Трассировочная таблица заполнится по шагам.</td></tr>'}</table></div>`;
+}
+
+/* Случайные числа для демонстрации диапазонов (имитация rand() в браузере). */
+window.roll = function (key, lo, hi, n) {
+  const v = Array.from({ length: n }, () => lo + Math.floor(Math.random() * (hi - lo + 1)));
+  window.DECK.setSelected(key, v.join(","));
+};
+
+const RAND = [
+  { e: "rand()%5", lo: 0, hi: 4 },
+  { e: "1+rand()%5", lo: 1, hi: 5 },
+  { e: "100+rand()%101", lo: 100, hi: 200 },
+  { e: "rand()%41-20", lo: -20, hi: 20 },
+];
+
+initDeck({
+  badge: "8.3В · Урок 3",
+  title: "Заполнение элементов одномерного массива",
+  subtitle: "8 класс · 3 четверть · цель 8.4.3.7 · 80 минут",
+  footer: "НИШ ЕМН г. Кызылорда · Информатика · 8 класс · Раздел 8.3В «Массивы (язык программирования C++)»",
+  slides: [
+    /* ---------------- НАЧАЛО УРОКА (10 мин) ---------------- */
+    {
+      badge: "Начало урока",
+      shortTitle: "Тема, цели и критерии",
+      timing: "0–3 мин",
+      source: "КТП 2026; КСП урока 1 темы",
+      notes: "Приветствие, инструктаж по ТБ. Озвучьте тему, цель и дескрипторы — по ним группы будут оценивать постеры друг друга.",
+      render() {
+        return `<div class="hero">
+          <div>
+            <div class="hero-kicker">Раздел 8.3В · Массивы (язык программирования C++)</div>
+            <h1>Заполнение элементов одномерного массива</h1>
+            <div class="goal"><b>8.4.3.7</b> — программировать заполнение элементов одномерного массива.</div>
+          </div>
+          <div class="stack text-sm">
+            <div class="card"><h3>🎯 Цели урока</h3>
+              <p><b>Все:</b> называют три способа заполнения; заполняют массив вводом с клавиатуры в цикле for по образцу.<br>
+              <b>Большинство:</b> заполняют массив случайными числами из диапазона и по формуле; заполняют трассировочную таблицу.<br>
+              <b>Некоторые:</b> определяют диапазон по выражению с rand() и подбирают выражение для нужного диапазона.</p></div>
+            <div class="card"><h3>✅ Дескрипторы</h3><p>• цикл for с индексом от 0 до n − 1; • ввод с клавиатуры (cin); • случайные числа из диапазона; • формула и трассировочная таблица.</p></div>
+          </div>
+        </div>${src("КТП 2026 (цель 8.4.3.7); КСП «Заполнение массива и вывод на экран», урок 1")}`;
+      },
+    },
+    {
+      badge: "Начало урока",
+      shortTitle: "Повторение",
+      timing: "3–7 мин",
+      source: SB + "стр. 160–161; " + "Презентация «массив», стр. 10–11",
+      notes: "Повторение объявления и обращения к элементу: ученики отвечают на карточках, щёлкните вариант. Массив B — условный пример.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Повторим: дан массив <code>int B[6];</code> <span class="text-xs text-muted">(условный пример)</span></h2>
+          <div class="grid-2 quizgrid" style="gap:14px;">
+            ${quiz("q-r1", "1. Сколько элементов в массиве B?", ["5", "6", "7", "0"], 1)}
+            ${quiz("q-r2", "2. Индекс последнего элемента:", ["6", "5", "1", "0"], 1)}
+            ${quiz("q-r3", "3. Записать 9 в первую ячейку:", ["B[1] = 9;", "B = 9;", "B[0] = 9;", "B[6] = 9;"], 2)}
+            ${quiz("q-r4", "4. Что в ячейках сразу после объявления?", ["нули", "мусорные значения", "единицы", "индексы"], 1)}
+          </div>
+        </div>${src(SB + "стр. 160 (1 способ объявления); " + PR + "стр. 9 (мусорные значения), стр. 10–11 (доступ, последний индекс)")}`;
+      },
+    },
+    {
+      badge: "Начало урока",
+      shortTitle: "Проблема: 1000 ячеек",
+      timing: "7–10 мин",
+      source: PR + "стр. 15; " + SB + "стр. 160",
+      notes: "Проблемный вопрос: как заполнить 1000 ячеек автоматически? Подведите к циклу. Стимулирующий вопрос урока — какие способы используют для заполнения массивов в C++? Объедините учащихся в три группы.",
+      render() {
+        return `<div class="body" style="justify-content:center;">
+          <h2 class="slide-h2">Как заполнить 1000 ячеек автоматически?</h2>
+          ${code("A[0] = …;\nA[1] = …;\nA[2] = …;\n…\nA[999] = …;   // 1000 строк?", 20)}
+          ${reveal("r-loop", "Подсказка", "Циклы! Индекс элемента меняет переменная цикла: <code>A[i]</code>.")}
+          <div class="note"><b>Вопрос урока:</b> какие способы используют для заполнения массивов в C++? · Класс делится на <b>три группы</b>.</div>
+        </div>${src(PR + "стр. 15 («В следующий раз: как заполнить 1000 ячеек автоматически»); " + SB + "стр. 160 («Ты узнаешь»)")}`;
+      },
+    },
+
+    /* ---------------- СЕРЕДИНА УРОКА (60 мин) ---------------- */
+    {
+      badge: "Новое · способы заполнения",
+      shortTitle: "Три способа заполнения",
+      timing: "10–18 мин",
+      source: SB + "стр. 160–161",
+      notes: "Фронтально: после объявления массив необходимо заполнить данными. Три способа — каждой группе по одному. Для заполнения рекомендуется цикл с параметром for, где индекс увеличивается на +1: от 0 до n − 1. Спросите: почему условие i < 5, а не i <= 5?",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">После объявления массив необходимо заполнить данными</h2>
+          <div class="cards c3">
+            <div class="card"><h3><span class="ico">⌨</span>Группа 1</h3><p>Ввод данных пользователем с клавиатуры.</p></div>
+            <div class="card"><h3><span class="ico">🎲</span>Группа 2</h3><p>Случайные числа из определённого диапазона.</p></div>
+            <div class="card"><h3><span class="ico">ƒ</span>Группа 3</h3><p>Использование формул.</p></div>
+          </div>
+          <div class="grid-2" style="gap:20px;align-items:center;">
+            ${code("for(int i=0;i<5;i++)\n    // действие с элементом sale[i]", 19)}
+            <div class="stack text-sm">
+              <div class="card">Рекомендуется цикл с параметром <b>for</b>, где индекс увеличивается на +1.</div>
+              ${reveal("r-why", "Почему i &lt; 5, а не i &lt;= 5?", "Индексы массива из 5 элементов — от 0 до 4. При i = 5 было бы обращение к sale[5] — выход за границы.")}
+            </div>
+          </div>
+        </div>${src(SB + "стр. 160 (способы заполнения), стр. 161 (цикл for); " + PR + "стр. 11 (последний индекс)")}`;
+      },
+    },
+    {
+      badge: "Группа 1 · ввод с клавиатуры",
+      shortTitle: "Ввод с клавиатуры (cin)",
+      timing: "18–26 мин",
+      source: SB + "стр. 161",
+      notes: "Группа 1 адаптирует код учебника для своего примера, проверяет на компьютере с разными данными, заполняет трассировочную таблицу. На доске: нажимайте «Ввести» — каждая итерация цикла записывает введённое число в sale[i] (значения — из трассировочной таблицы учебника). Комментарий в коде учебника «случайными числами» ошибочен: здесь ввод с клавиатуры.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;grid-template-columns:1fr 1.1fr;">
+          <div class="stack">
+            ${code(`#include <iostream>
+using namespace std;
+int main(){
+ //Объявляем массив
+ float sale[5];
+ cout<<"Введите элементы массива"<<endl;
+ for(int i=0;i<5;i++)
+   cin>>sale[i];
+ return 0;}`, 16)}
+          </div>
+          <div class="stack">
+            <h3 style="margin:0;">Пользователь вводит числа</h3>
+            ${stepper("kb", "sale", [[0, -8.9], [1, -6.7], [2, 5.5], [3, -5.6], [4, 7.8]], "Ввести")}
+          </div>
+        </div></div>${src(SB + "стр. 161 (2 способ: ввод с клавиатуры, программа и трассировочная таблица)")}`;
+      },
+    },
+    {
+      badge: "Группа 2 · случайные числа",
+      shortTitle: "Случайные числа: rand()",
+      timing: "26–34 мин",
+      source: SB + "стр. 161; " + Z2 + "стр. 5",
+      notes: "Группа 2: определите диапазон каждого выражения — щёлкните ответ. Затем «сгенерируйте» массивы кнопками (браузер имитирует rand()): все числа попадают в диапазон? rand()%5 даёт 0…4; прибавляем 1 — получаем 1…5. srand(time(0)) — инициализация генератора.",
+      render() {
+        const gen = RAND.map((r, j) => {
+          const v = S().selected[`g${j}`];
+          return `<div style="display:grid;grid-template-columns:150px auto 1fr;gap:10px;align-items:center;"><code>${r.e}</code><button type="button" class="btn btn-soft" onclick="roll('g${j}',${r.lo},${r.hi},6)">🎲 Заполнить</button><span class="mono text-sm">${v ? v.split(",").join("  ") : ""}</span></div>`;
+        }).join("");
+        return `<div class="body">
+          <h2 class="slide-h2">Какой диапазон даёт выражение?</h2>
+          ${matcher("rng", [["a", "0…4"], ["b", "1…5"], ["c", "100…200"], ["d", "−20…20"]], [
+            { t: "<code>salaries[0]=rand()%5;</code>", ans: "a" },
+            { t: "<code>salaries[1]=1+rand()%5;</code>", ans: "b" },
+            { t: "<code>salaries[2]=100+rand()%101;</code>", ans: "c" },
+            { t: "<code>salaries[3]=rand()%41-20;</code>", ans: "d" },
+          ])}
+          <div class="card text-sm" style="display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;padding:10px 14px;">${gen}</div>
+          <div class="text-xs"><code>srand(time(0));</code> — инициализация генератора; в цикле: <code>grades[i] = 1 + rand() % 5;</code></div>
+        </div>${src(SB + "стр. 161 (1 способ: случайные числа из диапазона); " + Z2 + "стр. 5 (генерация оценок, srand)")}`;
+      },
+    },
+    {
+      badge: "Группа 3 · формулы",
+      shortTitle: "Заполнение по формуле",
+      timing: "34–42 мин",
+      source: SB + "стр. 162",
+      notes: "Группа 3: значение элемента вычисляется по формуле от индекса i. Перед каждым шагом спросите класс, какое число получится, затем нажмите «Вычислить». Итог: sale = {−4.5, 0.5, 5.5, 10.5, 15.5}.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;grid-template-columns:1fr 1.1fr;">
+          <div class="stack">
+            ${code(`#include <iostream>
+using namespace std;
+int main(){
+ //Объявляем массив
+ float sale[5];
+ //Заполняем элементы массива
+ //с помощью формулы
+ for(int i=0;i<5;i++)
+   sale[i]=5*i-4.5;
+ return 0;}`, 16)}
+          </div>
+          <div class="stack">
+            <h3 style="margin:0;">sale[i] = 5*i − 4.5</h3>
+            ${stepper("fm", "sale", [[0, -4.5, "5*0−4.5 = −4.5"], [1, 0.5, "5*1−4.5 = 0.5"], [2, 5.5, "5*2−4.5 = 5.5"], [3, 10.5, "5*3−4.5 = 10.5"], [4, 15.5, "5*4−4.5 = 15.5"]], "Вычислить")}
+          </div>
+        </div></div>${src(SB + "стр. 162 (3 способ: использование формул, трассировочная таблица)")}`;
+      },
+    },
+    {
+      badge: "Физминутка",
+      shortTitle: "Физминутка",
+      timing: "42–45 мин",
+      source: "КСП урока 1 темы",
+      notes: "Упражнения для глаз, шеи и кистей рук — 3 минуты.",
+      render() {
+        return `<div class="body" style="align-items:center;justify-content:center;text-align:center;">
+          <div style="font-size:72px;">🧘</div>
+          <h2 class="slide-h2">Физминутка · 3 минуты</h2>
+          <p class="lead">Упражнения для глаз, шеи и кистей рук</p>
+        </div>${src("КСП урока 1 темы")}`;
+      },
+    },
+    {
+      badge: "Работа в группах · карусель",
+      shortTitle: "Постер и «Карусель»",
+      timing: "45–57 мин",
+      source: TG + "стр. 131",
+      notes: "Группы оформляют результат в виде постера и передают другой группе: «Карусель» — каждая группа изучает и оценивает постеры остальных по дескрипторам. Подойдите к каждой группе: проверено ли на компьютере с разными данными?",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;">
+          <div class="stack">
+            <h2 class="slide-h2">Что должно быть на постере</h2>
+            <div class="steps text-sm">
+              <div class="step">Способ заполнения и для какого примера он выбран.</div>
+              <div class="step">Программный код (адаптированный код учебника).</div>
+              <div class="step">Проверка на компьютере с разными данными.</div>
+              <div class="step">Трассировочная таблица: i и значение элемента.</div>
+            </div>
+          </div>
+          <div class="stack">
+            <h2 class="slide-h2">Оцените постер соседей</h2>
+            <table class="t text-sm">
+              <tr><th>Дескриптор</th><th>✓ / ✗</th></tr>
+              <tr><td>Цикл for с индексом от 0 до n − 1</td><td></td></tr>
+              <tr><td>Ввод с клавиатуры: cin &gt;&gt; имя[i]</td><td></td></tr>
+              <tr><td>Случайные числа из заданного диапазона</td><td></td></tr>
+              <tr><td>Формула и трассировочная таблица</td><td></td></tr>
+            </table>
+            <div class="note text-sm">Отметьте у соседей хотя бы один плюс и один совет.</div>
+          </div>
+        </div></div>${src(TG + "стр. 131 (работа в группах, постер, активити «Карусель»); КСП урока 1 темы (дескрипторы)")}`;
+      },
+    },
+    {
+      badge: "Практикум · индивидуально",
+      shortTitle: "Практикум: уровень 2",
+      timing: "57–70 мин",
+      source: Z1 + "стр. 5–6; " + Z2 + "стр. 4–5",
+      notes: "Индивидуально за компьютером: четыре задачи практикумов. Командное слово — «Запишите фрагмент программы, который заполняет…» (как в СОЧ). Решения открывайте по одному после проверки.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:16px;align-items:start;">
+          <div class="stack text-sm">
+            <div><b>1.</b> Заполните массив data из 10 элементов случайными числами в диапазоне от 0 до 99.</div>
+            ${reveal("r-p1", "Решение 1", code("for (int i = 0; i < 10; i++) {\n  data[i] = rand() % 100;\n}", 13))}
+            <div><b>2.</b> Используя цикл for, организуйте ввод 5 элементов массива users с клавиатуры.</div>
+            ${reveal("r-p2", "Решение 2", code("for (int i = 0; i < 5; i++) {\n  cin >> users[i];\n}  // индекс от 0 до 4", 13))}
+          </div>
+          <div class="stack text-sm">
+            <div><b>3.</b> В системе сбой! С помощью цикла замените все имена в массиве students (6 имён) на «Алишер».</div>
+            ${reveal("r-p3", "Решение 3", code('for (int i = 0; i < 6; i++) {\n  students[i] = "Алишер";\n}', 13))}
+            <div><b>4.</b> Объявите массив grades из 10 целых чисел и заполните его случайными числами от 1 до 5.</div>
+            ${reveal("r-p4", "Решение 4", code("int grades[10];\nsrand(time(0));\nfor (int i = 0; i < 10; i++) {\n  grades[i] = 1 + rand() % 5;\n}", 13))}
+          </div>
+        </div></div>${src(Z1 + "стр. 5–6 (уровень 2: задания 4–5 и решения); " + Z2 + "стр. 4–5 (Level 2 и решение)")}`;
+      },
+    },
+
+    /* ---------------- КОНЕЦ УРОКА (10 мин) ---------------- */
+    {
+      badge: "Конец урока · проверь себя",
+      shortTitle: "Определи диапазон",
+      timing: "70–75 мин",
+      source: SB + "стр. 163; " + TG + "стр. 132",
+      notes: "«Проверь себя» 3 (стр. 163): определить диапазон случайных чисел. Затем — фрагмент на заполнение по формуле (условный пример): ученики пишут на карточках, откройте эталон.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;">
+          <div class="stack quizgrid">
+            ${code("float sale[6]={};\nfor(int i=0; i<6; i++)\n  sale[i]=0.1+rand()%5;", 17)}
+            ${quiz("q-rng", "Определите диапазон случайных чисел:", ["от 0 до 5", "от 0.1 до 4.1", "от 0.1 до 5", "от 1 до 5"], 1)}
+            ${reveal("r-rng", "Объяснение", "rand()%5 — это диапазон от 0 до 4; полученное число прибавляется к 0.1 → от 0.1 до 4.1.")}
+          </div>
+          <div class="stack text-sm">
+            <h3 style="margin:0;">Запишите фрагмент программы, который заполняет массив K из 6 элементов по формуле K[i] = 3*i + 1</h3>
+            <div class="text-xs text-muted">Условный пример (тренировка по формату).</div>
+            ${reveal("r-k", "Эталон", code("int K[6];\nfor(int i=0; i<6; i++)\n  K[i]=3*i+1;", 16) + "K = {1, 4, 7, 10, 13, 16}")}
+          </div>
+        </div></div>${src(SB + "стр. 163 («Проверь себя» 3, код программы); " + TG + "стр. 132 (ответ 3); " + SB + "стр. 162 (заполнение по формуле)")}`;
+      },
+    },
+    {
+      badge: "Конец урока · рефлексия",
+      shortTitle: "Рефлексия и домашнее задание",
+      timing: "75–80 мин",
+      source: TG + "стр. 132; " + SB + "стр. 163",
+      notes: "Рефлексия: на стикере ученики располагают способы заполнения массива по сложности понимания и указывают причину затруднения. С учётом ответов подготовьте задания к следующему уроку.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;">
+          <div class="stack">
+            <h2 class="slide-h2">Рефлексия</h2>
+            <div class="card"><p>Расположи способы заполнения <b>от понятного к сложному</b> и укажи причину затруднения:</p>
+              <p>⌨ ввод с клавиатуры &nbsp;·&nbsp; 🎲 случайные числа &nbsp;·&nbsp; ƒ формулы</p></div>
+            <div class="card"><p>Какое выражение с rand() даст числа от 10 до 20? Задай свой вопрос учителю или однокласснику.</p></div>
+          </div>
+          <div class="stack">
+            <h2 class="slide-h2">Домашнее задание</h2>
+            <div class="card"><h3>📝 «Проверь себя» 4*, стр. 163</h3><p>Запиши фрагмент программного кода заполнения массива с помощью формулы. Заполни трассировочную таблицу.</p></div>
+            <div class="card text-sm"><h3>⭐ По желанию — задание 5*, стр. 163</h3><p>Заполнение массива случайными числами от 0,5 до 2,5 по блок-схеме.</p></div>
+          </div>
+        </div></div>${src(TG + "стр. 132 (рефлексия); " + SB + "стр. 163 («Проверь себя» 4*, задание 5*)")}`;
+      },
+    },
+  ],
+});
+</script>
+</body>
+</html>

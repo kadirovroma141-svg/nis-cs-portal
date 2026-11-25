@@ -1,0 +1,1189 @@
+{
+  "topic": "g7-vlozhennye-usloviya",
+  "summary": "Вложенные условия в C++: вложенное ветвление и вложенный условный оператор, правило «else — к ближайшему if», каскадное условие else if, блок-схемы и трассировочные таблицы, функции на отрезках.",
+  "theory": [
+    {
+      "title": "Что такое вложенное условие",
+      "objectives": [
+        "7.4.3.7"
+      ],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "content": "Что делать, если нужно проверить несколько условий? Для этого используют **вложенный условный оператор**. Вложенное ветвление используется для выбора **из более чем двух вариантов**."
+        },
+        {
+          "type": "definition",
+          "term": "Вложенное ветвление",
+          "content": "Ветвление, которое расположено в одной из веток другого ветвления. Вложенная ветвь — это ветвь, расположенная в другой ветви."
+        },
+        {
+          "type": "definition",
+          "term": "Вложенный условный оператор",
+          "content": "Условный оператор, который находится внутри блока `if` или блока `else`. Выполнение вложенного условия зависит от выполнения предыдущего (внешнего) условия."
+        },
+        {
+          "type": "warning",
+          "content": "Оператор `else` всегда относится к **ближайшему предыдущему** блоку `if`."
+        },
+        {
+          "type": "example",
+          "title": "В каком звене учится ученик",
+          "content": "Если пользователь введет число меньше 5 — это начальное звено; от 5 до 10 — среднее звено; в остальных случаях — «Старшее звено».\n\n```\nЕсли <answer меньше 5> То <вывести «Начальное звено»>\nИначе\n    Если <answer меньше 11> То <вывести «Среднее звено»>\n    Иначе <вывести «Старшее звено»>\n```"
+        },
+        {
+          "type": "diagram",
+          "format": "mermaid",
+          "content": "flowchart TD\n    A([\"Начало\"]) --> B[/\"Вывод: В каком классе ты учишься?\"/]\n    B --> C[/\"Ввод answer\"/]\n    C --> D{\"answer < 5?\"}\n    D -->|Да| E[/\"Начальное звено\"/]\n    D -->|Нет| F{\"answer < 11?\"}\n    F -->|Да| G[/\"Среднее звено\"/]\n    F -->|Нет| H[/\"Старшее звено\"/]\n    E --> K([\"Конец\"])\n    G --> K\n    H --> K",
+          "caption": "Второе условие вложено в ветку «Нет» первого"
+        }
+      ]
+    },
+    {
+      "title": "Вложенное условие в C++",
+      "objectives": [
+        "7.4.3.7"
+      ],
+      "blocks": [
+        {
+          "type": "example",
+          "title": "Задача про сумму денег",
+          "content": "По сумме денег (в тг) вывести: если сумма больше 1000 — «У вас достаточно денег.»; если больше 10000 — «У вас очень много денег.»; если не больше 1000 — «У вас маловато денег.»."
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "#include <iostream>\nusing namespace std;\nint main()\n{\n    int money;\n    cin >> money;\n    if (money > 1000)\n    {\n        if (money > 10000)\n            cout << \"У вас очень много денег.\" << endl;\n        else\n            cout << \"У вас достаточно денег.\" << endl;\n    }\n    else\n        cout << \"У вас маловато денег.\" << endl;\n    return 0;\n}",
+          "caption": "Внутренний if…else находится в ветке if внешнего условия"
+        },
+        {
+          "type": "steps",
+          "title": "Как работает программа",
+          "items": [
+            "Целое число вводится с клавиатуры и сохраняется в переменной `money`.",
+            "Внешнее условие проверяет, больше ли `money` 1000.",
+            "Если да — выполняется внутренний `if…else`: при `money > 10000` выводится «У вас очень много денег.», иначе — «У вас достаточно денег.».",
+            "Если нет — выполняется внешний `else`: «У вас маловато денег.»."
+          ]
+        },
+        {
+          "type": "diagram",
+          "format": "mermaid",
+          "content": "flowchart TD\n    A([\"Начало\"]) --> B[/\"Ввод money\"/]\n    B --> C{\"money > 1000?\"}\n    C -->|Да| D{\"money > 10000?\"}\n    C -->|Нет| E[/\"У вас маловато денег.\"/]\n    D -->|Да| F[/\"У вас очень много денег.\"/]\n    D -->|Нет| G[/\"У вас достаточно денег.\"/]\n    E --> K([\"Конец\"])\n    F --> K\n    G --> K",
+          "caption": "Блок-схема программы про сумму денег"
+        },
+        {
+          "type": "exam_tip",
+          "content": "Оформляй программу **лесенкой** (с отступами): так ее легче читать и понимать, видно, к какому `if` относится каждый `else`."
+        },
+        {
+          "type": "paragraph",
+          "content": "Если в ветке несколько действий или в ней стоит вложенный оператор, их заключают в фигурные скобки `{ }`. Новое условие можно добавлять не только в ветку `if`, но и в ветку `else`."
+        },
+        {
+          "type": "comparison",
+          "title": "Виды записи условий",
+          "columns": [
+            "Вид",
+            "Структура"
+          ],
+          "rows": [
+            [
+              "Условный оператор",
+              "`if (условие) { … } else { … }`"
+            ],
+            [
+              "Сложное условие",
+              "`if (условие 1 && условие 2) { … } else { … }`"
+            ],
+            [
+              "Вложенное условие",
+              "`if (условие 1) { if (условие 2) { … } else { … } } else { … }`"
+            ],
+            [
+              "Каскадное вложенное условие",
+              "`if (условие 1) { … } else if (условие 2) { … } else { … }`"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Оценка по баллам: каскадное условие",
+      "objectives": [
+        "7.4.3.7"
+      ],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "content": "Число вводится с клавиатуры и означает балл за суммативное оценивание. Нужно определить оценку. При истинном первом условии (`x >= 65`) проверяется второе (`x >= 85`): оба истинны — «5», истинно только первое — «4». В ветку `else` добавлено еще одно условие, чтобы отделить «2» от «3»."
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "#include <iostream>\nusing namespace std;\nint main()\n{\n    int x;\n    cout << \"Введите балл за СОЧ\" << endl;\n    cin >> x;\n    if (x >= 65)\n        if (x >= 85)\n            cout << \"5\" << endl;\n        else cout << \"4\" << endl;\n    else if (x <= 40)\n        cout << \"2\" << endl;\n    else\n        cout << \"3\" << endl;\n    return 0;\n}",
+          "caption": "Вложенное условие в ветке if и каскад в ветке else"
+        },
+        {
+          "type": "diagram",
+          "format": "mermaid",
+          "content": "flowchart TD\n    A([\"Начало\"]) --> B[/\"Ввод x\"/]\n    B --> C{\"x >= 65?\"}\n    C -->|Да| D{\"x >= 85?\"}\n    C -->|Нет| E{\"x <= 40?\"}\n    D -->|Да| F[/\"5\"/]\n    D -->|Нет| G[/\"4\"/]\n    E -->|Да| H[/\"2\"/]\n    E -->|Нет| I[/\"3\"/]\n    F --> K([\"Конец\"])\n    G --> K\n    H --> K\n    I --> K",
+          "caption": "Блок-схема определения оценки"
+        },
+        {
+          "type": "paragraph",
+          "content": "Чтобы программа принимала только корректные данные, после ввода можно проверить балл сложным условием и в ветке `else` записать определение оценки:\n\n```cpp\nif (score >= 0 && score <= 100) {\n    if (score >= 90) cout << \"Оценка: 5\" << endl;\n    else if (score >= 75) cout << \"Оценка: 4\" << endl;\n    else if (score >= 60) cout << \"Оценка: 3\" << endl;\n    else cout << \"Оценка: 2\" << endl;\n} else {\n    cout << \"Некорректный ввод!\" << endl;\n}\n```"
+        }
+      ]
+    },
+    {
+      "title": "Трассировочная таблица",
+      "objectives": [
+        "7.4.3.7"
+      ],
+      "blocks": [
+        {
+          "type": "definition",
+          "term": "Трассировочная таблица",
+          "content": "Инструмент для анализа программы, позволяющий отследить значения переменных на каждом шаге выполнения."
+        },
+        {
+          "type": "example",
+          "title": "Задача: знак между a и b",
+          "content": "Даны два целых числа a и b. Вывести «>», если a больше b; «<», если a меньше b; «=», если числа равны.\n\n```cpp\nif (a > b || a == b)\n{\n    if (a == b)\n        cout << \"=\" << endl;\n    else\n        cout << \">\" << endl;\n}\nelse\n    cout << \"<\" << endl;\n```"
+        },
+        {
+          "type": "paragraph",
+          "content": "| шаги | a | b | Условие 1 `a > b \\|\\| a == b` | Условие 2 `a == b` | Вывод |\n|---|---|---|---|---|---|\n| 1 | 8 | 2 | | | |\n| 2 | | | true | | |\n| 3 | | | | false | |\n| 4 | | | | | > |\n\nПри a = 3, b = 5 условие 1 ложно, условие 2 не проверяется, вывод «<». При a = −10, b = −10 оба условия истинны, вывод «=»."
+        },
+        {
+          "type": "example",
+          "title": "Сколько совпадающих чисел",
+          "content": "Даны три целых числа. Вывести 3, если все совпадают; 2, если совпадают два; 0, если все различны."
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "#include <iostream>\nusing namespace std;\nint main()\n{\n    int a, b, c;\n    cin >> a >> b >> c;\n    if (a == b || b == c || a == c)\n    {\n        if (a == b && b == c && a == c)\n            cout << \"3\" << endl;\n        else\n            cout << \"2\" << endl;\n    }\n    else\n        cout << \"0\" << endl;\n    return 0;\n}",
+          "caption": "Внешнее условие — «есть ли хотя бы одно совпадение», вложенное — «совпадают ли все три»"
+        },
+        {
+          "type": "paragraph",
+          "content": "| a | b | c | Условие 1 | Условие 2 | Вывод |\n|---|---|---|---|---|---|\n| 3 | 5 | 5 | true | false | 2 |\n| 1 | 2 | 3 | false | — | 0 |\n| 8 | 8 | 8 | true | true | 3 |"
+        }
+      ]
+    },
+    {
+      "title": "Вложенные условия в математике и практике",
+      "objectives": [
+        "7.4.3.7"
+      ],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "content": "С помощью разветвляющегося алгоритма можно вычислить значение функции, заданной по-разному на разных отрезках. Для этого используют каскадное вложенное условие."
+        },
+        {
+          "type": "formula",
+          "caption": "Функция, заданная на отрезках",
+          "latex": "y = \\begin{cases} 0, & x \\le 0 \\\\ x^3 + 5, & 0 < x \\le 1 \\\\ x^2 - \\sin(\\pi x), & \\text{в остальных случаях} \\end{cases}"
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "#include <iostream>\n#include <cmath>\nusing namespace std;\nint main()\n{\n    float x, y, pi = 3.14;\n    cout << \"Введите значение для x\" << endl;\n    cin >> x;\n    if (x <= 0)\n        y = 0;\n    else if (x > 0 && x <= 1)\n        y = pow(x, 3) + 5;\n    else\n        y = pow(x, 2) - sin(pi * x);\n    cout << \"y=\" << y << endl;\n    return 0;\n}",
+          "caption": "Значение функции на отрезках"
+        },
+        {
+          "type": "example",
+          "title": "Четность и делимость на 3",
+          "content": "Вложенные условия могут стоять в обеих ветках:\n\n```cpp\nif (num % 2 == 0) {\n    cout << \"Число четное\";\n    if (num % 3 == 0) cout << \" и делится на 3.\" << endl;\n    else cout << \" и не делится на 3.\" << endl;\n} else {\n    cout << \"Число нечетное\";\n    if (num % 3 == 0) cout << \" и делится на 3.\" << endl;\n    else cout << \" и не делится на 3.\" << endl;\n}\n```"
+        },
+        {
+          "type": "example",
+          "title": "Вид треугольника",
+          "content": "Сначала проверяется, можно ли построить треугольник (`a+b>c && a+c>b && b+c>a`); внутри — вид: все стороны равны — «Равносторонний», две равны — «Равнобедренный», иначе — «Разносторонний». В ветке `else` — «Нельзя построить треугольник»."
+        },
+        {
+          "type": "diagram",
+          "format": "mermaid",
+          "content": "mindmap\n  root((Вложенные условия C++))\n    Вложенное\n      if внутри if или else\n      else к ближайшему if\n      лесенка и фигурные скобки\n    Каскадное\n      else if\n      выбор из многих вариантов\n    Проверка\n      блок-схема\n      трассировочная таблица\n    Задачи\n      оценка по баллам\n      функция на отрезках\n      вид треугольника",
+          "caption": "Итог темы"
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "key": "nest7-def",
+      "title": "Вложенное ветвление",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.7"
+      ],
+      "text": "Что такое **вложенное ветвление**?",
+      "options": [
+        {
+          "key": "A",
+          "content": "Ветвление, которое расположено в одной из веток другого ветвления"
+        },
+        {
+          "key": "B",
+          "content": "Два условия, соединенные операцией `&&`"
+        },
+        {
+          "key": "C",
+          "content": "Повторение команд, пока условие истинно"
+        },
+        {
+          "key": "D",
+          "content": "Ветвление без ветки `else`"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 124; G7_Информатика_THB_Финал_26.10.23 1.pdf, стр. 127",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "A — 1 балл.",
+        "accepted": {
+          "correct": "A"
+        },
+        "model_answer": "A",
+        "explanation": "Вложенная ветвь расположена в другой ветви."
+      }
+    },
+    {
+      "key": "nest7-else-tf",
+      "title": "К какому if относится else",
+      "type": "true_false",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.7"
+      ],
+      "text": "В вложенном условном операторе `else` всегда относится к ближайшему предыдущему блоку `if`.",
+      "source": "nis_style",
+      "source_reference": "1_Влож условия.pptx, слайд 3",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "Верно — 1 балл.",
+        "accepted": {
+          "correct": true
+        },
+        "explanation": "Правило: else относится к ближайшему предыдущему if."
+      }
+    },
+    {
+      "key": "nest7-zveno",
+      "title": "Какое звено",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.7"
+      ],
+      "text": "По блок-схеме «звено»: `answer < 5?` → «Начальное звено», иначе `answer < 11?` → «Среднее звено», иначе «Старшее звено». Что будет выведено, если `answer = 11`?",
+      "options": [
+        {
+          "key": "A",
+          "content": "Начальное звено"
+        },
+        {
+          "key": "B",
+          "content": "Среднее звено"
+        },
+        {
+          "key": "C",
+          "content": "Старшее звено"
+        },
+        {
+          "key": "D",
+          "content": "Ничего"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 124",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "C — 1 балл.",
+        "accepted": {
+          "correct": "C"
+        },
+        "model_answer": "C",
+        "explanation": "11 < 5 — нет; 11 < 11 — нет, поэтому «Старшее звено»."
+      }
+    },
+    {
+      "key": "nest7-money",
+      "title": "Сумма денег",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "state",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.7"
+      ],
+      "text": "```cpp\n#include <iostream>\nusing namespace std;\nint main()\n{\n    int money;\n    cin >> money;\n    if (money > 1000)\n    {\n        if (money > 10000)\n            cout << \"У вас очень много денег.\" << endl;\n        else\n            cout << \"У вас достаточно денег.\" << endl;\n    }\n    else\n        cout << \"У вас маловато денег.\" << endl;\n    return 0;\n}\n```\n\nЧто выведет программа, если ввести `1000`?",
+      "options": [
+        {
+          "key": "A",
+          "content": "У вас очень много денег."
+        },
+        {
+          "key": "B",
+          "content": "У вас достаточно денег."
+        },
+        {
+          "key": "C",
+          "content": "У вас маловато денег."
+        },
+        {
+          "key": "D",
+          "content": "Ничего не выведет"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "1_Влож условия.pptx, слайды 4–5",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "C — 1 балл.",
+        "accepted": {
+          "correct": "C"
+        },
+        "model_answer": "C",
+        "explanation": "1000 > 1000 — ложь, выполняется внешний else."
+      }
+    },
+    {
+      "key": "nest7-ab",
+      "title": "Знак между числами",
+      "type": "fill_blank",
+      "marks": 2,
+      "difficulty": "medium",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.7"
+      ],
+      "text": "Вывести «=», если a равно b, «>», если a больше b, иначе «<». Заполни условия.\n\n```cpp\nif ([[1]])\n{\n    if ([[2]])\n        cout << \"=\" << endl;\n    else\n        cout << \">\" << endl;\n}\nelse\n    cout << \"<\" << endl;\n```",
+      "content": {
+        "blank_count": 2
+      },
+      "source": "nis_style",
+      "source_reference": "1_Влож условия.pptx, слайды 6–8",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "[[1]] a>b||a==b; [[2]] a==b — по 1 баллу",
+        "accepted": {
+          "blanks": [
+            [
+              "a>b||a==b",
+              "a==b||a>b",
+              "a>=b"
+            ],
+            [
+              "a==b",
+              "b==a"
+            ]
+          ],
+          "ignore_spaces": true
+        },
+        "explanation": "Внешнее условие: a больше или равно b; вложенное отделяет равенство."
+      }
+    },
+    {
+      "key": "nest7-trace-x",
+      "title": "Значение x",
+      "type": "fill_blank",
+      "marks": 4,
+      "difficulty": "medium",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.7"
+      ],
+      "text": "```cpp\nif (a > 0)\n    if (a < 10) x = 1;\n    else x = 2;\nelse\n    if (a > -20) x = 3;\n    else x = 4;\n```\n\nОпредели значение x:\n\n- a = 7 → x = [[1]]\n- a = 10 → x = [[2]]\n- a = −25 → x = [[3]]\n- a = 0 → x = [[4]]",
+      "content": {
+        "blank_count": 4
+      },
+      "source": "nis_style",
+      "source_reference": "vlozhennye_usl_operator (1).pptx, слайд 6",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "[[1]] 1; [[2]] 2; [[3]] 4; [[4]] 3 — по 1 баллу",
+        "accepted": {
+          "blanks": [
+            [
+              "1"
+            ],
+            [
+              "2"
+            ],
+            [
+              "4"
+            ],
+            [
+              "3"
+            ]
+          ],
+          "ignore_spaces": true
+        },
+        "explanation": "7: 7>0 и 7<10 → 1; 10: 10<10 ложно → 2; −25: не >0 и не >−20 → 4; 0: не >0, 0>−20 → 3."
+      }
+    },
+    {
+      "key": "nest7-trace-three",
+      "title": "Трассировка: совпадения",
+      "type": "trace_table",
+      "marks": 3,
+      "difficulty": "medium",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.7"
+      ],
+      "text": "```cpp\n#include <iostream>\nusing namespace std;\nint main()\n{\n    int a, b, c;\n    cin >> a >> b >> c;\n    if (a == b || b == c || a == c)\n    {\n        if (a == b && b == c && a == c)\n            cout << \"3\" << endl;\n        else\n            cout << \"2\" << endl;\n    }\n    else\n        cout << \"0\" << endl;\n    return 0;\n}\n```\n\nЗаполни трассировочную таблицу для трех наборов входных данных. Если условие не проверяется, поставь «-».",
+      "content": {
+        "columns": [
+          "a b c",
+          "Условие 1",
+          "Условие 2",
+          "Вывод"
+        ],
+        "rows": 3,
+        "prefill": [
+          [
+            "6 2 6",
+            null,
+            null,
+            null
+          ],
+          [
+            "4 7 9",
+            null,
+            null,
+            null
+          ],
+          [
+            "5 5 5",
+            null,
+            null,
+            null
+          ]
+        ]
+      },
+      "source": "nis_style",
+      "source_reference": "1_Влож условия.pptx, слайды 11–13",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "Каждая верно заполненная строка — 1 балл.",
+        "accepted": {
+          "rows": [
+            [
+              null,
+              "true",
+              "false",
+              "2"
+            ],
+            [
+              null,
+              "false",
+              "-",
+              "0"
+            ],
+            [
+              null,
+              "true",
+              "true",
+              "3"
+            ]
+          ]
+        },
+        "model_answer": "| a b c | Условие 1 | Условие 2 | Вывод |\n|---|---|---|---|\n| 6 2 6 | true | false | 2 |\n| 4 7 9 | false | - | 0 |\n| 5 5 5 | true | true | 3 |",
+        "explanation": "6 2 6: a == c — есть совпадение, но не все равны → 2. 4 7 9: совпадений нет → 0. 5 5 5: все равны → 3."
+      }
+    },
+    {
+      "key": "nest7-mod4",
+      "title": "Остаток от деления на 4",
+      "type": "fill_blank",
+      "marks": 3,
+      "difficulty": "medium",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.7"
+      ],
+      "text": "Заполни условия каскадного вложенного условия.\n\n```cpp\nif ([[1]])\n    cout << a << \" остаток деления на 4 = 0\" << endl;\nelse\n    if ([[2]])\n        cout << a << \" остаток деления на 4 = 1\" << endl;\n    else\n        if ([[3]])\n            cout << a << \" остаток деления на 4 = 2\" << endl;\n        else\n            cout << a << \" остаток деления на 4 = 3\" << endl;\n```",
+      "content": {
+        "blank_count": 3
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 169 («Проверь себя», 4)",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "[[1]] a%4==0; [[2]] a%4==1; [[3]] a%4==2 — по 1 баллу",
+        "accepted": {
+          "blanks": [
+            [
+              "a%4==0"
+            ],
+            [
+              "a%4==1"
+            ],
+            [
+              "a%4==2"
+            ]
+          ],
+          "ignore_spaces": true
+        },
+        "explanation": "Остаток от деления — операция %."
+      }
+    },
+    {
+      "key": "nest7-quarter",
+      "title": "Координатная четверть",
+      "type": "fill_blank",
+      "marks": 3,
+      "difficulty": "medium",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.7"
+      ],
+      "text": "Точка (x, y) не лежит на осях. Заполни условия.\n\n```cpp\nif ([[1]])\n    if ([[2]])\n        cout << \"1 координатная четверть\" << endl;\n    else\n        cout << \"4 координатная четверть\" << endl;\nelse\n    if ([[3]])\n        cout << \"2 координатная четверть\" << endl;\n    else\n        cout << \"3 координатная четверть\" << endl;\n```",
+      "content": {
+        "blank_count": 3
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 172 («Проверь себя», 3); 1_Влож условия.pptx, слайд 17",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "[[1]] x>0; [[2]] y>0; [[3]] y>0 — по 1 баллу",
+        "accepted": {
+          "blanks": [
+            [
+              "x>0",
+              "0<x"
+            ],
+            [
+              "y>0",
+              "0<y"
+            ],
+            [
+              "y>0",
+              "0<y"
+            ]
+          ],
+          "ignore_spaces": true
+        },
+        "explanation": "1 и 4 четверти — x > 0; 1 и 2 четверти — y > 0."
+      }
+    },
+    {
+      "key": "nest7-kinds",
+      "title": "Виды условий",
+      "type": "matching",
+      "marks": 4,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.7"
+      ],
+      "text": "Сопоставь вид условия и его запись.",
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "Условный оператор"
+          },
+          {
+            "key": "L2",
+            "text": "Сложное условие"
+          },
+          {
+            "key": "L3",
+            "text": "Вложенное условие"
+          },
+          {
+            "key": "L4",
+            "text": "Каскадное вложенное условие"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "`if (a > b && a > 0) c = a + b; else c = a - b;`"
+          },
+          {
+            "key": "R2",
+            "text": "`if (x < 0) y = 1; else if (x == 0) y = 2; else y = 3;`"
+          },
+          {
+            "key": "R3",
+            "text": "`if (a > b) c = a + b; else c = a - b;`"
+          },
+          {
+            "key": "R4",
+            "text": "`if (a > b) { if (a > c) max = a; else max = c; } else max = b;`"
+          }
+        ]
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 171 («Проверь себя», 1); стр. 192",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "L1–R3; L2–R1; L3–R4; L4–R2. Всего 4 б.",
+        "accepted": {
+          "pairs": {
+            "L1": "R3",
+            "L2": "R1",
+            "L3": "R4",
+            "L4": "R2"
+          }
+        },
+        "explanation": "Каскадное — цепочка else if; вложенное — if внутри if; сложное — несколько условий через && / ||."
+      }
+    },
+    {
+      "key": "nest7-func",
+      "title": "Значение функции",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "calculate",
+      "grading": "HYBRID",
+      "objectives": [
+        "7.4.3.7"
+      ],
+      "text": "Функция задана так: $y = 2x - 3$ при $x \\le 0$; $y = x^2 - 5$ при $0 < x \\le 5$; $y = -x^2 + 1$ в остальных случаях.\n\n```cpp\nif (x <= 0) y = 2 * x - 3;\nelse if (x > 0 && x <= 5) y = pow(x, 2) - 5;\nelse y = -pow(x, 2) + 1;\n```\n\nЧему равно y при x = 3?",
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 173, 175 («Проверь себя», 4)",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "4 — 1 балл.",
+        "accepted": {
+          "values": [
+            "4"
+          ],
+          "numeric": true,
+          "tolerance": 0.001
+        },
+        "model_answer": "4",
+        "explanation": "0 < 3 ≤ 5, поэтому y = 3² − 5 = 4."
+      }
+    },
+    {
+      "key": "nest7-sor",
+      "title": "Оценка за СОЧ",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "state",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.7"
+      ],
+      "text": "```cpp\nif (x >= 65)\n    if (x >= 85)\n        cout << \"5\" << endl;\n    else cout << \"4\" << endl;\nelse if (x <= 40)\n    cout << \"2\" << endl;\nelse\n    cout << \"3\" << endl;\n```\n\nЧто выведет программа при x = 40?",
+      "options": [
+        {
+          "key": "A",
+          "content": "5"
+        },
+        {
+          "key": "B",
+          "content": "4"
+        },
+        {
+          "key": "C",
+          "content": "3"
+        },
+        {
+          "key": "D",
+          "content": "2"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 166–167",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "D — 1 балл.",
+        "accepted": {
+          "correct": "D"
+        },
+        "model_answer": "D",
+        "explanation": "40 >= 65 — ложь; в ветке else 40 <= 40 — истина → «2»."
+      }
+    },
+    {
+      "key": "nest7-even3",
+      "title": "Четное и делится на 3",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "state",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.7"
+      ],
+      "text": "```cpp\nif (num % 2 == 0) {\n    cout << \"Число четное\";\n    if (num % 3 == 0) cout << \" и делится на 3.\";\n    else cout << \" и не делится на 3.\";\n} else {\n    cout << \"Число нечетное\";\n    if (num % 3 == 0) cout << \" и делится на 3.\";\n    else cout << \" и не делится на 3.\";\n}\n```\n\nЧто выведет программа при num = 9?",
+      "options": [
+        {
+          "key": "A",
+          "content": "Число четное и делится на 3."
+        },
+        {
+          "key": "B",
+          "content": "Число нечетное и делится на 3."
+        },
+        {
+          "key": "C",
+          "content": "Число нечетное и не делится на 3."
+        },
+        {
+          "key": "D",
+          "content": "Число нечетное"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "2_Влож условия.pptx, слайд 8",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "model_answer": "B",
+        "explanation": "9 % 2 = 1 — нечетное; 9 % 3 = 0 — делится на 3."
+      }
+    },
+    {
+      "key": "nest7-three",
+      "title": "Совпадающие числа",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "state",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.7"
+      ],
+      "text": "```cpp\n#include <iostream>\nusing namespace std;\nint main()\n{\n    int a, b, c;\n    cin >> a >> b >> c;\n    if (a == b || b == c || a == c)\n    {\n        if (a == b && b == c && a == c)\n            cout << \"3\" << endl;\n        else\n            cout << \"2\" << endl;\n    }\n    else\n        cout << \"0\" << endl;\n    return 0;\n}\n```\n\nЧто выведет программа для чисел 4 9 4?",
+      "options": [
+        {
+          "key": "A",
+          "content": "3"
+        },
+        {
+          "key": "B",
+          "content": "2"
+        },
+        {
+          "key": "C",
+          "content": "0"
+        },
+        {
+          "key": "D",
+          "content": "4"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "1_Влож условия.pptx, слайды 10–11",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "model_answer": "B",
+        "explanation": "a == c — есть совпадение, но не все три равны → 2."
+      }
+    },
+    {
+      "key": "nest7-sor-flaw",
+      "title": "Недостатки программы",
+      "type": "short_answer",
+      "marks": 2,
+      "difficulty": "medium",
+      "command_word": "explain",
+      "grading": "AI",
+      "objectives": [
+        "7.4.3.7"
+      ],
+      "text": "Программа определяет оценку: `if (x >= 65) if (x >= 85) cout << \"5\"; else cout << \"4\"; else cout << \"3\";`. Назови два недостатка этой программы.",
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 166",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "- Нет оценки «2»: при малом балле (например, меньше 40) всё равно выводится «3» (1)\n- Нет проверки корректности ввода (отрицательное число, балл больше 100 и т. п.) (1)",
+        "points": [
+          {
+            "criterion": "Нет оценки «2»: при малом балле (например, меньше 40) всё равно выводится «3»",
+            "marks": 1
+          },
+          {
+            "criterion": "Нет проверки корректности ввода (отрицательное число, балл больше 100 и т. п.)",
+            "marks": 1
+          }
+        ],
+        "model_answer": "Оценка «3» выводится без разделения на «3» и «2»; не проверяется, что введен корректный балл."
+      }
+    },
+    {
+      "key": "nest7-write-sign",
+      "title": "Программа: знак числа",
+      "type": "code_completion",
+      "marks": 4,
+      "difficulty": "medium",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "7.4.3.7"
+      ],
+      "text": "Напиши программу на C++: пользователь вводит целое число, программа выводит «Число положительное», «Число отрицательное» или «Число равно 0». Используй вложенное условие.\n\n```\nВведи число: -4\nЧисло отрицательное\n```",
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 125 (задание 2); 1_Влож условия.pptx, слайд 14",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "- Структура программы, объявлена переменная, ввод через cin (1)\n- Первое условие (например, number < 0) с выводом «Число отрицательное» (1)\n- Вложенное условие в ветке else (number > 0) с выводом «Число положительное» (1)\n- Ветка «Число равно 0» и верный синтаксис if / else (1)",
+        "points": [
+          {
+            "criterion": "Структура программы, объявлена переменная, ввод через cin",
+            "marks": 1
+          },
+          {
+            "criterion": "Первое условие (например, number < 0) с выводом «Число отрицательное»",
+            "marks": 1
+          },
+          {
+            "criterion": "Вложенное условие в ветке else (number > 0) с выводом «Число положительное»",
+            "marks": 1
+          },
+          {
+            "criterion": "Ветка «Число равно 0» и верный синтаксис if / else",
+            "marks": 1
+          }
+        ],
+        "model_answer": "int number; cout << \"Введи число\"; cin >> number; if (number < 0) cout << \"Число отрицательное\"; else if (number > 0) cout << \"Число положительное\"; else cout << \"Число равно 0\";"
+      }
+    },
+    {
+      "key": "nest7-exam-1",
+      "title": "Без фигурных скобок",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "exam",
+      "command_word": "state",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.7"
+      ],
+      "text": "```cpp\nif (a > 0)\n    if (a > 10) cout << \"A\";\n    else cout << \"B\";\n```\n\nЧто выведет фрагмент при a = −5?",
+      "options": [
+        {
+          "key": "A",
+          "content": "A"
+        },
+        {
+          "key": "B",
+          "content": "B"
+        },
+        {
+          "key": "C",
+          "content": "AB"
+        },
+        {
+          "key": "D",
+          "content": "Ничего"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "1_Влож условия.pptx, слайд 3; vlozhennye_usl_operator (1).pptx, слайд 2",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "D — 1 балл.",
+        "accepted": {
+          "correct": "D"
+        },
+        "model_answer": "D",
+        "explanation": "else относится к ближайшему if (a > 10). При a = −5 внешнее условие ложно, а у него нет else — ничего не выводится."
+      }
+    },
+    {
+      "key": "nest7-exam-2",
+      "title": "Значение x после программы",
+      "type": "fill_blank",
+      "marks": 4,
+      "difficulty": "exam",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.7"
+      ],
+      "text": "```cpp\ncin >> x;\nif (x > 0)\n{\n    x = x - 10;\n    if (x < 0) x = x * -2;\n}\nelse x = x + 2;\ncout << x;\n```\n\nЧто выведет программа?\n\n- x = 15 → [[1]]\n- x = 4 → [[2]]\n- x = −6 → [[3]]\n- x = 0 → [[4]]",
+      "content": {
+        "blank_count": 4
+      },
+      "source": "nis_style",
+      "source_reference": "3_Switch переделать.pptx, слайд 2",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "[[1]] 5; [[2]] 12; [[3]] -4; [[4]] 2 — по 1 баллу",
+        "accepted": {
+          "blanks": [
+            [
+              "5"
+            ],
+            [
+              "12"
+            ],
+            [
+              "-4"
+            ],
+            [
+              "2"
+            ]
+          ],
+          "ignore_spaces": true
+        },
+        "explanation": "15 → 5; 4 → −6 → 12; −6 → −4; 0 → 2."
+      }
+    },
+    {
+      "key": "nest7-exam-3",
+      "title": "Трассировка: знак между числами",
+      "type": "trace_table",
+      "marks": 3,
+      "difficulty": "exam",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.7"
+      ],
+      "text": "```cpp\nif (a > b || a == b)\n{\n    if (a == b) cout << \"=\";\n    else cout << \">\";\n}\nelse cout << \"<\";\n```\n\nЗаполни трассировочную таблицу. Если условие не проверяется, поставь «-».",
+      "content": {
+        "columns": [
+          "a b",
+          "Условие 1",
+          "Условие 2",
+          "Вывод"
+        ],
+        "rows": 3,
+        "prefill": [
+          [
+            "2 9",
+            null,
+            null,
+            null
+          ],
+          [
+            "-7 -7",
+            null,
+            null,
+            null
+          ],
+          [
+            "6 1",
+            null,
+            null,
+            null
+          ]
+        ]
+      },
+      "source": "nis_style",
+      "source_reference": "1_Влож условия.pptx, слайд 9",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "Каждая верно заполненная строка — 1 балл.",
+        "accepted": {
+          "rows": [
+            [
+              null,
+              "false",
+              "-",
+              "<"
+            ],
+            [
+              null,
+              "true",
+              "true",
+              "="
+            ],
+            [
+              null,
+              "true",
+              "false",
+              ">"
+            ]
+          ]
+        },
+        "model_answer": "| a b | Условие 1 | Условие 2 | Вывод |\n|---|---|---|---|\n| 2 9 | false | - | < |\n| -7 -7 | true | true | = |\n| 6 1 | true | false | > |",
+        "explanation": "Условие 2 проверяется только при истинном условии 1."
+      }
+    },
+    {
+      "key": "nest7-exam-4",
+      "title": "Функция на отрезках",
+      "type": "fill_blank",
+      "marks": 2,
+      "difficulty": "exam",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.7"
+      ],
+      "text": "$y = |x|$ при $x \\le 0$; $y = x^2 + x - 5$ при $0 < x \\le 1$; $y = -x^2 + 1$ в остальных случаях.\n\n- x = −4 → y = [[1]]\n- x = 3 → y = [[2]]",
+      "content": {
+        "blank_count": 2
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 174 (задание 5)",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "[[1]] 4; [[2]] -8 — по 1 баллу",
+        "accepted": {
+          "blanks": [
+            [
+              "4"
+            ],
+            [
+              "-8"
+            ]
+          ],
+          "ignore_spaces": true
+        },
+        "explanation": "−4 ≤ 0 → |−4| = 4; 3 > 1 → −9 + 1 = −8."
+      }
+    },
+    {
+      "key": "nest7-exam-5",
+      "title": "Программа: знак и четность",
+      "type": "code_completion",
+      "marks": 4,
+      "difficulty": "exam",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "7.4.3.7"
+      ],
+      "text": "Напиши программу на C++: пользователь вводит целое число, программа сообщает, положительное оно, отрицательное или ноль, а также четное оно или нечетное.\n\n```\nВведите число: 7\nЧисло положительное.\nОно нечетное.\n```",
+      "source": "nis_style",
+      "source_reference": "1_Влож условия.pptx, слайд 14",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "- Структура программы, ввод целого числа через cin (1)\n- Вложенное/каскадное условие для положительного, отрицательного и нуля (1)\n- Проверка четности через % 2 (1)\n- Верные сообщения во всех ветках, синтаксис if / else (1)",
+        "points": [
+          {
+            "criterion": "Структура программы, ввод целого числа через cin",
+            "marks": 1
+          },
+          {
+            "criterion": "Вложенное/каскадное условие для положительного, отрицательного и нуля",
+            "marks": 1
+          },
+          {
+            "criterion": "Проверка четности через % 2",
+            "marks": 1
+          },
+          {
+            "criterion": "Верные сообщения во всех ветках, синтаксис if / else",
+            "marks": 1
+          }
+        ],
+        "model_answer": "int n; cin >> n; if (n > 0) cout << \"Число положительное.\"; else if (n < 0) cout << \"Число отрицательное.\"; else cout << \"Число равно 0.\"; if (n % 2 == 0) cout << \"Оно четное.\"; else cout << \"Оно нечетное.\";"
+      }
+    },
+    {
+      "key": "nest7-exam-6",
+      "title": "Порядок условий",
+      "type": "code_analysis",
+      "marks": 2,
+      "difficulty": "exam",
+      "command_word": "explain",
+      "grading": "AI",
+      "objectives": [
+        "7.4.3.7"
+      ],
+      "text": "Ученик написал определение оценки:\n\n```cpp\nif (x >= 65) cout << \"4\";\nelse if (x >= 85) cout << \"5\";\nelse cout << \"3\";\n```\n\nЧто выведет программа при x = 90? Объясни ошибку и как ее исправить.",
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 166–167",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "- Выведет «4» (а должно «5») (1)\n- Условие x >= 85 проверяется только при ложном x >= 65, поэтому никогда не выполнится; нужно проверять x >= 85 первым или вложить его в ветку x >= 65 (1)",
+        "points": [
+          {
+            "criterion": "Выведет «4» (а должно «5»)",
+            "marks": 1
+          },
+          {
+            "criterion": "Условие x >= 85 проверяется только при ложном x >= 65, поэтому никогда не выполнится; нужно проверять x >= 85 первым или вложить его в ветку x >= 65",
+            "marks": 1
+          }
+        ],
+        "model_answer": "Выведет 4. Проверка x >= 85 стоит в ветке else условия x >= 65 и не выполнится; правильно: if (x >= 65) { if (x >= 85) cout << \"5\"; else cout << \"4\"; } else cout << \"3\";"
+      }
+    },
+    {
+      "key": "nest7-exam-7",
+      "title": "Программа: вид треугольника",
+      "type": "code_completion",
+      "marks": 4,
+      "difficulty": "exam",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "7.4.3.7"
+      ],
+      "text": "Напиши программу на C++: вводятся три стороны треугольника (целые числа). Если треугольник построить нельзя, вывести «Нельзя построить треугольник». Иначе вывести «Равносторонний», «Равнобедренный» или «Разносторонний».",
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 176 (задача 1); 1_Влож условия.pptx, слайд 16",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "- Ввод трех сторон через cin (1)\n- Проверка существования: a + b > c && a + c > b && b + c > a, ветка else с сообщением (1)\n- Вложенное условие: все равны → «Равносторонний» (1)\n- Две равны → «Равнобедренный», иначе «Разносторонний» (1)",
+        "points": [
+          {
+            "criterion": "Ввод трех сторон через cin",
+            "marks": 1
+          },
+          {
+            "criterion": "Проверка существования: a + b > c && a + c > b && b + c > a, ветка else с сообщением",
+            "marks": 1
+          },
+          {
+            "criterion": "Вложенное условие: все равны → «Равносторонний»",
+            "marks": 1
+          },
+          {
+            "criterion": "Две равны → «Равнобедренный», иначе «Разносторонний»",
+            "marks": 1
+          }
+        ],
+        "model_answer": "if (a+b>c && a+c>b && b+c>a) { if (a==b && b==c) cout << \"Равносторонний\"; else if (a==b || b==c || a==c) cout << \"Равнобедренный\"; else cout << \"Разносторонний\"; } else cout << \"Нельзя построить треугольник\";"
+      }
+    }
+  ],
+  "topic_exam": {
+    "duration": 25,
+    "title": "Вложенные условия — экзамен",
+    "instructions": "Ответьте на **все** вопросы. Программы пишите на C++. Количество баллов указано у каждого вопроса. Всего: 20 баллов. Время: 25 минут.",
+    "questions": [
+      "nest7-exam-1",
+      "nest7-exam-2",
+      "nest7-exam-3",
+      "nest7-exam-4",
+      "nest7-exam-5",
+      "nest7-exam-6",
+      "nest7-exam-7"
+    ]
+  }
+}

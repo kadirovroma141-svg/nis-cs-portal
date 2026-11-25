@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>10.2А · Урок 2 · Заголовки h1–h6, абзацы p, br, hr</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+</head>
+<body>
+<script src="../_engine/deck.js"></script>
+<script>
+const L2_INIT_POEM = `<p align="center">\n  У лукоморья дуб зелёный;<br>\n  Златая цепь на дубе том:<br>\n  И днём и ночью кот учёный<br>\n  Всё ходит по цепи кругом.\n</p>`;
+
+DECK_INITIALS = { poem: L2_INIT_POEM };
+DECK_PRESETS = {
+  poem: [
+    () => DECK.resetEditor("poem", "У лукоморья дуб зелёный;\nЗлатая цепь на дубе том:\nИ днём и ночью кот учёный\nВсё ходит по цепи кругом."),
+    () => DECK.resetEditor("poem", L2_INIT_POEM)
+  ]
+};
+
+initDeck({
+  badge: "</> 10.2А · Урок 2",
+  title: "Заголовки <h1>–<h6>, абзацы <p>, <br>, <hr> и их атрибуты",
+  subtitle: "10 класс · 2 четверть · Цели 10.1.2.4, 10.1.2.5 · 80 мин · Мини-HTML",
+  initialState: {
+    selected: { hLevel: 1, hAlign: "center", hrColor: "blue", hrSize: 4, hrWidth: "70%", hrAlign: "center" },
+    revealed: { hrNoshade: true }
+  },
+  slides: [
+    {
+      badge: "Этап 1 · Введение",
+      shortTitle: "Титул и цели урока",
+      timing: "0–2 мин",
+      source: "КСП 10.2А Урок 2 · SB 10 кл. стр. 74–76",
+      notes: "Поприветствуйте класс. Озвучьте цели 10.1.2.4 и 10.1.2.5 и критерии оценивания.",
+      render() {
+        return `
+          <div class="stack">
+            <div class="text-xs font-bold text-muted" style="text-transform:uppercase;">Информатика · 10 класс · Раздел 10.2А · Урок 2 из 10</div>
+            <h1 class="slide-h1">Заголовки <span class="mono">&lt;h1&gt;–&lt;h6&gt;</span>, абзацы <span class="mono">&lt;p&gt;</span>, <span class="mono">&lt;br&gt;</span> и <span class="mono">&lt;hr&gt;</span></h1>
+            <p class="lead">Научимся строить иерархию заголовков, разбивать текст на абзацы, переносить строки и настраивать горизонтальные разделительные линии.</p>
+            <div class="grid-2">
+              <div class="box-primary">
+                <div class="box-title mono">Цель 10.1.2.4</div>
+                <div class="text-xs">Использовать теги заголовков (<span class="mono">&lt;h1&gt;–&lt;h6&gt;</span>), абзацев (<span class="mono">&lt;p&gt;</span>), переноса строки (<span class="mono">&lt;br&gt;</span>) и горизонтальной линии (<span class="mono">&lt;hr&gt;</span>).</div>
+              </div>
+              <div class="box-accent">
+                <div class="box-title mono" style="color:var(--accent);">Цель 10.1.2.5</div>
+                <div class="text-xs">Настраивать выравнивание (<span class="mono">align</span>) и атрибуты линии <span class="mono">&lt;hr&gt;</span>: <span class="mono">color, size, width, align, noshade</span>.</div>
+              </div>
+            </div>
+            <div class="box text-xs">
+              <strong>Критерии успеха:</strong> различает 6 уровней заголовков · применяет <span class="mono">&lt;p align="justify"&gt;</span> и <span class="mono">&lt;br&gt;</span> · настраивает <span class="mono">&lt;hr&gt;</span> минимум с тремя атрибутами.
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 1 · Проблемная ситуация",
+      shortTitle: "Стартер «Куда пропали абзацы?»",
+      timing: "2–10 мин",
+      source: "КСП 10.2А · 1 ур 2 четв, слайды 9–10",
+      notes: "Нажмите кнопку «Без тегов (только Enter)» — покажите классу, что браузер схлопывает все переносы Enter в одну строку! Затем верните <p> и <br>.",
+      render(st, api) {
+        return `
+          <div>
+            <h2 class="slide-h2">Стартер: «Куда пропали абзацы и строки?»</h2>
+            <p class="lead">Переключите кнопки «Без тегов (Enter)» и «С тегами &lt;p&gt; и &lt;br&gt;» или отредактируйте код вручную!</p>
+          </div>
+          ${api.renderPlayground({
+            key: "poem",
+            initial: "У лукоморья дуб зелёный;\nЗлатая цепь на дубе том:\nИ днём и ночью кот учёный\nВсё ходит по цепи кругом.",
+            tabTitle: "problem_text.html",
+            presets: [
+              { label: "Без тегов (только Enter)" },
+              { label: "С тегами <p> и <br>" }
+            ]
+          })}
+          <div class="box-warning text-xs">
+            <strong>Вывод:</strong> браузер игнорирует лишние пробелы и клавишу <kbd>Enter</kbd> в исходном коде. Для абзаца нужен парный тег <span class="mono font-bold">&lt;p&gt;…&lt;/p&gt;</span>, а для переноса строки внутри абзаца — одиночный <span class="mono font-bold">&lt;br&gt;</span>.
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Интерактив",
+      shortTitle: "Иерархия заголовков <h1>–<h6> и align",
+      timing: "10–18 мин",
+      source: "SB 10 кл. стр. 74–75",
+      notes: "Переключайте уровни h1–h6 и значения align (left, center, right, justify). Подчеркните: <h1> — самый крупный, <h6> — самый мелкий.",
+      render(st) {
+        const lvl = st.selected.hLevel || 1;
+        const al = st.selected.hAlign || "center";
+        const sizes = { 1: 30, 2: 24, 3: 20, 4: 16, 5: 14, 6: 12 };
+        return `
+          <h2 class="slide-h2">Заголовки <span class="mono">&lt;h1&gt;…&lt;h6&gt;</span> и выравнивание <span class="mono">align</span></h2>
+          <div class="grid-12">
+            <div class="col-5 box stack text-xs">
+              <div><strong>Выберите уровень заголовка:</strong></div>
+              <div class="flex-row">
+                ${[1,2,3,4,5,6].map(n => `<button type="button" class="btn mono ${lvl === n ? "btn-primary" : ""}" onclick="DECK.setSelected('hLevel',${n})">&lt;h${n}&gt;</button>`).join("")}
+              </div>
+              <div><strong>Атрибут <span class="mono">align</span>:</strong></div>
+              <div class="flex-row">
+                ${["left","center","right","justify"].map(a => `<button type="button" class="btn mono ${al === a ? "btn-primary" : ""}" onclick="DECK.setSelected('hAlign','${a}')">${a}</button>`).join("")}
+              </div>
+              <pre class="code-block">${DECK.esc(`<h${lvl} align="${al}">Достопримечательности Казахстана</h${lvl}>\n<p align="${al}">Казахстан славится природой и историей.</p>`)}</pre>
+            </div>
+            <div class="col-7 browser-frame">
+              <div class="browser-bar"><span class="browser-tab">🌐 headings.html</span><span class="text-xs text-muted" style="margin-left:auto;">Размер: ${sizes[lvl]}px</span></div>
+              <div style="padding:24px;background:#fff;color:#111;text-align:${al};">
+                <div style="font-size:${sizes[lvl]}px;font-weight:700;margin-bottom:10px;">Достопримечательности Казахстана</div>
+                <p style="margin:0;font-size:14px;line-height:1.55;">Казахстан славится уникальной природой — от Чарынского каньона и Бурабая до горных вершин Заилийского Алатау и древних памятников Туркестана.</p>
+              </div>
+            </div>
+          </div>
+          <div class="grid-2 text-xs">
+            <div class="box-primary"><strong>&lt;p&gt;…&lt;/p&gt;</strong> — создаёт новый абзац с отступом сверху и снизу.</div>
+            <div class="box-accent"><strong>&lt;br&gt;</strong> (непарный) — переносит строку <em>внутри</em> абзаца без лишнего интервала (стихи, адреса).</div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Конструктор <hr>",
+      shortTitle: "Горизонтальная линия <hr> и её атрибуты",
+      timing: "18–28 мин",
+      source: "SB 10 кл. стр. 75–76 · 1 ур 2 четв, слайды 11–12",
+      notes: "Покрутите параметры линии <hr> (цвет, толщина size, ширина width, align, noshade) — ученики сразу увидят результат и готовый тег.",
+      render(st) {
+        const col = st.selected.hrColor || "blue";
+        const sz = st.selected.hrSize || 4;
+        const wd = st.selected.hrWidth || "70%";
+        const al = st.selected.hrAlign || "center";
+        const ns = !!st.revealed.hrNoshade;
+        const tag = `<hr align="${al}" color="${col}" size="${sz}" width="${wd}"${ns ? " noshade" : ""}>`;
+        const marginCss = al === "left" ? "0 auto 0 0" : al === "right" ? "0 0 0 auto" : "0 auto";
+        return `
+          <h2 class="slide-h2">Одиночный тег <span class="mono">&lt;hr&gt;</span> (Horizontal Rule)</h2>
+          <div class="grid-12">
+            <div class="col-6 box stack text-xs">
+              <div><strong>color (цвет):</strong></div>
+              <div class="flex-row">${["red","blue","green","#0066CC","orange"].map(c => `<button type="button" class="btn mono ${col === c ? "btn-primary" : ""}" onclick="DECK.setSelected('hrColor','${c}')">${c}</button>`).join("")}</div>
+              <div><strong>size (толщина в px):</strong></div>
+              <div class="flex-row">${[1,3,5,8,12].map(s => `<button type="button" class="btn mono ${sz === s ? "btn-primary" : ""}" onclick="DECK.setSelected('hrSize',${s})">${s}px</button>`).join("")}</div>
+              <div><strong>width (ширина):</strong></div>
+              <div class="flex-row">${["30%","50%","70%","100%"].map(w => `<button type="button" class="btn mono ${wd === w ? "btn-primary" : ""}" onclick="DECK.setSelected('hrWidth','${w}')">${w}</button>`).join("")}</div>
+              <div><strong>align и noshade:</strong></div>
+              <div class="flex-row">
+                ${["left","center","right"].map(a => `<button type="button" class="btn mono ${al === a ? "btn-primary" : ""}" onclick="DECK.setSelected('hrAlign','${a}')">${a}</button>`).join("")}
+                <button type="button" class="btn ${ns ? "btn-accent" : ""}" onclick="DECK.toggleReveal('hrNoshade')">noshade: ${ns ? "ВКЛ" : "ВЫКЛ"}</button>
+              </div>
+            </div>
+            <div class="col-6 stack">
+              <pre class="code-block">${DECK.esc(tag)}</pre>
+              <div class="browser-frame">
+                <div class="browser-bar"><span class="text-xs text-muted">Предпросмотр линии &lt;hr&gt;</span></div>
+                <div style="padding:28px 18px;background:#fff;color:#111;">
+                  <div style="font-weight:700;margin-bottom:14px;">Раздел 1: Введение</div>
+                  <div style="width:${wd};height:${sz}px;background:${col};margin:${marginCss};${ns ? "" : "box-shadow:inset 0 1px 2px rgba(0,0,0,0.45);border:1px solid #999;"}"></div>
+                  <div style="margin-top:14px;font-size:13px;">Раздел 2: Основная часть статьи</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Мини-HTML №1 · Практика",
+      pillClass: "pill-accent",
+      shortTitle: "Мини-HTML: Абзацы и выравнивание",
+      timing: "28–48 мин",
+      source: "Мини-HTML (/html?task=g10-html-abzatsy)",
+      notes: "Практическая работа в живом Мини-HTML: настройка абзацев, выравнивания и отступов.",
+      render(st, api) {
+        return api.renderMiniHtmlTask({
+          taskId: "g10-html-abzatsy",
+          title: "Практика 1: Абзацы — выравнивание, отступ, интервал",
+          summary: "Оформите абзацы на странице прямо в Мини-HTML и проверьте по критериям.",
+          steps: ["Теги <p> и заголовки", "Выравнивание align / CSS", "Проверка автотестом"],
+          meta: "10 мин · Цели 10.1.2.4, 10.1.2.5"
+        });
+      }
+    },
+    {
+      badge: "Мини-HTML №2 · Практика",
+      pillClass: "pill-accent",
+      shortTitle: "Мини-HTML: Атрибуты линии <hr>",
+      timing: "48–66 мин",
+      source: "Мини-HTML (/html?task=g10-html-pr-atributy-hr)",
+      notes: "Задание на анализ и изменение атрибутов <hr>: определить толщину, ширину, noshade и перекрасить линию в синий шириной 50%.",
+      render(st, api) {
+        return api.renderMiniHtmlTask({
+          taskId: "g10-html-pr-atributy-hr",
+          title: "Практика 2: Атрибуты горизонтальной линии <hr>",
+          summary: "Определите атрибуты линии в коде, заполните поля ответов и измените цвет на blue и ширину на 50%.",
+          steps: ["Найти атрибут толщины (size)", "Значение ширины (70%)", "Атрибут без значения (noshade)", "Сделать blue и 50%"],
+          meta: "8 мин · Цели 10.1.2.4, 10.1.2.5"
+        });
+      }
+    },
+    {
+      badge: "Этап 3 · Упражнение и ДЗ",
+      shortTitle: "«Собери тег по описанию» и ДЗ",
+      timing: "66–80 мин",
+      source: "КСП 10.2А Урок 2 · Мини-HTML (g10-html-dz-statya)",
+      notes: "Прочитайте описание, пусть ученики назовут тег, затем нажмите на карточку для проверки. Выдайте ДЗ g10-html-dz-statya.",
+      render(st) {
+        const cards = [
+          { k: "c1", q: "Горизонтальная синяя линия толщиной 4 px, шириной в половину экрана, без тени", a: '<hr color="blue" size="4" width="50%" noshade>' },
+          { k: "c2", q: "Главный заголовок страницы «Казахстан» по центру", a: '<h1 align="center">Казахстан</h1>' },
+          { k: "c3", q: "Абзац с выравниванием по ширине и переносом строки внутри", a: '<p align="justify">Строка 1<br>Строка 2</p>' }
+        ];
+        return `
+          <h2 class="slide-h2">Упражнение «Собери тег по описанию» и ДЗ</h2>
+          <div class="stack">
+            ${cards.map((c, i) => `
+              <button type="button" class="interactive-card ${st.revealed[c.k] ? "revealed" : ""}" onclick="DECK.toggleReveal('${c.k}')">
+                <div class="font-bold text-sm" style="margin-bottom:4px;">${i + 1}. ${c.q}</div>
+                <div class="mono text-xs">${st.revealed[c.k] ? "✓ " + DECK.esc(c.a) : "Показать ответ →"}</div>
+              </button>
+            `).join("")}
+          </div>
+          <div class="box-primary flex-between text-xs">
+            <div><strong>Домашнее задание:</strong> сверстать статью о любимой книге с <span class="mono">&lt;h1&gt;–&lt;h3&gt;, &lt;p&gt;, &lt;br&gt;, &lt;hr&gt;</span>.</div>
+            <a class="btn btn-accent" href="/html?task=g10-html-dz-statya" target="_blank" rel="noopener noreferrer">ДЗ в Мини-HTML (g10-html-dz-statya) ↗</a>
+          </div>
+        `;
+      }
+    }
+  ]
+});
+</script>
+</body>
+</html>

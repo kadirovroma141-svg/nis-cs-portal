@@ -1,0 +1,1292 @@
+{
+  "topic": "g7-tipy-dannykh-summativnoe-otsenivanie-po-razdelu-7-3a",
+  "summary": "Арифметические операции в C++ (+, −, *, /, %), целочисленное и вещественное деление, функции floor, ceil и число M_PI из cmath, запись формул и программирование линейных алгоритмов.",
+  "theory": [
+    {
+      "title": "Арифметические операции",
+      "objectives": [
+        "7.4.3.4"
+      ],
+      "blocks": [
+        {
+          "type": "definition",
+          "term": "Операторы",
+          "content": "Используются для выполнения операций над переменными и значениями."
+        },
+        {
+          "type": "comparison",
+          "title": "Арифметические операции C++",
+          "columns": [
+            "Операция",
+            "Название",
+            "Пример"
+          ],
+          "rows": [
+            [
+              "`+`",
+              "Сложение",
+              "`cout << a + b;`"
+            ],
+            [
+              "`-`",
+              "Вычитание",
+              "`cout << a - b;`"
+            ],
+            [
+              "`*`",
+              "Умножение",
+              "`cout << a * b;`"
+            ],
+            [
+              "`/`",
+              "Деление",
+              "`c = a / b;`"
+            ],
+            [
+              "`%`",
+              "Остаток от деления",
+              "`17 % 7 = 3`, `14 % 7 = 0`, `7 % 17 = 7`"
+            ]
+          ]
+        },
+        {
+          "type": "comparison",
+          "title": "Деление: результат зависит от типов",
+          "columns": [
+            "Переменные",
+            "Пример (a = 6, b = 4)",
+            "Результат"
+          ],
+          "rows": [
+            [
+              "`int a, b; double c; c = a / b;`",
+              "6 / 4",
+              "`c = 1` — целое число (дробная часть отбрасывается)"
+            ],
+            [
+              "`double a, b; double c; c = a / b;`",
+              "6 / 4",
+              "`c = 1.5` — вещественное число"
+            ]
+          ]
+        },
+        {
+          "type": "example",
+          "title": "Целая часть и остаток",
+          "content": "`17 / 7 = 2` (целая часть числа, если оба числа `int`), `17 % 7 = 3` (остаток от деления).\n\n```cpp\nint x, y;\ncin >> x >> y;\ncout << \"целое = \" << x / y << endl;\ncout << \"остаток = \" << x % y << endl;\n```\n\nВвод 19 и 5 → `целое = 3`, `остаток = 4`."
+        },
+        {
+          "type": "warning",
+          "content": "Не путай остаток от деления с дробной частью числа: `17 % 7 = 3`, а не 0,43."
+        },
+        {
+          "type": "comparison",
+          "title": "Сокращенная запись операторов",
+          "columns": [
+            "Первый вариант",
+            "Второй вариант"
+          ],
+          "rows": [
+            [
+              "`i++`",
+              "`i = i + 1`"
+            ],
+            [
+              "`i += 3`",
+              "`i = i + 3`"
+            ],
+            [
+              "`i -= 3`",
+              "`i = i - 3`"
+            ],
+            [
+              "`i *= 3`",
+              "`i = i * 3`"
+            ],
+            [
+              "`i /= 3`",
+              "`i = i / 3`"
+            ],
+            [
+              "`i %= 3`",
+              "`i = i % 3`"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Как меняются значения переменных",
+      "objectives": [
+        "7.4.3.4"
+      ],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "content": "Даны переменные `int a = 12; int b = 5; double c = 4;`. Выполним строки по порядку и проследим значения (пустая клетка — значение не изменилось)."
+        },
+        {
+          "type": "comparison",
+          "title": "Трассировка",
+          "columns": [
+            "Строка",
+            "int a",
+            "int b",
+            "double c"
+          ],
+          "rows": [
+            [
+              "начальные значения",
+              "12",
+              "5",
+              "4"
+            ],
+            [
+              "`c = a + b;`",
+              "",
+              "",
+              "17"
+            ],
+            [
+              "`c = a / b;`",
+              "",
+              "",
+              "2"
+            ],
+            [
+              "`b = a * b + 3;`",
+              "",
+              "63",
+              ""
+            ],
+            [
+              "`a = b / a;`",
+              "5",
+              "",
+              ""
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": "Почему в строке `c = a / b;` получилось 2, а не 2.4? Переменные `a` и `b` — целые (`int`), поэтому деление целочисленное, хотя `c` имеет тип `double`. В строке `a = b / a;`: 63 / 12 = 5 (целая часть)."
+        },
+        {
+          "type": "exam_tip",
+          "content": "Сложить целое и вещественное число можно, а целое и строку (`string`) — нельзя: строка `d = c + b;` для `string d` — ошибка (учебник, стр. 133)."
+        }
+      ]
+    },
+    {
+      "title": "Библиотека cmath: округление и число π",
+      "objectives": [
+        "7.4.3.4"
+      ],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "content": "Для округления числа и использования числа π в начале программы подключают `#include <cmath>`."
+        },
+        {
+          "type": "comparison",
+          "title": "Функции и константы cmath",
+          "columns": [
+            "Запись",
+            "Назначение",
+            "Пример"
+          ],
+          "rows": [
+            [
+              "`floor`",
+              "Округляет до ближайшего наименьшего целого",
+              "`floor(13.4) = 13`"
+            ],
+            [
+              "`ceil`",
+              "Округляет до ближайшего наибольшего целого",
+              "`ceil(13.5) = 14`"
+            ],
+            [
+              "`M_PI`",
+              "Число π (Пи)",
+              "`C = M_PI * d`"
+            ]
+          ]
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "#include <iostream>\n#include <cmath>\nusing namespace std;\nint main()\n{ double a; int b, c, s, k;\na = 21.6;\nb = floor(a);\ncout << b << endl;\nc = ceil(a);\ncout << c << endl;\ncout << \"Enter an integer:\";\ncin >> s;\nk = s % 3;\ncout << k << endl; }",
+          "caption": "Результат: 21, 22; при вводе 7 → 1"
+        },
+        {
+          "type": "comparison",
+          "title": "Длина окружности C = π·d: какой вариант точнее?",
+          "columns": [
+            "1-й вариант",
+            "2-й вариант"
+          ],
+          "rows": [
+            [
+              "`pi = 3.14;` … `c = d * pi;`",
+              "`#include <cmath>` … `c = d * M_PI;`"
+            ],
+            [
+              "d = 5 → c = 15.7",
+              "d = 5 → c = 15.708"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": "Второй вариант точнее: у `M_PI` больше знаков после запятой, чем у `pi = 3.14`."
+        }
+      ]
+    },
+    {
+      "title": "Запись формул на языке C++",
+      "objectives": [
+        "7.4.3.4"
+      ],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "content": "Математическую формулу записывают в одну строку: знак умножения `*` не пропускают, деление — `/`, порядок действий задают скобками."
+        },
+        {
+          "type": "comparison",
+          "title": "Формула → C++",
+          "columns": [
+            "Формула",
+            "Запись на C++"
+          ],
+          "rows": [
+            [
+              "$P = 2\\times(l + w)$",
+              "`P = 2 * (l + w);`"
+            ],
+            [
+              "$S = \\pi r^2$",
+              "`S = M_PI * r * r;`"
+            ],
+            [
+              "$C = \\pi d$",
+              "`C = M_PI * d;`"
+            ],
+            [
+              "$F = C\\times\\frac{9}{5} + 32$",
+              "`F = C * 9 / 5 + 32;` (C — float)"
+            ],
+            [
+              "$PROC = \\frac{x\\cdot50}{20} + \\frac{y\\cdot50}{30}$",
+              "`proc = (x * 50) / 20 + (y * 50) / 30;`"
+            ],
+            [
+              "среднее трех чисел",
+              "`itog = (a + b + c) / 3;`"
+            ]
+          ]
+        },
+        {
+          "type": "warning",
+          "content": "Без скобок `a + b + c / 3` делится на 3 только `c`. Для среднего нужно `(a + b + c) / 3`."
+        }
+      ]
+    },
+    {
+      "title": "Программирование линейных алгоритмов",
+      "objectives": [
+        "7.4.3.5"
+      ],
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "Как решить задачу",
+          "items": [
+            "прочитать условие и определить, что вводится и что нужно вывести;",
+            "построить блок-схему (ввод → вычисления → вывод);",
+            "выбрать имена и типы переменных;",
+            "записать ввод (`cout` с подсказкой и `cin`);",
+            "записать вычисления по формуле;",
+            "вывести результат с пояснением (`cout`)."
+          ]
+        },
+        {
+          "type": "example",
+          "title": "Перевод часов в минуты и секунды",
+          "content": "```cpp\n#include <iostream>\nusing namespace std;\nint main()\n{\n  int h, min, sec;\n  cout << \"Enter the number of hours: \" << endl;\n  cin >> h;\n  min = h * 60;\n  sec = min * 60;\n  cout << h << \" hours = \" << min << \" minutes = \" << sec << \" seconds\";\n  return 0;\n}\n```\n\nВвод 2 → `2 hours = 120 minutes = 7200 seconds`."
+        },
+        {
+          "type": "diagram",
+          "format": "mermaid",
+          "content": "flowchart TD\n    A([\"Начало\"]) --> B[/\"Ввод h\"/]\n    B --> C[\"min = h * 60\"]\n    C --> D[\"sec = min * 60\"]\n    D --> E[/\"Вывод h, min, sec\"/]\n    E --> F([\"Конец\"])",
+          "caption": "Блок-схема перевода часов в минуты и секунды"
+        },
+        {
+          "type": "example",
+          "title": "Размер скидки",
+          "content": "```cpp\nfloat price, percentage, discount;\ncout << \"Entering the price of the product: \" << endl;\ncin >> price;\ncout << \"Entering a discount percentage: \" << endl;\ncin >> percentage;\ndiscount = price * (percentage / 100);\ncout << \"Display discount: \" << discount << \"\\n\";\n```\n\nЦена 2000, скидка 10 % → `Display discount: 200`."
+        },
+        {
+          "type": "example",
+          "title": "Процент за четверть",
+          "content": "Баллы СОР `x` (максимум 20) и СОЧ `y` (максимум 30): `proc = (x * 5) / 2 + (y * 5) / 3;` (это то же, что `(x*50)/20 + (y*50)/30`). Ввод 15 и 25 → `proc = 79.1667`."
+        },
+        {
+          "type": "example",
+          "title": "Возраст по году рождения",
+          "content": "```cpp\nint x, y;\ncout << \"Введи год твоего рождения\" << endl;\ncin >> x;\ny = 2025 - x;\ncout << \"Тебе \" << y << \" лет\" << endl;\n```\n\nВвод 2014 → `Тебе 11 лет`."
+        },
+        {
+          "type": "exam_tip",
+          "content": "Тип переменных выбирай по задаче: нужен точный результат со знаками после запятой — `float`/`double`; деньги в тенге без тиын или количество предметов — `int`. Если результат нужно округлить вверх (например, количество шагов), используй `ceil`."
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "key": "ar7-ops",
+      "title": "Операции",
+      "type": "matching",
+      "marks": 4,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.4"
+      ],
+      "text": "Сопоставь знак операции C++ и ее название.",
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "`*`"
+          },
+          {
+            "key": "L2",
+            "text": "`/`"
+          },
+          {
+            "key": "L3",
+            "text": "`%`"
+          },
+          {
+            "key": "L4",
+            "text": "`-`"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "Остаток от деления"
+          },
+          {
+            "key": "R2",
+            "text": "Вычитание"
+          },
+          {
+            "key": "R3",
+            "text": "Умножение"
+          },
+          {
+            "key": "R4",
+            "text": "Деление"
+          }
+        ]
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 132; 3 ур Типы данных.pptx, слайды 9–11",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "L1–R3; L2–R4; L3–R1; L4–R2. Всего 4 б.",
+        "accepted": {
+          "pairs": {
+            "L1": "R3",
+            "L2": "R4",
+            "L3": "R1",
+            "L4": "R2"
+          }
+        },
+        "explanation": "* — умножение, / — деление, % — остаток, - — вычитание."
+      }
+    },
+    {
+      "key": "ar7-mod",
+      "title": "Остаток от деления",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "calculate",
+      "grading": "HYBRID",
+      "objectives": [
+        "7.4.3.4"
+      ],
+      "text": "Чему равно значение выражения `23 % 6`?",
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 132; 3 ур Типы данных.pptx, слайды 9–11",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "5 — 1 балл.",
+        "accepted": {
+          "values": [
+            "5"
+          ],
+          "numeric": true,
+          "tolerance": 0.001
+        },
+        "model_answer": "5",
+        "explanation": "23 = 6·3 + 5, остаток 5."
+      }
+    },
+    {
+      "key": "ar7-intdiv",
+      "title": "Целочисленное деление",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "calculate",
+      "grading": "HYBRID",
+      "objectives": [
+        "7.4.3.4"
+      ],
+      "text": "`int a = 23, b = 6; double c; c = a / b;` Чему равно `c`?",
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 132–133; G7_Информатика_THB_Финал_26.10.23 1.pdf, стр. 97",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "3 — 1 балл.",
+        "accepted": {
+          "values": [
+            "3"
+          ],
+          "numeric": true,
+          "tolerance": 0.001
+        },
+        "model_answer": "3",
+        "explanation": "a и b — int, деление целочисленное: 23 / 6 = 3 (дробная часть отбрасывается), хотя c — double."
+      }
+    },
+    {
+      "key": "ar7-realdiv",
+      "title": "Вещественное деление",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "calculate",
+      "grading": "HYBRID",
+      "objectives": [
+        "7.4.3.4"
+      ],
+      "text": "`double a = 9, b = 4; double c; c = a / b;` Чему равно `c`?",
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 132",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "2.25 — 1 балл.",
+        "accepted": {
+          "values": [
+            "2.25"
+          ],
+          "numeric": true,
+          "tolerance": 0.001
+        },
+        "model_answer": "2.25",
+        "explanation": "Оба операнда double — результат вещественный: 9 / 4 = 2.25."
+      }
+    },
+    {
+      "key": "ar7-floorceil",
+      "title": "floor и ceil",
+      "type": "fill_blank",
+      "marks": 2,
+      "difficulty": "easy",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.4"
+      ],
+      "text": "`floor(8.7)` = [[1]], `ceil(8.2)` = [[2]]",
+      "content": {
+        "blank_count": 2
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 132–133; 3 ур Типы данных.pptx, слайды 12–13; G7_Информатика_THB_Финал_26.10.23 1.pdf, стр. 97",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "[[1]] 8; [[2]] 9 — по 1 баллу",
+        "accepted": {
+          "blanks": [
+            [
+              "8"
+            ],
+            [
+              "9"
+            ]
+          ]
+        },
+        "explanation": "floor — до ближайшего наименьшего целого, ceil — до ближайшего наибольшего."
+      }
+    },
+    {
+      "key": "ar7-cmath",
+      "title": "Зачем cmath",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.4"
+      ],
+      "text": "В какой программе обязательно нужно подключить `#include <cmath>`?",
+      "options": [
+        {
+          "key": "A",
+          "content": "Программа выводит текст «Привет!»"
+        },
+        {
+          "key": "B",
+          "content": "Программа вычисляет площадь круга с помощью M_PI"
+        },
+        {
+          "key": "C",
+          "content": "Программа складывает два целых числа"
+        },
+        {
+          "key": "D",
+          "content": "Программа спрашивает имя пользователя"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 132–133; 3 ур Типы данных.pptx, слайды 12–13; G7_Информатика_THB_Финал_26.10.23 1.pdf, стр. 97",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "model_answer": "B",
+        "explanation": "cmath нужна для округления (floor, ceil) и числа π (M_PI)."
+      }
+    },
+    {
+      "key": "ar7-formula",
+      "title": "Формула → код",
+      "type": "matching",
+      "marks": 3,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.4"
+      ],
+      "text": "Сопоставь формулу и ее запись на C++.",
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "$P = 2(a + b)$"
+          },
+          {
+            "key": "L2",
+            "text": "$S = \\pi r^2$"
+          },
+          {
+            "key": "L3",
+            "text": "среднее трех чисел a, b, c"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "`(a + b + c) / 3`"
+          },
+          {
+            "key": "R2",
+            "text": "`2 * (a + b)`"
+          },
+          {
+            "key": "R3",
+            "text": "`M_PI * r * r`"
+          },
+          {
+            "key": "R4",
+            "text": "`a + b + c / 3`"
+          }
+        ]
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 132; 4 ур Повтор 7_3А.pptx, слайды 2, 12; G7_Информатика_THB_Финал_26.10.23 1.pdf, стр. 98",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "L1–R2; L2–R3; L3–R1. Всего 3 б.",
+        "accepted": {
+          "pairs": {
+            "L1": "R2",
+            "L2": "R3",
+            "L3": "R1"
+          }
+        },
+        "explanation": "Знак * не пропускают; для среднего нужны скобки."
+      }
+    },
+    {
+      "key": "ar7-trace",
+      "title": "Трассировка",
+      "type": "trace_table",
+      "marks": 4,
+      "difficulty": "medium",
+      "command_word": "complete",
+      "grading": "HYBRID",
+      "objectives": [
+        "7.4.3.4"
+      ],
+      "text": "Выполни строки по порядку и запиши значения переменных **после** каждой строки.\n\n```cpp\nint a = 10; int b = 4; double c = 3;\nc = a + b;\nc = a / b;\nb = a * b - 5;\na = b / a;\n```",
+      "content": {
+        "columns": [
+          "Строка",
+          "a",
+          "b",
+          "c"
+        ],
+        "rows": 4,
+        "prefill": [
+          [
+            "c = a + b;",
+            null,
+            null,
+            null
+          ],
+          [
+            "c = a / b;",
+            null,
+            null,
+            null
+          ],
+          [
+            "b = a * b - 5;",
+            null,
+            null,
+            null
+          ],
+          [
+            "a = b / a;",
+            null,
+            null,
+            null
+          ]
+        ]
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 132–133 (задание 1); 3 ур Типы данных.pptx, слайд 10; G7_Информатика_THB_Финал_26.10.23 1.pdf, стр. 96–97",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "c = 14; c = 2; b = 35; a = 3 — по 1 баллу",
+        "points": [
+          {
+            "criterion": "c = a + b → 14",
+            "marks": 1
+          },
+          {
+            "criterion": "c = a / b → 2 (целочисленное деление)",
+            "marks": 1
+          },
+          {
+            "criterion": "b → 35",
+            "marks": 1
+          },
+          {
+            "criterion": "a → 3",
+            "marks": 1
+          }
+        ],
+        "accepted": {
+          "rows": [
+            [
+              null,
+              "10",
+              "4",
+              "14"
+            ],
+            [
+              null,
+              "10",
+              "4",
+              "2"
+            ],
+            [
+              null,
+              "10",
+              "35",
+              "2"
+            ],
+            [
+              null,
+              "3",
+              "35",
+              "2"
+            ]
+          ]
+        },
+        "explanation": "10 / 4 у целых чисел = 2; b = 10·4 − 5 = 35; a = 35 / 10 = 3."
+      }
+    },
+    {
+      "key": "ar7-floor-prog",
+      "title": "Результат с floor",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "calculate",
+      "grading": "HYBRID",
+      "objectives": [
+        "7.4.3.4"
+      ],
+      "text": "```cpp\ndouble a; int b;\na = 15.9;\nb = floor(a);\ncout << b;\n```\nЧто выведет программа?",
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 132–133; 3 ур Типы данных.pptx, слайды 12–13; G7_Информатика_THB_Финал_26.10.23 1.pdf, стр. 97",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "15 — 1 балл.",
+        "accepted": {
+          "values": [
+            "15"
+          ],
+          "numeric": true,
+          "tolerance": 0.001
+        },
+        "model_answer": "15",
+        "explanation": "floor округляет до ближайшего наименьшего целого."
+      }
+    },
+    {
+      "key": "ar7-pi",
+      "title": "Более точный результат",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.4"
+      ],
+      "text": "Длину окружности вычисляют двумя способами: `c = d * 3.14;` и `c = d * M_PI;`. Какой результат точнее и почему?",
+      "options": [
+        {
+          "key": "A",
+          "content": "Первый: 3.14 — точное значение π"
+        },
+        {
+          "key": "B",
+          "content": "Второй: у M_PI больше знаков после запятой"
+        },
+        {
+          "key": "C",
+          "content": "Результаты всегда одинаковые"
+        },
+        {
+          "key": "D",
+          "content": "Первый: в нем нет cmath"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 132–133; 3 ур Типы данных.pptx, слайды 12–13; G7_Информатика_THB_Финал_26.10.23 1.pdf, стр. 97",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "model_answer": "B",
+        "explanation": "M_PI имеет больше знаков после запятой, чем 3.14."
+      }
+    },
+    {
+      "key": "ar7-minutes",
+      "title": "Минуты в часы и минуты",
+      "type": "code_completion",
+      "marks": 4,
+      "difficulty": "medium",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "7.4.3.4",
+        "7.4.3.5"
+      ],
+      "text": "Напиши программу: пользователь вводит количество минут (целое число), программа выводит, сколько это часов и минут. Например, 135 минут → `2 ч 15 мин`.",
+      "content": {
+        "starter_code": "#include <iostream>\nusing namespace std;\nint main()\n{\n\n}",
+        "answer_lines": 12
+      },
+      "source": "nis_style",
+      "source_reference": "4 ур Повтор 7_3А.pptx, слайды 2, 9, 12",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "- Правильная структура программы, переменные типа int (1)\n- Ввод количества минут с подсказкой (1)\n- Часы: целочисленное деление на 60 (m / 60) (1)\n- Минуты: остаток m % 60 и вывод результата с пояснением (1)",
+        "points": [
+          {
+            "criterion": "Правильная структура программы, переменные типа int",
+            "marks": 1
+          },
+          {
+            "criterion": "Ввод количества минут с подсказкой",
+            "marks": 1
+          },
+          {
+            "criterion": "Часы: целочисленное деление на 60 (m / 60)",
+            "marks": 1
+          },
+          {
+            "criterion": "Минуты: остаток m % 60 и вывод результата с пояснением",
+            "marks": 1
+          }
+        ],
+        "model_answer": "```cpp\n#include <iostream>\nusing namespace std;\nint main()\n{\nint m, h, mm;\ncout << \"Введи количество минут: \";\ncin >> m;\nh = m / 60;\nmm = m % 60;\ncout << h << \" ч \" << mm << \" мин\" << endl;\nreturn 0;\n}\n```"
+      }
+    },
+    {
+      "key": "ar7-perimeter",
+      "title": "Периметр прямоугольника",
+      "type": "code_completion",
+      "marks": 4,
+      "difficulty": "medium",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "7.4.3.4",
+        "7.4.3.5"
+      ],
+      "text": "Напиши программу, которая вводит длину `l` и ширину `w` прямоугольника (дробные числа) и выводит периметр `P = 2 × (l + w)`.",
+      "content": {
+        "starter_code": "#include <iostream>\nusing namespace std;\nint main()\n{\n\n}",
+        "answer_lines": 12
+      },
+      "source": "nis_style",
+      "source_reference": "4 ур Повтор 7_3А.pptx, слайды 2, 12",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "- Структура программы и тип float/double (1)\n- Ввод l и w с подсказками (1)\n- Формула P = 2 * (l + w) со скобками (1)\n- Вывод P с пояснением (1)",
+        "points": [
+          {
+            "criterion": "Структура программы и тип float/double",
+            "marks": 1
+          },
+          {
+            "criterion": "Ввод l и w с подсказками",
+            "marks": 1
+          },
+          {
+            "criterion": "Формула P = 2 * (l + w) со скобками",
+            "marks": 1
+          },
+          {
+            "criterion": "Вывод P с пояснением",
+            "marks": 1
+          }
+        ],
+        "model_answer": "```cpp\n#include <iostream>\nusing namespace std;\nint main()\n{\nfloat l, w, P;\ncout << \"Длина: \";\ncin >> l;\ncout << \"Ширина: \";\ncin >> w;\nP = 2 * (l + w);\ncout << \"P = \" << P << endl;\nreturn 0;\n}\n```"
+      }
+    },
+    {
+      "key": "ar7-discount",
+      "title": "Стоимость со скидкой",
+      "type": "calculation",
+      "marks": 2,
+      "difficulty": "medium",
+      "command_word": "calculate",
+      "grading": "HYBRID",
+      "objectives": [
+        "7.4.3.5"
+      ],
+      "text": "```cpp\nint a, itog;\ncout << \"Сколько стоит покупка?\";\ncin >> a;\nitog = a - a * 5 / 100;\ncout << \"Всего: \" << itog;\n```\nПользователь ввел 820. Что будет выведено после «Всего: »?",
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 134 (задача 1); G7_Информатика_THB_Финал_26.10.23 1.pdf, стр. 98",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "779 — 2 балла; 779.0 без учета целочисленного деления тоже засчитывается.",
+        "accepted": {
+          "values": [
+            "779"
+          ],
+          "numeric": true,
+          "tolerance": 0.001
+        },
+        "model_answer": "779",
+        "explanation": "820·5 = 4100; 4100 / 100 = 41 (целое); 820 − 41 = 779."
+      }
+    },
+    {
+      "key": "ar7-blocks-code",
+      "title": "Код по блок-схеме",
+      "type": "code_completion",
+      "marks": 4,
+      "difficulty": "hard",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "7.4.3.4",
+        "7.4.3.5"
+      ],
+      "text": "Напиши программу по блок-схеме:\n\nНачало → Вывод «Сколько стоит проезд в автобусе?» → Ввод a → Вывод «Сколько поездок в месяц?» → Ввод b → `itog = a * b` → Вывод «Всего за месяц: » и itog → Конец",
+      "content": {
+        "starter_code": "#include <iostream>\nusing namespace std;\nint main()\n{\n\n}",
+        "answer_lines": 12
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 134 (задача 2); 3 ур Типы данных.pptx, слайд 14; G7_Информатика_THB_Финал_26.10.23 1.pdf, стр. 98",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "- Структура программы и объявление переменных подходящего типа (int) (1)\n- Два вопроса через cout и ввод a, b через cin в порядке блок-схемы (1)\n- itog = a * b (1)\n- Вывод текста и itog (1)",
+        "points": [
+          {
+            "criterion": "Структура программы и объявление переменных подходящего типа (int)",
+            "marks": 1
+          },
+          {
+            "criterion": "Два вопроса через cout и ввод a, b через cin в порядке блок-схемы",
+            "marks": 1
+          },
+          {
+            "criterion": "itog = a * b",
+            "marks": 1
+          },
+          {
+            "criterion": "Вывод текста и itog",
+            "marks": 1
+          }
+        ],
+        "model_answer": "```cpp\n#include <iostream>\nusing namespace std;\nint main()\n{\nint a, b, itog;\ncout << \"Сколько стоит проезд в автобусе?\";\ncin >> a;\ncout << \"Сколько поездок в месяц?\";\ncin >> b;\nitog = a * b;\ncout << \"Всего за месяц: \" << itog;\nreturn 0;\n}\n```"
+      }
+    },
+    {
+      "key": "ar7-exam-1",
+      "title": "Целая часть и остаток",
+      "type": "fill_blank",
+      "marks": 2,
+      "difficulty": "exam",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.4"
+      ],
+      "text": "`int x = 47, y = 6;`\n\n`x / y` = [[1]], `x % y` = [[2]]",
+      "content": {
+        "blank_count": 2
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 132; 4 ур Повтор 7_3А.pptx, слайд 9",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "[[1]] 7; [[2]] 5 — по 1 баллу",
+        "accepted": {
+          "blanks": [
+            [
+              "7"
+            ],
+            [
+              "5"
+            ]
+          ]
+        },
+        "explanation": "47 = 6·7 + 5: целая часть 7, остаток 5."
+      }
+    },
+    {
+      "key": "ar7-exam-2",
+      "title": "Округление",
+      "type": "fill_blank",
+      "marks": 2,
+      "difficulty": "exam",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.4"
+      ],
+      "text": "Функция [[1]] округляет число до ближайшего наибольшего целого, а функция [[2]] — до ближайшего наименьшего. Обе подключаются строкой `#include <cmath>`.",
+      "content": {
+        "blank_count": 2
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 132–133; 3 ур Типы данных.pptx, слайды 12–13; G7_Информатика_THB_Финал_26.10.23 1.pdf, стр. 97",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "[[1]] ceil; [[2]] floor — по 1 баллу",
+        "accepted": {
+          "blanks": [
+            [
+              "ceil"
+            ],
+            [
+              "floor"
+            ]
+          ]
+        },
+        "explanation": "ceil — вверх, floor — вниз."
+      }
+    },
+    {
+      "key": "ar7-exam-3",
+      "title": "Запиши выражения",
+      "type": "fill_blank",
+      "marks": 3,
+      "difficulty": "exam",
+      "command_word": "write",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.4"
+      ],
+      "text": "Запиши выражения на C++ (без пробелов не обязательно):\n\n1) $S = a \\cdot b$ → `S = ` [[1]]\n2) $C = \\pi d$ (через M_PI) → `C = ` [[2]]\n3) $sr = \\frac{x + y}{2}$ → `sr = ` [[3]]",
+      "content": {
+        "blank_count": 3
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 132; 4 ур Повтор 7_3А.pptx, слайды 2, 12",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "[[1]] a*b; [[2]] M_PI*d; [[3]] (x+y)/2 — по 1 баллу",
+        "accepted": {
+          "blanks": [
+            [
+              "a*b",
+              "a * b",
+              "b*a"
+            ],
+            [
+              "M_PI*d",
+              "d*M_PI"
+            ],
+            [
+              "(x+y)/2",
+              "(y+x)/2"
+            ]
+          ],
+          "ignore_spaces": true
+        },
+        "explanation": "Умножение — *, деление — /, скобки задают порядок."
+      }
+    },
+    {
+      "key": "ar7-exam-4",
+      "title": "Трассировка программы",
+      "type": "trace_table",
+      "marks": 3,
+      "difficulty": "exam",
+      "command_word": "complete",
+      "grading": "HYBRID",
+      "objectives": [
+        "7.4.3.4"
+      ],
+      "text": "Запиши значения переменных после выполнения каждой строки.\n\n```cpp\nint a = 14; int b = 3; double c = 0;\nc = a / b;\nb = a % b + 1;\na = a * b;\n```",
+      "content": {
+        "columns": [
+          "Строка",
+          "a",
+          "b",
+          "c"
+        ],
+        "rows": 3,
+        "prefill": [
+          [
+            "c = a / b;",
+            null,
+            null,
+            null
+          ],
+          [
+            "b = a % b + 1;",
+            null,
+            null,
+            null
+          ],
+          [
+            "a = a * b;",
+            null,
+            null,
+            null
+          ]
+        ]
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 132–133; 3 ур Типы данных.pptx, слайд 10",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "c = 4; b = 3; a = 42 — по 1 баллу",
+        "points": [
+          {
+            "criterion": "c = 4 (целочисленное деление)",
+            "marks": 1
+          },
+          {
+            "criterion": "b = 14 % 3 + 1 = 3",
+            "marks": 1
+          },
+          {
+            "criterion": "a = 14 * 3 = 42",
+            "marks": 1
+          }
+        ],
+        "accepted": {
+          "rows": [
+            [
+              null,
+              "14",
+              "3",
+              "4"
+            ],
+            [
+              null,
+              "14",
+              "3",
+              "4"
+            ],
+            [
+              null,
+              "42",
+              "3",
+              "4"
+            ]
+          ]
+        },
+        "explanation": "14 / 3 = 4 (int); 14 % 3 = 2, +1 = 3; 14·3 = 42."
+      }
+    },
+    {
+      "key": "ar7-exam-5",
+      "title": "Вывод программы",
+      "type": "fill_blank",
+      "marks": 2,
+      "difficulty": "exam",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.4",
+        "7.4.3.5"
+      ],
+      "text": "```cpp\nfloat x, y, z, a, d;\ncin >> x >> y >> z;\na = x + y * z;\nd = x / y;\ncout << a << endl << d;\n```\nПользователь ввел 6, 4, 2. Первая выведенная строка: [[1]], вторая: [[2]]",
+      "content": {
+        "blank_count": 2
+      },
+      "source": "nis_style",
+      "source_reference": "4 ур Повтор 7_3А.pptx, слайды 7–8",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "[[1]] 14; [[2]] 1.5 — по 1 баллу",
+        "accepted": {
+          "blanks": [
+            [
+              "14"
+            ],
+            [
+              "1.5",
+              "1,5"
+            ]
+          ]
+        },
+        "explanation": "Умножение выполняется раньше сложения: 6 + 8 = 14; 6 / 4 = 1.5 (float)."
+      }
+    },
+    {
+      "key": "ar7-exam-6",
+      "title": "Программа: градусы Цельсия в Фаренгейты",
+      "type": "code_completion",
+      "marks": 5,
+      "difficulty": "exam",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "7.4.3.4",
+        "7.4.3.5"
+      ],
+      "text": "Напиши программу: пользователь вводит температуру `C` в градусах Цельсия (может быть дробной), программа переводит ее в градусы Фаренгейта по формуле $F = C \\times \\frac{9}{5} + 32$ и выводит результат с пояснением. Например, 25 → `F = 77`.",
+      "content": {
+        "answer_lines": 12
+      },
+      "source": "nis_style",
+      "source_reference": "4 ур Повтор 7_3А.pptx, слайды 2, 12",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "- Структура программы (iostream, using namespace std, int main, { }) (1)\n- Тип float/double для C и F (1)\n- Ввод C с подсказкой (1)\n- Верное выражение F = C * 9 / 5 + 32 (или с 1.8) (1)\n- Вывод результата с текстом (1)",
+        "points": [
+          {
+            "criterion": "Структура программы (iostream, using namespace std, int main, { })",
+            "marks": 1
+          },
+          {
+            "criterion": "Тип float/double для C и F",
+            "marks": 1
+          },
+          {
+            "criterion": "Ввод C с подсказкой",
+            "marks": 1
+          },
+          {
+            "criterion": "Верное выражение F = C * 9 / 5 + 32 (или с 1.8)",
+            "marks": 1
+          },
+          {
+            "criterion": "Вывод результата с текстом",
+            "marks": 1
+          }
+        ],
+        "model_answer": "```cpp\n#include <iostream>\nusing namespace std;\nint main()\n{\nfloat C, F;\ncout << \"Введи температуру по Цельсию: \";\ncin >> C;\nF = C * 9 / 5 + 32;\ncout << \"F = \" << F << endl;\nreturn 0;\n}\n```"
+      }
+    },
+    {
+      "key": "ar7-exam-7",
+      "title": "Программа: шаги до школы",
+      "type": "code_completion",
+      "marks": 4,
+      "difficulty": "exam",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "7.4.3.4",
+        "7.4.3.5"
+      ],
+      "text": "Длина шага ученика — 0,4 метра. Напиши программу: пользователь вводит расстояние в метрах (целое число), программа выводит количество шагов, **округленное вверх** до целого (например, 10 м → 25 шагов; 7 м → 18 шагов, так как 7 / 0,4 = 17,5).",
+      "content": {
+        "answer_lines": 14
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 135 (задача 6); G7_Информатика_THB_Финал_26.10.23 1.pdf, стр. 98",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "- Подключена cmath (для ceil), правильная структура (1)\n- Ввод расстояния (int) с подсказкой (1)\n- Вычисление distance / 0.4 в переменной double (1)\n- Округление ceil и вывод результата (1)",
+        "points": [
+          {
+            "criterion": "Подключена cmath (для ceil), правильная структура",
+            "marks": 1
+          },
+          {
+            "criterion": "Ввод расстояния (int) с подсказкой",
+            "marks": 1
+          },
+          {
+            "criterion": "Вычисление distance / 0.4 в переменной double",
+            "marks": 1
+          },
+          {
+            "criterion": "Округление ceil и вывод результата",
+            "marks": 1
+          }
+        ],
+        "model_answer": "```cpp\n#include <iostream>\n#include <cmath>\nusing namespace std;\nint main()\n{\nint distanceInMeters;\ndouble totalSteps;\ncout << \"Введите расстояние в метрах:\";\ncin >> distanceInMeters;\ntotalSteps = distanceInMeters / 0.4;\ncout << ceil(totalSteps) << \" шагов\" << endl;\nreturn 0;\n}\n```"
+      }
+    }
+  ],
+  "topic_exam": {
+    "duration": 30,
+    "title": "Арифметические выражения и линейные программы — экзамен",
+    "instructions": "Ответьте на **все** вопросы. Программы пишите на C++. Количество баллов указано у каждого вопроса. Всего: 21 баллов. Время: 30 минут.",
+    "questions": [
+      "ar7-exam-1",
+      "ar7-exam-2",
+      "ar7-exam-3",
+      "ar7-exam-4",
+      "ar7-exam-5",
+      "ar7-exam-6",
+      "ar7-exam-7"
+    ]
+  }
+}

@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>10.3В · Урок 5 · Базы данных и мультимедиа в приложениях C#</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+  <link rel="stylesheet" href="../_engine/lesson.css" />
+</head>
+<body class="lesson">
+<script src="../_engine/deck.js"></script>
+<script src="../_engine/lesson.js"></script>
+<script>
+/*
+ * 10.3В «Разработка приложений (C#)», урок 5 (КТП) — «Многооконные приложения с базой данных в C#
+ * и компоненты работы с аудио- и видеоданными. Обобщение раздела 10.3B».
+ * Цели обучения: 10.4.3.12 использовать ООП для решения задач из различных предметных областей;
+ *                10.4.3.15 использовать компоненты ООП для работы с аудиоданными при создании медиаконтента;
+ *                10.4.3.16 использовать компоненты ООП для работы с видеоданными при создании медиаконтента.
+ * Ход урока — КСП content/lesson-plans/g10-programmirovanie-usloviy-i-multimedia.json, урок 5 (10 + 60 + 10 мин).
+ * Содержание — только из материалов: презентация «7 ур БД в ООП C#» (ПБ), слайды 2–14; учебник 9 кл. (2020)
+ * стр. 139–149 (SoundPlayer, SystemSounds, аудиопроигрыватель, Windows Media Player), стр. 175–176 (PictureBox).
+ * В материалах 10 кл. аудио и видео нет — использован учебник 9 кл. (см. materials/map.md).
+ * Не использовано: Ctlcontrols.play(), SizeMode = Zoom (есть в КСП, нет в материалах); задание 10* ПБ (повтор вариантов).
+ */
+const SB9 = "Учебник 9 кл. (2020), ";
+const PB = "Презентация «БД в ООП C#», ";
+const SPEC = "Спецификация СОЧ 10 кл., 3 четверть";
+const { src, reveal, statements, quiz, matcher, orderGame } = LESSON;
+const S = () => window.DECK_STATE;
+const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const code = (t, fs = 16) => `<pre class="code-block" style="font-size:${fs}px;line-height:1.42;margin:0;">${esc(t)}</pre>`;
+
+/* ---------- компоненты БД на форме (перерисовано по ПБ слайды 10–12) ---------- */
+const DIA_DB = `
+<svg class="dia" viewBox="0 0 760 210" role="img" aria-label="Связь файла базы данных с таблицей DataGridView на форме">
+  <defs><marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--primary)"/></marker></defs>
+  <rect class="blk" x="4" y="60" width="140" height="70" rx="12"/><text x="74" y="92" text-anchor="middle">Файл БД</text><text class="s" x="74" y="116" text-anchor="middle">MS Access</text>
+  <rect class="blk-a" x="194" y="60" width="160" height="70" rx="12"/><text x="274" y="92" text-anchor="middle">TableAdapter</text><text class="s" x="274" y="116" text-anchor="middle">чтение и сохранение</text>
+  <rect class="blk-p" x="404" y="60" width="140" height="70" rx="12"/><text x="474" y="92" text-anchor="middle">DataSet</text><text class="s" x="474" y="116" text-anchor="middle">таблицы, настройки</text>
+  <rect class="blk-a" x="594" y="10" width="162" height="70" rx="12"/><text x="675" y="42" text-anchor="middle">BindingSource</text><text class="s" x="675" y="66" text-anchor="middle">источник для формы</text>
+  <rect class="blk" x="594" y="122" width="162" height="70" rx="12"/><text x="675" y="154" text-anchor="middle">DataGridView</text><text class="s" x="675" y="178" text-anchor="middle">таблица на форме</text>
+  <path class="ar" d="M144 95 H191"/><path class="ar" d="M191 105 H147"/>
+  <path class="ar" d="M354 95 H401"/><path class="ar" d="M401 105 H357"/>
+  <path class="ar" d="M544 80 L591 55"/><path class="ar" d="M675 80 V119"/>
+</svg>`;
+
+initDeck({
+  badge: "10.3В · Урок 5",
+  title: "Базы данных и мультимедиа в приложениях C#",
+  subtitle: "10 класс · 3 четверть · цели 10.4.3.12, 10.4.3.15, 10.4.3.16 · 80 минут",
+  footer: "НИШ ЕМН г. Кызылорда · Информатика · 10 класс · Раздел 10.3В «Разработка приложений (C#)»",
+  slides: [
+    /* ---------------- НАЧАЛО УРОКА (10 мин) ---------------- */
+    {
+      badge: "Начало урока",
+      shortTitle: "Тема, цели и критерии",
+      timing: "0–3 мин",
+      source: "КТП 2026; КСП урока 5",
+      notes: "Организационный момент. Итоговый урок раздела 10.3В. Тема, цели, критерии. Напомните о СОЧ: в разделе 10.3В проверяются цели 10.4.3.12 и 10.4.3.15 (аудио) — 10 баллов.",
+      render() {
+        return `<div class="hero">
+          <div>
+            <div class="hero-kicker">Раздел 10.3В · Разработка приложений (C#)</div>
+            <h1>Базы данных и мультимедиа в приложениях C#</h1>
+            <div class="stack">
+              <div class="goal"><b>10.4.3.12</b> — использовать ООП для решения задач из различных предметных областей.</div>
+              <div class="goal"><b>10.4.3.15</b> — компоненты ООП для работы с аудиоданными при создании медиаконтента.</div>
+              <div class="goal"><b>10.4.3.16</b> — компоненты ООП для работы с видеоданными при создании медиаконтента.</div>
+            </div>
+          </div>
+          <div class="stack text-sm">
+            <div class="card"><h3>🎯 Цели урока</h3><p>Разрабатывать многооконные приложения с базой данных MS Access: добавление записи, поиск, сортировка, фильтрация. Использовать PictureBox, SoundPlayer и Windows Media Player.</p></div>
+            <div class="card"><h3>✅ Критерии оценивания</h3><p>Объясняет роль DataSet, BindingSource, TableAdapter, DataGridView. Создаёт форму добавления записи через Owner. Программирует Contains, Sort, Filter. Воспроизводит звук и видео, показывает изображение.</p></div>
+          </div>
+        </div>${src("КТП 2026 (цели 10.4.3.12, 10.4.3.15, 10.4.3.16); КСП урока 5; " + SPEC)}`;
+      },
+    },
+    {
+      badge: "Начало урока",
+      shortTitle: "Проблемный вопрос",
+      timing: "3–10 мин",
+      source: "КСП урока 5; " + PB + "слайд 2",
+      notes: "Проблемный вопрос из КСП. Ученики выдвигают идеи. Затем покажите варианты мини-проектов урока — каждый ученик выбирает свой.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Программу закрыли — данные из массива и DataGridView исчезли. Как их сохранить?</h2>
+          ${reveal("r-hook", "Ответ", "Связать приложение C# с <b>базой данных MS Access</b>: записи хранятся в файле на диске, их можно добавлять, искать, сортировать и фильтровать. Справочник можно дополнить фотографиями, аудио и видео.")}
+          <h3 style="margin:6px 0 0;">Варианты мини-проектов</h3>
+          <div class="cards c2 text-sm">
+            <div class="card">🏆 «Итоги спортивных игр» — команды, очки, призовые места</div>
+            <div class="card">👔 «Сотрудники фирмы» — ФИО, должность, отдел, оклад</div>
+            <div class="card">🔬 «Академики» — учёные, область науки, открытия, год</div>
+            <div class="card">🪙 «Коллекция старинных монет» — название, год, металл, страна</div>
+          </div>
+        </div>${src("КСП урока 5; " + PB + "слайд 2 (варианты приложений)")}`;
+      },
+    },
+
+    /* ---------------- СЕРЕДИНА УРОКА (60 мин) ---------------- */
+    {
+      badge: "Новое · компоненты БД",
+      shortTitle: "DataSet, BindingSource, TableAdapter",
+      timing: "10–15 мин",
+      source: PB + "слайды 8, 10–12",
+      notes: "По схеме: файл БД → TableAdapter → DataSet → BindingSource → DataGridView. Затем сопоставление: щёлкните компонент в строке.",
+      render() {
+        return `<div class="body">
+          <div style="max-width:560px;margin:0 auto;width:100%;">${DIA_DB}</div>
+          ${matcher("db", [["ds", "DataSet"], ["bs", "BindingSource"], ["ta", "TableAdapter"], ["dgv", "DataGridView"]], [
+            { t: "Хранит в памяти таблицы и настройки подключения базы данных.", ans: "ds" },
+            { t: "Определяет источник данных для формы; через него сортируют и фильтруют.", ans: "bs" },
+            { t: "Адаптер для обмена данными (чтения и сохранения) между приложением и БД.", ans: "ta" },
+            { t: "Отображает записи таблицы на форме.", ans: "dgv" },
+          ])}
+        </div>${src(PB + "слайд 8 (задания 4–5), слайд 10 (ответы), слайд 11 (задание 8*), слайд 14 (чек-лист)")}`;
+      },
+    },
+    {
+      badge: "Практика · подключение БД",
+      shortTitle: "Этапы подключения",
+      timing: "15–20 мин",
+      source: PB + "слайды 7, 10",
+      notes: "Работа в парах: восстановить порядок основных этапов подключения БД MS Access (сокращено из 14 этапов презентации). Ученики выходят к доске и щёлкают шаги по порядку.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Расставьте этапы подключения БД по порядку</h2>
+          ${orderGame("conn", [
+            "Создать таблицу в MS Access с помощью конструктора и сохранить базу данных.",
+            "Запустить Visual Studio и расположить на форме DataGridView.",
+            "Вызвать смарт-задачи DataGridView и выбрать «Добавить источник данных проекта».",
+            "Выбрать тип источника «База данных», поставщик OLE DB.",
+            "Указать путь к файлу БД Access, проверить подключение, нажать «ОК».",
+            "Выбрать таблицы для набора данных — данные загрузятся в DataGridView.",
+          ], [3, 0, 5, 2, 4, 1])}
+        </div>${src(PB + "слайд 7 (14 этапов подключения), слайд 10 (порядок 2 → 13 → 10 → 4 → 5 → 6 → 7 → 14 → 1 → 11 → 12 → 9 → 3 → 8)")}`;
+      },
+    },
+    {
+      badge: "Новое · вторая форма",
+      shortTitle: "Добавление записи через Form2",
+      timing: "20–26 мин",
+      source: PB + "слайды 4–5, 8, 12",
+      notes: "Почему отдельная форма удобнее: меньше ошибок, каждое значение — в подписанном поле. Сначала порядок трёх строк открытия формы (щёлкайте по порядку), затем разбор кода кнопки «Добавить». Напомните: модификаторы компонентов БД в Form1.Designer.cs — public.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:18px;grid-template-columns:1fr 1.25fr;">
+          <div class="stack">
+            <b>Порядок строк кнопки «Добавить» на Form1:</b>
+            ${orderGame("own", [
+              "<span class='mono'>Form2 af = new Form2();</span> — создать форму",
+              "<span class='mono'>af.Owner = this;</span> — Form1 — владелец",
+              "<span class='mono'>af.Show();</span> — показать форму",
+            ], [2, 0, 1])}
+            <div class="note">Без <span class="mono">af.Owner = this;</span> строка <span class="mono">this.Owner as Form1</span> вернёт пустую ссылку <b>null</b>.</div>
+          </div>
+          ${code(`// Form2: кнопка «Добавить»
+Form1 main = this.Owner as Form1;
+if (main != null)
+{
+    DataRow nRow = main.ученикDataSet.Tables[0].NewRow();
+    nRow[0] = main.dataGridView1.RowCount + 1;
+    nRow[1] = textBox1.Text;   // Имя
+    nRow[2] = textBox2.Text;   // Фамилия
+    main.ученикDataSet.Tables[0].Rows.Add(nRow);
+    main.ученикTableAdapter.Update(main.ученикDataSet.Ученик);
+    main.ученикDataSet.Tables[0].AcceptChanges();
+    main.dataGridView1.Refresh();
+}`, 13)}
+        </div></div>${src(PB + "слайд 4 (Owner, модификатор public), слайд 5 (код «Добавить», сокращён), слайд 8 (задание 2), слайд 12")}`;
+      },
+    },
+    {
+      badge: "Новое · поиск, сортировка, фильтр",
+      shortTitle: "Contains, Sort, Filter",
+      timing: "26–33 мин",
+      source: PB + "слайды 6, 9, 11–12",
+      notes: "Поиск: двойной цикл по строкам и столбцам, Contains, выделение строки и счётчик k. Сортировка и фильтр — через BindingSource. Ученики определяют результат команды — щёлкните вариант.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:16px;grid-template-columns:1.2fr 1fr;">
+          ${code(`// поиск: main.dataGridView1 → строки i, столбцы j
+for (int i = 0; i < main.dataGridView1.RowCount; i++)
+ for (int j = 0; j < main.dataGridView1.ColumnCount; j++)
+  if (main.dataGridView1.Rows[i].Cells[j].Value != null)
+   if (main.dataGridView1.Rows[i].Cells[j].Value
+         .ToString().Contains(textBox1.Text))
+   { main.dataGridView1.Rows[i].Selected = true;
+     k++; break; }
+label2.Text = "Найдено " + k.ToString() + " совпадений";
+
+ученикBindingSource.Sort = "Фамилия ASC";
+ученикBindingSource.Filter = "Класс > "
+        + Convert.ToInt32(textBox6.Text);
+ученикBindingSource.Filter = "";  // сброс`, 12)}
+          <div class="stack">
+            <b>Что произойдёт? (↑ — по возрастанию, ↓ — по убыванию, отбор записей, все записи)</b>
+            ${matcher("sf", [["asc", "↑ возр."], ["desc", "↓ убыв."], ["flt", "отбор"], ["all", "все"]], [
+              { t: "<span class='mono'>Sort = \"Рост DESC\"</span>", ans: "desc" },
+              { t: "<span class='mono'>Sort = \"Вес ASC\"</span>", ans: "asc" },
+              { t: "<span class='mono'>Filter = \"Класс &gt; 8\"</span>", ans: "flt" },
+              { t: "<span class='mono'>Filter = \"\"</span>", ans: "all" },
+            ])}
+            ${reveal("r-flt", "Какие ученики останутся при «Класс > 8»?", "Только ученики 9, 10, 11 классов — строгое неравенство. Знак <b>%</b> в <span class='mono'>LIKE '%Ах%'</span> заменяет любую последовательность символов.")}
+          </div>
+        </div></div>${src(PB + "слайд 6 (поиск, Form3), слайд 9 (задания 6*, 9*), слайд 11 (ответы), слайд 12 (памятка Sort и Filter)")}`;
+      },
+    },
+    {
+      badge: "Новое · аудио",
+      shortTitle: "Класс SoundPlayer",
+      timing: "33–40 мин",
+      source: SB9 + "стр. 139–145",
+      notes: "Звук в приложении: подключить библиотеку System.Media, создать экземпляр SoundPlayer, указать SoundLocation, воспроизвести. Расскажите об ограничениях класса. Системные звуки — класс SystemSounds. Затем — порядок шагов (щёлкайте по порядку).",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:18px;">
+          <div class="stack">
+            ${code(`using System.Media;
+...
+SoundPlayer Simple = new SoundPlayer();
+Simple.SoundLocation = "C:\\\\Windows\\\\Media\\\\tada.wav";
+Simple.Play();          // воспроизвести один раз
+Simple.PlayLooping();   // с повторением
+Simple.Stop();          // остановить
+
+SystemSounds.Beep.Play();  // системный звук`, 14)}
+            <div class="note"><b>SoundPlayer</b> воспроизводит только файлы <b>WAV</b>, не воспроизводит одновременно более одного звука, плохо работает с большими файлами (загружает весь файл в память).</div>
+          </div>
+          <div class="stack"><b>Порядок воспроизведения звука</b>
+            ${orderGame("snd", [
+              "Подключить библиотеку <span class='mono'>using System.Media</span>",
+              "Создать экземпляр <span class='mono'>SoundPlayer</span>",
+              "Указать файл: свойство <span class='mono'>SoundLocation</span>",
+              "Загрузить: <span class='mono'>Load()</span>",
+              "Воспроизвести: <span class='mono'>Play()</span>",
+            ], [2, 4, 0, 3, 1])}</div>
+        </div></div>${src(SB9 + "стр. 139 (System.Media, шаги 1–2, ограничения), стр. 140 (Load, Play, PlayLooping), стр. 141 (недостатки), стр. 142 (SystemSounds), стр. 145 (Stop)")}`;
+      },
+    },
+    {
+      badge: "Новое · видео и изображения",
+      shortTitle: "Windows Media Player, PictureBox",
+      timing: "40–45 мин",
+      source: SB9 + "стр. 147–149, 175–176",
+      notes: "Медиаплеер воспроизводит и аудио, и видео: компонент Windows Media Player добавляют через «Выбрать элементы» → «Компоненты COM». Изображение — компонент PictureBox. Ученики выбирают компонент для каждой задачи.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:18px;grid-template-columns:1fr 1.1fr;">
+          <div class="stack">${code(`// Windows Media Player (компонент COM)
+axWindowsMediaPlayer1.URL = open.FileName;
+axWindowsMediaPlayer1.Ctlcontrols.pause();
+axWindowsMediaPlayer1.Ctlcontrols.stop();
+
+// изображение в PictureBox
+pictureBox1.Image = Image.FromFile("D:\\\\фото бассейна\\\\1.jpg");
+// SizeMode = StretchImage — растянуть по размеру`, 12.5)}
+            <div class="note">Файл выбирают через <span class="mono">OpenFileDialog</span>; ошибки (файл удалён, другой формат) обрабатывают конструкцией <span class="mono">try … catch</span>.</div></div>
+          <div class="stack"><b>Какой компонент выбрать?</b>
+          ${matcher("media", [["sp", "SoundPlayer"], ["wmp", "Windows Media Player"], ["pb", "PictureBox"], ["ss", "SystemSounds"]], [
+            { t: "Короткий звук tada.wav при нажатии кнопки", ans: "sp" },
+            { t: "Видеообзор ролик.mp4 с кнопками управления", ans: "wmp" },
+            { t: "Фотография объекта справочника", ans: "pb" },
+            { t: "Сигнал о завершении операции (Beep)", ans: "ss" },
+          ])}</div>
+        </div></div>${src(SB9 + "стр. 143 (try … catch), стр. 147–148 (Windows Media Player, URL), стр. 149 (форматы), стр. 175 (PictureBox, SizeMode, Ctlcontrols), стр. 176 (Image.FromFile)")}`;
+      },
+    },
+    {
+      badge: "Практика · Visual Studio",
+      shortTitle: "Практическая работа",
+      timing: "45–62 мин",
+      source: "КСП урока 5; " + PB + "слайды 3, 14; " + SB9 + "стр. 140, 148",
+      notes: "Индивидуальная практическая работа по выбранному варианту. Задание 1 — все, задание 2 — большинство. Ученики проверяют себя по чек-листу (критерии из презентации).",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:18px;">
+          <div class="stack">
+            <div class="card"><h3>Задание 1 · база данных</h3><p>Подключить БД MS Access к Form1 (DataGridView). Реализовать поиск по ключевому слову (<span class="mono">Contains</span>) с подсчётом совпадений, сортировку ASC / DESC через RadioButton и фильтр (<span class="mono">Filter</span>).</p></div>
+            <div class="card"><h3>Задание 2 · медиакарточка</h3><p>Вторая форма Form2 (Owner = this): PictureBox с фото объекта и кнопка звука (<span class="mono">SoundPlayer</span>, файл .wav) или медиаплеер (<span class="mono">Windows Media Player</span>) для видеообзора.</p></div>
+          </div>
+          <div class="card"><h3>✅ Чек-лист</h3><p>
+            1. БД MS Access создана, в таблице 3–4 записи.<br>
+            2. DataGridView подключён через DataSet, BindingSource, TableAdapter.<br>
+            3. Модификаторы компонентов БД — public.<br>
+            4. Вторая форма открывается с <span class="mono">Owner = this</span>.<br>
+            5. Поиск выделяет строки и выводит число совпадений k.<br>
+            6. Реализованы сортировка (ASC / DESC) и фильтрация.<br>
+            7. Звук или видео воспроизводится, изображение отображается.</p></div>
+        </div></div>${src("КСП урока 5 (задания 1–2); " + PB + "слайд 3 (критерии), слайд 14 (чек-лист); " + SB9 + "стр. 140 (SoundPlayer), стр. 148 (медиаплеер)")}`;
+      },
+    },
+    {
+      badge: "Обобщение · подготовка к СОЧ",
+      shortTitle: "Задания в формате СОЧ",
+      timing: "62–70 мин",
+      source: SPEC + "; " + SB9 + "стр. 139–146; " + PB + "слайды 5, 12",
+      notes: "Демонстрация 2–3 проектов, затем — обобщение в формате СОР/СОЧ (СОР прошлых лет по разделам «Массивы» и «Базы данных в ООП» — 20 мин, задания по шагам): задания с кратким (КО) и развёрнутым (РО) ответом. Ученики выполняют в тетради, откройте эталоны для самопроверки. Это тренировочные задания, не задания СОЧ.",
+      render() {
+        return `<div class="body">
+          <div class="note text-xs"><b>СОР</b> (образец прошлых лет): 20 минут, 10–12 баллов, 1 балл за каждый шаг; командные слова — «опишите», «приведите пример», «напишите программный код», «оптимизируйте», «укажите», «дополните алгоритм». <b>СОЧ:</b> раздел 10.3В — 10 баллов, цели 10.4.3.12 и 10.4.3.15 («Применение»), краткий и развёрнутый ответ: покажи всю последовательность действий.</div>
+          <div class="grid-2" style="gap:16px;">
+            <div class="stack">
+              <div class="card text-xs"><h3>КО · по 1 баллу</h3><p>1) Назови формат файлов, который может воспроизводить класс SoundPlayer.<br>2) Запиши команду сортировки записей по полю «Оклад» по убыванию через <span class="mono">сотрудникиBindingSource</span>.</p></div>
+              ${reveal("k1", "Эталоны КО", "1) WAV. 2) <span class='mono'>сотрудникиBindingSource.Sort = \"Оклад DESC\";</span>")}
+            </div>
+            <div class="stack">
+              <div class="card text-xs"><h3>РО · 3 балла</h3><p>Напиши обработчик кнопки, который воспроизводит файл <span class="mono">sound.wav</span> из папки приложения, а при ошибке выводит сообщение «Ошибка».</p></div>
+              ${reveal("k3", "Эталон и дескрипторы", `<pre class="code-block" style="font-size:12.5px;line-height:1.35;margin:0 0 4px;">${esc(`SoundPlayer Player = new SoundPlayer();
+try { Player.SoundLocation = "sound.wav";
+      Player.Play(); }
+catch { MessageBox.Show("Ошибка"); }`)}</pre><span class="text-xs">1 — создаёт экземпляр SoundPlayer; 1 — задаёт SoundLocation и вызывает Play(); 1 — обрабатывает ошибку try … catch.</span>`)}
+            </div>
+          </div>
+        </div>${src(SPEC + " (раздел 10.3В, типы заданий КО/РО); СОР 10 кл. прошлых лет (Google Drive, формат); " + SB9 + "стр. 139–140, 145 (SoundPlayer, try … catch); " + PB + "слайд 12 (Sort)")}`;
+      },
+    },
+
+    /* ---------------- КОНЕЦ УРОКА (10 мин) ---------------- */
+    {
+      badge: "Конец урока · итог раздела",
+      shortTitle: "Итоговый блиц-опрос",
+      timing: "70–76 мин",
+      source: "КСП урока 5; " + PB + "слайды 8, 12; " + SB9 + "стр. 139, 147",
+      notes: "Итоговый блиц по разделу 10.3В: массивы, списки, БД, мультимедиа. Щёлкните вариант после ответов учеников.",
+      render() {
+        return `<div class="body"><div class="grid-2 quizgrid" style="gap:14px;">
+          ${quiz("b1", "1. Какой метод добавляет строку в ListBox?", ["Items.Clear()", "Items.Add()", "Items.Count", "Rows.Add()"], 1)}
+          ${quiz("b2", "2. Компонент, хранящий в памяти таблицы и настройки подключения БД:", ["BindingSource", "TableAdapter", "DataSet", "DataGridView"], 2)}
+          ${quiz("b3", "3. Какая библиотека нужна для класса SoundPlayer?", ["System.Media", "System.Data", "AxWMPLib", "System.IO"], 0)}
+          ${quiz("b4", "4. Какой компонент воспроизводит и аудио, и видео?", ["SoundPlayer", "PictureBox", "Windows Media Player", "SystemSounds"], 2)}
+        </div></div>${src("КСП урока 5 (итоговый блиц); " + PB + "слайд 8 (задание 5); " + SB9 + "стр. 139 (System.Media), стр. 147 (медиаплеер)")}`;
+      },
+    },
+    {
+      badge: "Конец урока · рефлексия",
+      shortTitle: "Рефлексия и домашнее задание",
+      timing: "76–80 мин",
+      source: PB + "слайд 13; КСП урока 5",
+      notes: "Рефлексия «Мои достижения в разработке C#-приложений» по пяти категориям. Домашнее задание из КСП.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;">
+          <div class="stack">
+            <h2 class="slide-h2">Мои достижения</h2>
+            <div class="card"><p><b>Полезно:</b> какие приёмы работы с БД в C# пригодились для проекта?</p></div>
+            <div class="card"><p><b>Важно:</b> о каком правиле (public, Owner = this) нужно помнить всегда?</p></div>
+            <div class="card"><p><b>Ново:</b> какие методы DataRow, TableAdapter, BindingSource, SoundPlayer ты узнал?</p></div>
+          </div>
+          <div class="stack">
+            <h2 class="slide-h2">Домашнее задание</h2>
+            <div class="card"><h3>💡 Проект 4 четверти</h3><p>Продумать тему собственного программного проекта для 4 четверти: какие данные, компоненты и медиа понадобятся.</p></div>
+            <div class="card"><h3>📝 Повторить</h3><p>Материал раздела 10.3В: массивы, циклы и ListBox, RadioButton и CheckBox, БД, мультимедиа — к СОЧ.</p></div>
+          </div>
+        </div></div>${src(PB + "слайд 13 (рефлексия 5 категорий); КСП урока 5 (домашнее задание)")}`;
+      },
+    },
+  ],
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>7.2А · Урок 1 · Электронная таблица. Типы и форматы данных</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+</head>
+<body>
+<script src="../_engine/deck.js"></script>
+<script>
+const G7F1_FORMATS = {
+  gen: { name: "Общий", v1: "1000", v2: "0,5", v3: "45000", desc: "Стандартный формат: отображает числа и текст так, как их ввели." },
+  num: { name: "Числовой (2 знака)", v1: "1 000,00", v2: "0,50", v3: "45 000,00", desc: "Задаёт фиксированное число знаков после запятой и разделитель разрядов." },
+  cur: { name: "Денежный (₸)", v1: "1 000,00 ₸", v2: "0,50 ₸", v3: "45 000,00 ₸", desc: "Добавляет символ валюты (₸, ₽, $) — при этом внутри остаётся ЧИСЛО (можно складывать!)." },
+  pct: { name: "Процентный (%)", v1: "100000%", v2: "50%", v3: "4500000%", desc: "Умножает число на 100 и приписывает %. Поэтому 0,5 превращается в 50%!" },
+  dat: { name: "Дата", v1: "26.09.1902", v2: "00.01.1900", v3: "15.03.2023", desc: "Показывает дату (внутри Excel хранит даты как количество дней с 01.01.1900!)." }
+};
+
+const G7F1_QUIZ = [
+  { id: "q1", item: "Стоимость ноутбука: 349 970 ₸ (нужно суммировать)", ans: "cur", why: "Денежный формат — отображает ₸ и позволяет считать суммы." },
+  { id: "q2", item: "Скидка на товар: 15% (введено 0,15)", ans: "pct", why: "Процентный формат умножает 0,15 на 100 и показывает 15%." },
+  { id: "q3", item: "Дата рождения участника: 12.05.2013", ans: "dat", why: "Формат Дата позволяет сортировать хронологически и вычитать даты." },
+  { id: "q4", item: "Фамилия ученика: «Айтжанова»", ans: "txt", why: "Текстовый формат для слов, имён и кодов с ведущим нулём." },
+  { id: "q5", item: "Количество тетрадей: 24", ans: "num", why: "Числовой формат для обычных количественных значений." },
+  { id: "q6", item: "ИИН или номер телефона с нулём в начале: 090512...", ans: "txt", why: "Текстовый! В числовом формате ведущий ноль исчезнет." }
+];
+
+initDeck({
+  badge: "📊 7.2А · Урок 1",
+  title: "Электронная таблица. Типы и форматы данных",
+  subtitle: "7 класс · 2 четверть · Цель 7.1.1.1 · 80 мин · Мини-Таблицы (/excel)",
+  footer: "НИШ ЕМН г. Кызылорда · 7 класс · 2 четверть · Мини-Таблицы (/excel)",
+  initialState: {
+    selected: { cellPart: "cell" },
+    tabs: { fmt: "cur" }
+  },
+  slides: [
+    {
+      badge: "Этап 1 · Мотивация и цели",
+      shortTitle: "Электронная vs бумажная таблица",
+      timing: "0–7 мин",
+      source: "КСП 7.2А Урок 1 · Теория g7-formaty-dannykh-v-elektronnykh-tablitsakh",
+      notes: "Сравните бумажный журнал с электронной таблицей: в бумажной при изменении одной цены нужно зачёркивать и пересчитывать итог вручную; в Excel итог пересчитывается сам! Озвучьте цель 7.1.1.1.",
+      render() {
+        return `
+          <div class="stack">
+            <div class="text-xs font-bold text-muted" style="text-transform:uppercase;">Информатика · 7 класс · Раздел 7.2А «Электронные таблицы» · Урок 1 из 5</div>
+            <h1 class="slide-h1">Электронные таблицы: типы и форматы данных</h1>
+            <p class="lead">Разберём строение листа Excel (ячейка, адрес, диапазон), отличим 3 типа данных (текст, число, формула) и научимся применять 5 форматов отображения.</p>
+            <div class="box-primary text-xs">
+              <div class="box-title mono">Цель обучения 7.1.1.1</div>
+              Форматировать элементы электронной таблицы и подбирать правильные типы и форматы данных (Общий, Числовой, Денежный, Процентный, Дата, Текстовый).
+            </div>
+            <table class="data-table">
+              <thead><tr><th>Критерий</th><th>Бумажная таблица</th><th>Электронная таблица (Excel / Мини-Таблицы)</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Редактирование</strong></td><td>Требует зачёркивания / переписывания</td><td><strong>Мгновенное исправление</strong> любой ячейки</td></tr>
+                <tr><td><strong>Автоматизация</strong></td><td>Считаем вручную на калькуляторе</td><td><strong>Формулы сами пересчитывают</strong> итог при правке!</td></tr>
+                <tr><td><strong>Поиск и анализ</strong></td><td>Вручную глазами</td><td>Мгновенный поиск, сортировка и фильтры</td></tr>
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Строение листа",
+      shortTitle: "Интерактивная сетка: столбец, строка, ячейка, диапазон",
+      timing: "7–17 мин",
+      source: "Теория 7.2А · Адреса ячеек и диапазонов",
+      notes: "Нажимайте на 4 кнопки подсветки: ученики запоминают, что столбцы обозначаются латинскими буквами (A, B, C), строки — цифрами (1, 2, 3), адрес ячейки = Буква+Цифра (B2), а диапазон пишется через двоеточие (A1:C2).",
+      render(st) {
+        const part = st.selected.cellPart || "cell";
+        const info = {
+          col: "Столбец (B) — вертикальный ряд ячеек, обозначается латинскими буквами (A, B, C… Z, AA…).",
+          row: "Строка (2) — горизонтальный ряд ячеек, нумеруется числами (1, 2, 3…).",
+          cell: "Ячейка (B2) — основная клетка на пересечении столбца B и строки 2. У каждой ячейки свой уникальный адрес!",
+          rng: "Диапазон (A1:B3) — прямоугольная группа смежных ячеек. Записывается через ДВОЕТОЧИЕ (:) от левой верхней до правой нижней!"
+        }[part];
+        const hl = (r, c) => {
+          if (part === "col" && c === 1) return "background:var(--primary-soft);font-weight:700;";
+          if (part === "row" && r === 1) return "background:var(--accent-soft);font-weight:700;";
+          if (part === "cell" && r === 1 && c === 1) return "background:var(--success-soft);outline:2px solid var(--success);font-weight:700;";
+          if (part === "rng" && r <= 2 && c <= 1) return "background:var(--warning-soft);font-weight:700;";
+          return "";
+        };
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <h2 class="slide-h2">Анатомия электронной таблицы</h2>
+              <div class="flex-row">
+                <button type="button" class="btn ${part === "col" ? "btn-primary" : ""}" onclick="DECK.setSelected('cellPart','col')">Столбец B</button>
+                <button type="button" class="btn ${part === "row" ? "btn-accent" : ""}" onclick="DECK.setSelected('cellPart','row')">Строка 2</button>
+                <button type="button" class="btn ${part === "cell" ? "btn-primary" : ""}" onclick="DECK.setSelected('cellPart','cell')">Ячейка B2</button>
+                <button type="button" class="btn ${part === "rng" ? "btn-accent" : ""}" onclick="DECK.setSelected('cellPart','rng')">Диапазон A1:B3</button>
+              </div>
+            </div>
+            <table class="data-table">
+              <thead><tr><th style="width:40px;"></th><th>A</th><th>B</th><th>C</th></tr></thead>
+              <tbody>
+                <tr><td class="mono font-bold">1</td><td style="${hl(0,0)}">Товар</td><td style="${hl(0,1)}">Цена</td><td style="${hl(0,2)}">Кол-во</td></tr>
+                <tr><td class="mono font-bold">2</td><td style="${hl(1,0)}">Тетрадь</td><td class="mono" style="${hl(1,1)}">250</td><td class="mono" style="${hl(1,2)}">4</td></tr>
+                <tr><td class="mono font-bold">3</td><td style="${hl(2,0)}">Ручка</td><td class="mono" style="${hl(2,1)}">150</td><td class="mono" style="${hl(2,2)}">6</td></tr>
+              </tbody>
+            </table>
+            <div class="box-primary text-xs">${info}</div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · 3 типа данных",
+      shortTitle: "Текст, Число и Формула + выравнивание по умолчанию",
+      timing: "17–25 мин",
+      source: "Теория 7.2А · Типы данных в ячейке",
+      notes: "Классный лайфхак для 7 класса: как на глаз сразу понять, распознал ли Excel ввод как ЧИСЛО или как ТЕКСТ? Числа автоматически выравниваются по ПРАВОМУ краю, а текст — по ЛЕВОМУ!",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">3 главных типа данных в ячейке Excel</h2>
+            <div class="grid-3 text-xs">
+              <div class="box-white">
+                <div class="box-title">1. Текст</div>
+                Любые слова, имена, заголовки, коды. По умолчанию выравнивается <strong>по ЛЕВОМУ краю</strong>.<br>
+                <div class="box mono" style="margin-top:6px;text-align:left;">Айтжанова</div>
+              </div>
+              <div class="box-primary">
+                <div class="box-title">2. Число (и Дата)</div>
+                Участвует в расчётах! По умолчанию выравнивается <strong>по ПРАВОМУ краю</strong>.<br>
+                <div class="box-white mono" style="margin-top:6px;text-align:right;">1250,5</div>
+              </div>
+              <div class="box-accent">
+                <div class="box-title" style="color:var(--accent);">3. Формула</div>
+                ВСЕГДА начинается со знака <span class="mono font-bold">=</span>! В ячейке виден результат, в строке формул — само выражение.<br>
+                <div class="box-white mono" style="margin-top:6px;">=B2*C2 → 1000</div>
+              </div>
+            </div>
+            <div class="box-danger text-xs">
+              <strong>Главная ловушка 7 класса:</strong> если вручную написать в ячейке <span class="mono">1000 тг</span> или <span class="mono">1000 руб</span> (словами!), Excel примет это за <strong>ТЕКСТ</strong> (выровняет слева), и формула выдаст ошибку <span class="mono font-bold">#ЗНАЧ!</span> Вводите только число <span class="mono">1000</span>, а знак валюты задавайте <strong>Денежным форматом</strong>!
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Живой переключатель форматов",
+      shortTitle: "Как один и тот же набор чисел выглядит в 5 форматах",
+      timing: "25–36 мин",
+      source: "Теория 7.2А · Числовые форматы (Общий, Числовой, Денежный, %, Дата)",
+      notes: "Нажимайте на 5 кнопок форматов: ученики видят, что сами числа внутри ячеек (1000, 0.5, 45000) НЕ меняются — меняется только их отображение! Особо покажите Процентный (0,5 → 50%).",
+      render(st) {
+        const fk = st.tabs.fmt || "cur";
+        const f = G7F1_FORMATS[fk];
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Симулятор форматов: одно значение — 5 разных видов!</h2>
+            <div class="flex-row">
+              ${Object.keys(G7F1_FORMATS).map(k => `<button type="button" class="btn ${fk === k ? "btn-primary" : ""}" onclick="DECK.setTab('fmt','${k}')">${G7F1_FORMATS[k].name}</button>`).join("")}
+            </div>
+            <table class="data-table">
+              <thead><tr><th>Ячейка</th><th>Что реально хранится внутри</th><th>Как отображается в формате «${f.name}»</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">A1</td><td class="mono">1000</td><td class="mono font-bold" style="background:var(--primary-soft);">${f.v1}</td></tr>
+                <tr><td class="mono">A2</td><td class="mono">0,5</td><td class="mono font-bold" style="background:var(--primary-soft);">${f.v2}</td></tr>
+                <tr><td class="mono">A3</td><td class="mono">45000</td><td class="mono font-bold" style="background:var(--primary-soft);">${f.v3}</td></tr>
+              </tbody>
+            </table>
+            <div class="box-success text-xs"><strong>Пояснение:</strong> ${f.desc}</div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Тренажёр форматов",
+      shortTitle: "Подбери формат данных для 6 ситуаций",
+      timing: "36–46 мин",
+      source: "КСП 7.2А Урок 1 · Практика выбора форматов",
+      notes: "Пройдите 6 кейсов со счётчиком верных ответов.",
+      render(st) {
+        let ok = 0;
+        G7F1_QUIZ.forEach(q => { if (st.quiz[q.id] === q.ans) ok++; });
+        const opts = [["num","Числовой"],["cur","Денежный"],["pct","Процент."],["dat","Дата"],["txt","Текстовый"]];
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <h2 class="slide-h2">Тренажёр: подбери правильный формат ячейки</h2>
+              <span class="pill pill-success mono">${ok} / ${G7F1_QUIZ.length}</span>
+            </div>
+            <div class="stack" style="gap:6px;">
+              ${G7F1_QUIZ.map((q, i) => {
+                const p = st.quiz[q.id];
+                const cls = p ? (p === q.ans ? "ok" : "bad") : "";
+                return `
+                  <div class="quiz-row ${cls}">
+                    <div style="flex:1;"><strong>${i + 1}. ${q.item}</strong>${p === q.ans ? `<div class="text-xs text-muted">${q.why}</div>` : ""}</div>
+                    <div class="flex-row" style="gap:4px;">
+                      ${opts.map(([k,lbl]) => `<button type="button" class="btn ${p === k ? "btn-primary" : ""}" style="padding:2px 6px;font-size:11px;" onclick="DECK.pickQuiz('${q.id}','${k}')">${lbl}</button>`).join("")}
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Оформление таблицы",
+      shortTitle: "Форматирование ячеек: границы, заливка, перенос текста",
+      timing: "46–52 мин",
+      source: "КСП 7.2А Урок 1 · Оформление таблиц",
+      notes: "Кратко покажите 4 инструмента красивой таблицы: Объединить ячейки (заголовок), Перенос текста, Все границы и Заливка шапки + расширение столбца при #####.",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">4 приёма аккуратного оформления таблицы</h2>
+            <div class="grid-2 text-xs">
+              <div class="box-primary"><strong>1. Объединить и поместить в центре</strong><br>Для общего заголовка таблицы поверх всех столбцов (например, <span class="mono">A1:E1</span>).</div>
+              <div class="box-accent"><strong>2. Перенос текста</strong><br>Чтобы длинный заголовок столбца не обрезался, а переносился в 2 строки внутри ячейки.</div>
+              <div class="box-success"><strong>3. Все границы и заливка шапки</strong><br>Выделяют структуру таблицы и делают её читаемой при печати.</div>
+              <div class="box-warning"><strong>4. Видишь <span class="mono">#####</span> в ячейке?</strong><br>Это НЕ ошибка в формуле — просто число не помещается по ширине! Раздвинь столбец шире.</div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Мини-Таблицы · Практика",
+      pillClass: "pill-accent",
+      shortTitle: "Мини-Таблицы: Форматы данных (участники олимпиады)",
+      timing: "52–70 мин",
+      source: "Мини-Таблицы (/excel?task=g7-fmt-formaty)",
+      notes: "Живой тренажёр Мини-Таблицы прямо в слайде! Ученики применяют нужные форматы (Числовой, Денежный, Дата, Процентный) и проверяют решение кнопкой автопроверки. Доп. задание: g7-fmt-oshibki.",
+      render(st, api) {
+        return api.renderMiniExcelTask({
+          key: "g7fmt1",
+          taskId: "g7-fmt-formaty",
+          title: "Практика в Мини-Таблицах: Форматы данных",
+          summary: "Настройте правильные форматы данных для таблицы «Участники олимпиады» и проверьте себя автопроверкой.",
+          steps: ["Задайте форматы столбцов (Дата, Денежный, Процентный)", "Оформите шапку и границы", "Нажмите «Проверить»"],
+          meta: "Цель 7.1.1.1 · Автопроверка"
+        });
+      }
+    },
+    {
+      badge: "Этап 3 · Блиц-проверка",
+      shortTitle: "Блиц «Верно / Неверно» (4 вопроса)",
+      timing: "70–75 мин",
+      source: "КСП 7.2А Урок 1",
+      notes: "Быстрый блиц по итогам урока.",
+      render(st) {
+        const qa = [
+          { k: "b1", q: "1. Адрес ячейки записывается как «Номер строки + Буква столбца» (например 2B).", a: "НЕВЕРНО! Сначала буква столбца, затем номер строки: B2." },
+          { k: "b2", q: "2. Если применить Процентный формат к числу 0,25, на экране появится 25%.", a: "ВЕРНО! Процентный формат умножает число на 100 и добавляет знак %." },
+          { k: "b3", q: "3. Значки ##### в ячейке означают деление на ноль.", a: "НЕВЕРНО! ##### означает, что число не помещается в узкий столбец — расширьте его." },
+          { k: "b4", q: "4. Число в Excel по умолчанию выравнивается по правому краю, а текст — по левому.", a: "ВЕРНО! Это быстрый способ проверить, распозналось ли число." }
+        ];
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Блиц «Верно / Неверно»</h2>
+            <div class="grid-2">
+              ${qa.map(x => `
+                <button type="button" class="interactive-card ${st.revealed[x.k] ? "revealed" : ""}" onclick="DECK.toggleReveal('${x.k}')">
+                  <div class="font-bold text-xs">${x.q}</div>
+                  <div class="text-xs" style="margin-top:6px;">${st.revealed[x.k] ? x.a : "Нажмите для ответа →"}</div>
+                </button>
+              `).join("")}
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 3 · ДЗ",
+      shortTitle: "Домашнее задание в Мини-Таблицах",
+      timing: "75–80 мин",
+      source: "Мини-Таблицы · g7-fmt-dz-rashody",
+      notes: "Выдайте домашнее задание в Мини-Таблицах «ДЗ. Мои расходы: форматы данных» (g7-fmt-dz-rashody).",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Домашнее задание урока 1</h2>
+            <div class="box-primary flex-between text-xs">
+              <div>
+                <strong>В тренажёре Мини-Таблицы (/excel) выполните:</strong><br>
+                • <strong>«ДЗ. Мои расходы: форматы данных»</strong> (<span class="mono">g7-fmt-dz-rashody</span>)<br>
+                • По желанию: «Ошибка #ЗНАЧ!: исправьте данные» (<span class="mono">g7-fmt-oshibki</span>)
+              </div>
+              <a class="btn btn-accent" href="/excel?task=g7-fmt-dz-rashody" target="_blank" rel="noopener noreferrer">Открыть ДЗ ↗</a>
+            </div>
+          </div>
+        `;
+      }
+    }
+  ]
+});
+</script>
+</body>
+</html>

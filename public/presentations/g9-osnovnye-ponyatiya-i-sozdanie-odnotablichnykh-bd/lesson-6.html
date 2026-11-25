@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9.2А · Урок 6 · Запросы к однотабличной БД. QBE и обобщение 9.2А</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+</head>
+<body>
+<script src="../_engine/deck.js"></script>
+<script>
+const L6_CARS = [
+  { model: "Toyota Camry", color: "белый", year: 2019, price: 8124300 },
+  { model: "Kia Rio", color: "белый", year: 2018, price: 4188410 },
+  { model: "BMW 3", color: "красный", year: 2020, price: 11800136 },
+  { model: "Audi S5", color: "красный", year: 2021, price: 24968800 },
+  { model: "Toyota Corolla", color: "серый", year: 2019, price: 6849900 }
+];
+
+const L6_QBE_PRESETS = {
+  and: {
+    label: "И (одна строка): Toyota И Цена < 8 000 000",
+    qbeCols: [
+      { field: "Модель", tbl: "Автомобили", sort: "", show: true, crit: 'Like "Toyota*"', or: "" },
+      { field: "Цвет", tbl: "Автомобили", sort: "", show: true, crit: "", or: "" },
+      { field: "Цена", tbl: "Автомобили", sort: "по возрастанию", show: true, crit: "< 8000000", or: "" }
+    ],
+    sql: 'SELECT Модель, Цвет, Цена\nFROM Автомобили\nWHERE Модель LIKE "Toyota*" AND Цена < 8000000\nORDER BY Цена ASC;',
+    rows: () => L6_CARS.filter(x => x.model.startsWith("Toyota") && x.price < 8000000)
+  },
+  or: {
+    label: "ИЛИ (разные строки): Цвет = красный ИЛИ Год = 2018",
+    qbeCols: [
+      { field: "Модель", tbl: "Автомобили", sort: "", show: true, crit: "", or: "" },
+      { field: "Цвет", tbl: "Автомобили", sort: "", show: true, crit: '"красный"', or: "" },
+      { field: "Год", tbl: "Автомобили", sort: "по убыванию", show: true, crit: "", or: "2018" },
+      { field: "Цена", tbl: "Автомобили", sort: "", show: true, crit: "", or: "" }
+    ],
+    sql: 'SELECT Модель, Цвет, Год, Цена\nFROM Автомобили\nWHERE Цвет = "красный" OR Год = 2018\nORDER BY Год DESC;',
+    rows: () => L6_CARS.filter(x => x.color === "красный" || x.year === 2018).sort((a,b) => b.year - a.year)
+  },
+  like: {
+    label: 'Like "T*": модели на букву T',
+    qbeCols: [
+      { field: "Модель", tbl: "Автомобили", sort: "по возрастанию", show: true, crit: 'Like "T*"', or: "" },
+      { field: "Цена", tbl: "Автомобили", sort: "", show: true, crit: "", or: "" }
+    ],
+    sql: 'SELECT Модель, Цена\nFROM Автомобили\nWHERE Модель LIKE "T*"\nORDER BY Модель ASC;',
+    rows: () => L6_CARS.filter(x => x.model.startsWith("T")).sort((a,b) => a.model.localeCompare(b.model))
+  },
+  between: {
+    label: "BETWEEN 6 000 000 AND 12 000 000",
+    qbeCols: [
+      { field: "Модель", tbl: "Автомобили", sort: "", show: true, crit: "", or: "" },
+      { field: "Год", tbl: "Автомобили", sort: "", show: false, crit: "", or: "" },
+      { field: "Цена", tbl: "Автомобили", sort: "по возрастанию", show: true, crit: "BETWEEN 6000000 AND 12000000", or: "" }
+    ],
+    sql: 'SELECT Модель, Цена\nFROM Автомобили\nWHERE Цена BETWEEN 6000000 AND 12000000\nORDER BY Цена ASC;',
+    rows: () => L6_CARS.filter(x => x.price >= 6000000 && x.price <= 12000000).sort((a,b) => a.price - b.price)
+  },
+  calc: {
+    label: "Вычисляемое поле: ЦенаСоСкидкой: [Цена]*0.9",
+    qbeCols: [
+      { field: "Модель", tbl: "Автомобили", sort: "", show: true, crit: "", or: "" },
+      { field: "Цена", tbl: "Автомобили", sort: "", show: true, crit: "", or: "" },
+      { field: "ЦенаСоСкидкой: [Цена]*0.9", tbl: "", sort: "", show: true, crit: "", or: "" }
+    ],
+    sql: 'SELECT Модель, Цена, [Цена]*0.9 AS ЦенаСоСкидкой\nFROM Автомобили;',
+    rows: () => L6_CARS.map(x => Object.assign({ sale: Math.round(x.price * 0.9) }, x))
+  }
+};
+
+const L6_SOR_QUIZ = [
+  { id: "s1", q: "Какой инструмент выбрать, если в запросе нужно задать условие «Цена > 5000»?", ans: "qbe", opts: [["wiz","Мастер запросов"], ["qbe","Конструктор запросов"]], why: "Мастер запросов НЕ позволяет задавать условия отбора — для критериев открывают Конструктор!" },
+  { id: "s2", q: "Куда записать условия «Цвет = белый» И «Год = 2019» в бланке QBE?", ans: "same", opts: [["same","В одну строку «Условие»"], ["diff","В строки «Условие» и «или»"]], why: "Условия в ОДНОЙ строке объединяются логическим И (AND)." },
+  { id: "s3", q: "Что означает галочка ☑ «Вывод на экран» в столбце бланка QBE, если она СНЯТА?", ans: "hide", opts: [["del","Поле удалится из таблицы"], ["hide","Поле фильтрует, но не выводится"]], why: "Снятие галочки скрывает столбец из результата, но условие отбора по нему продолжает работать!" },
+  { id: "s4", q: "Как правильно записать вычисляемое поле «Со скидкой 10%» в бланке QBE?", ans: "colon", opts: [["colon","Скидка: [Цена]*0.9"], ["eq","=Цена*0.9"]], why: "В бланке QBE имя нового поля отделяют двоеточием (:), а исходное поле берут в [квадратные скобки]." },
+  { id: "s5", q: "Что отберёт критерий Like \"М*\" в поле «Город»?", ans: "mstart", opts: [["mstart","Все города на букву М"], ["msingle","Только 1 букву М"]], why: "Like \"М*\" находит любую строку, начинающуюся с буквы М (Москва, Минск…)." },
+  { id: "s6", q: "На каком языке MS Access строит все запросы «под капотом»?", ans: "sql", opts: [["vba","VBA"], ["sql","SQL"]], why: "Конструктор QBE (Query By Example) автоматически генерирует код на языке SQL!" }
+];
+
+initDeck({
+  badge: "🗄 9.2А · Урок 6",
+  title: "Запросы к однотабличной БД. Конструктор QBE и обобщение 9.2А",
+  subtitle: "9 класс · 2 четверть · Цели 9.1.2.7, 9.1.2.6, 9.1.2.3 · 80 мин · Мини-СУБД",
+  footer: "НИШ ЕМН г. Кызылорда · 9 класс · 2 четверть · Мини-СУБД (/subd)",
+  initialState: {
+    tabs: { qbePreset: "and", logic: "and" }
+  },
+  slides: [
+    {
+      badge: "Этап 1 · Постановка задачи",
+      shortTitle: "Почему фильтра недостаточно — нужен Запрос",
+      timing: "0–6 мин",
+      source: "КСП 9.2А Урок 6 · SB 9 кл. стр. 74–77",
+      notes: "Подведите класс от предыдущего урока к новому понятию: фильтр пропадает при закрытии, не умеет считать цену со скидкой 10% и не работает с несколькими таблицами. Здесь на сцену выходит объект «Запрос на выборку».",
+      render() {
+        return `
+          <div class="stack">
+            <div class="text-xs font-bold text-muted" style="text-transform:uppercase;">Информатика · 9 класс · Раздел 9.2А «Однотабличные БД» · Урок 6 из 6</div>
+            <h1 class="slide-h1">Запросы на выборку (QBE) и итоги раздела 9.2А</h1>
+            <p class="lead">Научимся строить и сохранять запросы в Конструкторе QBE, сочетать условия И / ИЛИ, задавать вычисляемые поля, видеть генерируемый SQL и готовиться к СОР.</p>
+            <div class="box-accent text-xs">
+              <strong>Проблема урока:</strong> вчера мы фильтровали таблицу «Автомобили». Но при закрытии таблицы фильтр сбросился, лишние столбцы не спрятать, а посчитать <strong>цену со скидкой 10%</strong> фильтр вообще не умеет! Что нужно создать в БД?
+            </div>
+            <div class="grid-3 text-xs">
+              <div class="box-primary"><div class="box-title mono">9.1.2.7</div>Создавать запросы на выборку в Конструкторе (QBE) с условиями, сортировкой и расчётами.</div>
+              <div class="box-accent"><div class="box-title mono" style="color:var(--accent);">SQL + QBE</div>Понимать, как бланк QBE переводится в код SQL и в запрос с параметром <span class="mono">[...]</span>.</div>
+              <div class="box-success"><div class="box-title">Обобщение 9.2А</div>Пройти полный тест-подготовку СОР по однотабличным БД.</div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Фильтр vs Запрос",
+      shortTitle: "Фильтр vs Запрос и Мастер vs Конструктор",
+      timing: "6–15 мин",
+      source: "SB 9 кл. стр. 74–75 · Сравнительная таблица",
+      notes: "Чётко закрепите два сравнения из учебника: (1) Фильтр — НЕ объект БД, Запрос — самостоятельный объект БД; (2) Мастер запросов не задаёт условия отбора — их задают в Конструкторе запросов.",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Фильтр vs Запрос на выборку · Мастер vs Конструктор</h2>
+            <table class="data-table">
+              <thead><tr><th>Критерий сравнения</th><th>Фильтр (в таблице)</th><th>Запрос на выборку (объект БД)</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Является ли объектом БД?</strong></td><td>Нет (привязан к текущему виду таблицы)</td><td><strong>Да</strong> (сохраняется в Области навигации, на нём строят формы/отчёты)</td></tr>
+                <tr><td><strong>Сохранение результата</strong></td><td>Временно скрывает строки до закрытия</td><td>Хранит правило отбора и всегда показывает свежие данные из таблицы</td></tr>
+                <tr><td><strong>Возможности</strong></td><td>Не скрывает столбцы и не считает новые поля</td><td><strong>Скрывает столбцы, делает вычисления, связывает таблицы</strong></td></tr>
+                <tr><td><strong>Простой и сложный запрос</strong></td><td colspan="2"><strong>Простой запрос</strong> — содержит одно условие отбора; <strong>сложный запрос</strong> — несколько условий (И / ИЛИ) или несколько таблиц.</td></tr>
+              </tbody>
+            </table>
+            <div class="grid-2 text-xs">
+              <div class="box">
+                <div class="box-title">Мастер запросов</div>
+                Позволяет быстро выбрать таблицу и поля, НО <strong>НЕ умеет задавать условия отбора (критерии)</strong> на этапе создания!
+              </div>
+              <div class="box-primary">
+                <div class="box-title">Конструктор запросов (QBE)</div>
+                <strong>Query By Example</strong> — визуальный бланк, в котором задаются поля, сортировка, скрытие столбцов, вычисляемые поля и условия <span class="mono">И / ИЛИ</span>.
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Алгоритм построения",
+      shortTitle: "4 вопроса планирования и пример «Химические элементы»",
+      timing: "15–23 мин",
+      source: "SB 9 кл. стр. 75 · Алгоритм создания запроса («Химические элементы»)",
+      notes: "Разберите 4 вопроса планирования перед созданием запроса из учебника SB и пройдите 5 шагов Конструктора на примере «Химические элементы → Франция».",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Планирование и 5 шагов в Конструкторе запросов</h2>
+            <div class="box-primary text-xs">
+              <div class="box-title">4 вопроса планирования ДО создания запроса (SB 9 кл.)</div>
+              <strong>1.</strong> Какая таблица содержит нужную информацию? &nbsp;|&nbsp;
+              <strong>2.</strong> Каким условиям должны удовлетворять записи?<br>
+              <strong>3.</strong> Каким должен быть порядок сортировки? &nbsp;|&nbsp;
+              <strong>4.</strong> Какое осмысленное имя получит сохранённый запрос?
+            </div>
+            <div class="box-white text-xs stack">
+              <div class="box-title">Пример SB: выбрать элементы из таблицы «Химические элементы», открытые во Франции</div>
+              <div class="grid-5" style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;">
+                <div class="box"><strong>1. Запуск</strong><br>Вкладка «Создание» → <strong>Конструктор запросов</strong>.</div>
+                <div class="box"><strong>2. Таблица</strong><br>В окне «Добавление таблицы» выбрать <em>«Химические элементы»</em> → Закрыть.</div>
+                <div class="box"><strong>3. Поля</strong><br>Двойным щелчком перенести поля <span class="mono">Элемент</span>, <span class="mono">Символ</span>, <span class="mono">Страна</span> в бланк QBE.</div>
+                <div class="box"><strong>4. Критерий</strong><br>В строке <strong>«Условие отбора»</strong> под полем «Страна» написать <span class="mono">"Франция"</span>.</div>
+                <div class="box"><strong>5. Старт</strong><br>Нажать красную кнопку <strong>! Выполнить</strong> (или сохранить Ctrl+S).</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Бланк QBE",
+      shortTitle: "Строки QBE, логика И / ИЛИ и расчёты",
+      timing: "23–33 мин",
+      source: "SB 9 кл. стр. 76 · Устройство бланка QBE",
+      notes: "Переключайтесь между вкладками И (одна строка) и ИЛИ (разные строки) — именно в этом месте ученики чаще всего ошибаются в практических работах и на СОР.",
+      render(st) {
+        const lg = st.tabs.logic || "and";
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <h2 class="slide-h2">Устройство бланка QBE, логика «И» / «ИЛИ» и вычисления</h2>
+              <div class="flex-row">
+                <button type="button" class="btn ${lg === "and" ? "btn-primary" : ""}" onclick="DECK.setTab('logic','and')">Логика И (AND)</button>
+                <button type="button" class="btn ${lg === "or" ? "btn-accent" : ""}" onclick="DECK.setTab('logic','or')">Логика ИЛИ (OR)</button>
+              </div>
+            </div>
+            <table class="data-table">
+              <thead><tr><th>Строка бланка QBE</th><th>Поле 1: Модель</th><th>Поле 2: Цвет</th><th>Поле 3: Цена</th><th>Поле 4 (вычисляемое): СоСкидкой: [Цена]*0.9</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Имя таблицы</strong></td><td class="mono">Автомобили</td><td class="mono">Автомобили</td><td class="mono">Автомобили</td><td class="mono text-muted">(пусто)</td></tr>
+                <tr><td><strong>Сортировка</strong></td><td></td><td></td><td>по возрастанию</td><td></td></tr>
+                <tr><td><strong>Вывод на экран</strong></td><td>☑</td><td>☑</td><td>☑</td><td>☑</td></tr>
+                <tr style="background:${lg === "and" ? "var(--primary-soft)" : "var(--accent-soft)"};">
+                  <td><strong>Условие отбора</strong></td>
+                  <td class="mono">${lg === "and" ? 'Like "Toyota*"' : ""}</td>
+                  <td class="mono">${lg === "and" ? "" : '"красный"'}</td>
+                  <td class="mono">${lg === "and" ? "< 8000000" : ""}</td>
+                  <td></td>
+                </tr>
+                <tr style="background:${lg === "or" ? "var(--accent-soft)" : "transparent"};">
+                  <td><strong>или</strong></td>
+                  <td></td>
+                  <td class="mono">${lg === "or" ? '"белый"' : ""}</td>
+                  <td class="mono">${lg === "or" ? "" : ""}</td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="grid-2 text-xs">
+              <div class="${lg === "and" ? "box-primary" : "box"}">
+                <strong>Логика И (AND) — ОДНА строка:</strong> условия, записанные в одной строке «Условие отбора», должны выполняться <strong>одновременно</strong> (Toyota И дешевле 8 млн).
+              </div>
+              <div class="${lg === "or" ? "box-accent" : "box"}">
+                <strong>Логика ИЛИ (OR) — РАЗНЫЕ строки:</strong> если второе условие опустить на строку «или», подойдёт <strong>хотя бы одно</strong> (красный ИЛИ белый).
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Таблица критериев",
+      shortTitle: "Все операторы и критерии отбора SB 9 кл.",
+      timing: "33–42 мин",
+      source: "SB 9 кл. стр. 76–77 · Критерии отбора в запросах",
+      notes: "Полный справочник критериев из учебника: Саратов, Not Саратов, Like \"М*\", <М, >=М, 100, <=20, = 4 OR = 5, BETWEEN 3 AND 5. Плюс даты в #...# и Is Null / Is Not Null.",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Справочник критериев отбора MS Access (примеры из SB)</h2>
+            <table class="data-table">
+              <thead><tr><th>Запись в «Условие отбора»</th><th>Тип поля</th><th>Какие записи будут отобраны</th></tr></thead>
+              <tbody>
+                <tr><td class="mono font-bold">"Саратов"</td><td>Текст</td><td>Точное совпадение со словом Саратов (Access сам ставит кавычки).</td></tr>
+                <tr><td class="mono font-bold">Not "Саратов"</td><td>Текст</td><td>Все города, кроме Саратова (можно также <span class="mono">&lt;&gt; "Саратов"</span>).</td></tr>
+                <tr><td class="mono font-bold">Like "М*"</td><td>Текст</td><td>Все слова, начинающиеся на букву М (Москва, Минск, Муром).</td></tr>
+                <tr><td class="mono font-bold">&lt;"М"  /  &gt;="М"</td><td>Текст</td><td>По алфавиту: до буквы М (А–Л) или от буквы М до Я включительно.</td></tr>
+                <tr><td class="mono font-bold">100  /  &lt;=20</td><td>Число</td><td>Ровно 100 или меньше либо равно 20.</td></tr>
+                <tr><td class="mono font-bold">= 4 Or = 5</td><td>Число</td><td>Значение равно 4 или равно 5 (например, хорошисты и отличники).</td></tr>
+                <tr><td class="mono font-bold">Between 3 And 5</td><td>Число</td><td>Диапазон от 3 до 5 <strong>включительно</strong> (3, 4 и 5).</td></tr>
+                <tr><td class="mono font-bold">&gt;=#01.01.2020#</td><td>Дата/время</td><td>Даты с 1 января 2020 года (даты заключаются в решётки <span class="mono">#...#</span>).</td></tr>
+                <tr><td class="mono font-bold">Is Null / Is Not Null</td><td>Любой</td><td>Только пустые ячейки / только заполненные ячейки.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Симулятор QBE ⇄ SQL",
+      shortTitle: "Живой симулятор: Бланк QBE ⇄ Код SQL ⇄ Результат",
+      timing: "42–52 мин",
+      source: "Тренажёр QBE & SQL · SB 9 кл.",
+      notes: "Покажите связь визуального бланка QBE с настоящим языком SQL: в MS Access каждый запрос QBE «под капотом» является SQL-кодом, который можно открыть через «Режим SQL».",
+      render(st) {
+        const pk = st.tabs.qbePreset || "and";
+        const pr = L6_QBE_PRESETS[pk];
+        const rows = pr.rows();
+        const isCalc = pk === "calc";
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Живой симулятор: Бланк QBE ⇄ SQL ⇄ Результат</h2>
+            <div class="flex-row">
+              ${Object.keys(L6_QBE_PRESETS).map(k => `<button type="button" class="btn ${pk === k ? "btn-primary" : ""}" style="font-size:11px;" onclick="DECK.setTab('qbePreset','${k}')">${L6_QBE_PRESETS[k].label}</button>`).join("")}
+            </div>
+            <div class="grid-2">
+              <div class="stack">
+                <div class="box-title">Бланк Конструктора QBE</div>
+                <table class="data-table">
+                  <thead><tr><th>Строка</th>${pr.qbeCols.map(c => `<th class="mono">${c.field}</th>`).join("")}</tr></thead>
+                  <tbody>
+                    <tr><td>Таблица</td>${pr.qbeCols.map(c => `<td class="mono text-xs">${c.tbl}</td>`).join("")}</tr>
+                    <tr><td>Сортировка</td>${pr.qbeCols.map(c => `<td class="text-xs">${c.sort}</td>`).join("")}</tr>
+                    <tr><td>Вывод</td>${pr.qbeCols.map(c => `<td>${c.show ? "☑" : "☐ (скрыто)"}</td>`).join("")}</tr>
+                    <tr><td>Условие</td>${pr.qbeCols.map(c => `<td class="mono font-bold">${DECK_ESC(c.crit)}</td>`).join("")}</tr>
+                    <tr><td>или</td>${pr.qbeCols.map(c => `<td class="mono font-bold">${DECK_ESC(c.or)}</td>`).join("")}</tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="stack">
+                <div class="box-title" style="color:var(--accent);">Эквивалент SQL (Режим SQL в Access)</div>
+                <pre class="code-block" style="font-size:11.5px;">${DECK_ESC(pr.sql)}</pre>
+              </div>
+            </div>
+            <table class="data-table">
+              <thead><tr><th>Модель</th>${pk === "or" ? "<th>Цвет</th><th>Год</th>" : pk === "and" ? "<th>Цвет</th>" : ""}<th>Цена (₸)</th>${isCalc ? "<th>ЦенаСоСкидкой (₸)</th>" : ""}</tr></thead>
+              <tbody>
+                ${rows.map(r => `<tr><td><strong>${r.model}</strong></td>${pk === "or" ? `<td>${r.color}</td><td class="mono">${r.year}</td>` : pk === "and" ? `<td>${r.color}</td>` : ""}<td class="mono">${r.price.toLocaleString("ru-RU")}</td>${isCalc ? `<td class="mono font-bold">${r.sale.toLocaleString("ru-RU")}</td>` : ""}</tr>`).join("")}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Мини-СУБД · Практика",
+      pillClass: "pill-accent",
+      shortTitle: "Мини-СУБД: Запросы к одной таблице",
+      timing: "52–68 мин",
+      source: "Мини-СУБД (/subd) · t6, g9a-p6-like, g9a-p6-skidka, t7",
+      notes: "Основное задание в Мини-СУБД — «Запрос к одной таблице» (t6). Дополнительно для закрепления Like, вычислений и параметров: «Запрос с Like» (g9a-p6-like), «Цена со скидкой» (g9a-p6-skidka) и «Запрос с параметром» (t7).",
+      render(st, api) {
+        return api.renderMiniSubdTask({
+          key: "g9a6",
+          title: "Практика в Мини-СУБД: Запрос к одной таблице",
+          summary: "Постройте запрос на выборку в бланке Конструктора QBE, проверьте условия И / ИЛИ и вычисляемое поле.",
+          taskName: "1) Запрос к одной таблице (t6) · Доп.: Запрос с Like (g9a-p6-like), Цена со скидкой (g9a-p6-skidka), Запрос с параметром (t7)",
+          steps: ["Откройте «✓ Задания»", "Выполните «Запрос к одной таблице»", "Доп.: «Запрос с Like» и «Цена со скидкой»"],
+          meta: "Цели 9.1.2.7 · 9.1.2.6"
+        });
+      }
+    },
+    {
+      badge: "Этап 3 · Контроль 9.2А",
+      shortTitle: "Итоговый мини-тест по разделу 9.2А (6 вопросов СОР)",
+      timing: "68–75 мин",
+      source: "Контроль раздела 9.2А · Подготовка к СОР",
+      notes: "Решите всем классом 6 тестовых заданий формата СОР. Разберите каждое неверное предположение по ходу проверки.",
+      render(st) {
+        let ok = 0;
+        L6_SOR_QUIZ.forEach(item => { if (st.quiz[item.id] === item.ans) ok++; });
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <h2 class="slide-h2">Итоговый тест раздела 9.2А (подготовка к СОР)</h2>
+              <span class="pill pill-success mono">${ok} / ${L6_SOR_QUIZ.length}</span>
+            </div>
+            <div class="stack" style="gap:6px;">
+              ${L6_SOR_QUIZ.map((item, i) => {
+                const picked = st.quiz[item.id];
+                const cls = picked ? (picked === item.ans ? "ok" : "bad") : "";
+                return `
+                  <div class="quiz-row ${cls}">
+                    <div style="flex:1;">
+                      <strong>${i + 1}. ${item.q}</strong>
+                      ${picked === item.ans ? `<div class="text-xs text-muted">${item.why}</div>` : ""}
+                    </div>
+                    <div class="flex-row" style="gap:4px;">
+                      ${item.opts.map(([k, lbl]) => `<button type="button" class="btn ${picked === k ? "btn-primary" : ""}" style="padding:2px 8px;font-size:11px;" onclick="DECK.pickQuiz('${item.id}','${k}')">${lbl}</button>`).join("")}
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 3 · Мостик к 9.2B и ДЗ",
+      shortTitle: "Карта раздела 9.2А + переход к 9.2B + ДЗ",
+      timing: "75–80 мин",
+      source: "КСП 9.2А Урок 6 · ДЗ g9a-hw6-avto-zapros",
+      notes: "Подведите итог всего раздела 9.2А: мы прошли все 5 инструментов однотабличной БД. В следующем разделе 9.2B научимся связывать несколько таблиц и строить печатные отчёты.",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Итоги раздела 9.2А и мост к многотабличным БД (9.2B)</h2>
+            <div class="grid-3 text-xs">
+              <div class="box-primary"><strong>Уроки 1–2: Таблицы и типы</strong><br>ИС ⇄ СУБД ⇄ БД, 9 типов Access, первичный ключ 🔑, Режим конструктора и Счётчик.</div>
+              <div class="box-accent"><strong>Уроки 3–4: Маски и Формы</strong><br>Символы <span class="mono">0 9 L ? &gt; &lt; \</span>, 8 свойств поля, 3 типа элементов формы, вычисления и кнопки.</div>
+              <div class="box-success"><strong>Уроки 5–6: Данные и Запросы</strong><br>Поиск (<span class="mono">* ?</span>), ловушки сортировки, 3 фильтра, бланк QBE (И/ИЛИ) и SQL.</div>
+            </div>
+            <div class="box-warning text-xs">
+              <strong>Впереди раздел 9.2B:</strong> что делать, если в одной таблице данные авторов или городов постоянно дублируются? Разделим базу на несколько таблиц, свяжем их ключами (<span class="mono">1:1, 1:N, M:N</span>) и оформим Отчёты!
+            </div>
+            <div class="box-primary flex-between text-xs">
+              <div><strong>Домашнее задание в Мини-СУБД (/subd):</strong> выполнить <strong>«Запрос для покупателя»</strong> (g9a-hw6-avto-zapros) — отобрать автомобили под требования клиента.</div>
+              <a class="btn btn-accent" href="/subd" target="_blank" rel="noopener noreferrer">Открыть Мини-СУБД ↗</a>
+            </div>
+          </div>
+        `;
+      }
+    }
+  ]
+});
+</script>
+</body>
+</html>

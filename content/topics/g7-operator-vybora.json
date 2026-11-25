@@ -1,0 +1,1105 @@
+{
+  "topic": "g7-operator-vybora",
+  "summary": "Оператор выбора switch в C++: назначение, синтаксис (switch, case, break, default), группы case, пропущенный break, вложенный switch, сравнение switch и if.",
+  "theory": [
+    {
+      "title": "Назначение оператора выбора",
+      "objectives": [
+        "7.4.3.8"
+      ],
+      "blocks": [
+        {
+          "type": "definition",
+          "term": "Оператор выбора switch",
+          "content": "Позволяет выбрать один вариант хода решения задачи из нескольких в зависимости от значения выражения. Так обеспечивается многонаправленное разветвление в программе."
+        },
+        {
+          "type": "paragraph",
+          "content": "Конструкция `switch` — удобная замена длинной конструкции `if … else`, которая сравнивает переменную с несколькими константными значениями. Она нужна, когда в зависимости от значения переменной надо выполнить те или иные действия. Оператор `switch` может быть заменен оператором `if`, но в некоторых случаях `switch` эффективнее."
+        },
+        {
+          "type": "diagram",
+          "format": "mermaid",
+          "content": "flowchart TD\n    A{\"switch (выражение)\"} -->|case 1| B[\"блок кода 1; break\"]\n    A -->|case 2| C[\"блок кода 2; break\"]\n    A -->|case n| D[\"блок кода n; break\"]\n    A -->|default| E[\"блок кода по умолчанию\"]\n    B --> K([\"дальше по программе\"])\n    C --> K\n    D --> K\n    E --> K",
+          "caption": "Многонаправленное разветвление"
+        }
+      ]
+    },
+    {
+      "title": "Синтаксис switch в C++",
+      "objectives": [
+        "7.4.3.8"
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "switch (выражение)\n{\n    case константа1:\n        последовательность_операторов1;\n        break;\n    case константа2:\n        последовательность_операторов2;\n        break;\n    ...\n    case константаN:\n        последовательность_операторовN;\n        break;\n    default:\n        последовательность_операторов;\n}",
+          "caption": "Общий вид оператора выбора"
+        },
+        {
+          "type": "comparison",
+          "title": "Части оператора выбора",
+          "columns": [
+            "Элемент",
+            "Назначение"
+          ],
+          "rows": [
+            [
+              "выражение (селектор)",
+              "выражение целочисленного (`int`) или символьного (`char`) типа; его значение сравнивается с константами"
+            ],
+            [
+              "`case константа:`",
+              "значение, при совпадении с которым выполняется соответствующая последовательность операторов; константы целого или символьного типа"
+            ],
+            [
+              "`break`",
+              "прерывает (заканчивает) выполнение кода инструкции `switch`"
+            ],
+            [
+              "`default:`",
+              "операторы, которые выполняются, если ни одна case-константа не совпала с выражением; блок может отсутствовать"
+            ]
+          ]
+        },
+        {
+          "type": "steps",
+          "title": "Как выполняется switch",
+          "items": [
+            "Вычисляется выражение возле ключевого слова `switch`.",
+            "Его значение сравнивается со значениями возле ключевых слов `case`.",
+            "Выполняется последовательность операторов в совпавшем блоке `case`.",
+            "Ключевое слово `break` указывает окончание выполнения действий.",
+            "Если совпадений нет, выполняется блок `default` (если он есть)."
+          ]
+        },
+        {
+          "type": "warning",
+          "content": "Чтобы прекратить выполнение последовательности операторов, нужно прервать процесс ключевым словом `break`. Без `break` выполняются и операторы следующих `case`."
+        }
+      ]
+    },
+    {
+      "title": "Примеры: дни недели и коды",
+      "objectives": [
+        "7.4.3.8"
+      ],
+      "blocks": [
+        {
+          "type": "example",
+          "title": "Рабочий или выходной день",
+          "content": "Даны номера дней недели n = 1..7. По значению n определить, выходной день или рабочий. Результат — в переменной `fDayOff` типа `bool`."
+        },
+        {
+          "type": "comparison",
+          "title": "Три способа",
+          "columns": [
+            "Способ",
+            "Код",
+            "Особенность"
+          ],
+          "rows": [
+            [
+              "1-й",
+              "`case 1: fDayOff = false; break;` … `case 7: fDayOff = true; break;`",
+              "перечислены все семь вариантов — нерационально, нет `default`"
+            ],
+            [
+              "2-й",
+              "`case 1: case 2: case 3: case 4: case 5: fDayOff = false; break; case 6: case 7: fDayOff = true; break;`",
+              "значения объединены в группы — эффективнее"
+            ],
+            [
+              "3-й",
+              "`case 6: case 7: fDayOff = true; break; default: fDayOff = false;`",
+              "самый компактный, но при day = −5 или day = 9 получим «рабочий день»"
+            ]
+          ]
+        },
+        {
+          "type": "example",
+          "title": "Код региона на номере машины",
+          "content": "```cpp\nint carNcode;\ncin >> carNcode;\nswitch (carNcode) {\n    case 1: cout << \"Астана\"; break;\n    case 2: cout << \"Алматы\"; break;\n    case 3: cout << \"Акмолинская область\"; break;\n    case 4: cout << \"Актюбинская область\"; break;\n    default: cout << \"Такого номера нет\"; break;\n}\n```"
+        },
+        {
+          "type": "example",
+          "title": "Баркод: несколько значений — одно действие",
+          "content": "Несколько меток `case` подряд дают одно действие:\n\n```cpp\nswitch (countryCode) {\n    case 0: case 1: /* … */ case 13: cout << \"США и Канада\"; break;\n    case 30: case 31: /* … */ case 37: cout << \"Франция\"; break;\n    case 380: cout << \"Болгария\"; break;\n    case 487: cout << \"Казахстан\"; break;\n    default: cout << \"Данное число не входит в наш список кодов\"; break;\n}\n```"
+        }
+      ]
+    },
+    {
+      "title": "Ошибки и особенности switch",
+      "objectives": [
+        "7.4.3.8"
+      ],
+      "blocks": [
+        {
+          "type": "example",
+          "title": "Пропущен break",
+          "content": "```cpp\nswitch (2)\n{ case 1: cout << 1 << '\\n';\n  case 2: cout << 2 << '\\n';\n  case 3: cout << 3 << '\\n';\n  case 4: cout << 4 << '\\n';\n  default: cout << 5 << '\\n'; }\n```\n\nРезультат: 2, 3, 4, 5. После совпадения с `case 2` без `break` выполняются все следующие операторы, включая `default`."
+        },
+        {
+          "type": "paragraph",
+          "content": "Объявить переменную в блоке `case` можно, но инициализировать новую переменную внутри `case` запрещено. Чтобы это сделать, блок заключают в фигурные скобки:\n\n```cpp\ncase 3:\n{ int c = 4;   // разрешено внутри { }\n  break; }\n```"
+        },
+        {
+          "type": "paragraph",
+          "content": "**Вложенный switch**: оператор `switch` нижнего уровня используется как часть case-последовательности внешнего `switch`.\n\n```cpp\nint k = 3, n = 2;\nswitch (k)\n{  case 1: cout << \"Тестовый редактор\" << endl; break;\n   case 2: cout << \"Браузер\" << endl; break;\n   case 3: switch (n)\n        {  case 1: cout << \"Python\" << endl; break;\n           case 2: cout << \"C++\" << endl; break;\n           case 3: cout << \"Java\" << endl; break; }\n   break;\n   default: cout << \"Это не программное обеспечение\" << endl; }\n```\n\nПри k = 3 и n = 2 будет выведено «C++»."
+        }
+      ]
+    },
+    {
+      "title": "switch и if: что выбрать",
+      "objectives": [
+        "7.4.3.8"
+      ],
+      "blocks": [
+        {
+          "type": "comparison",
+          "title": "Оператор выбора и условный оператор",
+          "columns": [
+            "switch",
+            "if / else"
+          ],
+          "rows": [
+            [
+              "выполняет только проверку **строгого равенства** выражения константам",
+              "может вычислять логические выражения и отношения (`>`, `<`, `&&` …)"
+            ],
+            [
+              "вместо условия пишется переменная или выражение целого или символьного типа",
+              "в скобках — условие"
+            ],
+            [
+              "целесообразен, когда проверяется более трех условий: позволяет обойтись без вложенных условий",
+              "подходит для любых условий"
+            ]
+          ]
+        },
+        {
+          "type": "example",
+          "title": "Разделы Конституции РК",
+          "content": "Программа по номеру раздела (от 1 до 5) выводит его название.\n\n```cpp\nint section;\ncin >> section;\nswitch (section)\n{\n    case 1: cout << \"Общие положения\"; break;\n    case 2: cout << \"Человек и гражданин\"; break;\n    case 3: cout << \"Президент\"; break;\n    case 4: cout << \"Парламент\"; break;\n    case 5: cout << \"Правительство\"; break;\n    default: cout << \"Такого раздела не существует\";\n}\n```\n\nТо же условным оператором: `if (section == 1) … else if (section == 2) …` и т. д. Переменная `section` — селектор."
+        },
+        {
+          "type": "example",
+          "title": "Замена if на switch",
+          "content": "Три условия `num < 5`, `num > 5`, `num == 5` для чисел от 0 до 10 можно переписать через `switch`, сгруппировав значения:\n\n```cpp\nswitch (num)\n{\n    case 0: case 1: case 2: case 3: case 4:\n        cout << \"Это число меньше 5.\"; break;\n    case 6: case 7: case 8: case 9: case 10:\n        cout << \"Это число больше 5.\"; break;\n    case 5: cout << \"Это число равно 5.\"; break;\n    default: cout << \"Этого числа нет на диапазоне от 0 до 10\";\n}\n```"
+        },
+        {
+          "type": "diagram",
+          "format": "mermaid",
+          "content": "mindmap\n  root((Оператор выбора switch))\n    Части\n      выражение int или char\n      case константа\n      break\n      default\n    Приемы\n      группа case\n      вложенный switch\n      фигурные скобки в case\n    Сравнение с if\n      только равенство\n      больше трех вариантов",
+          "caption": "Итог темы"
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "key": "sw7-def",
+      "title": "Назначение switch",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.8"
+      ],
+      "text": "Для чего используется оператор выбора `switch`?",
+      "options": [
+        {
+          "key": "A",
+          "content": "Чтобы выбрать один вариант из нескольких в зависимости от значения выражения"
+        },
+        {
+          "key": "B",
+          "content": "Чтобы повторять команды несколько раз"
+        },
+        {
+          "key": "C",
+          "content": "Чтобы объявить переменные разных типов"
+        },
+        {
+          "key": "D",
+          "content": "Чтобы проверить сложное условие с `&&` и `||`"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 186; 3_Switch переделать.pptx, слайд 6; G7_Информатика_THB_Финал_26.10.23 1.pdf, стр. 127",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "A — 1 балл.",
+        "accepted": {
+          "correct": "A"
+        },
+        "model_answer": "A",
+        "explanation": "switch обеспечивает многонаправленное разветвление."
+      }
+    },
+    {
+      "key": "sw7-parts",
+      "title": "Части switch",
+      "type": "matching",
+      "marks": 4,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.8"
+      ],
+      "text": "Сопоставь ключевое слово и его назначение.",
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "`switch`"
+          },
+          {
+            "key": "L2",
+            "text": "`case`"
+          },
+          {
+            "key": "L3",
+            "text": "`break`"
+          },
+          {
+            "key": "L4",
+            "text": "`default`"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "Прерывает выполнение кода инструкции switch"
+          },
+          {
+            "key": "R2",
+            "text": "Содержит выражение, которое сравнивается со значениями"
+          },
+          {
+            "key": "R3",
+            "text": "Операторы, выполняемые, если совпадений не найдено"
+          },
+          {
+            "key": "R4",
+            "text": "Указывает значение константы, при совпадении с которой выполняются операторы"
+          }
+        ]
+      },
+      "source": "nis_style",
+      "source_reference": "3_Switch переделать.pptx, слайды 8–9; G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 186",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "L1–R2; L2–R4; L3–R1; L4–R3. Всего 4 б.",
+        "accepted": {
+          "pairs": {
+            "L1": "R2",
+            "L2": "R4",
+            "L3": "R1",
+            "L4": "R3"
+          }
+        },
+        "explanation": "switch — выражение; case — значение для сравнения; break — выход; default — если совпадений нет."
+      }
+    },
+    {
+      "key": "sw7-type",
+      "title": "Тип выражения",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.8"
+      ],
+      "text": "Какого типа должно быть выражение в `switch` (по материалам урока)?",
+      "options": [
+        {
+          "key": "A",
+          "content": "Целочисленного (`int`) или символьного (`char`)"
+        },
+        {
+          "key": "B",
+          "content": "Только вещественного (`float`)"
+        },
+        {
+          "key": "C",
+          "content": "Только строкового (`string`)"
+        },
+        {
+          "key": "D",
+          "content": "Любого типа"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "3_Switch переделать.pptx, слайд 8",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "A — 1 балл.",
+        "accepted": {
+          "correct": "A"
+        },
+        "model_answer": "A",
+        "explanation": "Выражение и константы — целочисленного или символьного типа."
+      }
+    },
+    {
+      "key": "sw7-default",
+      "title": "Можно без default",
+      "type": "true_false",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.8"
+      ],
+      "text": "Блок `default` в операторе `switch` может отсутствовать.",
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 186, 190",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "Верно — 1 балл.",
+        "accepted": {
+          "correct": true
+        },
+        "explanation": "Ключевое слово default может быть опущено."
+      }
+    },
+    {
+      "key": "sw7-when",
+      "title": "Когда выбирать switch",
+      "type": "true_false",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.8"
+      ],
+      "text": "Оператор выбора целесообразно использовать, когда проверяется более трех условий на строгое равенство.",
+      "source": "nis_style",
+      "source_reference": "3_Switch переделать.pptx, слайд 17",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "Верно — 1 балл.",
+        "accepted": {
+          "correct": true
+        },
+        "explanation": "Это позволяет обойтись без вложенных условий."
+      }
+    },
+    {
+      "key": "sw7-day",
+      "title": "Выходной день",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "state",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.8"
+      ],
+      "text": "```cpp\nint day;\nbool fDayOff;\ncin >> day;\nswitch (day)\n{   case 6:\n    case 7: fDayOff = true; break;\n    default: fDayOff = false; }\n```\n\nКаким будет `fDayOff` при day = 9?",
+      "options": [
+        {
+          "key": "A",
+          "content": "true"
+        },
+        {
+          "key": "B",
+          "content": "false"
+        },
+        {
+          "key": "C",
+          "content": "Программа выдаст ошибку"
+        },
+        {
+          "key": "D",
+          "content": "Значение не изменится"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 187 (3-й способ)",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "model_answer": "B",
+        "explanation": "9 не совпадает с 6 и 7 → default → false (это недостаток способа: некорректный день считается рабочим)."
+      }
+    },
+    {
+      "key": "sw7-nobreak",
+      "title": "Пропущен break",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "state",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.8"
+      ],
+      "text": "```cpp\nswitch (3)\n{ case 1: cout << 1;\n  case 2: cout << 2;\n  case 3: cout << 3;\n  case 4: cout << 4;\n  default: cout << 5; }\n```\n\nЧто будет выведено?",
+      "options": [
+        {
+          "key": "A",
+          "content": "3"
+        },
+        {
+          "key": "B",
+          "content": "345"
+        },
+        {
+          "key": "C",
+          "content": "12345"
+        },
+        {
+          "key": "D",
+          "content": "35"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 188 («Проверь себя», 1)",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "model_answer": "B",
+        "explanation": "Нет break: после case 3 выполняются case 4 и default."
+      }
+    },
+    {
+      "key": "sw7-f-default",
+      "title": "Значение f",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "calculate",
+      "grading": "HYBRID",
+      "objectives": [
+        "7.4.3.8"
+      ],
+      "text": "```cpp\nint n = 5;\nfloat f, x = 2;\nswitch (n)\n{ case 1:\n  case 2:\n  case 3: f = 15 - 3*x; break;\n  default: f = -2*x*x - 4; }\n```\n\nЧему равно f?",
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 188 («Проверь себя», 3)",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "-12 — 1 балл.",
+        "accepted": {
+          "values": [
+            "-12"
+          ],
+          "numeric": true,
+          "tolerance": 0.001
+        },
+        "model_answer": "-12",
+        "explanation": "n = 5 не равно 1, 2, 3 → default: −2·4 − 4 = −12."
+      }
+    },
+    {
+      "key": "sw7-find-n",
+      "title": "Найди n",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "calculate",
+      "grading": "HYBRID",
+      "objectives": [
+        "7.4.3.8"
+      ],
+      "text": "```cpp\nint n;\nfloat f, x;\nx = 4;\nswitch (n)\n{ case 1: f = -2*x*x - 4; break;\n  case 2: f = 5*x + 2; break;\n  case 3: f = 15 - 3*x; break; }\n```\n\nПри каком значении n получится f = 22?",
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 188 («Проверь себя», 2)",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "2 — 1 балл.",
+        "accepted": {
+          "values": [
+            "2"
+          ],
+          "numeric": true,
+          "tolerance": 0.001
+        },
+        "model_answer": "2",
+        "explanation": "case 2: 5·4 + 2 = 22."
+      }
+    },
+    {
+      "key": "sw7-region",
+      "title": "Код региона",
+      "type": "fill_blank",
+      "marks": 3,
+      "difficulty": "medium",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.8"
+      ],
+      "text": "Заполни пропуски в программе определения региона по коду номера машины.\n\n```cpp\nint carNcode;\ncin >> carNcode;\nswitch ([[1]]) {\n    case 1: cout << \"Астана\"; break;\n    case 2: cout << \"Алматы\"; [[2]];\n    [[3]]: cout << \"Такого номера нет\"; break;\n}\n```",
+      "content": {
+        "blank_count": 3
+      },
+      "source": "nis_style",
+      "source_reference": "3_Switch переделать.pptx, слайд 12; G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 190",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "[[1]] carNcode; [[2]] break; [[3]] default — по 1 баллу",
+        "accepted": {
+          "blanks": [
+            [
+              "carNcode"
+            ],
+            [
+              "break"
+            ],
+            [
+              "default"
+            ]
+          ],
+          "ignore_spaces": true
+        },
+        "explanation": "Селектор — carNcode; после действия — break; для остальных значений — default."
+      }
+    },
+    {
+      "key": "sw7-group",
+      "title": "Одно действие для нескольких значений",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.8"
+      ],
+      "text": "Как в `switch` выполнить одно и то же действие для значений 1, 2 и 3?",
+      "options": [
+        {
+          "key": "A",
+          "content": "`case 1: case 2: case 3: действие; break;`"
+        },
+        {
+          "key": "B",
+          "content": "`case 1 && 2 && 3: действие; break;`"
+        },
+        {
+          "key": "C",
+          "content": "`case (1, 2, 3) действие;`"
+        },
+        {
+          "key": "D",
+          "content": "`case 1..3: действие; break;`"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 187 (2-й способ); 3_Switch переделать.pptx, слайд 13",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "A — 1 балл.",
+        "accepted": {
+          "correct": "A"
+        },
+        "model_answer": "A",
+        "explanation": "Метки case записывают подряд."
+      }
+    },
+    {
+      "key": "sw7-nested",
+      "title": "Вложенный switch",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "state",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.8"
+      ],
+      "text": "```cpp\nint k = 3, n = 3;\nswitch (k)\n{  case 1: cout << \"Тестовый редактор\"; break;\n   case 2: cout << \"Браузер\"; break;\n   case 3: switch (n)\n        {  case 1: cout << \"Python\"; break;\n           case 2: cout << \"C++\"; break;\n           case 3: cout << \"Java\"; break; }\n   break;\n   default: cout << \"Это не программное обеспечение\"; }\n```\n\nЧто будет выведено?",
+      "options": [
+        {
+          "key": "A",
+          "content": "Браузер"
+        },
+        {
+          "key": "B",
+          "content": "C++"
+        },
+        {
+          "key": "C",
+          "content": "Java"
+        },
+        {
+          "key": "D",
+          "content": "Это не программное обеспечение"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 190",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "C — 1 балл.",
+        "accepted": {
+          "correct": "C"
+        },
+        "model_answer": "C",
+        "explanation": "k = 3 → внутренний switch, n = 3 → Java."
+      }
+    },
+    {
+      "key": "sw7-num",
+      "title": "Число от 0 до 10",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "state",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.8"
+      ],
+      "text": "```cpp\nswitch (num)\n{\n    case 0: case 1: case 2: case 3: case 4:\n        cout << \"Это число меньше 5.\"; break;\n    case 6: case 7: case 8: case 9: case 10:\n        cout << \"Это число больше 5.\"; break;\n    case 5: cout << \"Это число равно 5.\"; break;\n    default: cout << \"Этого числа нет на диапазоне от 0 до 10\";\n}\n```\n\nЧто выведет программа при num = 12?",
+      "options": [
+        {
+          "key": "A",
+          "content": "Это число больше 5."
+        },
+        {
+          "key": "B",
+          "content": "Это число равно 5."
+        },
+        {
+          "key": "C",
+          "content": "Этого числа нет на диапазоне от 0 до 10"
+        },
+        {
+          "key": "D",
+          "content": "Ничего"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "3_Повторение Условн опер.pptx, слайд 6",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "C — 1 балл.",
+        "accepted": {
+          "correct": "C"
+        },
+        "model_answer": "C",
+        "explanation": "12 не совпадает ни с одной case-константой → default."
+      }
+    },
+    {
+      "key": "sw7-vs-if",
+      "title": "switch и if",
+      "type": "short_answer",
+      "marks": 2,
+      "difficulty": "medium",
+      "command_word": "explain",
+      "grading": "AI",
+      "objectives": [
+        "7.4.3.8"
+      ],
+      "text": "Чем оператор выбора `switch` отличается от условного оператора `if`? Приведи два отличия.",
+      "source": "nis_style",
+      "source_reference": "3_Switch переделать.pptx, слайды 11, 17",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "- switch проверяет только строгое равенство значению, а if может вычислять логические выражения и отношения (1)\n- В switch вместо условия пишется переменная/выражение целого или символьного типа (или: switch удобен при большом числе вариантов, более трех) (1)",
+        "points": [
+          {
+            "criterion": "switch проверяет только строгое равенство значению, а if может вычислять логические выражения и отношения",
+            "marks": 1
+          },
+          {
+            "criterion": "В switch вместо условия пишется переменная/выражение целого или символьного типа (или: switch удобен при большом числе вариантов, более трех)",
+            "marks": 1
+          }
+        ],
+        "model_answer": "switch выполняет только проверку строгого равенства, if может вычислять отношения и логические выражения; в switch пишут выражение целого или символьного типа, а не условие."
+      }
+    },
+    {
+      "key": "sw7-menu",
+      "title": "Перепиши через switch",
+      "type": "code_completion",
+      "marks": 4,
+      "difficulty": "medium",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "7.4.3.8"
+      ],
+      "text": "Перепиши фрагмент с помощью оператора `switch`:\n\n```cpp\ncin >> input;\nif (input == 1) cout << \"Load game!\";\nelse if (input == 2) cout << \"Start game!\";\nelse if (input == 3) cout << \"Play game!\";\nelse if (input == 4) cout << \"Thank you for playing!\";\nelse cout << \"Error, bad input, quitting\";\n```",
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 191 («Проверь себя», 2)",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "- switch (input) с верным синтаксисом и фигурными скобками (1)\n- case 1–4 с соответствующими сообщениями (1)\n- break после каждого варианта (1)\n- default с сообщением об ошибке (1)",
+        "points": [
+          {
+            "criterion": "switch (input) с верным синтаксисом и фигурными скобками",
+            "marks": 1
+          },
+          {
+            "criterion": "case 1–4 с соответствующими сообщениями",
+            "marks": 1
+          },
+          {
+            "criterion": "break после каждого варианта",
+            "marks": 1
+          },
+          {
+            "criterion": "default с сообщением об ошибке",
+            "marks": 1
+          }
+        ],
+        "model_answer": "switch (input) { case 1: cout << \"Load game!\"; break; case 2: cout << \"Start game!\"; break; case 3: cout << \"Play game!\"; break; case 4: cout << \"Thank you for playing!\"; break; default: cout << \"Error, bad input, quitting\"; }"
+      }
+    },
+    {
+      "key": "sw7-calc",
+      "title": "Калькулятор",
+      "type": "code_completion",
+      "marks": 4,
+      "difficulty": "medium",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "7.4.3.8"
+      ],
+      "text": "Напиши программу на C++: вводятся два числа и знак операции (`+`, `-`, `*`, `/`). С помощью `switch` выведи результат. Если знак другой — выведи «Неверная операция».\n\n```\n5 6 +\n11\n```",
+      "source": "nis_style",
+      "source_reference": "3_Switch переделать.pptx, слайд 14; G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 187 (задание 2)",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "- Объявлены переменные: два числа и char для знака, ввод через cin (1)\n- switch по символу операции с case '+', '-', '*', '/' (1)\n- Верные вычисления и break в каждой ветке (1)\n- default с сообщением «Неверная операция» (1)",
+        "points": [
+          {
+            "criterion": "Объявлены переменные: два числа и char для знака, ввод через cin",
+            "marks": 1
+          },
+          {
+            "criterion": "switch по символу операции с case '+', '-', '*', '/'",
+            "marks": 1
+          },
+          {
+            "criterion": "Верные вычисления и break в каждой ветке",
+            "marks": 1
+          },
+          {
+            "criterion": "default с сообщением «Неверная операция»",
+            "marks": 1
+          }
+        ],
+        "model_answer": "float a, b; char s; cin >> a >> b >> s; switch (s) { case '+': cout << a + b; break; case '-': cout << a - b; break; case '*': cout << a * b; break; case '/': cout << a / b; break; default: cout << \"Неверная операция\"; }"
+      }
+    },
+    {
+      "key": "sw7-exam-1",
+      "title": "Нет совпадения и нет default",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "exam",
+      "command_word": "state",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.8"
+      ],
+      "text": "```cpp\nint x = 7;\nswitch (x)\n{ case 1: cout << \"A\"; break;\n  case 2: cout << \"B\"; break; }\ncout << \"!\";\n```\n\nЧто будет выведено?",
+      "options": [
+        {
+          "key": "A",
+          "content": "A!"
+        },
+        {
+          "key": "B",
+          "content": "B!"
+        },
+        {
+          "key": "C",
+          "content": "!"
+        },
+        {
+          "key": "D",
+          "content": "Ошибка компиляции"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 186",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "C — 1 балл.",
+        "accepted": {
+          "correct": "C"
+        },
+        "model_answer": "C",
+        "explanation": "Совпадений нет, блока default нет — switch ничего не выполняет, затем выводится «!»."
+      }
+    },
+    {
+      "key": "sw7-exam-2",
+      "title": "Время года",
+      "type": "fill_blank",
+      "marks": 3,
+      "difficulty": "exam",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.8"
+      ],
+      "text": "Программа по номеру месяца выводит время года. Заполни пропуски.\n\n```cpp\nint m;\ncin >> m;\nswitch ([[1]])\n{\n    case 12: case 1: case 2: cout << \"зима\"; break;\n    case 3: case 4: case 5: cout << \"весна\"; [[2]];\n    case 6: case 7: case 8: cout << \"лето\"; break;\n    case 9: case 10: case 11: cout << \"осень\"; break;\n    [[3]]: cout << \"Неверный номер месяца\";\n}\n```",
+      "content": {
+        "blank_count": 3
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 193 (задание 9), стр. 187 (2-й способ)",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "[[1]] m; [[2]] break; [[3]] default — по 1 баллу",
+        "accepted": {
+          "blanks": [
+            [
+              "m"
+            ],
+            [
+              "break"
+            ],
+            [
+              "default"
+            ]
+          ],
+          "ignore_spaces": true
+        },
+        "explanation": "Селектор — m; break завершает ветку; default — для некорректного ввода."
+      }
+    },
+    {
+      "key": "sw7-exam-3",
+      "title": "if и switch: значения x",
+      "type": "fill_blank",
+      "marks": 2,
+      "difficulty": "exam",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.8"
+      ],
+      "text": "```cpp\nint x = 5;\nif (x == 5) x = x * 2;\nif (x % 2 == 0) x = x * 3;\nif (x >= 30 && x <= 32) x = x + 3;\nif (x == 33) x = x / 3;\ncout << x;\n```\n\n```cpp\nint x = 5;\nswitch (x)\n{ case 5: x = x * 2; break;\n  case 10: x = x * 3; break;\n  case 30: case 31: case 32: x = x + 3; break;\n  case 33: x = x / 3; break; }\ncout << x;\n```\n\nПервая программа выведет [[1]], вторая — [[2]].",
+      "content": {
+        "blank_count": 2
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 191 («Проверь себя», 3)",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "[[1]] 11; [[2]] 10 — по 1 баллу",
+        "accepted": {
+          "blanks": [
+            [
+              "11"
+            ],
+            [
+              "10"
+            ]
+          ],
+          "ignore_spaces": true
+        },
+        "explanation": "В первой программе проверяются все if подряд: 10 → 30 → 33 → 11. В switch выполняется только case 5: 10, затем break."
+      }
+    },
+    {
+      "key": "sw7-exam-4",
+      "title": "Значение f и n",
+      "type": "fill_blank",
+      "marks": 2,
+      "difficulty": "exam",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.8"
+      ],
+      "text": "```cpp\nint n;\nfloat f, x;\nx = 2;\nswitch (n)\n{ case 1: f = -2*x*x - 4; break;\n  case 2: f = 5*x + 2; break;\n  case 3: f = 15 - 3*x; break; }\n```\n\n- При n = 1 значение f = [[1]]\n- f = 9 получится при n = [[2]]",
+      "content": {
+        "blank_count": 2
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 188 («Проверь себя», 2)",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "[[1]] -12; [[2]] 3 — по 1 баллу",
+        "accepted": {
+          "blanks": [
+            [
+              "-12"
+            ],
+            [
+              "3"
+            ]
+          ],
+          "ignore_spaces": true
+        },
+        "explanation": "n = 1: −2·4 − 4 = −12; 15 − 3·2 = 9 → n = 3."
+      }
+    },
+    {
+      "key": "sw7-exam-5",
+      "title": "Ошибка: нет break",
+      "type": "code_analysis",
+      "marks": 2,
+      "difficulty": "exam",
+      "command_word": "explain",
+      "grading": "AI",
+      "objectives": [
+        "7.4.3.8"
+      ],
+      "text": "```cpp\nswitch (1)\n{ case 1: cout << 1 << '\\n';\n  case 2: cout << 2 << '\\n';\n  case 3: cout << 3 << '\\n';\n  default: cout << 4 << '\\n'; }\n```\n\nЧто выведет фрагмент? Объясни ошибку и как ее исправить, чтобы выводилось только 1.",
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 188 («Проверь себя», 1)",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "- Выведет 1, 2, 3, 4 (каждое с новой строки) (1)\n- Нет break: после совпавшего case выполняются все следующие операторы; нужно поставить break после каждого case (1)",
+        "points": [
+          {
+            "criterion": "Выведет 1, 2, 3, 4 (каждое с новой строки)",
+            "marks": 1
+          },
+          {
+            "criterion": "Нет break: после совпавшего case выполняются все следующие операторы; нужно поставить break после каждого case",
+            "marks": 1
+          }
+        ],
+        "model_answer": "Выведет 1 2 3 4. Пропущены break; исправление: case 1: cout << 1 << '\\n'; break; и т. д."
+      }
+    },
+    {
+      "key": "sw7-exam-6",
+      "title": "Программа: день недели",
+      "type": "code_completion",
+      "marks": 4,
+      "difficulty": "exam",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "7.4.3.8"
+      ],
+      "text": "Напиши программу на C++ с оператором `switch`: пользователь вводит номер дня недели (1–7). Для 1–5 вывести «Рабочий день», для 6 и 7 — «Выходной день», для других чисел — «Такого дня нет».",
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 186–187; 3_Switch переделать.pptx, слайд 15",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "- Структура программы, ввод номера дня через cin (1)\n- switch по номеру дня; case 1–5 сгруппированы с выводом «Рабочий день» (1)\n- case 6 и 7 с выводом «Выходной день», break после групп (1)\n- default с сообщением «Такого дня нет» (1)",
+        "points": [
+          {
+            "criterion": "Структура программы, ввод номера дня через cin",
+            "marks": 1
+          },
+          {
+            "criterion": "switch по номеру дня; case 1–5 сгруппированы с выводом «Рабочий день»",
+            "marks": 1
+          },
+          {
+            "criterion": "case 6 и 7 с выводом «Выходной день», break после групп",
+            "marks": 1
+          },
+          {
+            "criterion": "default с сообщением «Такого дня нет»",
+            "marks": 1
+          }
+        ],
+        "model_answer": "int day; cin >> day; switch (day) { case 1: case 2: case 3: case 4: case 5: cout << \"Рабочий день\"; break; case 6: case 7: cout << \"Выходной день\"; break; default: cout << \"Такого дня нет\"; }"
+      }
+    },
+    {
+      "key": "sw7-exam-7",
+      "title": "Когда switch, а когда if",
+      "type": "short_answer",
+      "marks": 2,
+      "difficulty": "exam",
+      "command_word": "explain",
+      "grading": "AI",
+      "objectives": [
+        "7.4.3.8"
+      ],
+      "text": "Нужно по баллу (0–100) выставить оценку: 90 и выше — «5», 75–89 — «4», 60–74 — «3», ниже — «2». Что удобнее использовать: `switch` или `if`? Объясни почему.",
+      "source": "nis_style",
+      "source_reference": "3_Switch переделать.pptx, слайд 17; G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 189–190; 2_Влож условия.pptx, слайд 9",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "- Удобнее if (каскадное условие else if) (1)\n- switch проверяет только строгое равенство константам, а здесь нужны отношения/диапазоны (>=, <) (1)",
+        "points": [
+          {
+            "criterion": "Удобнее if (каскадное условие else if)",
+            "marks": 1
+          },
+          {
+            "criterion": "switch проверяет только строгое равенство константам, а здесь нужны отношения/диапазоны (>=, <)",
+            "marks": 1
+          }
+        ],
+        "model_answer": "if: switch проверяет только равенство выражения константам, а для диапазонов баллов нужны отношения, которые вычисляет if."
+      }
+    },
+    {
+      "key": "sw7-exam-8",
+      "title": "Программа: калькулятор",
+      "type": "code_completion",
+      "marks": 4,
+      "difficulty": "exam",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "7.4.3.8"
+      ],
+      "text": "Напиши программу на C++: вводятся два целых числа и знак операции (`+`, `-`, `*`, `/`). С помощью `switch` выведи результат. При делении на ноль выведи «На ноль делить нельзя!», при другом знаке — «Неверная операция».",
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 170 (задача 2), стр. 187 (задание 2)",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "- Ввод двух чисел и символа операции (char) (1)\n- switch по символу с case '+', '-', '*' и break (1)\n- case '/' с проверкой y != 0 и сообщением «На ноль делить нельзя!» (1)\n- default с сообщением «Неверная операция» (1)",
+        "points": [
+          {
+            "criterion": "Ввод двух чисел и символа операции (char)",
+            "marks": 1
+          },
+          {
+            "criterion": "switch по символу с case '+', '-', '*' и break",
+            "marks": 1
+          },
+          {
+            "criterion": "case '/' с проверкой y != 0 и сообщением «На ноль делить нельзя!»",
+            "marks": 1
+          },
+          {
+            "criterion": "default с сообщением «Неверная операция»",
+            "marks": 1
+          }
+        ],
+        "model_answer": "int x, y; char s; cin >> x >> y >> s; switch (s) { case '+': cout << x + y; break; case '-': cout << x - y; break; case '*': cout << x * y; break; case '/': if (y != 0) cout << x / y; else cout << \"На ноль делить нельзя!\"; break; default: cout << \"Неверная операция\"; }"
+      }
+    }
+  ],
+  "topic_exam": {
+    "duration": 25,
+    "title": "Оператор выбора — экзамен",
+    "instructions": "Ответьте на **все** вопросы. Программы пишите на C++. Количество баллов указано у каждого вопроса. Всего: 20 баллов. Время: 25 минут.",
+    "questions": [
+      "sw7-exam-1",
+      "sw7-exam-2",
+      "sw7-exam-3",
+      "sw7-exam-4",
+      "sw7-exam-5",
+      "sw7-exam-6",
+      "sw7-exam-7",
+      "sw7-exam-8"
+    ]
+  }
+}

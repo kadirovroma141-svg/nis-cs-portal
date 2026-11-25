@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9.2А · Урок 4 · Создание и редактирование форм в MS Access</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+</head>
+<body>
+<script src="../_engine/deck.js"></script>
+<script>
+const L4_GUESTS = [
+  { id: 1, fio: "Ахметов Данияр", room: "Люкс №104", price: 32000, days: 4, paid: true },
+  { id: 2, fio: "Бекова Асель", room: "Стандарт №205", price: 18000, days: 3, paid: true },
+  { id: 3, fio: "Сериков Нурлан", room: "Полулюкс №302", price: 24000, days: 5, paid: false },
+  { id: 4, fio: "Омарова Лейла", room: "Стандарт №112", price: 18000, days: 2, paid: true }
+];
+
+const L4_CONTROLS_QUIZ = [
+  { id: "c1", item: "Поле «Фамилия» (привязано к столбцу Фамилия)", ans: "bound", why: "Связанный элемент — напрямую отображает и изменяет поле таблицы." },
+  { id: "c2", item: "Заголовок «Анкета гостя» (элемент Надпись)", ans: "free", why: "Свободный элемент — статический текст оформления, с таблицей не связан." },
+  { id: "c3", item: "Поле с формулой =[Цена]*[Дни]", ans: "calc", why: "Вычисляемый элемент — считает итог по формуле и не хранится в таблице." },
+  { id: "c4", item: "Логотип отеля или декоративная линия", ans: "free", why: "Свободный элемент — украшает макет формы (рисунок, линия, рамка)." },
+  { id: "c5", item: "Флажок «Оплачено» из таблицы «Гости»", ans: "bound", why: "Связанный элемент — записывает Да/Нет в соответствующее поле таблицы." },
+  { id: "c6", item: "Поле возраста =Year(Date())-[Год_рождения]", ans: "calc", why: "Вычисляемый элемент — пересчитывается динамически на основе выражения." }
+];
+
+const L4_BLITZ = [
+  { k: "b1", q: "Если удалить созданную форму, удалятся ли данные в связанной с ней таблице?", a: "НЕТ! Форма — лишь экранный интерфейс для просмотра/ввода. Все данные надёжно хранятся в таблице." },
+  { k: "b2", q: "В чём разница между Режимом макета и Режимом конструктора формы?", a: "В Режиме макета вы редактируете дизайн, видя реальные данные; в Конструкторе — точная настройка всех разделов, свойств и формул без загрузки строк." },
+  { k: "b3", q: "К какому типу элементов управления относится поле со значением =[Цена]*[Дни]?", a: "Вычисляемый элемент управления (в таблице не хранится, пересчитывается автоматически)." },
+  { k: "b4", q: "Зачем в форме нужны разделы «Заголовок формы» и «Примечание формы»?", a: "В Заголовке размещают название/логотип сверху формы; в Примечании — кнопки навигации, подсказки или общие итоги снизу." },
+  { k: "b5", q: "Какая категория Мастера кнопок используется для кнопки «Добавить запись»?", a: "Категория «Обработка записей → Добавить запись» (а для перелистывания карточек — «Переходы по записям»)." }
+];
+
+window.L4_MOVE = function(dir) {
+  const st = window.DECK_STATE;
+  const max = st.custom.rows.length - 1;
+  if (dir === "first") st.custom.idx = 0;
+  else if (dir === "prev") st.custom.idx = Math.max(0, st.custom.idx - 1);
+  else if (dir === "next") st.custom.idx = Math.min(max, st.custom.idx + 1);
+  else if (dir === "last") st.custom.idx = max;
+  else if (dir === "new") {
+    const nextId = st.custom.rows.length + 1;
+    st.custom.rows.push({ id: nextId, fio: "Жакупов Рустам", room: "Стандарт №118", price: 18000, days: 3, paid: false });
+    st.custom.idx = st.custom.rows.length - 1;
+    st.custom.note = "Новая запись #" + nextId + " добавлена через форму и сразу записана в базовую таблицу!";
+  }
+  window.DECK.render();
+};
+
+initDeck({
+  badge: "🗄 9.2А · Урок 4",
+  title: "Создание и редактирование форм в MS Access",
+  subtitle: "9 класс · 2 четверть · Цель 9.1.2.3 · 80 мин · Мини-СУБД",
+  footer: "НИШ ЕМН г. Кызылорда · 9 класс · 2 четверть · Мини-СУБД (/subd)",
+  initialState: {
+    tabs: { viewMode: "form", createTool: "master", section: "detail" },
+    custom: { idx: 0, rows: L4_GUESTS.map(x => Object.assign({}, x)), note: "Нажмите кнопки навигации внизу карточки-формы!" }
+  },
+  slides: [
+    {
+      badge: "Этап 1 · Постановка проблемы",
+      shortTitle: "Зачем нужна форма вместо широкой таблицы",
+      timing: "0–6 мин",
+      source: "КСП 9.2А Урок 4 · SB 9 кл. стр. 66–69",
+      notes: "Начните с жизненной ситуации: на стойке регистрации отеля администратор работает с таблицей из 25 столбцов (паспорт, заезд, тариф, примечания). В широкой таблице легко перепутать строку! Форма решает эту проблему.",
+      render() {
+        return `
+          <div class="stack">
+            <div class="text-xs font-bold text-muted" style="text-transform:uppercase;">Информатика · 9 класс · Раздел 9.2А «Однотабличные БД» · Урок 4 из 6</div>
+            <h1 class="slide-h1">Создание, оформление и редактирование форм в Access</h1>
+            <p class="lead">Научимся превращать длинные таблицы в удобные карточки-анкеты, настраивать разделы формы, добавлять вычисляемые поля и кнопки навигации.</p>
+            <div class="box-accent text-xs">
+              <strong>Ситуация из жизни:</strong> в таблице «Гостиница» 25 столбцов и 800 строк. Когда гость оформляется у стойки, администратор легко может промахнуться строкой и вписать паспортные данные не тому человеку. <strong>Как упростить ввод и защитить таблицу?</strong>
+            </div>
+            <div class="grid-3 text-xs">
+              <div class="box-primary"><div class="box-title mono">9.1.2.3</div>Создавать экранные формы (Автоформа, Мастер форм, Конструктор).</div>
+              <div class="box-accent"><div class="box-title" style="color:var(--accent);">Элементы управления</div>Различать связанные, свободные и вычисляемые поля формы.</div>
+              <div class="box-success"><div class="box-title">Мастер кнопок</div>Добавлять кнопки перелистывания, добавления и сохранения записей.</div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Таблица vs Форма",
+      shortTitle: "Таблица и форма (живой переключатель)",
+      timing: "6–15 мин",
+      source: "SB 9 кл. стр. 66 · База «Гостиница»",
+      notes: "Переключайте кнопку «Режим таблицы ⇄ Режим формы» и обязательно зафиксируйте два железных правила хранения: (1) форма показывает те же данные таблицы; (2) удаление формы НЕ удаляет данные в таблице.",
+      render(st) {
+        const vm = st.tabs.viewMode || "form";
+        const g = st.custom.rows[st.custom.idx] || st.custom.rows[0];
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <h2 class="slide-h2">Таблица (список) ⇄ Форма (карточка гостя)</h2>
+              <div class="flex-row">
+                <button type="button" class="btn ${vm === "table" ? "btn-primary" : ""}" onclick="DECK.setTab('viewMode','table')">📋 Вид: Таблица</button>
+                <button type="button" class="btn ${vm === "form" ? "btn-accent" : ""}" onclick="DECK.setTab('viewMode','form')">🪪 Вид: Форма</button>
+              </div>
+            </div>
+            ${vm === "table" ? `
+              <table class="data-table">
+                <thead><tr><th>Код</th><th>ФИО гостя</th><th>Номер</th><th>Цена/сут</th><th>Дни</th><th>Оплачено</th></tr></thead>
+                <tbody>
+                  ${st.custom.rows.map(r => `<tr><td class="mono">${r.id}</td><td>${r.fio}</td><td>${r.room}</td><td class="mono">${r.price.toLocaleString("ru-RU")} ₸</td><td class="mono">${r.days}</td><td>${r.paid ? "Да" : "Нет"}</td></tr>`).join("")}
+                </tbody>
+              </table>
+            ` : `
+              <div class="box-white stack" style="border:2px solid var(--primary);">
+                <div class="flex-between" style="border-bottom:1px solid var(--border);padding-bottom:8px;">
+                  <strong>🏨 Карточка гостя — Запись № ${g.id} из ${st.custom.rows.length}</strong>
+                  <span class="pill ${g.paid ? "pill-success" : "pill-warning"}">${g.paid ? "Оплачено" : "Ожидает оплаты"}</span>
+                </div>
+                <div class="grid-2 text-xs">
+                  <div class="box">ФИО гостя: <strong>${g.fio}</strong></div>
+                  <div class="box">Номер: <strong>${g.room}</strong></div>
+                  <div class="box">Тариф / сутки: <strong class="mono">${g.price.toLocaleString("ru-RU")} ₸</strong></div>
+                  <div class="box">Количество дней: <strong class="mono">${g.days}</strong></div>
+                </div>
+                <div class="box-success text-xs"><strong>Итого к оплате (вычисляемое поле =[Цена]*[Дни]):</strong> <span class="mono font-bold">${(g.price * g.days).toLocaleString("ru-RU")} ₸</span></div>
+              </div>
+            `}
+            <div class="box-warning text-xs">
+              <strong>2 железных правила MS Access:</strong>
+              (1) Любая правка в форме <strong>мгновенно сохраняется в базовой таблице</strong>;
+              (2) <strong>Удаление формы НЕ удаляет записи в таблице</strong> — удаляется только сам бланк!
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Способы создания",
+      shortTitle: "5 инструментов вкладки «Создание → Формы»",
+      timing: "15–24 мин",
+      source: "SB 9 кл. стр. 67 · Группа «Формы» и Мастер форм",
+      notes: "Разберите все 5 кнопок на вкладке «Создание → Формы» (Форма, Мастер форм, Конструктор форм, Пустая форма, Другие формы) и пошагово пройдите алгоритм «Мастера форм».",
+      render(st) {
+        const cur = st.tabs.createTool || "master";
+        const tools = {
+          auto: { t: "1. Форма (Автоформа в 1 клик)", d: "Выделяете таблицу в области навигации и нажимаете «Форма». Access сам мгновенно создаёт форму со всеми полями и выводит её в Режиме макета." },
+          master: { t: "2. Мастер форм (самый частый способ)", d: "Пошаговый диалог: выбрать таблицу/запрос → отобрать нужные поля → выбрать внешний вид (в один столбец / ленточный / табличный / выровненный) → задать имя формы." },
+          design: { t: "3. Конструктор форм", d: "Открывает чистый сетчатый бланк без данных. Полный контроль над координатами полей, формулами, разделами, кнопками и свойствами." },
+          blank: { t: "4. Пустая форма", d: "Сразу открывается в Режиме макета: справа панель «Список полей», откуда мышью перетаскиваются нужные поля прямо с живыми данными." },
+          other: { t: "5. Другие формы", d: "Включает: «Несколько элементов» (табличный вид), «Разделённая форма» (сверху карточка записи, снизу таблица), «Таблица», «Модальное диалоговое окно»." }
+        }[cur];
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Все 5 инструментов вкладки «Создание → Формы»</h2>
+            <div class="flex-row">
+              <button type="button" class="btn ${cur === "auto" ? "btn-primary" : ""}" onclick="DECK.setTab('createTool','auto')">Форма</button>
+              <button type="button" class="btn ${cur === "master" ? "btn-accent" : ""}" onclick="DECK.setTab('createTool','master')">Мастер форм</button>
+              <button type="button" class="btn ${cur === "design" ? "btn-primary" : ""}" onclick="DECK.setTab('createTool','design')">Конструктор форм</button>
+              <button type="button" class="btn ${cur === "blank" ? "btn-primary" : ""}" onclick="DECK.setTab('createTool','blank')">Пустая форма</button>
+              <button type="button" class="btn ${cur === "other" ? "btn-primary" : ""}" onclick="DECK.setTab('createTool','other')">Другие формы</button>
+            </div>
+            <div class="grid-2">
+              <div class="box-primary text-xs">
+                <div class="font-bold text-sm" style="margin-bottom:6px;">${tools.t}</div>
+                <p style="margin:0;">${tools.d}</p>
+              </div>
+              <div class="box-white text-xs">
+                <div class="box-title">Алгоритм работы в «Мастере форм» (5 шагов)</div>
+                <strong>Шаг 1.</strong> Вкладка «Создание» → <strong>Мастер форм</strong>.<br>
+                <strong>Шаг 2.</strong> Выберите источник (таблица/запрос) и перенесите поля кнопкой <span class="mono">&gt;</span> или <span class="mono">&gt;&gt;</span>.<br>
+                <strong>Шаг 3.</strong> Выберите макет: <strong>В один столбец</strong>, Ленточный, Табличный или Выровненный.<br>
+                <strong>Шаг 4.</strong> Задайте заголовок формы.<br>
+                <strong>Шаг 5.</strong> Нажмите «Готово» — открыть для ввода или изменения макета.
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Режимы и разделы",
+      shortTitle: "3 режима формы и 3 раздела Конструктора",
+      timing: "24–33 мин",
+      source: "SB 9 кл. стр. 68 · Структура формы в Конструкторе",
+      notes: "Нажимайте на 3 раздела схемы справа (Заголовок, Область данных, Примечание), чтобы ученики запомнили, что где размещается.",
+      render(st) {
+        const sec = st.tabs.section || "detail";
+        const secInfo = {
+          header: "Заголовок формы: отображается вверху 1 раз. Здесь размещают крупное название формы, логотип или изображение (свободные элементы).",
+          detail: "Область данных: главный рабочий раздел — показывает поля текущей записи (связанные и вычисляемые элементы управления).",
+          footer: "Примечание формы: нижняя часть экрана. Сюда удобно помещать кнопки навигации («Вперёд», «Добавить»), подсказки и общие счётчики."
+        }[sec];
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">3 режима просмотра и 3 раздела формы</h2>
+            <div class="grid-2">
+              <div class="stack text-xs">
+                <div class="box-primary">
+                  <div class="box-title">1. Режим формы</div>
+                  Рабочий режим оператора: ввод новых записей, редактирование и перелистывание карточек. Менять дизайн здесь нельзя.
+                </div>
+                <div class="box-accent">
+                  <div class="box-title" style="color:var(--accent);">2. Режим макета</div>
+                  Видите реальные данные из таблицы и одновременно можете менять ширину полей, шрифты и цвета.
+                </div>
+                <div class="box">
+                  <div class="box-title">3. Режим конструктора</div>
+                  Точная сетка без загрузки записей: создание вычисляемых выражений (<span class="mono">=[Цена]*[Дни]</span>), настройка свойств, добавление кнопок.
+                </div>
+              </div>
+              <div class="stack">
+                <div class="box-title">Нажмите на раздел формы:</div>
+                <button type="button" class="interactive-card ${sec === "header" ? "active" : ""}" style="padding:10px 12px;" onclick="DECK.setTab('section','header')">
+                  <strong>▲ Заголовок формы</strong> <span class="text-xs">(название, логотип)</span>
+                </button>
+                <button type="button" class="interactive-card ${sec === "detail" ? "active" : ""}" style="padding:14px 12px;" onclick="DECK.setTab('section','detail')">
+                  <strong>■ Область данных</strong> <span class="text-xs">(поля записи, вычисляемые поля)</span>
+                </button>
+                <button type="button" class="interactive-card ${sec === "footer" ? "active" : ""}" style="padding:10px 12px;" onclick="DECK.setTab('section','footer')">
+                  <strong>▼ Примечание формы</strong> <span class="text-xs">(кнопки, примечания)</span>
+                </button>
+                <div class="box-success text-xs">${secInfo}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Элементы управления",
+      shortTitle: "3 типа элементов + классификатор",
+      timing: "33–43 мин",
+      source: "SB 9 кл. стр. 68–69 · Элементы управления формы",
+      notes: "Это частый экзаменационный вопрос: различие между связанным, свободным и вычисляемым элементом управления. Сначала разберите таблицу, потом пройдите 6 примеров классификатора.",
+      render(st) {
+        let ok = 0;
+        L4_CONTROLS_QUIZ.forEach(c => { if (st.quiz[c.id] === c.ans) ok++; });
+        const btns = [["bound","Связанный"], ["free","Свободный"], ["calc","Вычисляемый"]];
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <h2 class="slide-h2">3 типа элементов управления формы (SB 9 кл.)</h2>
+              <span class="pill pill-success mono">${ok} / ${L4_CONTROLS_QUIZ.length}</span>
+            </div>
+            <div class="grid-3 text-xs">
+              <div class="box-primary"><strong>1. Связанный</strong> — источником является поле базовой таблицы (напр., «Фамилия»).</div>
+              <div class="box"><strong>2. Свободный</strong> — не привязан к таблице: надпись, линия, рамка, логотип.</div>
+              <div class="box-accent"><strong>3. Вычисляемый</strong> — начинается со знака <span class="mono">=</span> (<span class="mono">=[Цена]*[Дни]</span>), не хранится в таблице.</div>
+            </div>
+            <div class="stack" style="gap:6px;">
+              ${L4_CONTROLS_QUIZ.map(c => {
+                const p = st.quiz[c.id];
+                const cls = p ? (p === c.ans ? "ok" : "bad") : "";
+                return `
+                  <div class="quiz-row ${cls}">
+                    <div style="flex:1;"><strong>${c.item}</strong>${p === c.ans ? ` <span class="text-xs text-muted">— ${c.why}</span>` : ""}</div>
+                    <div class="flex-row" style="gap:4px;">
+                      ${btns.map(([k,lbl]) => `<button type="button" class="btn ${p === k ? "btn-primary" : ""}" style="padding:2px 7px;font-size:11px;" onclick="DECK.pickQuiz('${c.id}','${k}')">${lbl}</button>`).join("")}
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Мастер кнопок",
+      shortTitle: "Интерактивный макет формы с кнопками",
+      timing: "43–51 мин",
+      source: "SB 9 кл. стр. 69 · Категории команд Мастера кнопок",
+      notes: "Попробуйте вживую нажать кнопки навигации и «+ Добавить гостя» на макете формы — после добавления переключитесь на слайд 2 в вид «Таблица», и ученики увидят, что строка реально появилась в таблице!",
+      render(st) {
+        const rows = st.custom.rows;
+        const idx = st.custom.idx;
+        const g = rows[idx] || rows[0];
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Мастер кнопок + живой макет формы «Гостиница»</h2>
+            <div class="grid-3 text-xs">
+              <div class="box"><strong>Переходы по записям:</strong> Первая, Предыдущая, Следующая, Последняя, Найти запись.</div>
+              <div class="box"><strong>Обработка записей:</strong> Добавить запись, Сохранить запись, Удалить запись, Напечатать.</div>
+              <div class="box"><strong>Работа с формой:</strong> Закрыть форму, Открыть форму, Обновить данные.</div>
+            </div>
+            <div class="box-white stack" style="border:2px solid var(--accent);">
+              <div class="flex-between">
+                <strong>🏨 Заголовок формы: Регистрация гостей</strong>
+                <span class="mono text-xs">Запись ${idx + 1} из ${rows.length}</span>
+              </div>
+              <div class="grid-2 text-xs">
+                <div class="box">ФИО: <strong>${g.fio}</strong></div>
+                <div class="box">Номер: <strong>${g.room}</strong></div>
+                <div class="box">Цена за сутки: <span class="mono">${g.price.toLocaleString("ru-RU")} ₸</span> · Дни: <span class="mono">${g.days}</span></div>
+                <div class="box-success"><strong>Стоимость =[Цена]*[Дни]:</strong> <span class="mono font-bold">${(g.price * g.days).toLocaleString("ru-RU")} ₸</span></div>
+              </div>
+              <div class="flex-between" style="padding-top:6px;border-top:1px solid var(--border);">
+                <div class="flex-row">
+                  <button type="button" class="btn" onclick="L4_MOVE('first')" ${idx === 0 ? "disabled" : ""}>|◀ Первая</button>
+                  <button type="button" class="btn" onclick="L4_MOVE('prev')" ${idx === 0 ? "disabled" : ""}>◀ Пред.</button>
+                  <button type="button" class="btn" onclick="L4_MOVE('next')" ${idx === rows.length - 1 ? "disabled" : ""}>След. ▶</button>
+                  <button type="button" class="btn" onclick="L4_MOVE('last')" ${idx === rows.length - 1 ? "disabled" : ""}>Последняя ▶|</button>
+                </div>
+                <button type="button" class="btn btn-accent" onclick="L4_MOVE('new')">+ Добавить запись</button>
+              </div>
+            </div>
+            <div class="box-primary text-xs">${st.custom.note}</div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Мини-СУБД · Практика",
+      pillClass: "pill-accent",
+      shortTitle: "Мини-СУБД: Форма с кнопками",
+      timing: "51–68 мин",
+      source: "Мини-СУБД (/subd) · t3, g9a-p4-reki-forma, g9a-p4-avto-forma",
+      notes: "Ученики выполняют в Мини-СУБД задание «Форма с кнопками» (t3), затем для отработки — «Форма „Реки Казахстана“» (g9a-p4-reki-forma) и «Форма автосалона» (g9a-p4-avto-forma).",
+      render(st, api) {
+        return api.renderMiniSubdTask({
+          key: "g9a4",
+          title: "Практика в Мини-СУБД: Создание формы с кнопками",
+          summary: "Сконструируйте форму, разместите поля, настройте кнопки переходов/добавления и протестируйте её в Режиме формы.",
+          taskName: "1) Форма с кнопками (t3) · Доп.: Форма «Реки Казахстана» (g9a-p4-reki-forma), Форма автосалона (g9a-p4-avto-forma)",
+          steps: ["Откройте «✓ Задания»", "Выберите «Форма с кнопками»", "Добавьте элементы и проверьте работу кнопок"],
+          meta: "Цель 9.1.2.3 · Формы"
+        });
+      }
+    },
+    {
+      badge: "Этап 3 · Проверочный блиц",
+      shortTitle: "Блиц по формам (5 вопросов)",
+      timing: "68–75 мин",
+      source: "КСП 9.2А Урок 4 · Проверка понимания",
+      notes: "Устное обсуждение 5 вопросов на типичные заблуждения о формах Access.",
+      render(st) {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Проверочный блиц по формам MS Access</h2>
+            <div class="stack" style="gap:8px;">
+              ${L4_BLITZ.map((item, i) => `
+                <button type="button" class="interactive-card ${st.revealed[item.k] ? "revealed" : ""}" style="padding:10px 12px;" onclick="DECK.toggleReveal('${item.k}')">
+                  <div class="font-bold text-xs">${i + 1}. ${item.q}</div>
+                  <div class="text-xs" style="margin-top:4px;">${st.revealed[item.k] ? item.a : "Нажмите для проверки →"}</div>
+                </button>
+              `).join("")}
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 3 · Итоги и ДЗ",
+      shortTitle: "Чеклист хорошей формы и ДЗ",
+      timing: "75–80 мин",
+      source: "КСП 9.2А Урок 4 · ДЗ g9a-hw4-gostinitsa",
+      notes: "Подведите итоги по чеклисту и выдайте домашнее задание «Форма „Гостиница“» в Мини-СУБД.",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Чеклист качественной формы и домашнее задание</h2>
+            <div class="grid-2 text-xs">
+              <div class="box-primary">
+                <div class="box-title">1. Понятные подписи и порядок полей</div>
+                Поля идут в естественном порядке (ФИО → Номер → Заезд → Выезд), без обрезанных текстов и технических кодов вместо заголовков.
+              </div>
+              <div class="box-accent">
+                <div class="box-title" style="color:var(--accent);">2. Связанные + Свободные + Вычисляемые</div>
+                Заголовок выделен надписью/цветом, итог считается формулой со знаком <span class="mono">=</span> (напр. <span class="mono">=[Цена]*[Дни]</span>).
+              </div>
+              <div class="box-success">
+                <div class="box-title">3. Удобные кнопки действий</div>
+                Оператор может перелистывать, искать и добавлять записи кнопками без возврата в сырую таблицу.
+              </div>
+              <div class="box">
+                <div class="box-title">4. Памятка о безопасности</div>
+                Форма не хранит данные сама по себе — удаление формы оставляет базовую таблицу целой и невредимой!
+              </div>
+            </div>
+            <div class="box-primary flex-between text-xs">
+              <div><strong>Домашнее задание в Мини-СУБД (/subd):</strong> выполнить задание <strong>«Форма „Гостиница“»</strong> (g9a-hw4-gostinitsa) с вычисляемым полем и кнопками.</div>
+              <a class="btn btn-accent" href="/subd" target="_blank" rel="noopener noreferrer">Открыть Мини-СУБД ↗</a>
+            </div>
+          </div>
+        `;
+      }
+    }
+  ]
+});
+</script>
+</body>
+</html>

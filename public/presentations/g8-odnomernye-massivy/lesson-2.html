@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>8.3В · Урок 2 · Объявление одномерного массива в C++</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+  <link rel="stylesheet" href="../_engine/lesson.css" />
+</head>
+<body class="lesson">
+<script src="../_engine/deck.js"></script>
+<script src="../_engine/lesson.js"></script>
+<script>
+/*
+ * 8.3В «Массивы (язык программирования C++)», тема «Одномерные массивы», урок 2 (КТП) —
+ * «Объявление одномерного массива в C++». Цель обучения 8.4.3.6 объявлять одномерный массив в программе.
+ * Ход урока — КСП content/lesson-plans/g8-odnomernye-massivy.json, урок 2 (начало 10 мин, середина 60, конец 10).
+ * Содержание — только из материалов: SB 8 кл. стр. 160–161, 163; TG 8 кл. стр. 131–132;
+ * презентация «массив» стр. 2, 5–15; практикум «массив задачи 1» стр. 2–4, 11.
+ * Код C++ — только конструкции из материалов. Задания СОР/СОЧ не повторяются (формат и командные слова — по спецификации СОЧ 3 четв.).
+ */
+const SB = "Учебник 8 кл., ";
+const TG = "Руководство для учителя 8 кл., ";
+const PR = "Презентация «массив», ";
+const Z1 = "Практикум «массив задачи 1», ";
+const { src, reveal, statements, quiz, matcher } = LESSON;
+const S = () => window.DECK_STATE;
+const escH = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const code = (t, fs = 17) => `<pre class="code-block" style="font-size:${fs}px;line-height:1.45;">${escH(t)}</pre>`;
+
+/* Ряд ячеек массива: значение сверху, индекс снизу. */
+function cells(vals, opts = {}) {
+  const hi = opts.hi;
+  return `<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end;">${opts.name ? `<div class="font-bold mono" style="align-self:center;margin-right:6px;">${opts.name}</div>` : ""}${vals
+    .map((v, i) => {
+      const on = hi === i;
+      const click = opts.key ? ` onclick="DECK.setSelected('${opts.key}','${i}')"` : "";
+      return `<div style="display:grid;gap:4px;text-align:center;${opts.key ? "cursor:pointer;" : ""}"${click}>
+        <div class="mono" style="min-width:${opts.w || 64}px;padding:10px 8px;border-radius:10px;border:2px solid ${on ? "var(--accent)" : "var(--primary)"};background:${on ? "var(--accent-soft)" : "var(--surface)"};font-weight:700;">${v}</div>
+        <div class="mono text-xs" style="color:var(--primary);font-weight:800;">[${i}]</div></div>`;
+    })
+    .join("")}</div>`;
+}
+
+const INIT = {
+  empty: { code: "int arr[5];", vals: ["?", "?", "?", "?", "?"], note: "Создан, но пуст (мусорные значения)." },
+  full: { code: "int arr[5] = {10, 20, 30, 40, 50};", vals: [10, 20, 30, 40, 50], note: "Полный набор." },
+  zero: { code: "int arr[5] = {0};", vals: [0, 0, 0, 0, 0], note: "«Чистый лист» (все равны 0)." },
+};
+
+initDeck({
+  badge: "8.3В · Урок 2",
+  title: "Объявление одномерного массива в C++",
+  subtitle: "8 класс · 3 четверть · цель 8.4.3.6 · 80 минут",
+  footer: "НИШ ЕМН г. Кызылорда · Информатика · 8 класс · Раздел 8.3В «Массивы (язык программирования C++)»",
+  slides: [
+    /* ---------------- НАЧАЛО УРОКА (10 мин) ---------------- */
+    {
+      badge: "Начало урока",
+      shortTitle: "Тема, цели и критерии",
+      timing: "0–3 мин",
+      source: "КТП 2026; КСП урока 2",
+      notes: "Приветствие, инструктаж по ТБ. Озвучьте тему, цель и критерий. Покажите цели урока из презентации «массив» (стр. 2): понять, различить, создать, использовать, избежать.",
+      render() {
+        return `<div class="hero">
+          <div>
+            <div class="hero-kicker">Раздел 8.3В · Массивы (язык программирования C++)</div>
+            <h1>Объявление одномерного массива в C++</h1>
+            <div class="goal"><b>8.4.3.6</b> — объявлять одномерный массив в программе.</div>
+          </div>
+          <div class="stack text-sm">
+            <div class="card"><h3>🎯 Цели урока</h3>
+              <p><b>Все:</b> записывают объявление по синтаксису <code>тип имя[размер];</code>; называют индекс первого и последнего элемента.<br>
+              <b>Большинство:</b> выбирают тип данных; объявляют массив разными способами; обращаются к элементу по индексу.<br>
+              <b>Некоторые:</b> определяют длину массива через <code>sizeof()</code> и находят выход за границы.</p></div>
+            <div class="card"><h3>✅ Критерий оценивания</h3><p>Объявляет одномерный массив в программе.</p></div>
+          </div>
+        </div>${src("КТП 2026 (цель 8.4.3.6); КСП урока 2; " + PR + "стр. 2 (цели урока)")}`;
+      },
+    },
+    {
+      badge: "Начало урока",
+      shortTitle: "Повторение: типы данных",
+      timing: "3–7 мин",
+      source: PR + "стр. 7",
+      notes: "Повторение типов данных C++: для каждого вида данных команды называют тип — щёлкните его. Это пригодится: в одном массиве — данные только одного типа.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Какой тип данных выбрать?</h2>
+          ${matcher("type", [["int", "int"], ["fl", "float / double"], ["str", "string"], ["ch", "char"]], [
+            { t: "Оценки, количество, счётчики", ans: "int" },
+            { t: "Температура, вес, рост", ans: "fl" },
+            { t: "Имена, названия городов", ans: "str" },
+            { t: "Коды, буквы класса", ans: "ch" },
+          ])}
+          <div class="note"><b>Строгий порядок:</b> в одном массиве могут храниться данные только одного типа.</div>
+        </div>${src(PR + "стр. 7 «Тип данных: строгий порядок»; " + TG + "стр. 131 (начало урока — повторение типов данных)")}`;
+      },
+    },
+    {
+      badge: "Начало урока",
+      shortTitle: "int a или int a[10]?",
+      timing: "7–10 мин",
+      source: PR + "стр. 5; " + SB + "стр. 160",
+      notes: "Вопрос: чем int a отличается от int a[10]? Выслушайте ответы, откройте вывод. Стимулирующий вопрос урока: каким образом можно объявить массив в программном коде C++?",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Чем <code>int a;</code> отличается от <code>int a[10];</code>?</h2>
+          <div class="cards c2">
+            <div class="card"><h3><span class="ico">a</span><code>int a;</code></h3>${reveal("r-v1", "Ответ", "<b>Переменная</b>: хранит одно значение.")}</div>
+            <div class="card"><h3><span class="ico">[ ]</span><code>int a[10];</code></h3>${reveal("r-v2", "Ответ", "<b>Массив</b>: хранит множество значений (10) под одним именем.")}</div>
+          </div>
+          <div class="note"><b>Вопрос урока:</b> каким образом можно объявить массив в программном коде C++?</div>
+        </div>${src(PR + "стр. 5 «Переменная vs массив»; " + SB + "стр. 160 («Ты узнаешь»)")}`;
+      },
+    },
+
+    /* ---------------- СЕРЕДИНА УРОКА (60 мин) ---------------- */
+    {
+      badge: "Новое · анатомия массива",
+      shortTitle: "Элемент, значение, индекс",
+      timing: "10–18 мин",
+      source: SB + "стр. 160, рис. 1",
+      notes: "Рис. 1 (стр. 160): массив arr из четырёх элементов целого типа. Коробка — элемент массива, в коробке — значение элемента, порядковый номер — индекс. Нумерация в C++ начинается с НУЛЯ. Щёлкните ячейку — подпись покажет её индекс. Значения в ячейках — условный пример.",
+      render() {
+        const p = S().selected["an"];
+        const i = p === undefined ? undefined : Number(p);
+        const vals = [12, -5, 8, 33];
+        return `<div class="body">
+          <h2 class="slide-h2">Нумерация элементов массива в C++</h2>
+          <div class="grid-2" style="gap:24px;align-items:center;">
+            <div class="stack">
+              ${code("int arr[4];", 22)}
+              ${cells(vals, { name: "arr", hi: i, key: "an", w: 80 })}
+              <div class="text-xs text-muted">Значения — условный пример. Щёлкните ячейку.</div>
+              <div class="card text-sm">${i === undefined ? "4 — <b>длина массива</b> (количество элементов); int — тип всех элементов." : `<b>arr[${i}]</b>: индекс элемента — <b>${i}</b>, значение элемента — <b>${vals[i]}</b>. Это ${i + 1}-й по счёту элемент.`}</div>
+            </div>
+            <div class="stack text-sm">
+              <div class="card"><h3>📦 Элемент массива</h3><p>«Коробка»; вместо коробок в ОС резервируется последовательность ячеек.</p></div>
+              <div class="card"><h3>🔢 Значение элемента</h3><p>То, что лежит в коробке.</p></div>
+              <div class="card"><h3>🏷 Индекс элемента</h3><p>Порядковый номер. <b>Запомни!</b> Нумерация в C++ начинается с НУЛЯ.</p></div>
+            </div>
+          </div>
+        </div>${src(SB + "стр. 160 (рис. 1 «Нумерация элементов массива в C++», «Запомни!»); " + PR + "стр. 6 «Анатомия массива»")}`;
+      },
+    },
+    {
+      badge: "Новое · объявление",
+      shortTitle: "Синтаксис и способы",
+      timing: "18–26 мин",
+      source: SB + "стр. 160–161; " + PR + "стр. 8–9",
+      notes: "Синтаксис: тип имя[N]; — что храним, как назовём, сколько ячеек. Способ 1 — пустой массив, способ 2 — массив с данными (инициализация), длину при этом можно не указывать. Переключайте варианты инициализации справа: что окажется в ячейках?",
+      render() {
+        const k = S().tabs["init"] || "empty";
+        const it = INIT[k];
+        const tab = (id, label) => `<button type="button" class="chip ${k === id ? "on" : ""}" onclick="DECK.setTab('init','${id}')">${label}</button>`;
+        return `<div class="body">
+          <div class="grid-2" style="gap:22px;grid-template-columns:1.1fr 1fr;">
+            <div class="stack text-sm">
+              <div class="def" style="font-size:21px;"><code>тип имя[N];</code> &nbsp;— что храним, как назовём, сколько ячеек</div>
+              <div class="card"><h3>1 способ: пустой массив определённой длины</h3>${code("float array[5];", 16)}<p>массив array из пяти элементов вещественного типа</p></div>
+              <div class="card"><h3>2 способ: массив с данными</h3>${code('string names[5] = {"Marat", "Aruzhan",\n  "Marlen", "Sabina", "Ainur"};\nint numbers[] = {4, -1, -2, 34, 48, -50};', 15)}<p>При заполнении данными длину указывать необязательно.</p></div>
+            </div>
+            <div class="stack">
+              <h3 style="margin:0;">Способы инициализации</h3>
+              <div class="chips">${tab("empty", "int arr[5];")}${tab("full", "{10, …, 50}")}${tab("zero", "{0}")}</div>
+              ${code(it.code, 18)}
+              ${cells(it.vals, { name: "arr" })}
+              <div class="card text-sm">${it.note}</div>
+              <div class="note text-sm"><b>Инициализация</b> — одновременное объявление и заполнение массива данными.</div>
+            </div>
+          </div>
+        </div>${src(SB + "стр. 160 (1 и 2 способ), стр. 161 (без длины, инициализация); " + PR + "стр. 8 «Объявление массива», стр. 9 «Способы инициализации»")}`;
+      },
+    },
+    {
+      badge: "Практика · в парах",
+      shortTitle: "Найди правильное объявление",
+      timing: "26–32 мин",
+      source: PR + "стр. 12",
+      notes: "В парах: выбрать верную запись и тип для имён 10 победителей. Щёлкните вариант. Затем — запись объявлений по условию (командное слово СОЧ «Напишите фрагмент программного кода для объявления…»): пары пишут в тетради, потом откройте ответ.",
+      render() {
+        return `<div class="body"><div class="grid-2 quizgrid" style="gap:18px;">
+          <div class="stack">
+            ${quiz("q-decl", "Найдите правильное объявление:", ["int array;", "array[10] int;", "int array[10];"], 2)}
+            ${quiz("q-win", "Какой тип данных для имён 10 победителей?", ["int winners[10];", "string winners[10];", "char winners;"], 1)}
+          </div>
+          <div class="stack text-sm">
+            <h3 style="margin:0;">Напишите фрагмент кода для объявления массива</h3>
+            <div class="step">Массив T для 7 значений температуры.</div>
+            <div class="step">Массив cities для названий 4 городов.</div>
+            <div class="step">Массив letters для 12 букв.</div>
+            <div class="text-xs text-muted">Условия — условный пример (тренировка по формату).</div>
+            ${reveal("r-decl", "Ответы", "<code>float T[7];</code> (или <code>double T[7];</code>)<br><code>string cities[4];</code><br><code>char letters[12];</code>")}
+          </div>
+        </div></div>${src(PR + "стр. 12 «Практика: понимание концепции»; " + PR + "стр. 7 (типы данных)")}`;
+      },
+    },
+    {
+      badge: "Новое · доступ к элементам",
+      shortTitle: "Запись и чтение по индексу",
+      timing: "32–40 мин",
+      source: PR + "стр. 10, 13",
+      notes: "Запись: A[2] = 50; — положить 50 в ячейку с индексом 2. Чтение: cout << A[0]; — вывести содержимое ячейки 0. Затем практика в парах: щёлкайте ячейки массива A, ученики называют значения и вычисляют A[1] + A[3].",
+      render() {
+        const p = S().selected["acc"];
+        const i = p === undefined ? undefined : Number(p);
+        const A = [10, 20, 30, 40, 50];
+        return `<div class="body">
+          <div class="cards c2 text-sm">
+            <div class="card"><h3>✍ Запись (write)</h3>${code("A[2] = 50;", 18)}<p>Положить число 50 в ячейку с индексом 2.</p></div>
+            <div class="card"><h3>👁 Чтение (read)</h3>${code("cout << A[0];", 18)}<p>Вывести содержимое ячейки с индексом 0.</p></div>
+          </div>
+          <div class="grid-2" style="gap:20px;grid-template-columns:1.2fr 1fr;align-items:start;">
+            <div class="stack">
+              ${code("int A[5] = {10, 20, 30, 40, 50};", 17)}
+              ${cells(A, { name: "A", hi: i, key: "acc" })}
+              <div class="text-sm">${i === undefined ? "Щёлкните ячейку. Чтобы найти данные, нужно знать <b>имя массива</b> и <b>индекс</b>." : `<b>A[${i}]</b> = ${A[i]}`}</div>
+            </div>
+            <div class="stack text-sm">
+              <div class="step">Чему равен A[0]?</div>
+              <div class="step">Чему равен A[4]?</div>
+              <div class="step">Вычислите A[1] + A[3].</div>
+              ${reveal("r-acc", "Ответы", "A[0] = 10; A[4] = 50; A[1] + A[3] = 20 + 40 = 60.")}
+            </div>
+          </div>
+        </div>${src(PR + "стр. 10 «Доступ к элементам», стр. 13 «Практика: работа с индексами»")}`;
+      },
+    },
+    {
+      badge: "Физминутка",
+      shortTitle: "Физминутка",
+      timing: "40–43 мин",
+      source: "КСП урока 2",
+      notes: "Упражнения для глаз, шеи и кистей рук — 3 минуты.",
+      render() {
+        return `<div class="body" style="align-items:center;justify-content:center;text-align:center;">
+          <div style="font-size:72px;">🧘</div>
+          <h2 class="slide-h2">Физминутка · 3 минуты</h2>
+          <p class="lead">Упражнения для глаз, шеи и кистей рук</p>
+        </div>${src("КСП урока 2")}`;
+      },
+    },
+    {
+      badge: "Практика · за компьютером",
+      shortTitle: "Длина массива: sizeof()",
+      timing: "43–55 мин",
+      source: SB + "стр. 160–161",
+      notes: "Индивидуально за компьютером: набрать программу (стр. 161), запустить. Длина = размер всего массива / размер одного элемента. Затем дописать вывод salaries[1] и salaries[3]. Спросите: что выведет программа? Откройте ответы после запуска.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;grid-template-columns:1.25fr 1fr;">
+          <div class="stack">
+            <h2 class="slide-h2">Наберите и запустите программу</h2>
+            ${code(`#include <iostream>
+using namespace std;
+int main()
+{  //Создаем массив с зарплатами
+   int salaries[] = {150000, 80000, 200000, 300000, 700000};
+   //Находим длину массива
+   int length = sizeof(salaries) / sizeof(salaries[0]);
+   cout << length << endl;
+   return 0; }`, 15)}
+          </div>
+          <div class="stack text-sm">
+            <div class="card"><h3>sizeof()</h3><p>Длину массива можно определить с помощью функции sizeof(): размер всего массива разделить на размер одного элемента.</p>${code("length = sizeof(numbers) / sizeof(numbers[0]);", 13)}</div>
+            ${reveal("r-len", "Что выведет программа?", "<b>5</b> — в массиве пять элементов.")}
+            <div class="card"><h3>Допишите</h3><p>Выведите salaries[1] и salaries[3].</p></div>
+            ${reveal("r-s13", "Ответ", "salaries[1] = 80000, salaries[3] = 300000.")}
+          </div>
+        </div></div>${src(SB + "стр. 160 (поле: sizeof()), стр. 161 (программа с массивом salaries, обращение к элементам)")}`;
+      },
+    },
+    {
+      badge: "Новое · осторожно",
+      shortTitle: "Выход за границы",
+      timing: "55–60 мин",
+      source: PR + "стр. 11; " + Z1 + "стр. 11",
+      notes: "Фронтально: если размер массива 5, допустимые индексы 0–4. Обращение к arr[5] — ошибка: такой ячейки не существует. Правило — последний индекс всегда равен размер − 1. Попросите учеников сформулировать правило полезной фразой.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Осторожно: выход за границы!</h2>
+          <div style="display:flex;gap:6px;align-items:flex-end;flex-wrap:wrap;">
+            ${cells(["?", "?", "?", "?", "?"], { name: "arr" })}
+            <div style="display:grid;gap:4px;text-align:center;"><div class="mono" style="min-width:64px;padding:10px 8px;border-radius:10px;border:2px dashed var(--danger);background:var(--danger-soft);font-weight:700;color:var(--danger);">✗</div><div class="mono text-xs" style="color:var(--danger);font-weight:800;">[5]</div></div>
+          </div>
+          <div class="cards c2 text-sm">
+            <div class="card"><h3>Массив (размер = 5)</h3><p>Допустимые индексы: 0, 1, 2, 3, 4.<br><b>Ошибка:</b> arr[5] — такой ячейки не существует!</p></div>
+            <div class="card"><h3>Типичная ошибка</h3><p>Обращение к A[10] в массиве <code>int A[10];</code>. Помните: максимальный индекс — 9!</p></div>
+          </div>
+          <div class="def" style="font-size:22px;"><b>Правило:</b> последний индекс всегда равен <b>размер − 1</b>.</div>
+        </div>${src(PR + "стр. 11 «Осторожно: выход за границы!»; " + Z1 + "стр. 11 «Типичные ошибки»")}`;
+      },
+    },
+    {
+      badge: "Практика · в группах",
+      shortTitle: "Код и ошибки",
+      timing: "60–66 мин",
+      source: PR + "стр. 14",
+      notes: "В группах: почему код вызовет ошибку? Затем две задачи — группы пишут ответ на листе, откройте эталон. Обратите внимание на «первую ячейку»: её индекс 0.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;">
+          <div class="stack">
+            <h2 class="slide-h2">Почему этот код вызовет ошибку?</h2>
+            ${code("int N[10];\nN[10] = 5;", 22)}
+            ${reveal("r-n10", "Объяснение", "В массиве N 10 элементов: индексы от 0 до 9. Ячейки N[10] не существует — это <b>выход за границы</b> массива.")}
+          </div>
+          <div class="stack text-sm">
+            <h2 class="slide-h2">Задачи</h2>
+            <div class="step">Объявите массив prices для хранения 100 целых чисел.</div>
+            ${reveal("r-pr", "Ответ 1", "<code>int prices[100];</code>")}
+            <div class="step">Запишите число 7 в первую ячейку массива luckyNumbers.</div>
+            ${reveal("r-ln", "Ответ 2", "<code>luckyNumbers[0] = 7;</code>")}
+          </div>
+        </div></div>${src(PR + "стр. 14 «Практика: код и ошибки»")}`;
+      },
+    },
+    {
+      badge: "Анализ · обсуждение",
+      shortTitle: "Логическая задача",
+      timing: "66–70 мин",
+      source: PR + "стр. 15",
+      notes: "Обсуждение: arr[i] — количество яблок в корзине i. Что означает строка? Выслушайте версии, откройте возможный ответ. Подведите итог словарём: массив, индекс, размер.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;">
+          <div class="stack">
+            <h2 class="slide-h2">Если arr[i] — количество яблок в корзине i, что означает строка?</h2>
+            ${code("arr[2] = arr[1] + 5;", 24)}
+            ${reveal("r-apple", "Возможный ответ", "В корзину с индексом 2 записывают количество яблок корзины 1, увеличенное на 5: справа значение <b>читается</b> из arr[1], слева — <b>записывается</b> в arr[2].")}
+          </div>
+          <div class="stack text-sm">
+            <h2 class="slide-h2">Словарь</h2>
+            <div class="card"><b>МАССИВ (Array)</b> — набор однотипных данных.</div>
+            <div class="card"><b>ИНДЕКС (Index)</b> — номер позиции. Всегда начинается с 0.</div>
+            <div class="card"><b>РАЗМЕР (Size)</b> — количество ячеек.</div>
+          </div>
+        </div></div>${src(PR + "стр. 15 «Итоги и словарь», логическая задача; возможный ответ — по стр. 10 (запись и чтение)")}`;
+      },
+    },
+
+    /* ---------------- КОНЕЦ УРОКА (10 мин) ---------------- */
+    {
+      badge: "Конец урока · проверь себя",
+      shortTitle: "Проверь себя",
+      timing: "70–75 мин",
+      source: SB + "стр. 163; " + TG + "стр. 132",
+      notes: "«Проверь себя» 1–2 (стр. 163): ученики отвечают на карточках, щёлкните вариант. Вопрос 3 — по правилу последнего индекса.",
+      render() {
+        return `<div class="body">
+          ${code("int salaries[] = {150000, 80000, 200000, 300000, 700000};", 15)}
+          <div class="grid-2 quizgrid" style="gap:8px 14px;">
+            ${quiz("q1", "1. Как определить длину массива salaries?", ["int n = sizeof(salaries);", "int n = sizeof(salaries) / sizeof(salaries[0]);", "int n = salaries[5];", "int n = sizeof(salaries[0]);"], 1)}
+            ${quiz("q2", "2. salaries[2] = ?", ["80000", "200000", "300000", "150000"], 1)}
+            ${quiz("q3", "3. salaries[4] = ?", ["300000", "такого элемента нет", "700000", "80000"], 2)}
+            ${quiz("q4", "4. Индекс последнего элемента массива salaries:", ["5", "4", "0", "6"], 1)}
+          </div>
+        </div>${src(SB + "стр. 163 («Проверь себя» 1–2); " + TG + "стр. 132 (ответы); " + PR + "стр. 11 (правило последнего индекса)")}`;
+      },
+    },
+    {
+      badge: "Конец урока · рефлексия",
+      shortTitle: "Рефлексия и домашнее задание",
+      timing: "75–80 мин",
+      source: TG + "стр. 132; " + Z1 + "стр. 3",
+      notes: "Рефлексия: на стикере ученики располагают способы объявления массива по сложности понимания, указывают причину затруднения и задают вопрос учителю или однокласснику. Учтите ответы при подготовке следующего урока.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;">
+          <div class="stack">
+            <h2 class="slide-h2">Рефлексия</h2>
+            <div class="card"><p>Расположи способы объявления массива <b>от понятного к сложному</b>:</p>${code("float array[5];\nint arr[5] = {0};\nint numbers[] = {4, -1, -2};\nint length = sizeof(a) / sizeof(a[0]);", 15)}<div class="text-xs text-muted">Четвёртая строка — определение длины (массив a — условный).</div></div>
+            <div class="card"><p>Что вызвало затруднение? Задай вопрос учителю или однокласснику.</p></div>
+          </div>
+          <div class="stack">
+            <h2 class="slide-h2">Домашнее задание</h2>
+            <div class="card"><h3>📝 Практикум, уровень 1</h3><p>1. Объяви массив целых чисел grades для хранения оценок 25 учеников.<br>2. Создай массив arr из 3 элементов и сразу заполни его числами 10, 20, 30.</p></div>
+            <div class="card text-sm"><h3>⭐ По желанию — задание 3</h3><p>Фрагмент кода: пользователь вводит число n (размер), затем объявляется массив A этого размера.</p></div>
+          </div>
+        </div></div>${src(TG + "стр. 132 (рефлексия); " + Z1 + "стр. 3 «Уровень 1: объявление и инициализация»")}`;
+      },
+    },
+  ],
+});
+</script>
+</body>
+</html>

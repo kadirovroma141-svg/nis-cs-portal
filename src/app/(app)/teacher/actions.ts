@@ -1,0 +1,487 @@
+"use server";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { after } from "next/server";
+import { z } from "zod";
+import { requireProfile } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { createAccount, parseStudentCsv, resetAccountPassword } from "@/lib/accounts";
+import { gradeAttempt, gradePendingAttempts } from "@/lib/grading/attempt-grader";
+import { friendlyError } from "@/lib/errors";
+import { ACADEMIC_YEAR } from "@/lib/env";
+
+export type ActionState = { ok?: boolean; error?: string; message?: string; details?: string[] };
+
+const staff = () => requireProfile(["teacher", "admin"]);
+
+/** True when the caller owns the class (or is admin) — checked through RLS. */
+async function canManageClass(classId: string) {
+  const supabase = await createClient();
+  const { data } = await supabase.rpc("teaches_class", { p_class: classId });
+  const { data: admin } = await supabase.rpc("is_admin");
+  return Boolean(data) || Boolean(admin);
+}
+
+async function canManageStudent(studentId: string) {
+  const supabase = await createClient();
+  const { data } = await supabase.rpc("can_view_student", { p_student: studentId });
+  return Boolean(data);
+}
+
+// ---------------------------------------------------------------- classes
+export async function createClass(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const profile = await staff();
+  const parsed = z
+    .object({ name: z.string().trim().min(1).max(40), grade: z.coerce.number().int().min(7).max(12), academic_year: z.string().trim().min(4).max(20) })
+    .safeParse({ name: formData.get("name"), grade: formData.get("grade"), academic_year: formData.get("academic_year") || ACADEMIC_YEAR });
+  if (!parsed.success) return { error: "Enter a class name and grade." };
+  const supabase = await createClient();
+  const teacherId = profile.role === "admin" && formData.get("teacher_id") ? String(formData.get("teacher_id")) : profile.id;
+  const { data, error } = await supabase
+    .from("classes")
+    .insert({ ...parsed.data, teacher_id: teacherId })
+    .select("id")
+    .single();
+  if (error) return { error: error.code === "23505" ? "A class with this name already exists for this year." : "The class could not be created." };
+  revalidatePath("/teacher/classes");
+  redirect(`/teacher/classes/${data.id}`);
+}
+
+export async function addStudentToClass(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const profile = await staff();
+  const classId = String(formData.get("class_id"));
+  const username = String(formData.get("username") ?? "").trim().toLowerCase();
+  if (!(await canManageClass(classId))) return { error: "You do not manage this class." };
+  const admin = createAdminClient();
+  const { data: student } = await admin.from("profiles").select("id, role").eq("username", username).maybeSingle();
+  if (!student || student.role !== "student") return { error: `No student with username “${username}”.` };
+  const { error } = await admin
+    .from("class_members")
+    .upsert({ class_id: classId, student_id: student.id, status: "active" }, { onConflict: "class_id,student_id" });
+  if (error) return { error: "The student could not be added." };
+  await admin.from("audit_logs").insert({ actor_id: profile.id, action: "class.add_student", entity_type: "class", entity_id: classId, details: { student_id: student.id } });
+  revalidatePath(`/teacher/classes/${classId}`);
+  return { ok: true, message: `${username} added to the class.` };
+}
+
+export async function removeStudentFromClass(formData: FormData): Promise<ActionState | void> {
+  const profile = await staff();
+  const classId = String(formData.get("class_id"));
+  const studentId = String(formData.get("student_id"));
+  if (!(await canManageClass(classId))) return { error: "You do not manage this class." };
+  const admin = createAdminClient();
+  const { error } = await admin.from("class_members").update({ status: "removed" }).eq("class_id", classId).eq("student_id", studentId);
+  if (error) return { error: friendlyError(error, "The student could not be removed.") };
+  await admin.from("audit_logs").insert({ actor_id: profile.id, action: "class.remove_student", entity_type: "class", entity_id: classId, details: { student_id: studentId } });
+  revalidatePath(`/teacher/classes/${classId}`);
+}
+
+export async function createStudentInClass(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const profile = await staff();
+  const classId = String(formData.get("class_id"));
+  if (!(await canManageClass(classId))) return { error: "You do not manage this class." };
+  const admin = createAdminClient();
+  const { data: cls } = await admin.from("classes").select("grade").eq("id", classId).single();
+  const result = await createAccount(
+    {
+      username: String(formData.get("username") ?? ""),
+      first_name: String(formData.get("first_name") ?? ""),
+      last_name: String(formData.get("last_name") ?? ""),
+      role: "student",
+      grade: cls?.grade ?? null,
+    },
+    profile.id,
+  );
+  if (!result.ok) return { error: result.error };
+  await admin.from("class_members").insert({ class_id: classId, student_id: result.id });
+  revalidatePath(`/teacher/classes/${classId}`);
+  return { ok: true, message: `Account ${result.username} created with the temporary password. The student must change it at first login.` };
+}
+
+/**
+ * Bulk import: first_name,last_name,username,class,grade. Teachers import into
+ * their own classes (missing classes are created for them); admins may import
+ * into any class.
+ */
+export async function importStudents(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const profile = await staff();
+  const file = formData.get("file");
+  const fixedClassId = formData.get("class_id") ? String(formData.get("class_id")) : null;
+  if (!(file instanceof File) || file.size === 0) return { error: "Choose a CSV file." };
+  if (file.size > 1_000_000) return { error: "The file is too large (max 1 MB)." };
+  const { rows, errors } = parseStudentCsv(await file.text());
+  if (errors.length) return { error: "The file has problems.", details: errors.slice(0, 20) };
+  if (fixedClassId && !(await canManageClass(fixedClassId))) return { error: "You do not manage this class." };
+
+  const admin = createAdminClient();
+  const classIds = new Map<string, string>();
+  const details: string[] = [];
+  let created = 0;
+  let added = 0;
+
+  for (const row of rows) {
+    let classId = fixedClassId;
+    if (!classId && row.class) {
+      if (!classIds.has(row.class)) {
+        const { data: found } = await admin.from("classes").select("id, teacher_id").eq("name", row.class).eq("academic_year", ACADEMIC_YEAR).maybeSingle();
+        if (found && (found.teacher_id === profile.id || profile.role === "admin")) classIds.set(row.class, found.id);
+        else if (found) {
+          details.push(`${row.username}: class ${row.class} belongs to another teacher — skipped.`);
+          continue;
+        } else {
+          const parsedGrade = Number(row.class.match(/^\d{1,2}/)?.[0] ?? 12);
+          const grade = row.grade ?? (parsedGrade >= 7 && parsedGrade <= 12 ? parsedGrade : 12);
+          const { data: newClass } = await admin
+            .from("classes")
+            .insert({ name: row.class, grade, academic_year: ACADEMIC_YEAR, teacher_id: profile.id })
+            .select("id")
+            .single();
+          if (newClass) classIds.set(row.class, newClass.id);
+        }
+      }
+      classId = classIds.get(row.class) ?? null;
+    }
+    let grade = row.grade;
+    if (!grade && classId) {
+      const { data: c } = await admin.from("classes").select("grade").eq("id", classId).single();
+      grade = c?.grade ?? null;
+    }
+
+    const result = await createAccount({ ...row, role: "student", grade }, profile.id);
+    let studentId: string | null = result.ok ? result.id : null;
+    if (result.ok) created++;
+    else if (result.error === "This username already exists.") {
+      const { data: existing } = await admin.from("profiles").select("id, role").eq("username", result.username).maybeSingle();
+      if (existing?.role === "student") studentId = existing.id;
+      details.push(`${result.username}: already exists${studentId && classId ? " — added to class" : ""}.`);
+    } else details.push(`${result.username}: ${result.error}`);
+
+    if (studentId && classId) {
+      await admin.from("class_members").upsert({ class_id: classId, student_id: studentId, status: "active" }, { onConflict: "class_id,student_id" });
+      added++;
+    }
+  }
+  await admin.from("audit_logs").insert({ actor_id: profile.id, action: "account.bulk_import", entity_type: "profile", details: { rows: rows.length, created, added } });
+  revalidatePath("/teacher/classes");
+  if (fixedClassId) revalidatePath(`/teacher/classes/${fixedClassId}`);
+  return { ok: true, message: `${created} account(s) created, ${added} class membership(s) added.`, details };
+}
+
+export async function resetStudentPassword(formData: FormData): Promise<ActionState> {
+  const profile = await staff();
+  const studentId = String(formData.get("student_id"));
+  if (!(await canManageStudent(studentId))) return { error: "You do not teach this student." };
+  const r = await resetAccountPassword(studentId, profile.id);
+  if (!r.ok) return { error: r.error };
+  revalidatePath(`/teacher/students/${studentId}`);
+  return { ok: true, message: "Password reset to the temporary one." };
+}
+
+// ---------------------------------------------------------------- assignments
+const assignmentSchema = z.object({
+  assignment_type: z.enum(["practice", "topic_exam", "mock_exam", "revision", "topic"]),
+  title: z.string().trim().max(200),
+  instructions: z.string().max(5000).optional(),
+  exam_id: z.string().uuid().optional().or(z.literal("")),
+  topic_id: z.string().uuid().optional().or(z.literal("")),
+  available_from: z.string().optional(),
+  deadline: z.string().optional(),
+  theory_deadline: z.string().optional(),
+  practice_deadline: z.string().optional(),
+  practice_target: z.coerce.number().int().min(1).max(100).optional().or(z.literal("")),
+  attempt_limit: z.coerce.number().int().min(1).max(20).optional().or(z.literal("")),
+  duration_override_minutes: z.coerce.number().int().min(1).max(600).optional().or(z.literal("")),
+  show_results: z.string().optional(),
+  results_release_at: z.string().optional(),
+  show_mark_scheme: z.string().optional(),
+  integrity_mode: z.enum(["monitor", "warn", "auto_submit"]),
+  max_violations: z.coerce.number().int().min(1).max(50),
+});
+
+function localToIso(v: string | undefined, tzOffsetMinutes: number): string | null {
+  if (!v) return null;
+  // datetime-local has no zone: interpret it in the teacher's browser timezone.
+  const ms = Date.parse(`${v}:00Z`);
+  if (Number.isNaN(ms)) return null;
+  return new Date(ms + tzOffsetMinutes * 60_000).toISOString();
+}
+
+export async function createAssignment(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const profile = await staff();
+  const raw = Object.fromEntries(formData.entries());
+  const parsed = assignmentSchema.safeParse(raw);
+  if (!parsed.success) return { error: "Check the form: " + parsed.error.issues.map((i) => i.path.join(".")).join(", ") };
+  const v = parsed.data;
+  const tz = Number(formData.get("tz_offset") ?? 0) || 0;
+  const classIds = formData.getAll("class_ids").map(String).filter(Boolean);
+  const studentIds = formData.getAll("student_ids").map(String).filter(Boolean);
+  if (classIds.length === 0 && studentIds.length === 0) return { error: "Choose at least one class or student." };
+  const needsExam = v.assignment_type === "topic_exam" || v.assignment_type === "mock_exam";
+  const isTopic = v.assignment_type === "topic";
+  if (needsExam && !v.exam_id) return { error: "Choose an exam." };
+  if (isTopic && !v.topic_id) return { error: "Choose the topic to assign." };
+  if (!needsExam && !v.topic_id && !v.exam_id) return { error: "Choose a topic or an exam." };
+  if (!isTopic && !v.title) return { error: "Enter a title." };
+
+  for (const c of classIds) if (!(await canManageClass(c))) return { error: "You can only assign to your own classes." };
+  for (const s of studentIds) if (!(await canManageStudent(s))) return { error: "You can only assign to your own students." };
+
+  const supabase = await createClient();
+  const availableFrom = localToIso(v.available_from, tz) ?? new Date().toISOString();
+  const deadline = localToIso(v.deadline, tz);
+  if (deadline && deadline <= availableFrom) return { error: "The deadline must be after the start time." };
+
+  // A topic assignment: theory + practice + the topic's own exam (when it has a published one).
+  let title = v.title;
+  let examId = v.exam_id || null;
+  let theoryDeadline: string | null = null;
+  let practiceDeadline: string | null = null;
+  if (isTopic) {
+    if (!deadline) return { error: "Set the final deadline." };
+    theoryDeadline = localToIso(v.theory_deadline, tz);
+    practiceDeadline = localToIso(v.practice_deadline, tz);
+    for (const [name, d] of [["theory", theoryDeadline], ["practice", practiceDeadline]] as const) {
+      if (d && d <= availableFrom) return { error: `The ${name} deadline must be after the start time.` };
+      if (d && d > deadline) return { error: `The ${name} deadline cannot be later than the final deadline.` };
+    }
+    const [{ data: topic }, { data: exam }] = await Promise.all([
+      supabase.from("topics").select("title").eq("id", v.topic_id as string).maybeSingle(),
+      supabase
+        .from("exams")
+        .select("id")
+        .eq("topic_id", v.topic_id as string)
+        .eq("kind", "topic")
+        .in("status", ["published", "scheduled"])
+        .is("archived_at", null)
+        .not("current_version_id", "is", null)
+        .order("created_at")
+        .limit(1)
+        .maybeSingle(),
+    ]);
+    if (!topic) return { error: "That topic could not be found." };
+    title = title || topic.title;
+    examId = exam?.id ?? null;
+  }
+
+  const { data: assignment, error } = await supabase
+    .from("assignments")
+    .insert({
+      teacher_id: profile.id,
+      assignment_type: v.assignment_type,
+      title,
+      instructions: v.instructions || null,
+      exam_id: examId,
+      topic_id: v.topic_id || null,
+      available_from: availableFrom,
+      deadline,
+      theory_deadline: theoryDeadline,
+      practice_deadline: practiceDeadline,
+      practice_target: isTopic && v.practice_target !== "" && v.practice_target !== undefined ? v.practice_target : 100,
+      attempt_limit: v.attempt_limit === "" || v.attempt_limit === undefined ? null : v.attempt_limit,
+      duration_override_minutes: v.duration_override_minutes === "" || v.duration_override_minutes === undefined ? null : v.duration_override_minutes,
+      show_results: v.show_results === "on",
+      results_release_at: localToIso(v.results_release_at, tz),
+      show_mark_scheme: v.show_mark_scheme === "on",
+      integrity_mode: v.integrity_mode,
+      max_violations: v.max_violations,
+    })
+    .select("id")
+    .single();
+  if (error || !assignment) return { error: "The assignment could not be created." };
+
+  const targets = [...classIds.map((class_id) => ({ assignment_id: assignment.id, class_id })), ...studentIds.map((student_id) => ({ assignment_id: assignment.id, student_id }))];
+  const { error: tErr } = await supabase.from("assignment_targets").insert(targets);
+  if (tErr) {
+    await supabase.from("assignments").delete().eq("id", assignment.id);
+    return { error: "The assignment targets could not be saved." };
+  }
+
+  // Notify every targeted student.
+  const admin = createAdminClient();
+  const { data: members } = classIds.length
+    ? await admin.from("class_members").select("student_id").in("class_id", classIds).eq("status", "active")
+    : { data: [] };
+  const recipients = [...new Set([...(members ?? []).map((m) => m.student_id as string), ...studentIds])];
+  if (recipients.length) {
+    const link = isTopic ? `/assignments/${assignment.id}` : v.exam_id ? `/exams/${v.exam_id}?assignment=${assignment.id}` : "/student/dashboard";
+    await admin.from("notifications").insert(
+      recipients.map((user_id) => ({
+        user_id,
+        type: "assignment",
+        title: `New assignment: ${title}`,
+        body: deadline ? `Due ${new Date(deadline).toLocaleString("en-GB")}` : null,
+        link,
+      })),
+    );
+  }
+  await admin.from("audit_logs").insert({ actor_id: profile.id, action: "assignment.create", entity_type: "assignment", entity_id: assignment.id, details: { classes: classIds.length, students: studentIds.length } });
+  revalidatePath("/teacher/assignments");
+  redirect(`/teacher/assignments/${assignment.id}`);
+}
+
+/** Moves the deadlines of a topic assignment (e.g. to give the class more time). */
+export async function updateAssignmentDeadlines(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  await staff();
+  const id = String(formData.get("assignment_id"));
+  const tz = Number(formData.get("tz_offset") ?? 0) || 0;
+  const get = (k: string) => localToIso(String(formData.get(k) ?? "") || undefined, tz);
+  const deadline = get("deadline");
+  const theory = get("theory_deadline");
+  const practice = get("practice_deadline");
+  if (!deadline) return { error: "Set the final deadline." };
+  const supabase = await createClient();
+  const { data: a } = await supabase.from("assignments").select("available_from, assignment_type").eq("id", id).maybeSingle();
+  if (!a || a.assignment_type !== "topic") return { error: "This assignment could not be found." };
+  if (deadline <= new Date(a.available_from).toISOString()) return { error: "The final deadline must be after the start time." };
+  for (const [name, d] of [["theory", theory], ["practice", practice]] as const) {
+    if (d && d > deadline) return { error: `The ${name} deadline cannot be later than the final deadline.` };
+  }
+  // RLS: only the teacher who owns the assignment (or an admin) can change it.
+  const { data, error } = await supabase
+    .from("assignments")
+    .update({ deadline, theory_deadline: theory, practice_deadline: practice })
+    .eq("id", id)
+    .select("id");
+  if (error || !data?.length) return { error: "The deadlines could not be saved." };
+  revalidatePath(`/teacher/assignments/${id}`);
+  revalidatePath("/assignments", "layout");
+  return { ok: true, message: "Deadlines saved." };
+}
+
+export async function archiveAssignment(formData: FormData): Promise<ActionState | void> {
+  await staff();
+  const id = String(formData.get("assignment_id"));
+  const supabase = await createClient();
+  const { error } = await supabase.from("assignments").update({ archived_at: new Date().toISOString() }).eq("id", id);
+  if (error) return { error: friendlyError(error, "The assignment could not be archived.") };
+  revalidatePath("/teacher/assignments");
+  redirect("/teacher/assignments");
+}
+
+// ---------------------------------------------------------------- topic visibility
+const uuidList = z.array(z.string().uuid()).max(1000);
+
+/** Saves which topics are hidden from a class. `hidden_ids` is the complete list for that class. */
+export async function saveClassTopicVisibility(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const profile = await staff();
+  const classId = String(formData.get("class_id") ?? "");
+  const parsed = uuidList.safeParse(String(formData.get("hidden_ids") ?? "").split(",").filter(Boolean));
+  if (!z.string().uuid().safeParse(classId).success || !parsed.success) return { error: "The list of topics is not valid." };
+  if (!(await canManageClass(classId))) return { error: "You can only change the topics of your own classes." };
+  const hidden = new Set(parsed.data);
+
+  const supabase = await createClient();
+  const { data: current, error: readErr } = await supabase.from("class_hidden_topics").select("topic_id").eq("class_id", classId);
+  if (readErr) return { error: "The current settings could not be read." };
+  const before = new Set(((current ?? []) as { topic_id: string }[]).map((r) => r.topic_id));
+  const toShow = [...before].filter((id) => !hidden.has(id));
+  const toHide = [...hidden].filter((id) => !before.has(id));
+
+  if (toShow.length) {
+    const { error } = await supabase.from("class_hidden_topics").delete().eq("class_id", classId).in("topic_id", toShow);
+    if (error) return { error: "The changes could not be saved." };
+  }
+  if (toHide.length) {
+    const { error } = await supabase
+      .from("class_hidden_topics")
+      .insert(toHide.map((topic_id) => ({ class_id: classId, topic_id, hidden_by: profile.id })));
+    if (error) return { error: "The changes could not be saved." };
+  }
+  if (toShow.length || toHide.length) {
+    await createAdminClient().from("audit_logs").insert({
+      actor_id: profile.id, action: "class.topic_visibility", entity_type: "class", entity_id: classId,
+      details: { hidden: toHide.length, shown: toShow.length, hidden_total: hidden.size },
+    });
+  }
+  revalidatePath("/teacher/topics");
+  return {
+    ok: true,
+    message: toShow.length || toHide.length
+      ? `Saved: ${toHide.length} topic${toHide.length === 1 ? "" : "s"} hidden, ${toShow.length} shown again. ${hidden.size} hidden in total.`
+      : "Nothing changed.",
+  };
+}
+
+// ---------------------------------------------------------------- live exam control
+export async function forceSubmitAttempt(formData: FormData): Promise<ActionState | void> {
+  await staff();
+  const attemptId = String(formData.get("attempt_id"));
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("teacher_force_submit", { p_attempt_id: attemptId });
+  if (error) return { error: friendlyError(error, "The attempt could not be submitted.") };
+  if (data) after(() => gradeAttempt(attemptId).then(() => undefined, () => undefined));
+  revalidatePath("/teacher", "layout");
+}
+
+/** Switches "Technical issue" on or off for one running attempt: while it is on, nothing counts as a violation. */
+export async function setTechnicalIssue(formData: FormData): Promise<ActionState | void> {
+  await staff();
+  const attemptId = String(formData.get("attempt_id"));
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("teacher_set_technical_issue", { p_attempt_id: attemptId, p_on: formData.get("on") === "1" });
+  if (error) return { error: friendlyError(error, "The technical issue flag could not be changed.") };
+  revalidatePath("/teacher", "layout");
+}
+
+const minutesSchema = z.object({ attempt_id: z.string().uuid(), minutes: z.coerce.number().int().min(1).max(180) });
+
+/** Adds minutes to one student's running attempt. */
+export async function extendAttemptTime(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  await staff();
+  const parsed = minutesSchema.safeParse(Object.fromEntries(formData.entries()));
+  if (!parsed.success) return { error: "Choose between 1 and 180 minutes." };
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("teacher_extend_attempt", { p_attempt_id: parsed.data.attempt_id, p_minutes: parsed.data.minutes });
+  if (error) return { error: friendlyError(error, "The time could not be added.") };
+  revalidatePath("/teacher", "layout");
+  return { ok: true, message: `+${parsed.data.minutes} min` };
+}
+
+/** Returns a submitted attempt to "in progress" with a new time limit; its marks are discarded. */
+export async function reopenAttempt(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  await staff();
+  const parsed = minutesSchema.safeParse(Object.fromEntries(formData.entries()));
+  if (!parsed.success) return { error: "Choose between 1 and 180 minutes." };
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("teacher_reopen_attempt", { p_attempt_id: parsed.data.attempt_id, p_minutes: parsed.data.minutes });
+  if (error) return { error: friendlyError(error, "The work could not be reopened.") };
+  revalidatePath("/teacher", "layout");
+  return { ok: true, message: "Reopened" };
+}
+
+// ---------------------------------------------------------------- moderation
+export async function reviewMark(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  await staff();
+  const action = String(formData.get("action"));
+  const resultId = String(formData.get("result_id"));
+  const attemptId = String(formData.get("attempt_id"));
+  const markRaw = formData.get("mark");
+  // the form is prefilled with the AI feedback: saved as the teacher's only if changed
+  const feedback = String(formData.get("feedback") ?? "").trim();
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("teacher_review_mark", {
+    p_result_id: resultId,
+    p_action: action,
+    p_mark: markRaw === null || markRaw === "" ? null : Number(markRaw),
+    p_feedback: feedback && feedback !== String(formData.get("ai_feedback") ?? "").trim() ? feedback : null,
+    p_reason: String(formData.get("reason") ?? "") || null,
+  });
+  if (error) return { error: friendlyError(error) };
+  if (action === "regrade_request") after(() => gradeAttempt(attemptId).then(() => undefined, () => undefined));
+  revalidatePath(`/teacher/results/${attemptId}`);
+  return { ok: true, message: action === "regrade_request" ? "Sent for re-marking." : "Saved." };
+}
+
+export async function retryGrading(formData: FormData): Promise<ActionState> {
+  await staff();
+  const attemptId = formData.get("attempt_id");
+  if (attemptId) {
+    const ok = await gradeAttempt(String(attemptId)).then(() => true, () => false);
+    revalidatePath(`/teacher/results/${attemptId}`);
+    return ok ? { ok: true, message: "Marking restarted." } : { error: "Marking failed again. Check the AI settings or try later." };
+  }
+  const n = await gradePendingAttempts(20).catch(() => -1);
+  revalidatePath("/teacher", "layout");
+  return n < 0 ? { error: "Marking failed. Check the AI settings or try later." } : { ok: true, message: `Marked ${n} attempt(s).` };
+}

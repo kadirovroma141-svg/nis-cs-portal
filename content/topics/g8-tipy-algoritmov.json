@@ -1,0 +1,1267 @@
+{
+  "topic": "g8-tipy-algoritmov",
+  "summary": "Типы данных C++ (int, short, long, unsigned, float, double, char, string, bool) и три типа алгоритмов: линейный, разветвляющийся (неполная и полная формы, составные и вложенные условия) и циклический.",
+  "theory": [
+    {
+      "title": "Алгоритм и типы алгоритмов",
+      "objectives": [
+        "8.4.1.1"
+      ],
+      "blocks": [
+        {
+          "type": "definition",
+          "term": "Алгоритм",
+          "content": "Строгая последовательность действий, приводящая к определённому результату. Компьютер не умеет «гадать» — он выполняет инструкции."
+        },
+        {
+          "type": "definition",
+          "term": "Алгоритмическая структура",
+          "content": "Способ соединения команд в алгоритме. Существуют три базовые алгоритмические структуры: следование (линейная), ветвление и цикл."
+        },
+        {
+          "type": "cards",
+          "items": [
+            {
+              "title": "Линейная структура (следование)",
+              "content": "Команды выполняются последовательно, одна за другой. Каждый шаг зависит от предыдущего и ведёт к последующему.\n\n```cpp\nP = 2 * (a + b);\n```"
+            },
+            {
+              "title": "Ветвление (условие)",
+              "content": "Порядок действий зависит от условия (истина или ложь): если условие истинно — выполняются одни действия, иначе — другие.\n\n```cpp\nif (pass == \"123\") enter();\nelse error();\n```"
+            },
+            {
+              "title": "Цикл (повторение)",
+              "content": "Одна и та же последовательность действий повторяется многократно, пока выполняется условие (или заданное число раз).\n\n```cpp\nwhile (not_wall) {\n    move();\n}\n```"
+            }
+          ]
+        },
+        {
+          "type": "example",
+          "title": "Примеры из жизни",
+          "content": "- **Линейный:** мама поручает: убери комнату, вынеси мусор, сделай домашнее задание.\n- **Разветвляющийся:** если идёт дождь — берём зонт, иначе — очки.\n- **Циклический:** смена времён года, дыхание (вдох и выдох повторяются)."
+        }
+      ]
+    },
+    {
+      "title": "Классификация типов данных в C++",
+      "objectives": [
+        "8.4.3.1"
+      ],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "content": "Как упаковку выбирают по размеру и форме предмета, так и **тип данных** выбирают по характеристикам данных и тому, как они будут использоваться в программе. Тип данных определяет размер памяти и возможные операции. Правильный выбор типа важен для эффективной обработки информации и избегания ошибок."
+        },
+        {
+          "type": "comparison",
+          "title": "Основные типы данных C++",
+          "columns": [
+            "Тип данных",
+            "Ключевое слово",
+            "Пример значения",
+            "Объявление"
+          ],
+          "rows": [
+            [
+              "Целые числа",
+              "`int`",
+              "5, −10, 140, 2025",
+              "`int age;` (возраст: 41)"
+            ],
+            [
+              "Вещественные числа",
+              "`float`, `double`",
+              "3.14, −0.01, 36.6",
+              "`float temperature;` (температура: 36.6)"
+            ],
+            [
+              "Символ",
+              "`char`",
+              "'A', 'Z', '!'",
+              "`char letter;` (литер класса: 'D')"
+            ],
+            [
+              "Строка",
+              "`string`",
+              "\"Hello\"",
+              "`string name;` (имя: \"Жан\")"
+            ],
+            [
+              "Логический тип",
+              "`bool`",
+              "true, false",
+              "`bool light;` (свет горит: true)"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": "**Целочисленные типы** представляют положительные и отрицательные целые числа без дробной части: возраст, количество детей в семье, игровые очки, год выпуска автомобиля, число страниц книги."
+        },
+        {
+          "type": "comparison",
+          "title": "Целочисленные типы",
+          "columns": [
+            "Тип",
+            "Диапазон значений",
+            "Память"
+          ],
+          "rows": [
+            [
+              "`short`",
+              "от −32 768 до 32 767",
+              "2 байта"
+            ],
+            [
+              "`int`",
+              "от −2 147 483 648 до 2 147 483 647 (в 32-битных системах)",
+              "4 байта"
+            ],
+            [
+              "`long`",
+              "от −2 147 483 648 до 2 147 483 647 (32-битные системы) или 64-битный диапазон",
+              "4 или 8 байтов"
+            ],
+            [
+              "`unsigned short`",
+              "от 0 до 65 535",
+              "2 байта"
+            ]
+          ]
+        },
+        {
+          "type": "callout",
+          "tone": "info",
+          "title": "unsigned",
+          "content": "Слово `unsigned` перед целым типом (`int`, `short`, `long`) означает, что переменная хранит только **неотрицательные** числа: диапазон сдвигается в сторону положительных значений. Например, `unsigned short marks;` — баллы за СОЧ."
+        },
+        {
+          "type": "paragraph",
+          "content": "**Вещественные типы** представляют числа с плавающей точкой — числа, которые могут иметь дробную часть. Дробная часть отделяется **точкой**: `36.6`."
+        },
+        {
+          "type": "comparison",
+          "title": "Вещественные типы",
+          "columns": [
+            "Тип",
+            "Описание",
+            "Память"
+          ],
+          "rows": [
+            [
+              "`float`",
+              "одинарная точность (7–8 значащих цифр): графика, звук, где небольшая потеря точности допустима",
+              "4 байта"
+            ],
+            [
+              "`double`",
+              "двойная точность: более широкий диапазон и большая точность",
+              "8 байт"
+            ],
+            [
+              "`long double`",
+              "повышенная точность: научные и инженерные расчёты",
+              "10 байт"
+            ]
+          ]
+        },
+        {
+          "type": "list",
+          "items": [
+            "`bool` — логические значения `true` (истина) или `false` (ложь); используется в условиях и циклах. Пример: `bool x = false;`",
+            "`char` — **один** символ (буква, цифра, знак препинания), занимает 1 байт, диапазон значений — от 0 до 255. Пример: `char s = 'a';` — пол 'M'/'F', оценка 'A', режим коробки передач 'P', 'R', 'N', 'D'.",
+            "`string` — строка, набор символов. Пример: `string w = \"people\";`"
+          ]
+        },
+        {
+          "type": "callout",
+          "tone": "warning",
+          "title": "Апостроф и кавычки",
+          "content": "Апостроф `'` создаёт **символ** (`char`): `'A'`. Двойные кавычки `\"` создают **строку** (`string`): `\"A\"`. Запись `int number = \"Twenty\";` вызовет ошибку: в целую переменную нельзя записать строку."
+        },
+        {
+          "type": "paragraph",
+          "content": "`cin >> singleWord;` считывает только одно слово — до первого пробела. Чтобы считать всю строку вместе с пробелами, используют `getline(cin, multipleWords);` (нужна библиотека `<string>`)."
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "Диалог с пользователем: string — для имени, char — для литера класса",
+          "content": "#include <iostream>\n#include <string>\nusing namespace std;\nint main() {\n    string name;\n    int age, grade;\n    char liter;\n    cout << \"Привет! Как тебя зовут? \" << endl;\n    getline(cin, name);\n    cout << \"Приятно познакомиться, \" << name << \"!\" << endl;\n    cout << \"Сколько тебе лет?\" << endl;\n    cin >> age;\n    cout << \"В каком ты классе?\" << endl;\n    cin >> grade;\n    cout << \"Литер твоего класса?\" << endl;\n    cin >> liter;\n    cout << \"Понятно. Ты учишься в \" << grade << liter << \" классе.\" << endl;\n    return 0;\n}"
+        }
+      ]
+    },
+    {
+      "title": "Линейные алгоритмы в C++",
+      "objectives": [
+        "8.4.1.1"
+      ],
+      "blocks": [
+        {
+          "type": "definition",
+          "term": "Линейный алгоритм",
+          "content": "Алгоритм, который выполняет последовательный набор инструкций для решения определённой задачи. Каждый шаг зависит от предыдущего и ведёт к последующему, создавая цепочку действий."
+        },
+        {
+          "type": "example",
+          "title": "Задача курьера: номер подъезда",
+          "content": "Пользователь вводит номер квартиры и количество квартир в подъезде. Номер подъезда — частное, округлённое **вверх** до целого. Для округления вверх используют функцию `ceil` из библиотеки `<cmath>`."
+        },
+        {
+          "type": "diagram",
+          "format": "mermaid",
+          "caption": "Блок-схема линейного алгоритма",
+          "content": "flowchart TD\n  A([Начало]) --> B[/\"Ввод nomer_kvartiry, kolichestvo_kv_podezd\"/]\n  B --> C[\"podezd = nomer_kvartiry / kolichestvo_kv_podezd\"]\n  C --> D[/\"Вывод podezd с округлением вверх\"/]\n  D --> E([Конец])"
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "Номер подъезда",
+          "content": "#include <iostream>\n#include <cmath>\nusing namespace std;\nint main()\n{\n    int nomer_kvartiry, kolichestvo_kv_podezd;\n    float podezd;\n    cin >> nomer_kvartiry >> kolichestvo_kv_podezd;\n    podezd = float(nomer_kvartiry) / kolichestvo_kv_podezd;\n    cout << ceil(podezd);\n    return 0;\n}"
+        },
+        {
+          "type": "callout",
+          "tone": "warning",
+          "title": "Деление в C++",
+          "content": "Оператор `/` возвращает целый или вещественный результат в зависимости от типов операндов. Если **оба** операнда целые, результат целый, дробная часть отбрасывается: `7 / 2` даёт `3`. Если хотя бы один операнд вещественный, результат вещественный: `float(7) / 2` даёт `3.5`. Поэтому в примере номер квартиры приводится к `float`."
+        }
+      ]
+    },
+    {
+      "title": "Разветвляющиеся алгоритмы в C++",
+      "objectives": [
+        "8.4.1.1"
+      ],
+      "blocks": [
+        {
+          "type": "definition",
+          "term": "Разветвляющийся алгоритм",
+          "content": "Последовательность шагов, где выполнение зависит от определённого условия. Если условие истинно, программа выполняет одни действия, в противном случае — другие. Бывает неполной и полной формы."
+        },
+        {
+          "type": "example",
+          "title": "Неполная форма: билет в кино",
+          "content": "Взрослый билет стоит 1600 тенге. Если зрителю 12 лет или меньше, он покупает детский билет за 1100 тенге. Сначала устанавливаем стоимость взрослого билета, затем **только при истинном условии** меняем её."
+        },
+        {
+          "type": "diagram",
+          "format": "mermaid",
+          "caption": "Неполная форма ветвления",
+          "content": "flowchart TD\n  A([Начало]) --> B[\"bilet = 1600\"]\n  B --> C[/\"Ввод age\"/]\n  C --> D{\"age <= 12\"}\n  D -- Да --> E[\"bilet = 1100\"]\n  E --> F[/\"Вывод bilet\"/]\n  D -- Нет --> F\n  F --> G([Конец])"
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "Неполная форма: только if",
+          "content": "#include <iostream>\nusing namespace std;\nint main() {\n    int bilet = 1600, age;\n    cout << \"Введите возраст зрителя\" << endl;\n    cin >> age;\n    if (age <= 12)\n    {  bilet = 1100;  }\n    cout << bilet;\n    return 0;\n}"
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "Полная форма if … else: самостоятельный проезд в поезде с 15 лет",
+          "content": "#include <iostream>\nusing namespace std;\nint main() {\n    int age;\n    cout << \"Введите возраст пассажира\" << endl;\n    cin >> age;\n    if (age >= 15)\n    {  cout << \"МОЖНО с письменного согласия законного представителя\";  }\n    else\n    {  cout << \"НЕЛЬЗЯ\";  }\n    return 0;\n}"
+        },
+        {
+          "type": "comparison",
+          "title": "Логические операции в составных условиях",
+          "columns": [
+            "Операция",
+            "Смысл",
+            "Пример"
+          ],
+          "rows": [
+            [
+              "`&&`",
+              "И (AND): истинно, если **оба** условия верны",
+              "`a >= 0 && a <= 10`"
+            ],
+            [
+              "`||`",
+              "ИЛИ (OR): истинно, если **хотя бы одно** условие верно",
+              "`a < 0 || a > 10`"
+            ],
+            [
+              "`!`",
+              "НЕ (NOT): меняет значение на обратное",
+              "`!(a == 5)`"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": "**Вложенные условные операторы** (вложенные ветвления) — один условный оператор включается внутрь другого. Это помогает гибко управлять ходом программы. Цепочка `if … else if … else` проверяет условия по очереди:"
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "Вид аттестата: if — else if — else",
+          "content": "if (mark == 5 && olymp == true) {\n    cout << \"Алтын белгі\";\n}\nelse if (mark == 5) {\n    cout << \"Аттестат с отличием\";\n}\nelse {\n    cout << \"Обычный аттестат\";\n}"
+        },
+        {
+          "type": "exam_tip",
+          "content": "Два вложенных условия `if (a > 5) { if (a < 10) … }` можно заменить одним составным `if (a > 5 && a < 10)` — так компактнее и легче читать."
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "key": "g8-alg-structures-types",
+      "title": "Базовые структуры алгоритмов",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.1"
+      ],
+      "practice": true,
+      "text": "Какие три структуры являются базовыми в теории алгоритмов?",
+      "options": [
+        {
+          "key": "A",
+          "content": "Линейная, ветвление, цикл"
+        },
+        {
+          "key": "B",
+          "content": "Ввод, расчет, вывод"
+        },
+        {
+          "key": "C",
+          "content": "Функция, класс, объект"
+        },
+        {
+          "key": "D",
+          "content": "Стек, очередь, массив"
+        }
+      ],
+      "scheme": {
+        "mark_scheme": "A (Линейная, ветвление, цикл) — 1 балл.",
+        "accepted": {
+          "correct": "A"
+        },
+        "model_answer": "A"
+      },
+      "source_reference": "Типы_Алгоритмов_и_Логика_C   (2) (1).pdf, стр. 2, 15; G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 107, 110, 115"
+    },
+    {
+      "key": "g8-ta-match-types",
+      "title": "Значение и тип данных",
+      "type": "matching",
+      "marks": 5,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.1"
+      ],
+      "text": "Сопоставьте значение с типом данных C++, в котором его удобно хранить.",
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "'Q'"
+          },
+          {
+            "key": "L2",
+            "text": "\"Astana\""
+          },
+          {
+            "key": "L3",
+            "text": "true"
+          },
+          {
+            "key": "L4",
+            "text": "-27"
+          },
+          {
+            "key": "L5",
+            "text": "0.75"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "int"
+          },
+          {
+            "key": "R2",
+            "text": "double"
+          },
+          {
+            "key": "R3",
+            "text": "char"
+          },
+          {
+            "key": "R4",
+            "text": "string"
+          },
+          {
+            "key": "R5",
+            "text": "bool"
+          }
+        ]
+      },
+      "source": "teacher",
+      "source_reference": "Раздаточный материал по алгоритмам.pdf, стр. 1 (задание 1); Типы_Алгоритмов_и_Логика_C   (2) (1).pdf, стр. 3–4",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "'Q' — char; \"Astana\" — string; true — bool; -27 — int; 0.75 — double (по 1 баллу).",
+        "accepted": {
+          "pairs": {
+            "L1": "R3",
+            "L2": "R4",
+            "L3": "R5",
+            "L4": "R1",
+            "L5": "R2"
+          }
+        },
+        "explanation": "Апостроф — один символ (char), кавычки — строка (string), true/false — bool, целое со знаком — int, число с дробной частью — вещественный тип."
+      }
+    },
+    {
+      "key": "g8-ta-int-string-error",
+      "title": "Почему ошибка?",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "explain",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.1"
+      ],
+      "text": "Почему строка `int number = \"Twenty\";` вызовет ошибку?",
+      "options": [
+        {
+          "key": "A",
+          "content": "В переменную целого типа нельзя записать строку"
+        },
+        {
+          "key": "B",
+          "content": "Имя переменной number запрещено в C++"
+        },
+        {
+          "key": "C",
+          "content": "Строку нужно записывать в апострофах"
+        },
+        {
+          "key": "D",
+          "content": "Тип int хранит только отрицательные числа"
+        }
+      ],
+      "source": "teacher",
+      "source_reference": "Типы_Алгоритмов_и_Логика_C   (2) (1).pdf, стр. 4; G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 105",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "A — 1 балл.",
+        "accepted": {
+          "correct": "A"
+        },
+        "model_answer": "A",
+        "explanation": "\"Twenty\" — строка (string), а переменная объявлена целой (int)."
+      }
+    },
+    {
+      "key": "g8-ta-char-string-tf",
+      "title": "Апостроф и кавычки",
+      "type": "true_false",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "state",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.1"
+      ],
+      "text": "Верно ли: запись `\"A\"` в C++ создаёт значение типа `char`?",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 105",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "Неверно — 1 балл.",
+        "accepted": {
+          "correct": false
+        },
+        "explanation": "Двойные кавычки создают строку (string). Символ char записывается в апострофах: 'A'."
+      }
+    },
+    {
+      "key": "g8-ta-blanks-sizes",
+      "title": "Память и диапазоны",
+      "type": "fill_blank",
+      "marks": 3,
+      "difficulty": "medium",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.1"
+      ],
+      "text": "Тип `char` занимает в памяти [[1]] байт. Тип `short` занимает [[2]] байта. Тип `double` занимает [[3]] байт.",
+      "content": {
+        "blank_count": 3
+      },
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 101, 102, 104",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "[[1]] 1; [[2]] 2; [[3]] 8 (по 1 баллу).",
+        "accepted": {
+          "blanks": [
+            [
+              "1"
+            ],
+            [
+              "2"
+            ],
+            [
+              "8"
+            ]
+          ],
+          "ignore_spaces": true
+        },
+        "explanation": "char — 1 байт, short — 2 байта, int и float — 4 байта, double — 8 байт."
+      }
+    },
+    {
+      "key": "g8-ta-getline",
+      "title": "Считать строку с пробелами",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.1"
+      ],
+      "text": "Пользователь вводит название книги «Снежная королева». Какая команда считает его **целиком**, вместе с пробелом, в переменную `string book`?",
+      "options": [
+        {
+          "key": "A",
+          "content": "`cin >> book;`"
+        },
+        {
+          "key": "B",
+          "content": "`getline(cin, book);`"
+        },
+        {
+          "key": "C",
+          "content": "`cout << book;`"
+        },
+        {
+          "key": "D",
+          "content": "`char book;`"
+        }
+      ],
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 105–106",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "model_answer": "B",
+        "explanation": "cin >> считывает только до первого пробела; getline(cin, …) — всю строку."
+      }
+    },
+    {
+      "key": "g8-ta-int-division",
+      "title": "Деление целых",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.1",
+        "8.4.1.1"
+      ],
+      "text": "Что выведет фрагмент?\n\n```cpp\nint a = 9, b = 2;\ncout << a / b;\n```",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 107–108",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "4 — 1 балл.",
+        "accepted": {
+          "values": [
+            "4"
+          ],
+          "numeric": true
+        },
+        "explanation": "Оба операнда целые, поэтому результат целый: 9 / 2 = 4, дробная часть отброшена."
+      }
+    },
+    {
+      "key": "g8-ta-podezd",
+      "title": "Номер подъезда",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.1.1"
+      ],
+      "text": "Программа «Номер подъезда» (см. теорию) получила номер квартиры 41 и 9 квартир в подъезде. Какой номер подъезда она выведет?\n\n```cpp\npodezd = float(nomer_kvartiry) / kolichestvo_kv_podezd;\ncout << ceil(podezd);\n```",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 107",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "5 — 1 балл.",
+        "accepted": {
+          "values": [
+            "5"
+          ],
+          "numeric": true
+        },
+        "explanation": "41 / 9 ≈ 4,56; ceil округляет вверх до 5."
+      }
+    },
+    {
+      "key": "g8-ta-perimeter-blanks",
+      "title": "Линейная программа: периметр",
+      "type": "fill_blank",
+      "marks": 2,
+      "difficulty": "easy",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.1.1"
+      ],
+      "text": "Допишите линейную программу, которая вычисляет периметр прямоугольника со сторонами a и b.\n\n```cpp\ndouble a, b, P;\ncin >> a >> b;\nP = [[1]];\ncout << [[2]];\n```",
+      "content": {
+        "blank_count": 2
+      },
+      "source": "teacher",
+      "source_reference": "Типы_Алгоритмов_и_Логика_C   (2) (1).pdf, стр. 5, 13; Раздаточный материал по алгоритмам.pdf, стр. 2",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "[[1]] 2 * (a + b) (1); [[2]] P (1).",
+        "accepted": {
+          "blanks": [
+            [
+              "2*(a+b)",
+              "(a+b)*2",
+              "2*a+2*b",
+              "a*2+b*2"
+            ],
+            [
+              "P"
+            ]
+          ],
+          "ignore_spaces": true,
+          "case_sensitive": true
+        },
+        "explanation": "Ввод → вычисление → вывод: команды выполняются одна за другой."
+      }
+    },
+    {
+      "key": "g8-ta-or-blanks",
+      "title": "Составное условие «ИЛИ»",
+      "type": "fill_blank",
+      "marks": 2,
+      "difficulty": "medium",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.1.1"
+      ],
+      "text": "Год мушел — возраст 13, 25 или 37 лет (и далее через 12). Допишите условие для этих трёх возрастов.\n\n```cpp\nif (age == 13 [[1]] age == 25 [[2]] age == 37)\n    cout << \"Год мушел\";\n```",
+      "content": {
+        "blank_count": 2
+      },
+      "source": "teacher",
+      "source_reference": "Типы_Алгоритмов_и_Логика_C   (2) (1).pdf, стр. 8, 10; G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 112, 114",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "[[1]] || (1); [[2]] || (1).",
+        "accepted": {
+          "blanks": [
+            [
+              "||"
+            ],
+            [
+              "||"
+            ]
+          ],
+          "ignore_spaces": true
+        },
+        "explanation": "Нужно, чтобы выполнилось хотя бы одно из равенств — логическое ИЛИ ||."
+      }
+    },
+    {
+      "key": "g8-ta-ticket",
+      "title": "Неполное ветвление",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.1.1"
+      ],
+      "text": "Что выведет программа, если ввести 12?\n\n```cpp\nint bilet = 2000, age;\ncin >> age;\nif (age <= 12)\n{  bilet = 1200;  }\ncout << bilet;\n```",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 111",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "1200 — 1 балл.",
+        "accepted": {
+          "values": [
+            "1200"
+          ],
+          "numeric": true
+        },
+        "explanation": "Условие 12 <= 12 истинно, поэтому bilet меняется на 1200."
+      }
+    },
+    {
+      "key": "g8-ta-optimize",
+      "title": "Оптимизация условия",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.1.1"
+      ],
+      "text": "Какое условие заменяет вложенные проверки `if (x > 0) { if (x < 100) cout << \"OK\"; }`?",
+      "options": [
+        {
+          "key": "A",
+          "content": "`if (x > 0 || x < 100)`"
+        },
+        {
+          "key": "B",
+          "content": "`if (x > 0 && x < 100)`"
+        },
+        {
+          "key": "C",
+          "content": "`if (!(x > 0))`"
+        },
+        {
+          "key": "D",
+          "content": "`if (x > 100 && x < 0)`"
+        }
+      ],
+      "source": "teacher",
+      "source_reference": "Типы_Алгоритмов_и_Логика_C   (2) (1).pdf, стр. 11; Раздаточный материал по алгоритмам.pdf, стр. 2",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "model_answer": "B",
+        "explanation": "Оба условия должны быть верны одновременно — логическое И &&."
+      }
+    },
+    {
+      "key": "g8-ta-attestat",
+      "title": "if — else if — else",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "analyse",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.1.1"
+      ],
+      "text": "Что выведет фрагмент, если `mark = 5`, `olymp = false`?\n\n```cpp\nif (mark == 5 && olymp == true) cout << \"Алтын белгі\";\nelse if (mark == 5) cout << \"Аттестат с отличием\";\nelse cout << \"Обычный аттестат\";\n```",
+      "options": [
+        {
+          "key": "A",
+          "content": "Алтын белгі"
+        },
+        {
+          "key": "B",
+          "content": "Аттестат с отличием"
+        },
+        {
+          "key": "C",
+          "content": "Обычный аттестат"
+        },
+        {
+          "key": "D",
+          "content": "Ничего"
+        }
+      ],
+      "source": "teacher",
+      "source_reference": "Типы_Алгоритмов_и_Логика_C   (2) (1).pdf, стр. 14; Раздаточный материал по алгоритмам.pdf, стр. 3",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "model_answer": "B",
+        "explanation": "Первое условие ложно (olymp = false), второе (mark == 5) истинно."
+      }
+    },
+    {
+      "key": "g8-ta-match-alg",
+      "title": "Определи тип алгоритма",
+      "type": "matching",
+      "marks": 3,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.1.1"
+      ],
+      "text": "Сопоставьте фрагмент кода с типом алгоритма.",
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "S = a * b; cout << S;"
+          },
+          {
+            "key": "L2",
+            "text": "while (n > 0) { n = n - 1; }"
+          },
+          {
+            "key": "L3",
+            "text": "if (t < 0) cout << \"мороз\"; else cout << \"тепло\";"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "Линейный"
+          },
+          {
+            "key": "R2",
+            "text": "Разветвляющийся"
+          },
+          {
+            "key": "R3",
+            "text": "Циклический"
+          }
+        ]
+      },
+      "source": "teacher",
+      "source_reference": "Типы_Алгоритмов_и_Логика_C   (2) (1).pdf, стр. 13",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "По 1 баллу за пару.",
+        "accepted": {
+          "pairs": {
+            "L1": "R1",
+            "L2": "R3",
+            "L3": "R2"
+          }
+        },
+        "explanation": "Последовательные команды — линейный; while — циклический; if/else — разветвляющийся."
+      }
+    },
+    {
+      "key": "g8-ta-forms",
+      "title": "Неполная и полная формы",
+      "type": "short_answer",
+      "marks": 2,
+      "difficulty": "medium",
+      "command_word": "explain",
+      "grading": "AI",
+      "objectives": [
+        "8.4.1.1"
+      ],
+      "text": "В чём различие неполной и полной форм разветвляющегося алгоритма? Приведите по одному примеру записи на C++.",
+      "content": {
+        "answer_lines": 4
+      },
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 110–111, 114 (Проверь себя 1)",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "Неполная форма — действия только при истинном условии (только if), при ложном ничего не выполняется (1). Полная — есть действия и для ложного условия (if … else); примеры кода (1).",
+        "points": [
+          {
+            "criterion": "Различие: в неполной форме действия только при истинном условии, в полной — и при ложном (else)",
+            "marks": 1
+          },
+          {
+            "criterion": "Корректные примеры if и if … else на C++",
+            "marks": 1
+          }
+        ],
+        "model_answer": "Неполная форма: если условие истинно, выполняется действие, иначе ничего не происходит — `if (age <= 12) bilet = 1100;`. Полная форма: для ложного условия тоже есть действие — `if (age >= 15) cout << \"МОЖНО\"; else cout << \"НЕЛЬЗЯ\";`."
+      }
+    },
+    {
+      "key": "g8-ta-exam-1",
+      "title": "Типы данных",
+      "type": "matching",
+      "marks": 4,
+      "difficulty": "exam",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.1"
+      ],
+      "text": "Сопоставьте данные с подходящим типом C++.",
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "Количество пассажиров в автобусе"
+          },
+          {
+            "key": "L2",
+            "text": "Температура воздуха −20.5"
+          },
+          {
+            "key": "L3",
+            "text": "Литер класса"
+          },
+          {
+            "key": "L4",
+            "text": "Название книги"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "int"
+          },
+          {
+            "key": "R2",
+            "text": "float"
+          },
+          {
+            "key": "R3",
+            "text": "char"
+          },
+          {
+            "key": "R4",
+            "text": "string"
+          },
+          {
+            "key": "R5",
+            "text": "bool"
+          }
+        ]
+      },
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 101; Типы_Алгоритмов_и_Логика_C   (2) (1).pdf, стр. 3",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "По 1 баллу за пару.",
+        "accepted": {
+          "pairs": {
+            "L1": "R1",
+            "L2": "R2",
+            "L3": "R3",
+            "L4": "R4"
+          }
+        },
+        "explanation": "Количество — целое (int), температура — вещественное (float), литер — один символ (char), название — строка (string)."
+      }
+    },
+    {
+      "key": "g8-ta-exam-2",
+      "title": "Только неотрицательные",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "exam",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.1"
+      ],
+      "text": "Какое слово ставят перед целым типом, чтобы переменная хранила только неотрицательные числа?",
+      "options": [
+        {
+          "key": "A",
+          "content": "long"
+        },
+        {
+          "key": "B",
+          "content": "unsigned"
+        },
+        {
+          "key": "C",
+          "content": "double"
+        },
+        {
+          "key": "D",
+          "content": "bool"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 101",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "model_answer": "B",
+        "explanation": "unsigned исключает отрицательные числа и сдвигает диапазон в сторону положительных."
+      }
+    },
+    {
+      "key": "g8-ta-exam-3",
+      "title": "Вещественные типы",
+      "type": "multiple_response",
+      "marks": 3,
+      "difficulty": "exam",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.1"
+      ],
+      "text": "Отметьте все **вещественные** типы данных C++.",
+      "options": [
+        {
+          "key": "A",
+          "content": "float"
+        },
+        {
+          "key": "B",
+          "content": "short"
+        },
+        {
+          "key": "C",
+          "content": "double"
+        },
+        {
+          "key": "D",
+          "content": "char"
+        },
+        {
+          "key": "E",
+          "content": "long double"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 101–102, 104",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "A, C, E — по 1 баллу.",
+        "accepted": {
+          "correct": [
+            "A",
+            "C",
+            "E"
+          ]
+        },
+        "model_answer": "A, C, E",
+        "explanation": "float, double, long double — числа с плавающей точкой; short — целый; char — символ."
+      }
+    },
+    {
+      "key": "g8-ta-exam-4",
+      "title": "Результат деления",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "exam",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.1",
+        "8.4.1.1"
+      ],
+      "text": "Что выведет фрагмент?\n\n```cpp\nint x = 23, y = 4;\ncout << x / y;\n```",
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 107–108",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "5 — 1 балл.",
+        "accepted": {
+          "values": [
+            "5"
+          ],
+          "numeric": true
+        },
+        "explanation": "Оба операнда int — дробная часть отбрасывается: 23 / 4 = 5."
+      }
+    },
+    {
+      "key": "g8-ta-exam-5",
+      "title": "Округление вверх",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "exam",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.1.1"
+      ],
+      "text": "Курьеру нужен номер подъезда: квартира № 50, в подъезде 12 квартир. Что выведет `cout << ceil(float(50) / 12);`?",
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 107",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "5 — 1 балл.",
+        "accepted": {
+          "values": [
+            "5"
+          ],
+          "numeric": true
+        },
+        "explanation": "50 / 12 ≈ 4,17; ceil округляет вверх до 5."
+      }
+    },
+    {
+      "key": "g8-ta-exam-6",
+      "title": "Диапазон значений",
+      "type": "fill_blank",
+      "marks": 1,
+      "difficulty": "exam",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.1.1"
+      ],
+      "text": "Допишите условие «число x от 1 до 10 включительно»: `if (x >= 1 [[1]] x <= 10)`",
+      "content": {
+        "blank_count": 1
+      },
+      "source": "nis_style",
+      "source_reference": "Типы_Алгоритмов_и_Логика_C   (2) (1).pdf, стр. 8; G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 112",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "&& — 1 балл.",
+        "accepted": {
+          "blanks": [
+            [
+              "&&"
+            ]
+          ],
+          "ignore_spaces": true
+        },
+        "explanation": "Оба условия должны выполняться одновременно — логическое И."
+      }
+    },
+    {
+      "key": "g8-ta-exam-7",
+      "title": "Вложенное ветвление",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "exam",
+      "command_word": "analyse",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.1.1"
+      ],
+      "text": "Что выведет фрагмент при `mark = 4`, `olymp = true`?\n\n```cpp\nif (mark == 5 && olymp == true) cout << \"Алтын белгі\";\nelse if (mark == 5) cout << \"Аттестат с отличием\";\nelse cout << \"Обычный аттестат\";\n```",
+      "options": [
+        {
+          "key": "A",
+          "content": "Алтын белгі"
+        },
+        {
+          "key": "B",
+          "content": "Аттестат с отличием"
+        },
+        {
+          "key": "C",
+          "content": "Обычный аттестат"
+        },
+        {
+          "key": "D",
+          "content": "Ничего"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "Типы_Алгоритмов_и_Логика_C   (2) (1).pdf, стр. 14",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "C — 1 балл.",
+        "accepted": {
+          "correct": "C"
+        },
+        "model_answer": "C",
+        "explanation": "mark ≠ 5, поэтому оба условия ложны и выполняется else."
+      }
+    },
+    {
+      "key": "g8-ta-exam-8",
+      "title": "Программа с полным ветвлением",
+      "type": "code_completion",
+      "marks": 3,
+      "difficulty": "exam",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "8.4.1.1"
+      ],
+      "text": "Напишите программу на C++: пользователь вводит возраст; если возраст 16 лет или больше, выводится «МОЖНО», иначе — «НЕЛЬЗЯ».",
+      "content": {
+        "starter_code": "#include <iostream>\nusing namespace std;\nint main() {\n\n    return 0;\n}"
+      },
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 111–112",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "- объявление int и ввод через cin (1)\n- условие age >= 16 (1)\n- полная форма if … else с двумя выводами (1)",
+        "points": [
+          {
+            "criterion": "Переменная int и ввод cin >> age",
+            "marks": 1
+          },
+          {
+            "criterion": "Верное условие age >= 16",
+            "marks": 1
+          },
+          {
+            "criterion": "if … else с выводом «МОЖНО» / «НЕЛЬЗЯ»",
+            "marks": 1
+          }
+        ],
+        "model_answer": "```cpp\n#include <iostream>\nusing namespace std;\nint main() {\n    int age;\n    cin >> age;\n    if (age >= 16)\n    {  cout << \"МОЖНО\";  }\n    else\n    {  cout << \"НЕЛЬЗЯ\";  }\n    return 0;\n}\n```"
+      }
+    },
+    {
+      "key": "g8-ta-exam-9",
+      "title": "Ошибка при вводе строки",
+      "type": "short_answer",
+      "marks": 2,
+      "difficulty": "exam",
+      "command_word": "explain",
+      "grading": "AI",
+      "objectives": [
+        "8.4.3.1"
+      ],
+      "text": "Программа читает название любимой книги командой `cin >> book;` (переменная `string book`). Пользователь вводит «Том Сойер», а программа выводит только «Том». Объясните причину и исправьте команду ввода.",
+      "content": {
+        "answer_lines": 3
+      },
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 105–106 (задание 3)",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "cin >> считывает только одно слово — до первого пробела (1). Исправление: getline(cin, book); (1).",
+        "points": [
+          {
+            "criterion": "Причина: cin >> читает до первого пробела",
+            "marks": 1
+          },
+          {
+            "criterion": "Исправление: getline(cin, book);",
+            "marks": 1
+          }
+        ],
+        "model_answer": "Команда cin >> считывает только одно слово до первого пробела, поэтому «Сойер» не попадает в переменную. Нужно использовать getline(cin, book); — она считывает всю строку с пробелами."
+      }
+    }
+  ],
+  "topic_exam": {
+    "duration": 22,
+    "title": "Типы алгоритмов — экзамен",
+    "instructions": "Ответьте на **все** вопросы. Код записан на C++. Количество баллов указано у каждого вопроса. Всего: 17 баллов. Время: 22 минуты.",
+    "questions": [
+      "g8-ta-exam-1",
+      "g8-ta-exam-2",
+      "g8-ta-exam-3",
+      "g8-ta-exam-4",
+      "g8-ta-exam-5",
+      "g8-ta-exam-6",
+      "g8-ta-exam-7",
+      "g8-ta-exam-8",
+      "g8-ta-exam-9"
+    ]
+  }
+}

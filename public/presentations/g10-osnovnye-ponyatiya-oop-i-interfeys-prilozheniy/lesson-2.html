@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>10.3А · Урок 2 · Основы C#: идентификаторы, типы данных, переменные, константы, операции</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+  <link rel="stylesheet" href="../_engine/lesson.css" />
+</head>
+<body class="lesson">
+<script src="../_engine/deck.js"></script>
+<script src="../_engine/lesson.js"></script>
+<script>
+/*
+ * 10.3А «Введение в ООП (C#)», урок 2 (КТП) — «Основы языка C#: идентификаторы, типы данных, переменные, константы и приоритет операций».
+ * Цели обучения (КТП 2026): 10.4.3.1 описывать основные понятия ООП; 10.4.3.4 использовать функции преобразования типов данных.
+ * Ход урока — КСП content/lesson-plans/g10-osnovnye-ponyatiya-oop-i-interfeys-prilozheniy.json, урок 2 (10 + 60 + 10 мин).
+ * Содержание — только из материалов: презентация учителя «1 урок Введение в ООП», слайды 7–12, 14, 16;
+ * «2 урок Компоненты ИСР», слайд 9. Целочисленное деление `/` в материалах не описано — на слайдах не используется.
+ * Комментарии П1 слайд 11 к x--, ++x, --x посчитаны «каждая строка при x = 5» (см. materials/map.md).
+ */
+const P1 = "Презентация «1 урок Введение в ООП», ";
+const P2 = "Презентация «2 урок Компоненты ИСР», ";
+const SPEC = "Спецификация СОЧ 10 кл., 3 четверть";
+const { src, reveal, statements, quiz, matcher } = LESSON;
+const S = () => window.DECK_STATE;
+const code = (s, fs = 15) => `<pre class="code-block" style="font-size:${fs}px;line-height:1.45;">${DECK_ESC(s)}</pre>`;
+
+initDeck({
+  badge: "10.3А · Урок 2",
+  title: "Основы C#: идентификаторы, типы данных, переменные, константы, операции",
+  subtitle: "10 класс · 3 четверть · цели 10.4.3.1, 10.4.3.4 · 80 минут",
+  footer: "НИШ ЕМН г. Кызылорда · Информатика · 10 класс · Раздел 10.3А «Введение в ООП (C#)»",
+  slides: [
+    /* ---------------- НАЧАЛО УРОКА (10 мин) ---------------- */
+    {
+      badge: "Начало урока",
+      shortTitle: "Тема, цели и критерии",
+      timing: "0–3 мин",
+      source: "КТП 2026; КСП урока 2",
+      notes: "Организационный момент. Тема, цели, критерии. Напомните: на уроке 1 мы описывали класс Car — его поля имели типы string, int, double. Сегодня разберёмся, какие типы есть в C#.",
+      render() {
+        return `<div class="hero">
+          <div>
+            <div class="hero-kicker">Раздел 10.3А · Введение в ООП (C#)</div>
+            <h1>Идентификаторы, типы данных, переменные, константы и операции C#</h1>
+            <div class="stack">
+              <div class="goal"><b>10.4.3.1</b> — описывать основные понятия ООП.</div>
+              <div class="goal"><b>10.4.3.4</b> — использовать функции преобразования типов данных.</div>
+            </div>
+          </div>
+          <div class="stack text-sm">
+            <div class="card"><h3>🎯 Цели урока</h3>
+              <p><b>Все:</b> отличают верные идентификаторы от неверных; называют типы C#.<br>
+              <b>Большинство:</b> выбирают тип для данных; сопоставляют типы C# и .NET.<br>
+              <b>Некоторые:</b> безошибочно вычисляют выражения с <code>++</code>, <code>--</code>, <code>%</code>.</p></div>
+            <div class="card"><h3>✅ Критерии оценивания</h3><p>Различает корректные идентификаторы; сопоставляет типы C# с типами .NET и размером; вычисляет выражения с инкрементом, декрементом и остатком.</p></div>
+          </div>
+        </div>${src("КТП 2026 (цели 10.4.3.1, 10.4.3.4); КСП урока 2")}`;
+      },
+    },
+    {
+      badge: "Начало урока",
+      shortTitle: "Что выведет программа?",
+      timing: "3–10 мин",
+      source: P1 + "слайд 11",
+      notes: "Приём «Что выведет программа?». Ученики записывают гипотезы для каждой строки (каждая строка выполняется при x = 5). Ответ не открывайте — вернёмся к нему на слайде «Инкремент и декремент». Выход на тему: в C# важны тип и приоритет операций.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:24px;align-items:center;">
+          ${code(`int x = 5;
+int y;
+
+y = x++;   // y = ?  x = ?
+y = ++x;   // y = ?  x = ?`, 20)}
+          <div class="stack">
+            <h2 class="slide-h2">Что будет в y и x?</h2>
+            <p class="text-sm">Каждая строка выполняется при <code>x = 5</code>. Запишите гипотезу в тетрадь.</p>
+            <div class="note">Почему результат разный, хотя в обеих строках «x увеличили на 1»?</div>
+          </div>
+        </div></div>${src(P1 + "слайд 11 (IncrementDemo.cs)")}`;
+      },
+    },
+
+    /* ---------------- СЕРЕДИНА УРОКА (60 мин) ---------------- */
+    {
+      badge: "Новое · алфавит C#",
+      shortTitle: "Идентификаторы и ключевые слова",
+      timing: "10–15 мин",
+      source: P1 + "слайд 7",
+      notes: "Фронтально: что такое идентификатор, правила записи, чувствительность к регистру. Ключевые слова нельзя использовать как имена. Речевая конструкция: «C# различает регистр, поэтому count и Count — разные идентификаторы».",
+      render() {
+        return `<div class="body">
+          <div class="def"><b>Идентификатор</b> — название сущности в коде: переменной, константы, процедуры, класса и др.</div>
+          <div class="grid-2" style="gap:16px;">
+            <div class="stack text-sm">
+              <div class="card"><h3>✅ Можно</h3><p>Начинать с символа подчёркивания «_» или буквы; содержать заглавные и строчные буквы, цифры.</p></div>
+              <div class="card"><h3>⛔ Нельзя</h3><p>Начинать с цифры; использовать ключевое слово как имя; превышать 511 символов.</p></div>
+              <div class="card"><h3>Aa Регистр</h3><p><code>Vasja1</code>, <code>VASJA1</code> и <code>VaSjA1</code> — три разных идентификатора!</p></div>
+            </div>
+            <div class="card text-sm"><h3>Ключевые слова C#</h3><p>Служебные слова компилятора — нельзя использовать как имена переменных:<br><code>break, byte, case, char, bool, checked, class, const, continue, decimal, default, do, double, else, false, float, for, goto, if, int, long, namespace, new, null, object, switch, while</code> и т. д.</p></div>
+          </div>
+        </div>${src(P1 + "слайд 7 (идентификаторы, ключевые слова)")}`;
+      },
+    },
+    {
+      badge: "Практика · идентификаторы",
+      shortTitle: "Экспертиза идентификаторов",
+      timing: "15–20 мин",
+      source: P1 + "слайд 7",
+      notes: "Задание 1 (часть 1). Ученики в тетради отмечают верные имена, затем щёлкайте по строкам. Требуйте назвать нарушенное правило.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Верный ли это идентификатор C#?</h2>
+          <div class="grid-2 text-sm" style="gap:12px;">
+            ${statements("id1", [
+              { t: "<code>summa</code>", ok: true, why: "буквы" },
+              { t: "<code>_count</code>", ok: true, why: "начинается с «_»" },
+              { t: "<code>2day</code>", ok: false, why: "начинается с цифры" },
+              { t: "<code>class</code>", ok: false, why: "ключевое слово" },
+              { t: "<code>my name</code>", ok: false, why: "пробел — недопустимый символ" },
+            ])}
+            ${statements("id2", [
+              { n: 6, t: "<code>x_1</code>", ok: true, why: "буква, «_», цифра" },
+              { n: 7, t: "<code>double</code>", ok: false, why: "ключевое слово" },
+              { n: 8, t: "<code>Max</code>", ok: true, why: "буквы" },
+              { n: 9, t: "<code>a-b</code>", ok: false, why: "«-» — недопустимый символ" },
+              { n: 10, t: "<code>Vasja1</code> и <code>vasja1</code> — одно имя", ok: false, why: "регистр различается" },
+            ])}
+          </div>
+        </div>${src(P1 + "слайд 7 (правила записи идентификаторов)")}`;
+      },
+    },
+    {
+      badge: "Новое · типы данных",
+      shortTitle: "Типы: логический и целые",
+      timing: "20–25 мин",
+      source: P1 + "слайды 7–8",
+      notes: "Тип данных — набор значений и разрешённых операций. Встроенные типы C# соответствуют классам .NET в пространстве имён System. Обратите внимание на размер в памяти и диапазон.",
+      render() {
+        return `<div class="body">
+          <p class="text-sm" style="margin:0;"><b>Тип данных</b> — набор доступных значений переменной и разрешённый набор операций над ними. Встроенные типы C# соответствуют классам .NET (пространство имён <code>System</code>).</p>
+          <table class="t" style="font-size:15px;">
+            <tr><th>Категория</th><th>C#</th><th>.NET</th><th>Диапазон</th><th>Размер</th></tr>
+            <tr><td>Логический</td><td><code>bool</code></td><td>Boolean</td><td>True или False</td><td>1 байт</td></tr>
+            <tr><td>Целые со знаком</td><td><code>sbyte</code></td><td>SByte</td><td>−128 … 127</td><td>1 байт</td></tr>
+            <tr><td>Целые без знака</td><td><code>byte</code></td><td>Byte</td><td>0 … 255</td><td>1 байт</td></tr>
+            <tr><td>Целые короткие</td><td><code>short</code></td><td>Int16</td><td>−32 768 … 32 767</td><td>2 байта</td></tr>
+            <tr><td>Короткие без знака</td><td><code>ushort</code></td><td>UInt16</td><td>0 … 65 535</td><td>2 байта</td></tr>
+            <tr><td>Целые стандартные</td><td><code>int</code></td><td>Int32</td><td>−2 147 483 648 … 2 147 483 647</td><td>4 байта</td></tr>
+            <tr><td>Стандартные без знака</td><td><code>uint</code></td><td>UInt32</td><td>0 … 4 294 967 295</td><td>4 байта</td></tr>
+            <tr><td>Целые длинные</td><td><code>long</code></td><td>Int64</td><td>−9 223 372 036 854 775 808 … 9 223 372 036 854 775 807</td><td>8 байт</td></tr>
+          </table>
+        </div>${src(P1 + "слайд 7 (определение типа данных), слайд 8 (таблица типов)")}`;
+      },
+    },
+    {
+      badge: "Новое · типы данных",
+      shortTitle: "Вещественные, символьный, строковый",
+      timing: "25–28 мин",
+      source: P1 + "слайд 9",
+      notes: "Вторая часть таблицы. Подчеркните: char — один знак Юникода, string — последовательность символов; decimal — для финансовых расчётов высокой точности.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Вещественные, символьные и ссылочные типы</h2>
+          <table class="t">
+            <tr><th>Название типа</th><th>C# и диапазон</th><th>.NET и размер</th></tr>
+            <tr><td>Символьный</td><td><code>char</code> — знаки Юникода (Unicode)</td><td>Char (2 байта)</td></tr>
+            <tr><td>Вещественный одинарной точности</td><td><code>float</code> — от −3,402823e38 до 3,402823e38</td><td>Single (4 байта)</td></tr>
+            <tr><td>Вещественный двойной точности</td><td><code>double</code> — от −1,79769313486232e308 до 1,79769313486232e308</td><td>Double (8 байт)</td></tr>
+            <tr><td>Финансовый (высокой точности)</td><td><code>decimal</code> — от ±1,0 × 10⁻²⁸ до ±7,9 × 10²⁸</td><td>Decimal (16 байт)</td></tr>
+            <tr><td>Строковый</td><td><code>string</code> — последовательность символов Unicode</td><td>String (ссылочный тип)</td></tr>
+            <tr><td>Базовый объектный</td><td><code>object</code> — базовый тип для всех остальных типов</td><td>Object (ссылочный тип)</td></tr>
+          </table>
+        </div>${src(P1 + "слайд 9 (таблица типов)")}`;
+      },
+    },
+    {
+      badge: "Практика · выбор типа",
+      shortTitle: "Подбери тип данных",
+      timing: "28–33 мин",
+      source: P1 + "слайды 8–10",
+      notes: "Задание 1 (часть 2): подобрать минимально достаточный тип из предложенных. Обоснование — по диапазону из таблицы. Население Земли (около 8 млрд) больше максимума int.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Какой тип подойдёт для хранения?</h2>
+          ${matcher("tp", [["bool", "bool"], ["char", "char"], ["string", "string"], ["int", "int"], ["long", "long"], ["double", "double"], ["decimal", "decimal"]], [
+            { t: "Признак сдачи экзамена (сдал / не сдал)", ans: "bool" },
+            { t: "Первая буква имени", ans: "char" },
+            { t: "Фамилия ученика", ans: "string" },
+            { t: "Население Земли (≈ 8 000 000 000)", ans: "long" },
+            { t: "Число π = 3.1415", ans: "double" },
+            { t: "Финансовый расчёт высокой точности", ans: "decimal" },
+            { t: "Число жителей города (≈ 1 000 000)", ans: "int" },
+          ])}
+        </div>${src(P1 + "слайды 8–9 (диапазоны), слайд 10 (const double pi, const decimal)")}`;
+      },
+    },
+    {
+      badge: "Новое · константы и переменные",
+      shortTitle: "Константы и переменные",
+      timing: "33–38 мин",
+      source: P1 + "слайд 10",
+      notes: "Синтаксис константы и правила описания переменных. Вопрос: что будет, если после объявления константы pi попытаться присвоить ей новое значение? Откройте ответ.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:20px;align-items:start;">
+          <div class="stack">
+            <div class="card"><h3>Константы</h3><p><code>const тип имя_константы = значение;</code><br>Значение задаётся при объявлении и <b>не может изменяться</b> в ходе выполнения программы.</p></div>
+            ${code(`const double pi = 3.1415;      // тип double
+const bool YES = true;         // тип bool
+const int Max = 255;           // тип int
+const char AnswerYes = 'Y';    // тип char
+const string Str = "Constant String";`, 14)}
+          </div>
+          <div class="stack">
+            <div class="card"><h3>Переменные</h3><p>Всегда описываются в программе. Имя уникально внутри блока <code>{ }</code>, где переменная описана.</p></div>
+            ${code(`double d, f;  // 2 переменные типа double
+int i, j;     // 2 переменные типа int
+char c;       // переменная типа char
+string s;     // переменная типа string
+d = 2.939;  i = 50;
+c = '=';    s = "This is a text";`, 14)}
+            ${reveal("r-const", "pi = 3.14; после const?", "Нельзя: значение константы не может изменяться в ходе выполнения программы.")}
+          </div>
+        </div></div>${src(P1 + "слайд 10 (Constants.cs, Variables.cs)")}`;
+      },
+    },
+    {
+      badge: "Новое · операции",
+      shortTitle: "Операции и приоритет",
+      timing: "38–43 мин",
+      source: P1 + "слайды 11–12",
+      notes: "Таблица операций по группам. Остаток от деления % — например, 17 % 5 = 2. Обратите внимание: == (равно) — два знака, = — присваивание.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Операции C#</h2>
+          <table class="t" style="font-size:15.5px;">
+            <tr><th>Группа</th><th>Операторы</th><th>Назначение</th></tr>
+            <tr><td>Первичные</td><td><code>x++ x-- new</code></td><td>Постфиксный инкремент / декремент, выделение памяти</td></tr>
+            <tr><td>Унарные</td><td><code>+ - ! ++x --x (тип)x</code></td><td>Логическое отрицание, префиксный инкремент / декремент, приведение типа</td></tr>
+            <tr><td>Мультипликативные</td><td><code>* / %</code></td><td>Умножение, деление, остаток от деления</td></tr>
+            <tr><td>Аддитивные</td><td><code>+ -</code></td><td>Сложение и вычитание</td></tr>
+            <tr><td>Отношения</td><td><code>&lt; &gt; &lt;= &gt;=</code></td><td>Меньше, больше, меньше или равно, больше или равно</td></tr>
+            <tr><td>Проверка на равенство</td><td><code>== !=</code></td><td>Равно, не равно</td></tr>
+            <tr><td>Условные логические</td><td><code>&amp;&amp; ||</code></td><td>Логическое И, логическое ИЛИ</td></tr>
+            <tr><td>Присваивание</td><td><code>= *= /= +=</code></td><td>Присваивание; умножение, деление, сложение с присваиванием</td></tr>
+          </table>
+        </div>${src(P1 + "слайд 11 (операции ч. 1), слайд 12 (операции ч. 2)")}`;
+      },
+    },
+    {
+      badge: "Новое · инкремент и декремент",
+      shortTitle: "Инкремент и декремент",
+      timing: "43–50 мин",
+      source: P1 + "слайд 11",
+      notes: "Вернитесь к гипотезам начала урока. Каждая строка — при x = 5. Открывайте ответы по одному, ученики объясняют по правилу: префиксная форма — сначала изменить x, постфиксная — сначала использовать старое значение.",
+      render() {
+        const row = (k, c, a) => `<tr><td><code>${c}</code></td><td>${S().revealed[k] ? a : `<button type="button" class="btn" onclick="DECK.toggleReveal('${k}')">Показать</button>`}</td></tr>`;
+        return `<div class="body"><div class="grid-2" style="gap:22px;align-items:start;">
+          <div class="stack">
+            <h2 class="slide-h2">Каждая строка — при x = 5</h2>
+            <table class="t">
+              <tr><th>Строка</th><th>Результат</th></tr>
+              ${row("i1", "y = x++;", "y = 5, x = 6: сначала y = x, потом x увеличивается на 1")}
+              ${row("i2", "y = x--;", "y = 5, x = 4: сначала y = x, потом x уменьшается на 1")}
+              ${row("i3", "y = ++x;", "y = 6, x = 6: сначала x увеличивается на 1, потом y = x")}
+              ${row("i4", "y = --x;", "y = 4, x = 4: сначала x уменьшается на 1, потом y = x")}
+            </table>
+          </div>
+          <div class="stack">
+            <div class="def" style="font-size:20px;"><b>Главное правило:</b> префиксная форма (<code>++x</code>, <code>--x</code>) выполняется <b>сначала</b> (до присваивания), а постфиксная (<code>x++</code>, <code>x--</code>) — <b>потом</b>, после остальных операций.</div>
+            <div class="note text-sm"><b>Инкремент</b> <code>++</code> — увеличение на 1; <b>декремент</b> <code>--</code> — уменьшение на 1.</div>
+          </div>
+        </div></div>${src(P1 + "слайд 11 (IncrementDemo.cs, правило приоритета; строки посчитаны каждая при x = 5)")}`;
+      },
+    },
+    {
+      badge: "Практика · трассировка",
+      shortTitle: "Трассировка выражений",
+      timing: "50–60 мин",
+      source: P1 + "слайды 11–12",
+      notes: "Задание 2. Индивидуально в тетради: значения всех переменных после выполнения. Затем откройте ответы по одному; ученики объясняют порядок шагов.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Найдите значения всех переменных</h2>
+          <div class="cards c2 text-sm" style="gap:12px;">
+            <div class="stack">${code(`int a = 4, b = 3;
+int c = ++a * 2 + b--;`, 16)}${reveal("t1", "Ответ 1", "++a: a = 5; c = 5 · 2 + 3 = 13; затем b-- : b = 2. <b>a = 5, b = 2, c = 13</b>.")}</div>
+            <div class="stack">${code(`int x = 10, y = 4;
+int z = x-- - ++y * 2;`, 16)}${reveal("t2", "Ответ 2", "++y: y = 5; z = 10 − 5 · 2 = 0; затем x-- : x = 9. <b>x = 9, y = 5, z = 0</b>.")}</div>
+            <div class="stack">${code(`int n = 479;
+int e = n % 10;
+int k = n % 100;`, 16)}${reveal("t3", "Ответ 3", "479 = 47 · 10 + 9 → <b>e = 9</b>; 479 = 4 · 100 + 79 → <b>k = 79</b>.")}</div>
+            <div class="stack">${code(`int s = 7;
+s += 5;
+s *= 2;`, 16)}${reveal("t4", "Ответ 4", "s = 7 + 5 = 12; s = 12 · 2 = <b>24</b>.")}</div>
+          </div>
+        </div>${src(P1 + "слайд 11 (инкремент, %, правило), слайд 12 (+=, *=); числа — условные")}`;
+      },
+    },
+    {
+      badge: "Подготовка к СОЧ",
+      shortTitle: "Формат СОЧ и проверка в VS",
+      timing: "60–70 мин",
+      source: SPEC + "; " + P1 + "слайды 11, 14, 16",
+      notes: "Проверка решений в Visual Studio: ученики вставляют фрагмент в обработчик кнопки и выводят результат в label1 (как в практической работе урока 1). Затем — тренировочное задание в формате СОЧ (краткий ответ), не из СОЧ; взаимопроверка по дескрипторам.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;align-items:start;">
+          <div class="stack">
+            <h2 class="slide-h2" style="font-size:24px;">Проверка в Visual Studio</h2>
+            ${code(`private void button1_Click(object sender, EventArgs e)
+{
+    int a = 4, b = 3;
+    int c = ++a * 2 + b--;
+    label1.Text = c.ToString();
+}`, 14)}
+            <p class="text-xs text-muted" style="margin:0;">Условный пример: фрагмент задачи 1 в обработчике кнопки.</p>
+          </div>
+          <div class="stack">
+            <div class="text-xs text-muted">Тренировочное задание · КО · 3 балла</div>
+            ${code(`int m = 8, p = 2;
+int r = m-- / 2 + ++p;`, 16)}
+            <p class="text-sm" style="margin:0;"><b>Определите</b> значения m, p, r после выполнения фрагмента.</p>
+            <div class="card text-xs"><b>Дескрипторы:</b> верно находит p; верно находит m; верно вычисляет r.</div>
+            ${reveal("r-soch", "Ключ", "++p: p = 3; r = 8 / 2 + 3 = 7; затем m-- : m = 7. <b>m = 7, p = 3, r = 7</b>.")}
+          </div>
+        </div></div>${src(SPEC + " (тип КО); " + P1 + "слайд 11 (правило), слайды 14, 16 (обработчик, ToString); фрагменты — условные")}`;
+      },
+    },
+
+    /* ---------------- КОНЕЦ УРОКА (10 мин) ---------------- */
+    {
+      badge: "Конец урока · проверка",
+      shortTitle: "Блиц: ++x и x++",
+      timing: "70–74 мин",
+      source: P1 + "слайды 7–8, 11",
+      notes: "Блиц-проверка: ответ — поднятием карточки a/b/c/d. Щёлкните вариант, чтобы показать верный.",
+      render() {
+        return `<div class="body"><div class="grid-2 quizgrid" style="gap:14px;">
+          ${quiz("q1", "1. x = 7; y = ++x; Чему равны y и x?", ["y = 7, x = 8", "y = 8, x = 8", "y = 7, x = 7", "y = 8, x = 7"], 1)}
+          ${quiz("q2", "2. x = 7; y = x--; Чему равны y и x?", ["y = 7, x = 6", "y = 6, x = 6", "y = 6, x = 7", "y = 7, x = 7"], 0)}
+          ${quiz("q3", "3. Сколько памяти занимает int?", ["1 байт", "2 байта", "4 байта", "8 байт"], 2)}
+          ${quiz("q4", "4. Какой идентификатор верный?", ["1st", "new", "first name", "_first"], 3)}
+        </div></div>${src(P1 + "слайд 7 (идентификаторы), слайд 8 (int), слайд 11 (инкремент); числа — условные")}`;
+      },
+    },
+    {
+      badge: "Конец урока · проверка",
+      shortTitle: "Типы C# и .NET",
+      timing: "74–77 мин",
+      source: P1 + "слайды 8–9; " + P2 + "слайд 9",
+      notes: "Сопоставьте ключевое слово C# с типом .NET. Щёлкните ответ в строке.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Какой тип .NET соответствует типу C#?</h2>
+          ${matcher("net", [["Int32", "Int32"], ["Int64", "Int64"], ["Single", "Single"], ["Double", "Double"], ["Boolean", "Boolean"], ["Char", "Char"], ["String", "String"]], [
+            { t: "<code>int</code>", ans: "Int32" },
+            { t: "<code>float</code>", ans: "Single" },
+            { t: "<code>double</code>", ans: "Double" },
+            { t: "<code>bool</code>", ans: "Boolean" },
+            { t: "<code>long</code>", ans: "Int64" },
+            { t: "<code>char</code>", ans: "Char" },
+            { t: "<code>string</code>", ans: "String" },
+          ])}
+        </div>${src(P1 + "слайды 8–9 (таблицы типов); " + P2 + "слайд 9")}`;
+      },
+    },
+    {
+      badge: "Конец урока · рефлексия",
+      shortTitle: "Рефлексия и домашнее задание",
+      timing: "77–80 мин",
+      source: P1 + "слайд 17; КСП урока 2",
+      notes: "Рефлексия — продолжить фразы. Сверьтесь с критериями. Домашнее задание — по КСП.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;">
+          <div class="stack">
+            <h2 class="slide-h2">Продолжите фразы</h2>
+            <div class="card"><p>Сегодня я узнал… · Я научился…</p></div>
+            <div class="card"><p>Было трудно… · Я понял, что…</p></div>
+          </div>
+          <div class="stack">
+            <h2 class="slide-h2">Домашнее задание</h2>
+            <div class="card"><h3>📋 Таблица типов</h3><p>Выучить типы C#: размер в байтах и имя в .NET.</p></div>
+            <div class="card"><h3>🧮 4 примера</h3><p>Составьте и решите 4 примера на вычисление выражений с инкрементом и декрементом (каждый — с ответом).</p></div>
+          </div>
+        </div></div>${src(P1 + "слайд 17 (рефлексия); КСП урока 2 (домашнее задание)")}`;
+      },
+    },
+  ],
+});
+</script>
+</body>
+</html>

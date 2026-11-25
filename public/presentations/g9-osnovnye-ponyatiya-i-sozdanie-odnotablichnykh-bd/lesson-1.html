@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9.2А · Урок 1 · Базы данных и СУБД. Таблица, поле, запись, типы данных и ключ</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+</head>
+<body>
+<script src="../_engine/deck.js"></script>
+<script>
+const L1_TYPES_TRAINER = [
+  { id: "f1", field: "ИИН (090512500123)", ans: "text", hint: "Состоит из цифр, но расчёты не нужны; ведущий 0 потеряется в числе!" },
+  { id: "f2", field: "Длительность_песни (3:02)", ans: "date", hint: "Время звучания хранится в типе «Дата/время» (таблица песен в учебнике)." },
+  { id: "f3", field: "Фото_футболиста", ans: "ole", hint: "Изображения и вложенные документы в Access хранятся в «Поле объекта OLE»." },
+  { id: "f4", field: "Стоимость (4500 ₸)", ans: "money", hint: "Денежный тип исключает ошибки округления при финансовых расчётах." },
+  { id: "f5", field: "Длина_реки (4248 км)", ans: "num", hint: "Участвует в сравнениях (> 1000 км) и расчётах, поэтому «Числовой»." },
+  { id: "f6", field: "Водохранилище (есть/нет)", ans: "bool", hint: "Всего два взаимоисключающих значения — «Логический»." },
+  { id: "f7", field: "Код_книги (1, 2, 3… авто)", ans: "auto", hint: "Уникальный порядковый номер присваивается автоматически («Счётчик»)." },
+  { id: "f8", field: "Биография_писателя (1000 симв.)", ans: "memo", hint: "Текстовое поле вмещает только 255 символов; свыше 255 нужно «Поле MEMO»." }
+];
+
+const L1_PK_CHECK = [
+  { id: "pk1", name: "ИИН гражданина", ok: true, why: "Уникален для каждого жителя РК, не повторяется и не может быть пустым." },
+  { id: "pk2", name: "Электронный адрес (Email)", ok: true, why: "Двух абсолютно одинаковых действующих адресов у разных пользователей нет." },
+  { id: "pk3", name: "Госномер автомобиля", ok: true, why: "Регистрационный знак однозначно определяет конкретный автомобиль." },
+  { id: "pk4", name: "Фамилия ученика", ok: false, why: "В одной школе и даже в одном классе часто встречаются однофамильцы." },
+  { id: "pk5", name: "День рождения", ok: false, why: "Несколько разных людей могут родиться в один и тот же день." }
+];
+
+const L1_TRAPS = [
+  {
+    id: "tr1",
+    title: "1. Таблица «Погода» · Размер поля «Осадки» = 4",
+    problem: "Ученик создал поле «Осадки» типа «Текстовый», но оставил размер 4 символа.",
+    answer: "Слова «снег» (4) или «ясно» (4) поместятся, а вот «дождь» (5) и «гроза» (5) система обрежет или не примет! Нужно минимум 15–20 символов."
+  },
+  {
+    id: "tr2",
+    title: "2. Числовой подтип «Целое» и ввод 152,67",
+    problem: "Для роста или среднего балла выбрали подтип «Целое» (-32768..32767) и ввели 152,67.",
+    answer: "Access округлит значение до 153 и отбросит дробную часть! Для дробных чисел нужен подтип «С плавающей точкой» (Одинарное или Двойное)."
+  },
+  {
+    id: "tr3",
+    title: "3. ИИН, телефон и индекс → НЕ «Числовой»!",
+    problem: "Почему ИИН 090512500123 и индекс 010000 нельзя хранить в Числовом поле?",
+    answer: "Во-первых, в числе пропадёт ведущий нуль (0905 → 905). Во-вторых, ИИН никогда не складывают и не делят. Правильный тип — «Текстовый»!"
+  },
+  {
+    id: "tr4",
+    title: "4. «Таблица песен» и «Футболисты» из SB 9 кл.",
+    problem: "Какие типы выбрать для «Длительность 3:02», «Размер (Мб) 6,4» и «Фото игрока»?",
+    answer: "«Длительность» (3:02) — Дата/время; «Размер (Мб)» — Числовой (с плавающей точкой); «Фото игрока» — Поле объекта OLE."
+  }
+];
+
+const L1_BLITZ = [
+  { k: "b1", q: "Строка таблицы базы данных называется полем, а столбец — записью.", a: "НЕВЕРНО. Столбец — это ПОЛЕ (одно свойство объекта), а строка — ЗАПИСЬ (полные данные об одном объекте)." },
+  { k: "b2", q: "«Мастер подстановок» — это отдельный тип данных MS Access.", a: "НЕВЕРНО. Мастер подстановок — это способ заполнения поля (выпадающий список), а не самостоятельный тип данных." },
+  { k: "b3", q: "В реляционной таблице не может быть двух столбцов с одинаковыми именами.", a: "ВЕРНО. Это первое строгое правило реляционной таблицы: каждое имя поля уникально." },
+  { k: "b4", q: "Для поля ИИН лучше выбрать Числовой тип, так как там только цифры.", a: "НЕВЕРНО. В Числовом типе исчезнет ведущий нуль 0 и не нужны арифметические операции. Используется «Текстовый» тип." },
+  { k: "b5", q: "Значение «Поле MEMO» позволяет хранить до 65 535 символов текста.", a: "ВЕРНО. Обычный Текстовый тип ограничен 255 символами, а для длинных описаний берут MEMO." },
+  { k: "b6", q: "Первичный ключ таблицы может принимать пустое значение (NULL), если данные ещё не известны.", a: "НЕВЕРНО. Ключевое поле обязательно заполнено для каждой записи и никогда не повторяется." }
+];
+
+initDeck({
+  badge: "🗄 9.2А · Урок 1",
+  title: "Базы данных и СУБД. Таблица, поле, запись, типы данных и ключ",
+  subtitle: "9 класс · 2 четверть · Цели 9.1.2.1, 9.1.2.2, 9.1.2.4 · 80 мин · Мини-СУБД",
+  footer: "НИШ ЕМН г. Кызылорда · 9 класс · 2 четверть · Мини-СУБД (/subd)",
+  initialState: {
+    tabs: { chain: "is", dtype: "basic" },
+    selected: { riverPart: "field" }
+  },
+  slides: [
+    {
+      badge: "Этап 1 · Мотивация и цели",
+      shortTitle: "Титул, кейс и цели урока",
+      timing: "0–6 мин",
+      source: "КСП 9.2А Урок 1 · SB 9 кл. стр. 56–57 · 1 урок База Данных.pptx",
+      notes: "Начните с проблемной ситуации: представьте бумажный журнал регистрации или 1000 анкет учеников в папке. Сколько минут уйдёт, чтобы вручную найти всех отличников 9-х классов, родившихся в мае? В электронной БД такой ответ приходит за доли секунды. Озвучьте 3 цели обучения.",
+      render() {
+        return `
+          <div class="stack">
+            <div class="text-xs font-bold text-muted" style="text-transform:uppercase;">Информатика · 9 класс · Раздел 9.2А «Однотабличные БД» · Урок 1 из 6</div>
+            <h1 class="slide-h1">Базы данных и СУБД. Поле, запись, типы данных и ключ</h1>
+            <p class="lead">Переходим от обычных таблиц к профессиональным базам данных: изучим устройство реляционной таблицы, все 9 типов данных MS Access и правила выбора первичного ключа.</p>
+            <div class="box-accent text-xs">
+              <strong>Проблемная ситуация:</strong> в школе хранятся 1 200 бумажных анкет. Сколько времени займёт поиск всех учеников с именем «Алихан», родившихся после 2010 года? А в <strong>базе данных</strong>?
+            </div>
+            <div class="grid-3 text-xs">
+              <div class="box-primary"><div class="box-title mono">9.1.2.1</div>Объяснять понятия «информационная система», «база данных», «СУБД», «таблица», «поле», «запись».</div>
+              <div class="box-accent"><div class="box-title mono" style="color:var(--accent);">9.1.2.2</div>Подбирать подходящие типы данных MS Access и учитывать их ограничения и размер.</div>
+              <div class="box-success"><div class="box-title mono" style="color:var(--success);">9.1.2.4</div>Определять первичный ключ (ключевое поле) и записывать структуру таблицы.</div>
+            </div>
+            <div class="box text-xs">
+              <strong>Маршрут урока (80 мин):</strong> Цепочка ИС ⇄ СУБД ⇄ БД → Таблица «Реки Казахстана» → 9 типов данных и 4 ловушки → Тренажёры типов и ключей → Практика в Мини-СУБД → Разбор задания СОР и блиц.
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · ИС ⇄ СУБД ⇄ БД",
+      shortTitle: "Информационная система, БД и СУБД",
+      timing: "6–14 мин",
+      source: "SB 9 кл. стр. 56 · Теория 9.2А · 1 урок База Данных.pptx",
+      notes: "Чётко разведите три понятия, которые ученики часто путают на СОР: База данных — это сами данные (файл), СУБД — это программа-инструмент (Access), Информационная система — весь комплекс аппаратных и программных средств (Kundelik.kz, Kaspi.kz, BilimLand).",
+      render(st) {
+        const c = st.tabs.chain || "is";
+        const desc = {
+          is: {
+            t: "Информационная система (ИС)",
+            b: "Совокупность аппаратных и программных средств для хранения, поиска и обработки информации (серверы + сети + программы + БД).",
+            ex: "Примеры: электронный дневник Kundelik.kz, банковская система, расписание аэропорта, база поликлиники."
+          },
+          dbms: {
+            t: "СУБД — Система управления базами данных",
+            b: "Прикладное программное обеспечение (ПО), предназначенное для создания, наполнения, редактирования, защиты и обработки баз данных.",
+            ex: "Примеры из учебника SB: MS Access, OpenOffice.org Base, FoxPro, Oracle, MS SQL Server, Paradox (а также MySQL, PostgreSQL, наш Мини-СУБД)."
+          },
+          db: {
+            t: "БД — База данных",
+            b: "Упорядоченный набор структурированных цифровых данных о некоторой предметной области, размещённый во внешней памяти компьютера.",
+            ex: "Без СУБД файл базы данных (.accdb) — это просто набор байтов; СУБД позволяет удобно читать и менять эти данные."
+          }
+        }[c];
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Цепочка понятий: ИС ⇄ СУБД ⇄ БД</h2>
+            <div class="flex-row">
+              <button type="button" class="btn ${c === "is" ? "btn-primary" : ""}" onclick="DECK.setTab('chain','is')">1. Информационная система</button>
+              <button type="button" class="btn ${c === "dbms" ? "btn-accent" : ""}" onclick="DECK.setTab('chain','dbms')">2. СУБД (программа)</button>
+              <button type="button" class="btn ${c === "db" ? "btn-primary" : ""}" onclick="DECK.setTab('chain','db')">3. База данных (данные)</button>
+            </div>
+            <div class="box-primary">
+              <div class="font-bold text-sm">${desc.t}</div>
+              <p class="text-xs" style="margin:6px 0;">${desc.b}</p>
+              <div class="box-white text-xs">${desc.ex}</div>
+            </div>
+            <div class="grid-2 text-xs">
+              <div class="box">
+                <div class="box-title">Известные СУБД из учебника SB 9 кл.</div>
+                <strong>Настольные:</strong> Microsoft Access, OpenOffice.org Base, FoxPro, Paradox.<br>
+                <strong>Серверные:</strong> Oracle, MS SQL Server (обслуживают тысячи пользователей одновременно).
+              </div>
+              <div class="box-warning">
+                <div class="box-title" style="color:var(--warning);">Чем БД отличается от Excel?</div>
+                В Excel можно написать текст в столбец с числами или добавить формулу в любую ячейку. В <strong>БД</strong> каждый столбец имеет <strong>строгий тип данных</strong>, а таблицы связываются ключами — это защищает данные на миллионы строк.
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Реляционная таблица",
+      shortTitle: "Таблица «Реки Казахстана» (SB)",
+      timing: "14–22 мин",
+      source: "SB 9 кл. стр. 56 · Таблица «Реки Казахстана»",
+      notes: "Нажимайте на 4 кнопки подсветки на примере точной таблицы из учебника «Реки Казахстана» (5 полей, 4 записи). Акцентируйте два строгих правила реляционной БД — они постоянно проверяются в тестах!",
+      render(st) {
+        const part = st.selected.riverPart || "field";
+        const info = {
+          field: "Поле (столбец) — хранит одно свойство объекта (например, «Название» или «Длина»). В таблице «Реки Казахстана» ровно 5 полей. Все значения в одном поле имеют ОДИН тип данных!",
+          record: "Запись (строка) — полные сведения об одном конкретном объекте (строка о реке Тобол: 1591 км, 800 км, Карское море, есть). В таблице 4 записи.",
+          pk: "Первичный ключ (ключевое поле 🔑) — поле, однозначно определяющее каждую запись. Здесь «Название» (или добавленное поле «Код_реки») уникально для каждой реки.",
+          val: "Значение поля — конкретные данные на пересечении строки (записи) и столбца (поля), например «оз. Шаганак»."
+        };
+        const hlCol = (c) => (part === "pk" && c === 0) || (part === "field" && c === 1) ? "background:var(--primary-soft);font-weight:700;" : "";
+        const hlRow = (r) => part === "record" && r === 1 ? "background:var(--accent-soft);font-weight:700;" : "";
+        const hlCell = (r, c) => part === "val" && r === 3 && c === 3 ? "background:var(--success-soft);font-weight:700;outline:2px solid var(--success);" : "";
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <h2 class="slide-h2">Реляционная БД: пример «Реки Казахстана» (SB)</h2>
+              <div class="flex-row">
+                <button type="button" class="btn ${part === "field" ? "btn-primary" : ""}" onclick="DECK.setSelected('riverPart','field')">Поле (столбец)</button>
+                <button type="button" class="btn ${part === "record" ? "btn-accent" : ""}" onclick="DECK.setSelected('riverPart','record')">Запись (строка)</button>
+                <button type="button" class="btn ${part === "pk" ? "btn-primary" : ""}" onclick="DECK.setSelected('riverPart','pk')">🔑 Ключ</button>
+                <button type="button" class="btn ${part === "val" ? "btn-primary" : ""}" onclick="DECK.setSelected('riverPart','val')">Значение</button>
+              </div>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="${hlCol(0)}">🔑 Название</th>
+                  <th style="${hlCol(1)}">Длина (км)</th>
+                  <th>Длина в РК (км)</th>
+                  <th>Куда впадает</th>
+                  <th>Наличие водохранилищ</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="${hlRow(0)}"><td style="${hlCol(0)}">Иртыш</td><td class="mono" style="${hlCol(1)}">4248</td><td class="mono">1835</td><td>Карское море</td><td>есть</td></tr>
+                <tr style="${hlRow(1)}"><td style="${hlCol(0)}">Тобол</td><td class="mono" style="${hlCol(1)}">1591</td><td class="mono">800</td><td>Карское море</td><td>есть</td></tr>
+                <tr style="${hlRow(2)}"><td style="${hlCol(0)}">Есиль</td><td class="mono" style="${hlCol(1)}">2450</td><td class="mono">1400</td><td>Карское море</td><td>есть</td></tr>
+                <tr style="${hlRow(3)}"><td style="${hlCol(0)}">Шидерты</td><td class="mono" style="${hlCol(1)}">502</td><td class="mono">502</td><td style="${hlCell(3,3)}">оз. Шаганак</td><td>нет</td></tr>
+              </tbody>
+            </table>
+            <div class="box-primary text-xs">${info[part]}</div>
+            <div class="box-warning text-xs">
+              <strong>2 строгих правила реляционной таблицы:</strong>
+              (1) В таблице НЕ может быть двух полей (столбцов) с одинаковыми именами;
+              (2) В таблице НЕ должно быть двух абсолютно одинаковых записей (строк).
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Типы данных Access",
+      shortTitle: "Полный справочник: 9 типов данных",
+      timing: "22–32 мин",
+      source: "SB 9 кл. стр. 57 · Классификация типов данных MS Access",
+      notes: "Покажите сначала 4 базовых типа, затем переключитесь на 5 специализированных. Обязательно выделите правило: «Мастер подстановок» — это не тип данных, а способ выбора значений из выпадающего списка!",
+      render(st) {
+        const t = st.tabs.dtype || "basic";
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <div>
+                <h2 class="slide-h2">Справочник: все 9 типов данных MS Access</h2>
+                <p class="lead">Переключайте вкладки: от 4 базовых типов к 5 специализированным.</p>
+              </div>
+              <div class="flex-row">
+                <button type="button" class="btn ${t === "basic" ? "btn-primary" : ""}" onclick="DECK.setTab('dtype','basic')">4 базовых типа</button>
+                <button type="button" class="btn ${t === "spec" ? "btn-accent" : ""}" onclick="DECK.setTab('dtype','spec')">5 специализированных</button>
+              </div>
+            </div>
+            ${t === "basic" ? `
+              <table class="data-table">
+                <thead><tr><th>Тип данных</th><th>Что хранит и важные ограничения</th><th>Примеры значений</th></tr></thead>
+                <tbody>
+                  <tr><td><strong>Текстовый</strong><br><span class="text-xs text-muted">(Короткий текст)</span></td><td>Любые символы длиной <strong>до 255 знаков</strong> (по умолчанию размер = <strong>50</strong>). Для текста и кодов без расчётов.</td><td class="mono text-xs">Ахметов, 9A, 090512500123</td></tr>
+                  <tr><td><strong>Числовой</strong></td><td>Числа для вычислений и сравнений. Подтипы: <strong>Байт</strong> (0–255), <strong>Целое</strong> (−32768..32767), <strong>Длинное целое</strong>, <strong>С плавающей точкой</strong> (дроби).</td><td class="mono text-xs">4248, 15, 4.85</td></tr>
+                  <tr><td><strong>Логический</strong></td><td>Только два взаимоисключающих значения (1 бит памяти).</td><td class="mono text-xs">Да / Нет, Истина / Ложь</td></tr>
+                  <tr><td><strong>Дата/время</strong></td><td>Календарные даты и время за годы <strong>с 100 по 9999</strong>. Можно сортировать хронологически и вычитать даты.</td><td class="mono text-xs">14.03.2011, 03:02</td></tr>
+                </tbody>
+              </table>
+            ` : `
+              <table class="data-table">
+                <thead><tr><th>Тип данных</th><th>Назначение в MS Access</th><th>Примеры</th></tr></thead>
+                <tbody>
+                  <tr><td><strong>Поле MEMO</strong><br><span class="text-xs text-muted">(Длинный текст)</span></td><td>Длинные тексты, комментарии и биографии объёмом <strong>до 65 535 символов</strong>.</td><td class="text-xs">Отзыв клиента, описание реки (3 абзаца)</td></tr>
+                  <tr><td><strong>Денежный</strong></td><td>Точные финансовые значения (<strong>15 знаков до запятой и 4 после</strong>) без погрешностей двоичного округления.</td><td class="mono text-xs">4 500 ₸, $120.50</td></tr>
+                  <tr><td><strong>Счётчик</strong></td><td>Автоматически генерирует уникальный номер (+1) для каждой новой записи. Изменить вручную <strong>нельзя</strong>.</td><td class="mono text-xs">1, 2, 3, 4…</td></tr>
+                  <tr><td><strong>Поле объекта OLE</strong></td><td>Внедрение или связывание внешних объектов (фотографии, таблицы Excel, документы Word, аудио).</td><td class="text-xs">Фото футболиста, схема</td></tr>
+                  <tr><td><strong>Гиперссылка</strong></td><td>Кликабельный веб-адрес (URL), путь к файлу или адрес электронной почты.</td><td class="mono text-xs">https://nis.edu.kz</td></tr>
+                </tbody>
+              </table>
+            `}
+            <div class="box-danger text-xs">
+              <strong>Внимание! Частая ошибка на тестировании:</strong> строка <strong>«Мастер подстановок»</strong> в списке типов Access — это <strong>НЕ тип данных</strong>, а инструмент настройки выпадающего списка (связи) для заполнения поля!
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Ловушки учебника",
+      shortTitle: "4 коварные ошибки по типам данных",
+      timing: "32–40 мин",
+      source: "SB 9 кл. · Задачи «Погода», «Песни», «Футболисты»",
+      notes: "Дайте ученикам 30 секунд на каждую карточку: пусть предскажут, что пойдёт не так, и только затем кликайте для раскрытия верного разбора.",
+      render(st) {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Разбор 4 экзаменационных ловушек из учебника SB</h2>
+            <p class="lead">Нажмите на каждую карточку после обсуждения в паре, чтобы проверить ответ.</p>
+            <div class="grid-2">
+              ${L1_TRAPS.map(tr => {
+                const open = !!st.revealed[tr.id];
+                return `
+                  <button type="button" class="interactive-card ${open ? "revealed" : ""}" onclick="DECK.toggleReveal('${tr.id}')">
+                    <div class="font-bold text-sm">${tr.title}</div>
+                    <div class="text-xs text-muted" style="margin-top:4px;">${tr.problem}</div>
+                    <div class="text-xs" style="margin-top:8px;padding-top:6px;border-top:1px dashed var(--border);">
+                      ${open ? "✓ <strong>Разбор:</strong> " + tr.answer : "Нажмите, чтобы узнать ловушку →"}
+                    </div>
+                  </button>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Тренажёр типов",
+      shortTitle: "Определи тип данных (8 полей)",
+      timing: "40–48 мин",
+      source: "SB 9 кл. стр. 57 · Цель 9.1.2.2",
+      notes: "Пройдите с классом все 8 полей. Обратите особое внимание на Длительность_песни (Дата/время), Биография (MEMO) и ИИН (Текстовый).",
+      render(st) {
+        let ok = 0;
+        L1_TYPES_TRAINER.forEach(t => { if (st.quiz[t.id] === t.ans) ok++; });
+        const opts = [
+          ["text","Текст"], ["num","Число"], ["money","Денеж."], ["date","Дата/вр."],
+          ["bool","Логич."], ["auto","Счётчик"], ["memo","MEMO"], ["ole","OLE"]
+        ];
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <div>
+                <h2 class="slide-h2">Тренажёр: подбери тип данных для каждого поля</h2>
+                <p class="lead">Определите правильный тип MS Access для примеров из учебника.</p>
+              </div>
+              <span class="pill pill-success mono">${ok} / ${L1_TYPES_TRAINER.length}</span>
+            </div>
+            <div class="stack" style="gap:6px;">
+              ${L1_TYPES_TRAINER.map(t => {
+                const p = st.quiz[t.id];
+                const cls = p ? (p === t.ans ? "ok" : "bad") : "";
+                return `
+                  <div class="quiz-row ${cls}">
+                    <div style="min-width:0;flex:1;">
+                      <strong>${t.field}</strong>
+                      ${p === t.ans ? `<div class="text-xs text-muted">${t.hint}</div>` : ""}
+                    </div>
+                    <div class="flex-row" style="gap:4px;">
+                      ${opts.map(([k, lbl]) => `<button type="button" class="btn ${p === k ? "btn-primary" : ""}" style="padding:2px 6px;font-size:11px;" onclick="DECK.pickQuiz('${t.id}','${k}')">${lbl}</button>`).join("")}
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Первичный ключ",
+      shortTitle: "Нотация таблицы и выбор ключа",
+      timing: "48–56 мин",
+      source: "SB 9 кл. · Цель 9.1.2.4",
+      notes: "Покажите принятую в учебниках и экзаменах запись схемы таблицы с подчёркнутым первичным ключом. Затем вместе оцените 5 кандидатов в ключи.",
+      render(st) {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Первичный ключ 🔑 и нотация структуры таблицы</h2>
+            <div class="grid-2 text-xs">
+              <div class="box-primary">
+                <div class="box-title">Формальная запись таблицы (ключ подчёркнут)</div>
+                <div class="mono" style="margin-bottom:4px;">Имя_таблицы (<u>Ключ</u>, Поле_2, Поле_3, …)</div>
+                <div class="mono">Книга (<u>Id_книги</u>, Автор, Название, Год_издания)</div>
+                <div class="mono">УЧЕНИКИ (<u>ИИН</u>, Фамилия, Имя, Класс)</div>
+              </div>
+              <div class="box">
+                <div class="box-title">2 свойства первичного ключа</div>
+                <strong>1. Уникальность:</strong> значения не могут повторяться ни у каких двух записей.<br>
+                <strong>2. Обязательность (NOT NULL):</strong> значение не может оставаться пустым.
+              </div>
+            </div>
+            <div class="font-bold text-sm">Подходит ли поле на роль единственного первичного ключа?</div>
+            <div class="grid-3">
+              ${L1_PK_CHECK.map(item => {
+                const open = !!st.revealed[item.id];
+                const bg = open ? (item.ok ? "background:var(--success-soft);border-color:var(--success);" : "background:var(--danger-soft);border-color:var(--danger);") : "";
+                return `
+                  <button type="button" class="interactive-card" style="${bg}" onclick="DECK.toggleReveal('${item.id}')">
+                    <div class="font-bold text-xs">${item.name}</div>
+                    <div class="text-xs" style="margin-top:5px;">
+                      ${open ? (item.ok ? "✓ ДА: " : "✗ НЕТ: ") + item.why : "Нажмите для проверки →"}
+                    </div>
+                  </button>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Мини-СУБД · Практика",
+      pillClass: "pill-accent",
+      shortTitle: "Мини-СУБД: Поле, запись, тип данных, ключ",
+      timing: "56–68 мин",
+      source: "Мини-СУБД (/subd) · g9a-l1-ponyatiya, g9a-p1-iin, g9a-p1-sport",
+      notes: "Ученики работают прямо в встроенном Мини-СУБД (/subd) или открывают его в новой вкладке. Основное задание: «Поле, запись, тип данных, ключ». Для быстрых учеников (дифференциация): «Поле ИИН» и «Структура таблицы „Секции“».",
+      render(st, api) {
+        return api.renderMiniSubdTask({
+          key: "g9a1",
+          title: "Практика в Мини-СУБД: Поле, запись, тип данных, ключ",
+          summary: "Изучите таблицу в Мини-СУБД, определите поля, записи, типы данных и первичный ключ. Быстрые ученики дополнительно решают «Поле ИИН» и «Структура таблицы „Секции“».",
+          taskName: "Поле, запись, тип данных, ключ (g9a-l1-ponyatiya) · Доп.: g9a-p1-iin, g9a-p1-sport",
+          steps: ["Нажмите «✓ Задания» справа вверху", "Выберите «Поле, запись, тип данных, ключ»", "Выполните и нажмите «Проверить»"],
+          meta: "Цели 9.1.2.1 · 9.1.2.2 · 9.1.2.4"
+        });
+      }
+    },
+    {
+      badge: "Этап 3 · Разбор СОР",
+      shortTitle: "Проектирование таблицы «Издания»",
+      timing: "68–75 мин",
+      source: "Мини-СУБД · ДЗ g9a-hw1-izdaniya · Критерии СОР 9.2А",
+      notes: "Подготовьте учеников к выполнению домашнего задания: вместе разберите текстовое описание предметной области «Издания», выделите поля, подберите типы и обоснуйте выбор первичного ключа.",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Образец для ДЗ и СОР: проектируем таблицу «Издания»</h2>
+            <div class="box-primary text-xs">
+              <strong>Задание по описанию:</strong> «Библиотека хранит сведения о печатных изданиях: уникальный код издания, название журнала или газеты, индекс издания (6 цифр, может начинаться с 0), периодичность (выходов в год) и стоимость подписки в тенге».
+            </div>
+            <table class="data-table">
+              <thead><tr><th>Поле</th><th>Тип данных Access</th><th>Ключ?</th><th>Обоснование выбора</th></tr></thead>
+              <tbody>
+                <tr><td><strong>🔑 Код_издания</strong></td><td class="mono">Счётчик</td><td>Да (PK)</td><td>Автоматически гарантирует уникальность каждой записи.</td></tr>
+                <tr><td><strong>Название</strong></td><td class="mono">Текстовый (100)</td><td>Нет</td><td>Названия длиннее стандартных 50 символов не обрежутся.</td></tr>
+                <tr><td><strong>Индекс</strong></td><td class="mono">Текстовый (6)</td><td>Нет</td><td>6 цифр, но возможен ведущий 0 (напр. <span class="mono">010000</span>) и нет расчётов!</td></tr>
+                <tr><td><strong>Выходов_в_год</strong></td><td class="mono">Числовой (Целое)</td><td>Нет</td><td>Целое число (12, 24, 52), с ним можно сравнивать и считать.</td></tr>
+                <tr><td><strong>Цена_подписки</strong></td><td class="mono">Денежный</td><td>Нет</td><td>Точная валюта для финансовых расчётов (тенге).</td></tr>
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 3 · Блиц и ДЗ",
+      shortTitle: "Блиц «Верно / Неверно» (6 вопросов) и ДЗ",
+      timing: "75–80 мин",
+      source: "КСП 9.2А Урок 1 · ДЗ g9a-hw1-izdaniya",
+      notes: "Фронтальный блиц на закрепление: зачитывайте утверждение, весь класс голосует рукой «Верно / Неверно», затем кликайте карточку. Выдайте ДЗ в Мини-СУБД.",
+      render(st) {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Финальный блиц «Верно / Неверно» и домашнее задание</h2>
+            <div class="grid-2">
+              ${L1_BLITZ.map((item, i) => `
+                <button type="button" class="interactive-card ${st.revealed[item.k] ? "revealed" : ""}" onclick="DECK.toggleReveal('${item.k}')">
+                  <div class="font-bold text-xs">${i + 1}. ${item.q}</div>
+                  <div class="text-xs" style="margin-top:5px;">${st.revealed[item.k] ? item.a : "Нажмите для ответа →"}</div>
+                </button>
+              `).join("")}
+            </div>
+            <div class="box-primary flex-between text-xs">
+              <div><strong>Домашнее задание:</strong> в <strong>Мини-СУБД</strong> выполнить <strong>«Таблица „Издания“ по описанию»</strong> (g9a-hw1-izdaniya) и проверить себя.</div>
+              <a class="btn btn-accent" href="/subd" target="_blank" rel="noopener noreferrer">Открыть Мини-СУБД ↗</a>
+            </div>
+          </div>
+        `;
+      }
+    }
+  ]
+});
+</script>
+</body>
+</html>

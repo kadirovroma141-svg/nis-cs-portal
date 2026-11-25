@@ -1,0 +1,1148 @@
+{
+  "topic": "g7-tipy-dannykh",
+  "summary": "Переменные и их имена, основные типы данных C++ (string, int, float, double), константы, ввод и вывод (cin, cout) для диалога с пользователем.",
+  "theory": [
+    {
+      "title": "Переменная и ее имя",
+      "objectives": [
+        "7.4.3.2"
+      ],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "content": "Для хранения данных в программе применяются **переменные**. Каждая переменная должна иметь имя. Кроме имени, компьютеру надо сообщить **тип** информации, которая будет храниться под этим именем."
+        },
+        {
+          "type": "definition",
+          "term": "Переменная",
+          "content": "Область в памяти компьютера, которая имеет определенное имя и тип (например, `int summa`). Имя переменной называют **идентификатором**."
+        },
+        {
+          "type": "comparison",
+          "title": "Правила имени переменной",
+          "columns": [
+            "Правило",
+            "Пример"
+          ],
+          "rows": [
+            [
+              "Только латинские буквы, цифры и символ нижнего подчеркивания `_`",
+              "`all_3`, `bum23`"
+            ],
+            [
+              "Начинается только с буквы",
+              "`marat13` — можно, `13marat` — нельзя"
+            ],
+            [
+              "Нельзя использовать зарезервированные слова",
+              "`cout`, `cin`, `string` — нельзя"
+            ]
+          ]
+        },
+        {
+          "type": "comparison",
+          "title": "Правильно ли задано имя?",
+          "columns": [
+            "Имя",
+            "Верно?",
+            "Почему"
+          ],
+          "rows": [
+            [
+              "`marat`",
+              "да",
+              "латинские буквы"
+            ],
+            [
+              "`Marat13`",
+              "да",
+              "буквы и цифры, начинается с буквы"
+            ],
+            [
+              "`marat_13`",
+              "да",
+              "разрешен символ `_`"
+            ],
+            [
+              "`m`",
+              "да",
+              "одна латинская буква"
+            ],
+            [
+              "`13 marat`",
+              "нет",
+              "начинается с цифры, есть пробел"
+            ],
+            [
+              "`марат7в`",
+              "нет",
+              "кириллица"
+            ],
+            [
+              "`marat.13`",
+              "нет",
+              "точка не разрешена"
+            ]
+          ]
+        },
+        {
+          "type": "exam_tip",
+          "content": "Давай переменным «понятные» имена, по которым видно, для чего они нужны: например, `string namestudent_10A;`, `distanceInMeters` — расстояние в метрах, `totalSteps` — количество шагов."
+        }
+      ]
+    },
+    {
+      "title": "Основные типы данных",
+      "objectives": [
+        "7.4.3.2"
+      ],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "content": "В коде программы надо указать имя переменной и ее тип. Для каждого типа данных есть **диапазон значений**; для хранения больших чисел требуется больше памяти. Если у переменных одинаковый тип, их можно перечислять через запятую: `int x, y;`"
+        },
+        {
+          "type": "comparison",
+          "title": "Типы данных C++",
+          "columns": [
+            "Тип",
+            "Название",
+            "Диапазон значений",
+            "Пример"
+          ],
+          "rows": [
+            [
+              "`string`",
+              "строковый",
+              "символы алфавита",
+              "Mama, Привет, Она врач."
+            ],
+            [
+              "`int`",
+              "целочисленный",
+              "от −2147483648 до 2147483647",
+              "5, −3"
+            ],
+            [
+              "`float`",
+              "вещественный",
+              "от $3{,}4\\cdot10^{-38}$ до $3{,}4\\cdot10^{38}$",
+              "5.6, −23.1"
+            ],
+            [
+              "`double`",
+              "вещественный",
+              "от $1{,}7\\cdot10^{-308}$ до $1{,}7\\cdot10^{308}$",
+              "5.6, −23.1"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": "Для имен и других слов используют `string`, для целых чисел — `int`, для вещественных (дробных) чисел — `float` и `double`. Целое число можно хранить и в `float`/`double`, но чаще используют `int`: он занимает меньше памяти."
+        },
+        {
+          "type": "example",
+          "title": "Выбери тип данных",
+          "content": "- имя учащегося — `string`;\n- количество человек в кабинете — `int`;\n- названия дней недели — `string`;\n- вес планеты Юпитер — `float` или `double`;\n- число 2025.0205 — `float` или `double`;\n- `My hobby is reading books` — `string`."
+        },
+        {
+          "type": "warning",
+          "content": "Тип переменной нужен, чтобы компьютер «знал», какие данные хранятся под именем и какие действия с ними можно совершать. Если для названия города объявить `int name;`, то после ввода слова «Семей» программа выведет `0 - это хороший город!`. Нужно `string name;`."
+        },
+        {
+          "type": "callout",
+          "tone": "info",
+          "title": "Из презентации повторения",
+          "content": "В заданиях повторения встречаются также типы `char` (один символ, например `%` или `d`) и `bool` (логическое значение `false`). По руководству учителя в 7 классе основными считаются `string`, `int`, `float`, `double`."
+        }
+      ]
+    },
+    {
+      "title": "Константа",
+      "objectives": [
+        "7.4.3.2"
+      ],
+      "blocks": [
+        {
+          "type": "definition",
+          "term": "Константа",
+          "content": "Область в памяти компьютера, значение которой остается постоянным в течение работы программы и не может быть изменено."
+        },
+        {
+          "type": "paragraph",
+          "content": "Константы описываются так же, как переменные, но со словом `const`: `const int x = 22;`. Константу используют, если значение не должно меняться во время работы программы (например, $p = 3{,}14$)."
+        },
+        {
+          "type": "comparison",
+          "title": "Можно ли представить константой?",
+          "columns": [
+            "Данные",
+            "Константа?"
+          ],
+          "rows": [
+            [
+              "Количество часов в сутках",
+              "да"
+            ],
+            [
+              "Площадь нарисованного треугольника",
+              "да"
+            ],
+            [
+              "Рост ученика",
+              "нет"
+            ],
+            [
+              "Погода",
+              "нет"
+            ]
+          ]
+        },
+        {
+          "type": "warning",
+          "content": "Константе нельзя присвоить новое значение. Ошибка: `const int b = 14;` … `cin >> b;`. Если значение вводится с клавиатуры, нужна переменная: `int b;`."
+        }
+      ]
+    },
+    {
+      "title": "Ввод и вывод: диалог с пользователем",
+      "objectives": [
+        "7.4.3.3"
+      ],
+      "blocks": [
+        {
+          "type": "comparison",
+          "title": "Операторы ввода и вывода",
+          "columns": [
+            "Оператор",
+            "Назначение",
+            "Пример"
+          ],
+          "rows": [
+            [
+              "`cin >>`",
+              "ввод: присваивает переменной значение, введенное с клавиатуры",
+              "`cin >> x;` · `cin >> a >> b >> c;`"
+            ],
+            [
+              "`cout <<`",
+              "вывод текста и значений переменных на экран",
+              "`cout << \"s=\" << s;` · `cout << a << b << c;`"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": "Чтобы получился **диалог**, перед каждым вводом программа выводит подсказку (вопрос), а после ввода — ответ, в котором используются введенные значения."
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "#include <iostream>\nusing namespace std;\nint main ()\n{  float x, y, z, s;\ncout << \"Enter first number :\";\ncin >> x;\ncout << \"Enter second number :\";\ncin >> y;\ncout << \"Enter third number :\";\ncin >> z;\ns = x + y + z;\ncout << \"s=\" << s;\nreturn 0;\n}",
+          "caption": "Сумма трех чисел: ввод 5, 4.3, 0.9 → s=10.2"
+        },
+        {
+          "type": "diagram",
+          "format": "mermaid",
+          "content": "flowchart TD\n    A([\"Начало\"]) --> B[/\"Вывод: Enter first number\"/]\n    B --> C[/\"Ввод x\"/]\n    C --> D[/\"Вывод: Enter second number\"/]\n    D --> E[/\"Ввод y\"/]\n    E --> F[/\"Вывод: Enter third number\"/]\n    F --> G[/\"Ввод z\"/]\n    G --> H[\"s = x + y + z\"]\n    H --> I[/\"Вывод s\"/]\n    I --> J([\"Конец\"])",
+          "caption": "Блок-схема программы «Сумма трех чисел»"
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "#include <iostream>\nusing namespace std;\nint main ()\n{  string x, y, z;\ncout << \"Enter the name of the first dish :\";\ncin >> x;\ncout << \"Enter the name of the second dish :\";\ncin >> y;\ncout << \"Enter the name of the third dish :\";\ncin >> z;\ncout << \"Favorite Lunch: \" << x << \", \" << y << \", \" << z;\nreturn 0;\n}",
+          "caption": "Программа «Любимый обед»: названия блюд — тип string"
+        },
+        {
+          "type": "example",
+          "title": "Фрагмент программы общения",
+          "content": "```cpp\nstring name; int age;\ncout << \"Как вас зовут?\" << endl;\ncin >> name;\ncout << \"Сколько вам лет, \" << name << \"?\" << endl;\ncin >> age;\n```\n\nНа экране:\n\n```\nКак вас зовут?\nAset\nСколько вам лет, Aset?\n13\n```"
+        },
+        {
+          "type": "exam_tip",
+          "content": "Следи за пробелами и знаками препинания внутри кавычек: `cout << a << \" и \" << b;` выведет «Антон и Бауржан», а `cout << a << b;` — «АнтонБауржан»."
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "key": "td7-names",
+      "title": "Правильные имена переменных",
+      "type": "multiple_response",
+      "marks": 3,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.2"
+      ],
+      "text": "Выбери все **правильно** заданные имена переменных.",
+      "options": [
+        {
+          "key": "A",
+          "content": "summa_2"
+        },
+        {
+          "key": "B",
+          "content": "2summa"
+        },
+        {
+          "key": "C",
+          "content": "Ball"
+        },
+        {
+          "key": "D",
+          "content": "сумма"
+        },
+        {
+          "key": "E",
+          "content": "cin"
+        },
+        {
+          "key": "F",
+          "content": "price7"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 130; 3 ур Типы данных.pptx, слайд 2",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "Верные варианты: A, C, F (по 1 баллу; за неверный −1).",
+        "accepted": {
+          "correct": [
+            "A",
+            "C",
+            "F"
+          ]
+        },
+        "explanation": "Имя — латинские буквы, цифры и _, начинается с буквы, не зарезервированное слово. 2summa начинается с цифры, «сумма» — кириллица, cin — зарезервированное слово."
+      }
+    },
+    {
+      "key": "td7-var-def",
+      "title": "Переменная",
+      "type": "fill_blank",
+      "marks": 2,
+      "difficulty": "easy",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.2"
+      ],
+      "text": "Переменная — область в памяти компьютера, которая имеет определенное [[1]] и [[2]]. Имя переменной называют идентификатором.",
+      "content": {
+        "blank_count": 2
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 130; 3 ур Типы данных.pptx, слайд 2",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "[[1]] имя; [[2]] тип — по 1 баллу",
+        "accepted": {
+          "blanks": [
+            [
+              "имя"
+            ],
+            [
+              "тип"
+            ]
+          ]
+        },
+        "explanation": "Определение переменной (SB стр. 130)."
+      }
+    },
+    {
+      "key": "td7-types-match",
+      "title": "Значение и тип данных",
+      "type": "matching",
+      "marks": 4,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.2"
+      ],
+      "text": "Сопоставь значение и подходящий тип данных C++. Каждый тип используй один раз.",
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "Количество учеников в классе"
+          },
+          {
+            "key": "L2",
+            "text": "Название города"
+          },
+          {
+            "key": "L3",
+            "text": "Рост в метрах (1.65) — вещественный тип с меньшим диапазоном"
+          },
+          {
+            "key": "L4",
+            "text": "Масса Солнца — вещественный тип с самым большим диапазоном"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "double"
+          },
+          {
+            "key": "R2",
+            "text": "int"
+          },
+          {
+            "key": "R3",
+            "text": "string"
+          },
+          {
+            "key": "R4",
+            "text": "float"
+          }
+        ]
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 130; 3 ур Типы данных.pptx, слайды 4–5; G7_Информатика_THB_Финал_26.10.23 1.pdf, стр. 94",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "L1–R2; L2–R3; L3–R4; L4–R1. Всего 4 б.",
+        "accepted": {
+          "pairs": {
+            "L1": "R2",
+            "L2": "R3",
+            "L3": "R4",
+            "L4": "R1"
+          }
+        },
+        "explanation": "Целое — int, слова — string, вещественные — float (диапазон до 3,4·10^38) и double (до 1,7·10^308)."
+      }
+    },
+    {
+      "key": "td7-int-range",
+      "title": "Диапазон int",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.2"
+      ],
+      "text": "Какое число **не** помещается в тип `int`?",
+      "options": [
+        {
+          "key": "A",
+          "content": "−3"
+        },
+        {
+          "key": "B",
+          "content": "2147483647"
+        },
+        {
+          "key": "C",
+          "content": "5000000000"
+        },
+        {
+          "key": "D",
+          "content": "0"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 130",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "C — 1 балл.",
+        "accepted": {
+          "correct": "C"
+        },
+        "model_answer": "C",
+        "explanation": "Диапазон int — от −2147483648 до 2147483647; 5 000 000 000 больше."
+      }
+    },
+    {
+      "key": "td7-name-int",
+      "title": "Ошибка типа",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.2"
+      ],
+      "text": "Программа должна вывести «Тараз - это хороший город!», но выводит «0 - это хороший город!».\n\n```cpp\nint name;\ncout << \"Введи город\" << endl;\ncin >> name;\ncout << name << \" - это хороший город!\" << endl;\n```\n\nКак исправить ошибку?",
+      "options": [
+        {
+          "key": "A",
+          "content": "Заменить int name; на string name;"
+        },
+        {
+          "key": "B",
+          "content": "Заменить cin на cout"
+        },
+        {
+          "key": "C",
+          "content": "Удалить endl"
+        },
+        {
+          "key": "D",
+          "content": "Заменить int name; на const int name;"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 131 (задание 5); G7_Информатика_THB_Финал_26.10.23 1.pdf, стр. 95",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "A — 1 балл.",
+        "accepted": {
+          "correct": "A"
+        },
+        "model_answer": "A",
+        "explanation": "Название города — слово, его можно хранить только в переменной типа string."
+      }
+    },
+    {
+      "key": "td7-const",
+      "title": "Константа",
+      "type": "true_false",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.2"
+      ],
+      "text": "Значение константы можно изменить во время работы программы с помощью `cin`.",
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 130–131; 3 ур Типы данных.pptx, слайд 6",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "Неверно — 1 балл.",
+        "accepted": {
+          "correct": false
+        },
+        "explanation": "Значение константы остается постоянным и не может быть изменено."
+      }
+    },
+    {
+      "key": "td7-const-decl",
+      "title": "Объявление константы",
+      "type": "fill_blank",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.2"
+      ],
+      "text": "Допиши объявление константы — количество дней в неделе:\n\n```cpp\n[[1]] int days = 7;\n```",
+      "content": {
+        "blank_count": 1
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 131",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "[[1]] const — по 1 баллу",
+        "accepted": {
+          "blanks": [
+            [
+              "const"
+            ]
+          ]
+        },
+        "explanation": "Константы описываются как переменные со словом const: const int x = 22;"
+      }
+    },
+    {
+      "key": "td7-const-which",
+      "title": "Что может быть константой",
+      "type": "multiple_response",
+      "marks": 2,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.2"
+      ],
+      "text": "Выбери данные, которые можно представить константами.",
+      "options": [
+        {
+          "key": "A",
+          "content": "Количество минут в часе"
+        },
+        {
+          "key": "B",
+          "content": "Температура воздуха"
+        },
+        {
+          "key": "C",
+          "content": "Количество месяцев в году"
+        },
+        {
+          "key": "D",
+          "content": "Возраст ученика"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 131 (задание 6); G7_Информатика_THB_Финал_26.10.23 1.pdf, стр. 95",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "Верные варианты: A, C (по 1 баллу; за неверный −1).",
+        "accepted": {
+          "correct": [
+            "A",
+            "C"
+          ]
+        },
+        "explanation": "Количество минут в часе и месяцев в году не меняется; температура и возраст меняются."
+      }
+    },
+    {
+      "key": "td7-arrows",
+      "title": "Направление >>",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.3"
+      ],
+      "text": "Что делает строка `cin >> x;`?",
+      "options": [
+        {
+          "key": "A",
+          "content": "Выводит значение x на экран"
+        },
+        {
+          "key": "B",
+          "content": "Перемещает введенное с клавиатуры значение в переменную x"
+        },
+        {
+          "key": "C",
+          "content": "Объявляет переменную x"
+        },
+        {
+          "key": "D",
+          "content": "Переводит курсор на новую строку"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 128–129",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "model_answer": "B",
+        "explanation": ">> x перемещает данные в переменную x — это ввод."
+      }
+    },
+    {
+      "key": "td7-sum3",
+      "title": "Результат программы",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "calculate",
+      "grading": "HYBRID",
+      "objectives": [
+        "7.4.3.3"
+      ],
+      "text": "Программа «Сумма трех чисел» (`float x, y, z, s; … s = x + y + z; cout << \"s=\" << s;`). Пользователь ввел 2.5, 3 и 1.2. Какое значение `s` выведет программа?",
+      "source": "nis_style",
+      "source_reference": "3 ур Типы данных.pptx, слайд 7",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "6.7 — 1 балл.",
+        "accepted": {
+          "values": [
+            "6.7"
+          ],
+          "numeric": true,
+          "tolerance": 0.001
+        },
+        "model_answer": "6.7",
+        "explanation": "2.5 + 3 + 1.2 = 6.7"
+      }
+    },
+    {
+      "key": "td7-dialog-fill",
+      "title": "Допиши диалог",
+      "type": "fill_blank",
+      "marks": 3,
+      "difficulty": "medium",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.2",
+        "7.4.3.3"
+      ],
+      "text": "Допиши программу, которая спрашивает имя и любимый предмет и выводит, например, «Мадина любит информатику».\n\n```cpp\n[[1]] name, subject;\ncout << \"Как тебя зовут?\" << endl;\n[[2]] >> name;\ncout << \"Твой любимый предмет?\" << endl;\ncin >> subject;\ncout << name << \" любит \" << [[3]] << endl;\n```",
+      "content": {
+        "blank_count": 3
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 128–129, 131; 3 ур Типы данных.pptx, слайды 7–8; 4 ур Повтор 7_3А.pptx, слайд 6",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "[[1]] string; [[2]] cin; [[3]] subject — по 1 баллу",
+        "accepted": {
+          "blanks": [
+            [
+              "string"
+            ],
+            [
+              "cin"
+            ],
+            [
+              "subject"
+            ]
+          ],
+          "ignore_spaces": true
+        },
+        "explanation": "Для слов — string; ввод — cin; во вывод подставляется переменная subject."
+      }
+    },
+    {
+      "key": "td7-dialog",
+      "title": "Программа «Покупка»",
+      "type": "code_completion",
+      "marks": 4,
+      "difficulty": "medium",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "7.4.3.2",
+        "7.4.3.3"
+      ],
+      "text": "Напиши программу-диалог: она спрашивает название товара (слово) и его цену (может быть дробной), затем выводит строку вида `Товар: тетрадь, цена: 150.5`. Выбери подходящие типы данных.",
+      "content": {
+        "starter_code": "#include <iostream>\nusing namespace std;\nint main ()\n{\n\n}",
+        "answer_lines": 12
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 128–129, 131; 3 ур Типы данных.pptx, слайды 7–8; 4 ур Повтор 7_3А.pptx, слайд 6",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "- Правильная структура программы (1)\n- Тип string для названия и float/double для цены (1)\n- Вопросы через cout и ввод через cin (1)\n- Итоговый вывод текста и обеих переменных (1)",
+        "points": [
+          {
+            "criterion": "Правильная структура программы",
+            "marks": 1
+          },
+          {
+            "criterion": "Тип string для названия и float/double для цены",
+            "marks": 1
+          },
+          {
+            "criterion": "Вопросы через cout и ввод через cin",
+            "marks": 1
+          },
+          {
+            "criterion": "Итоговый вывод текста и обеих переменных",
+            "marks": 1
+          }
+        ],
+        "model_answer": "```cpp\n#include <iostream>\nusing namespace std;\nint main ()\n{\nstring tovar;\nfloat price;\ncout << \"Название товара?\" << endl;\ncin >> tovar;\ncout << \"Цена?\" << endl;\ncin >> price;\ncout << \"Товар: \" << tovar << \", цена: \" << price << endl;\nreturn 0;\n}\n```"
+      }
+    },
+    {
+      "key": "td7-const-error",
+      "title": "Ошибка с константой",
+      "type": "code_analysis",
+      "marks": 2,
+      "difficulty": "medium",
+      "command_word": "explain",
+      "grading": "AI",
+      "objectives": [
+        "7.4.3.2",
+        "7.4.3.3"
+      ],
+      "text": "Найди ошибку в программе, объясни ее и исправь.",
+      "content": {
+        "starter_code": "#include <iostream>\nusing namespace std;\nint main ()\n{ const int b = 7;\nstring a;\ncout << \"Введи имя\" << endl;\ncin >> a;\ncout << \"Введи класс\" << endl;\ncin >> b;\ncout << a << \" учится в \" << b << \" классе\" << endl; }",
+        "answer_lines": 3
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 131 («Проверь себя»); G7_Информатика_THB_Финал_26.10.23 1.pdf, стр. 95",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "- Ошибка: значение константы b пытаются ввести с клавиатуры (cin >> b), а константу изменить нельзя (1)\n- Исправление: объявить b переменной — int b; (без const) (1)",
+        "points": [
+          {
+            "criterion": "Ошибка: значение константы b пытаются ввести с клавиатуры (cin >> b), а константу изменить нельзя",
+            "marks": 1
+          },
+          {
+            "criterion": "Исправление: объявить b переменной — int b; (без const)",
+            "marks": 1
+          }
+        ],
+        "model_answer": "b объявлена константой (const int b = 7;), а затем вводится через cin >> b. Константу изменить нельзя. Нужно объявить обычную переменную: int b;"
+      }
+    },
+    {
+      "key": "td7-screen",
+      "title": "Экран программы",
+      "type": "fill_blank",
+      "marks": 2,
+      "difficulty": "medium",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.3"
+      ],
+      "text": "```cpp\nstring a, b;\ncout << \"Как тебя зовут?\" << endl;\ncin >> a;\ncout << \"Как зовут твоего друга?\" << endl;\ncin >> b;\ncout << a << \" и \" << b << \" - лучшие друзья\" << endl;\n```\n\nПользователь ввел `Ерлан`, затем `Санжар`. Последняя строка на экране: [[1]]. Сколько всего строк будет на экране (с введенными)? [[2]]",
+      "content": {
+        "blank_count": 2
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 129; G7_Информатика_THB_Финал_26.10.23 1.pdf, стр. 93",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "[[1]] Ерлан и Санжар - лучшие друзья; [[2]] 5 — по 1 баллу",
+        "accepted": {
+          "blanks": [
+            [
+              "Ерлан и Санжар - лучшие друзья",
+              "Ерлан и Санжар — лучшие друзья"
+            ],
+            [
+              "5"
+            ]
+          ]
+        },
+        "explanation": "Вопрос, ввод, вопрос, ввод, итоговая строка — 5 строк."
+      }
+    },
+    {
+      "key": "td7-exam-1",
+      "title": "Имена переменных",
+      "type": "multiple_response",
+      "marks": 2,
+      "difficulty": "exam",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.2"
+      ],
+      "text": "Выбери **неправильно** заданные имена переменных.",
+      "options": [
+        {
+          "key": "A",
+          "content": "x_1"
+        },
+        {
+          "key": "B",
+          "content": "1x"
+        },
+        {
+          "key": "C",
+          "content": "Summa"
+        },
+        {
+          "key": "D",
+          "content": "my.name"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 130; 3 ур Типы данных.pptx, слайд 2",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "Верные варианты: B, D (по 1 баллу; за неверный −1).",
+        "accepted": {
+          "correct": [
+            "B",
+            "D"
+          ]
+        },
+        "explanation": "1x начинается с цифры; в my.name есть точка."
+      }
+    },
+    {
+      "key": "td7-exam-2",
+      "title": "Типы данных для значений",
+      "type": "table_completion",
+      "marks": 4,
+      "difficulty": "exam",
+      "command_word": "complete",
+      "grading": "HYBRID",
+      "objectives": [
+        "7.4.3.2"
+      ],
+      "text": "Запиши тип данных C++ (`string`, `int`, `float`/`double`) для каждого значения.",
+      "content": {
+        "columns": [
+          "Значение",
+          "Тип данных"
+        ],
+        "rows": 4,
+        "prefill": [
+          [
+            "Количество страниц книги: 240",
+            null
+          ],
+          [
+            "Название реки: Есиль",
+            null
+          ],
+          [
+            "Температура: −12.5",
+            null
+          ],
+          [
+            "Пароль: qwerty",
+            null
+          ]
+        ]
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 130; 3 ур Типы данных.pptx, слайды 4–5; G7_Информатика_THB_Финал_26.10.23 1.pdf, стр. 94",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "1) int; 2) string; 3) float или double (оба верны); 4) string — по 1 баллу",
+        "points": [
+          {
+            "criterion": "Строка 1: int",
+            "marks": 1
+          },
+          {
+            "criterion": "Строка 2: string",
+            "marks": 1
+          },
+          {
+            "criterion": "Строка 3: float или double",
+            "marks": 1
+          },
+          {
+            "criterion": "Строка 4: string",
+            "marks": 1
+          }
+        ],
+        "accepted": {
+          "rows": [
+            [
+              null,
+              "int"
+            ],
+            [
+              null,
+              "string"
+            ],
+            [
+              null,
+              "float"
+            ],
+            [
+              null,
+              "string"
+            ]
+          ]
+        },
+        "explanation": "Целое — int; слова и тексты — string; дробное число — float или double."
+      }
+    },
+    {
+      "key": "td7-exam-3",
+      "title": "Константа и переменная",
+      "type": "fill_blank",
+      "marks": 2,
+      "difficulty": "exam",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.2"
+      ],
+      "text": "Область памяти, значение которой остается постоянным в течение работы программы, называется [[1]]. Чтобы ее объявить, перед типом пишут слово [[2]].",
+      "content": {
+        "blank_count": 2
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 130–131; 3 ур Типы данных.pptx, слайд 6",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "[[1]] константа; [[2]] const — по 1 баллу",
+        "accepted": {
+          "blanks": [
+            [
+              "константа",
+              "константой"
+            ],
+            [
+              "const"
+            ]
+          ]
+        },
+        "explanation": "Константа объявляется словом const."
+      }
+    },
+    {
+      "key": "td7-exam-4",
+      "title": "Тип для дробного числа",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "exam",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.2"
+      ],
+      "text": "Какой тип данных подходит для переменной, в которой хранится вес покупки 2.75 кг?",
+      "options": [
+        {
+          "key": "A",
+          "content": "int"
+        },
+        {
+          "key": "B",
+          "content": "string"
+        },
+        {
+          "key": "C",
+          "content": "double"
+        },
+        {
+          "key": "D",
+          "content": "const"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 130; 3 ур Типы данных.pptx, слайды 4–5; G7_Информатика_THB_Финал_26.10.23 1.pdf, стр. 94",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "C — 1 балл.",
+        "accepted": {
+          "correct": "C"
+        },
+        "model_answer": "C",
+        "explanation": "Вещественное число — float или double."
+      }
+    },
+    {
+      "key": "td7-exam-5",
+      "title": "Объясни ошибку типа",
+      "type": "short_answer",
+      "marks": 2,
+      "difficulty": "exam",
+      "command_word": "explain",
+      "grading": "AI",
+      "objectives": [
+        "7.4.3.2"
+      ],
+      "text": "В программе объявлено `int city;`, затем `cin >> city;`. Пользователь вводит «Актобе», а программа выводит `0`. Объясни, почему так происходит, и исправь объявление.",
+      "content": {
+        "answer_lines": 3
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 131 (задание 5); G7_Информатика_THB_Финал_26.10.23 1.pdf, стр. 95",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "- Причина: переменная целочисленная (int), в ней нельзя сохранить слово / символы (1)\n- Исправление: string city; (1)",
+        "points": [
+          {
+            "criterion": "Причина: переменная целочисленная (int), в ней нельзя сохранить слово / символы",
+            "marks": 1
+          },
+          {
+            "criterion": "Исправление: string city;",
+            "marks": 1
+          }
+        ],
+        "model_answer": "Переменная city имеет тип int и может хранить только целые числа, поэтому слово не сохраняется и выводится 0. Нужно объявить string city;"
+      }
+    },
+    {
+      "key": "td7-exam-6",
+      "title": "Программа «Анкета»",
+      "type": "code_completion",
+      "marks": 5,
+      "difficulty": "exam",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "7.4.3.2",
+        "7.4.3.3"
+      ],
+      "text": "Напиши программу-диалог: она спрашивает имя пользователя, его возраст (целое число) и рост в метрах (дробное число), а затем выводит строку вида `Аслан, тебе 13 лет, твой рост 1.62 м`.",
+      "content": {
+        "answer_lines": 14
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 128–131; 4 ур Повтор 7_3А.pptx, слайд 6",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "- Правильная структура программы (1)\n- Верные типы: string для имени, int для возраста, float/double для роста (1)\n- Для каждого значения есть вопрос (cout) и ввод (cin) (1)\n- Итоговый вывод со всеми тремя переменными и текстом (1)\n- Синтаксис: ; в конце инструкций, << и >> в нужную сторону (1)",
+        "points": [
+          {
+            "criterion": "Правильная структура программы",
+            "marks": 1
+          },
+          {
+            "criterion": "Верные типы: string для имени, int для возраста, float/double для роста",
+            "marks": 1
+          },
+          {
+            "criterion": "Для каждого значения есть вопрос (cout) и ввод (cin)",
+            "marks": 1
+          },
+          {
+            "criterion": "Итоговый вывод со всеми тремя переменными и текстом",
+            "marks": 1
+          },
+          {
+            "criterion": "Синтаксис: ; в конце инструкций, << и >> в нужную сторону",
+            "marks": 1
+          }
+        ],
+        "model_answer": "```cpp\n#include <iostream>\nusing namespace std;\nint main ()\n{\nstring name;\nint age;\nfloat rost;\ncout << \"Как тебя зовут?\" << endl;\ncin >> name;\ncout << \"Сколько тебе лет?\" << endl;\ncin >> age;\ncout << \"Какой у тебя рост в метрах?\" << endl;\ncin >> rost;\ncout << name << \", тебе \" << age << \" лет, твой рост \" << rost << \" м\" << endl;\nreturn 0;\n}\n```"
+      }
+    },
+    {
+      "key": "td7-exam-7",
+      "title": "Вывод программы",
+      "type": "calculation",
+      "marks": 2,
+      "difficulty": "exam",
+      "command_word": "calculate",
+      "grading": "HYBRID",
+      "objectives": [
+        "7.4.3.3"
+      ],
+      "text": "```cpp\nfloat a, b, s;\ncout << \"a=\";\ncin >> a;\ncout << \"b=\";\ncin >> b;\ns = a + b;\ncout << \"s=\" << s;\n```\n\nПользователь ввел 3.6 и 2.9. Какое число будет выведено после `s=`?",
+      "source": "nis_style",
+      "source_reference": "3 ур Типы данных.pptx, слайд 7",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "6.5 — 2 балла.",
+        "accepted": {
+          "values": [
+            "6.5"
+          ],
+          "numeric": true,
+          "tolerance": 0.001
+        },
+        "model_answer": "6.5",
+        "explanation": "3.6 + 2.9 = 6.5"
+      }
+    }
+  ],
+  "topic_exam": {
+    "duration": 25,
+    "title": "Типы данных — экзамен",
+    "instructions": "Ответьте на **все** вопросы. Количество баллов указано у каждого вопроса. Всего: 18 баллов. Время: 25 минут.",
+    "questions": [
+      "td7-exam-1",
+      "td7-exam-2",
+      "td7-exam-3",
+      "td7-exam-4",
+      "td7-exam-5",
+      "td7-exam-6",
+      "td7-exam-7"
+    ]
+  }
+}

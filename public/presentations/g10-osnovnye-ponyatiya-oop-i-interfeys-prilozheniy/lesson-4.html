@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>10.3А · Урок 4 · Преобразование типов данных в C#. Расчётные приложения</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+  <link rel="stylesheet" href="../_engine/lesson.css" />
+</head>
+<body class="lesson">
+<script src="../_engine/deck.js"></script>
+<script src="../_engine/lesson.js"></script>
+<script>
+/*
+ * 10.3А «Введение в ООП (C#)», урок 4 (КТП) — «Функции преобразования типов данных в C# и разработка расчётных Windows Forms приложений».
+ * Цели обучения (КТП 2026): 10.4.3.4 использовать функции преобразования типов данных; 10.4.3.2; 10.4.3.7.
+ * Ход урока — КСП content/lesson-plans/g10-osnovnye-ponyatiya-oop-i-interfeys-prilozheniy.json, урок 4 (10 + 60 + 10 мин).
+ * Содержание — только из материалов: «2 урок Компоненты ИСР» (слайды 9, 11–12), «1 урок Введение в ООП» (слайды 10, 16–17);
+ * учебник 10 кл. стр. 191 (сцепление строк с Convert.ToString). double.Parse, формат "F2", Clear(), разделитель дробной части —
+ * в материалах нет, на слайдах не используются.
+ */
+const P1 = "Презентация «1 урок Введение в ООП», ";
+const P2 = "Презентация «2 урок Компоненты ИСР», ";
+const SB = "Учебник 10 кл., ";
+const SPEC = "Спецификация СОЧ 10 кл., 3 четверть";
+const { src, reveal, statements, quiz, matcher } = LESSON;
+const S = () => window.DECK_STATE;
+const code = (s, fs = 15) => `<pre class="code-block" style="font-size:${fs}px;line-height:1.45;">${DECK_ESC(s)}</pre>`;
+
+/* ---------- три шага расчётного обработчика ---------- */
+const DIA_STEPS = `
+<svg class="dia" viewBox="0 0 640 110" role="img" aria-label="Ввод и преобразование, обработка, вывод">
+  <defs><marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--primary)"/></marker></defs>
+  <rect class="blk-a" x="4" y="14" width="186" height="82" rx="12"/><text x="97" y="48" text-anchor="middle">1. Ввод</text><text class="s" x="97" y="74" text-anchor="middle">string → число</text>
+  <rect class="blk-p" x="227" y="14" width="186" height="82" rx="12"/><text x="320" y="48" text-anchor="middle">2. Обработка</text><text class="s" x="320" y="74" text-anchor="middle">расчёт по формуле</text>
+  <rect class="blk-a" x="450" y="14" width="186" height="82" rx="12"/><text x="543" y="48" text-anchor="middle">3. Вывод</text><text class="s" x="543" y="74" text-anchor="middle">число → string</text>
+  <path class="ar" d="M190 55 H224"/><path class="ar" d="M413 55 H447"/>
+</svg>`;
+
+initDeck({
+  badge: "10.3А · Урок 4",
+  title: "Преобразование типов данных в C#. Расчётные приложения",
+  subtitle: "10 класс · 3 четверть · цели 10.4.3.4, 10.4.3.2, 10.4.3.7 · 80 минут",
+  footer: "НИШ ЕМН г. Кызылорда · Информатика · 10 класс · Раздел 10.3А «Введение в ООП (C#)»",
+  slides: [
+    /* ---------------- НАЧАЛО УРОКА (10 мин) ---------------- */
+    {
+      badge: "Начало урока",
+      shortTitle: "Тема, цели и критерии",
+      timing: "0–3 мин",
+      source: "КТП 2026; КСП урока 4",
+      notes: "Организационный момент. Тема, цели, критерии.",
+      render() {
+        return `<div class="hero">
+          <div>
+            <div class="hero-kicker">Раздел 10.3А · Введение в ООП (C#)</div>
+            <h1>Преобразование типов данных и расчётные приложения</h1>
+            <div class="stack">
+              <div class="goal"><b>10.4.3.4</b> — использовать функции преобразования типов данных.</div>
+              <div class="goal"><b>10.4.3.2 · 10.4.3.7</b> — Button и событие Click; программировать событие элемента управления.</div>
+            </div>
+          </div>
+          <div class="stack text-sm">
+            <div class="card"><h3>🎯 Цели урока</h3>
+              <p><b>Все:</b> объясняют, почему <code>textBox1.Text</code> нужно преобразовать.<br>
+              <b>Большинство:</b> применяют <code>Convert</code>, <code>Parse</code>, <code>ToString()</code> в обработчике.<br>
+              <b>Некоторые:</b> создают приложение «Масса по весу» и конвертеры.</p></div>
+            <div class="card"><h3>✅ Критерии оценивания</h3><p>Применяет методы Convert и Parse для чтения чисел из полей ввода; выводит результат через ToString() в Label или TextBox.</p></div>
+          </div>
+        </div>${src("КТП 2026 (цели 10.4.3.4, 10.4.3.2, 10.4.3.7); КСП урока 4")}`;
+      },
+    },
+    {
+      badge: "Начало урока",
+      shortTitle: "Странный калькулятор: 2 + 3 = 23",
+      timing: "3–10 мин",
+      source: "КСП урока 4; " + P1 + "слайд 16; " + SB + "стр. 191",
+      notes: "Проблемная ситуация. Покажите код (условный) и результат. Вопросы: почему компьютер сцепил цифры как текст? Как объяснить C#, что в поле записано число? Откройте ответ после обсуждения.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:24px;align-items:center;">
+          <div class="stack">
+            ${code(`private void button1_Click(object sender, EventArgs e)
+{
+    label1.Text = textBox1.Text + textBox2.Text;
+}`, 15)}
+            <div class="cards c3 text-sm" style="gap:10px;">
+              <div class="card" style="text-align:center;">textBox1<br><b style="font-size:26px;">2</b></div>
+              <div class="card" style="text-align:center;">textBox2<br><b style="font-size:26px;">3</b></div>
+              <div class="card" style="text-align:center;">label1<br><b style="font-size:26px;color:var(--danger);">23</b></div>
+            </div>
+          </div>
+          <div class="stack">
+            <h2 class="slide-h2">Почему не 5?</h2>
+            ${reveal("r-23", "Ответ", "Свойство <code>Text</code> хранит <b>строку</b> (<code>string</code>), а «+» для строк сцепляет их. Чтобы сложить числа, строку нужно преобразовать в число: <code>Convert.ToInt32(textBox1.Text)</code>.")}
+          </div>
+        </div></div>${src("КСП урока 4 (ситуация); " + P1 + "слайд 16 (Convert.ToInt32 из TextBox); " + SB + "стр. 191 (сцепление строк «+»); код — условный")}`;
+      },
+    },
+
+    /* ---------------- СЕРЕДИНА УРОКА (60 мин) ---------------- */
+    {
+      badge: "Новое · преобразование",
+      shortTitle: "Методы преобразования",
+      timing: "10–18 мин",
+      source: P2 + "слайд 9; " + P1 + "слайд 16",
+      notes: "Сводная таблица. Речевая конструкция: «Поскольку свойство Text возвращает значение типа string, для чтения целого числа используем Convert.ToInt32(textBox1.Text) или int.Parse(textBox1.Text)». Обратно — ToString() или Convert.ToString(x).",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Строка ⇄ число: методы класса Convert и Parse</h2>
+          <table class="t" style="font-size:16px;">
+            <tr><th>Нужен тип</th><th>.NET</th><th>Как получить из строки</th></tr>
+            <tr><td><code>int</code> — целые</td><td>Int32</td><td><code>Convert.ToInt32(textBox1.Text)</code> или <code>int.Parse(textBox1.Text)</code></td></tr>
+            <tr><td><code>float</code> — вещественные</td><td>Single</td><td><code>float.Parse(textBox1.Text)</code> или <code>Convert.ToSingle(textBox1.Text)</code></td></tr>
+            <tr><td><code>double</code> — двойной точности</td><td>Double</td><td><code>Convert.ToDouble(textBox1.Text)</code></td></tr>
+            <tr><td><code>bool</code> — логический</td><td>Boolean</td><td><code>Convert.ToBoolean(textBox1.Text)</code> — true / false</td></tr>
+            <tr><th>Обратно: число → <code>string</code></th><th>String</th><th><code>c.ToString()</code> или <code>Convert.ToString(c)</code></th></tr>
+          </table>
+          <div class="note"><b>Запомни:</b> <code>Text</code> любого компонента — строка. Перед вычислениями — в число, перед выводом — в строку.</div>
+        </div>${src(P2 + "слайд 9 (типы данных и класс Convert); " + P1 + "слайд 16 (методы Convert)")}`;
+      },
+    },
+    {
+      badge: "Практика · выбор метода",
+      shortTitle: "Подбери метод",
+      timing: "18–22 мин",
+      source: P2 + "слайд 9; " + P1 + "слайд 16",
+      notes: "Ученики называют метод для каждой ситуации; щёлкните ответ.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Какой метод нужен?</h2>
+          ${matcher("mt", [["i", "Convert.ToInt32"], ["f", "float.Parse"], ["d", "Convert.ToDouble"], ["b", "Convert.ToBoolean"], ["s", ".ToString()"]], [
+            { t: "Прочитать из textBox1 количество учеников (целое)", ans: "i" },
+            { t: "Вывести вычисленную массу в textBox2", ans: "s" },
+            { t: "Прочитать вес в переменную типа float", ans: "f" },
+            { t: "Прочитать рост в метрах в переменную double", ans: "d" },
+            { t: "Прочитать из поля значение true / false", ans: "b" },
+            { t: "Вывести целую сумму c в label1", ans: "s" },
+          ])}
+        </div>${src(P2 + "слайд 9 (int.Parse, float.Parse, Convert.ToDouble, Convert.ToBoolean, ToString); " + P1 + "слайд 16")}`;
+      },
+    },
+    {
+      badge: "Новое · шаблон обработчика",
+      shortTitle: "Три шага расчётного обработчика",
+      timing: "22–30 мин",
+      source: P1 + "слайд 16",
+      notes: "Разбор практической работы урока 1 «Сложение двух чисел». Ученики относят каждую строку к шагу: ввод и преобразование, обработка, вывод.",
+      render() {
+        return `<div class="body">
+          <div>${DIA_STEPS}</div>
+          <div class="grid-2" style="grid-template-columns:1fr 1.2fr;gap:18px;align-items:start;">
+            ${code(`private void button1_Click(object sender, EventArgs e)
+{
+    int a, b, c;
+    a = Convert.ToInt32(textBox1.Text);
+    b = Convert.ToInt32(textBox2.Text);
+    c = a + b;
+    label1.Text = c.ToString();
+    textBox3.Text = Convert.ToString(c);
+}`, 13.5)}
+            ${matcher("st", [["in", "1. Ввод"], ["pr", "2. Обработка"], ["out", "3. Вывод"]], [
+              { t: "<code>a = Convert.ToInt32(textBox1.Text);</code>", ans: "in" },
+              { t: "<code>c = a + b;</code>", ans: "pr" },
+              { t: "<code>label1.Text = c.ToString();</code>", ans: "out" },
+              { t: "<code>textBox3.Text = Convert.ToString(c);</code>", ans: "out" },
+            ])}
+          </div>
+        </div>${src(P1 + "слайд 16 (практическая работа «Сложение двух чисел»)")}`;
+      },
+    },
+    {
+      badge: "Практическая работа",
+      shortTitle: "Проект 1 «Калькулятор»",
+      timing: "30–42 мин",
+      source: P1 + "слайды 16–17",
+      notes: "Базовый уровень — задание А: добавить операцию (−, *, /) в программу сложения. Продвинутый — задание Б: калькулятор с несколькими кнопками. Для деления удобно читать числа в double. Код вычитания — условный, по образцу сложения.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:20px;align-items:start;">
+          <div class="stack">
+            <h2 class="slide-h2" style="font-size:24px;">Проект 1 «Калькулятор»</h2>
+            <div class="card text-sm"><h3>А · базовый уровень</h3><p>Добавьте новую арифметическую операцию (−, *, /) в программу сложения двух чисел.</p></div>
+            <div class="card text-sm"><h3>Б · продвинутый уровень</h3><p>Создайте «Калькулятор» с несколькими кнопками операций для двух вводимых чисел.</p></div>
+          </div>
+          <div class="stack">
+            <div class="text-xs text-muted">Кнопка «−» (условный пример по образцу сложения)</div>
+            ${code(`private void button2_Click(object sender, EventArgs e)
+{
+    double a, b, c;
+    a = Convert.ToDouble(textBox1.Text);
+    b = Convert.ToDouble(textBox2.Text);
+    c = a - b;
+    label1.Text = c.ToString();
+}`, 14.5)}
+          </div>
+        </div></div>${src(P1 + "слайд 16 (образец), слайд 17 (задания А и Б); код кнопки «−» — условный")}`;
+      },
+    },
+    {
+      badge: "Практическая работа",
+      shortTitle: "Проект 2 «Масса по весу»",
+      timing: "42–52 мин",
+      source: P2 + "слайд 11; " + P1 + "слайд 10",
+      notes: "Практикум из презентации урока 2. Из физики: P = m · g, g = 9,8 м/с². Ученики создают интерфейс и код, тестируют: вес 98 Н → масса 10 кг. Повышенный уровень: вынести 9.8 в константу (const — урок 2).",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:20px;align-items:start;">
+          <div class="stack text-sm">
+            <h2 class="slide-h2" style="font-size:24px;">Проект 2 «Масса тела по весу»</h2>
+            <div class="card"><b>Модель:</b> P = m · g (g = 9,8 м/с²) ⇒ <code>Massa = Ves / 9.8;</code></div>
+            <div class="card"><b>Интерфейс:</b> <code>textBox1</code> — вес (Ves); <code>textBox2</code> — масса (Massa); <code>button1</code> — расчёт; <code>label1</code>, <code>label2</code> — надписи.</div>
+            ${reveal("r-m", "Тест: вес 98 Н", "Massa = 98 / 9,8 = <b>10</b> (кг).")}
+            <div class="note text-xs"><b>Повышенный уровень:</b> объявите <code>const double g = 9.8;</code> и используйте g в формуле.</div>
+          </div>
+          ${code(`private void button1_Click(object sender, EventArgs e)
+{
+    float Ves;
+    double Massa;
+    Ves = float.Parse(textBox1.Text);
+    Massa = Ves / 9.8;
+    textBox2.Text = Massa.ToString();
+}`, 15)}
+        </div></div>${src(P2 + "слайд 11 (практикум «Масса»); " + P1 + "слайд 10 (const)")}`;
+      },
+    },
+    {
+      badge: "Самостоятельная работа",
+      shortTitle: "Конвертеры и крыша",
+      timing: "52–62 мин",
+      source: P2 + "слайд 12",
+      notes: "Ученики выбирают задачу по уровню. Задача 3 — для сильных учеников (теорема Пифагора). Курс валюты ученики берут текущий.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Задачи для самостоятельного программирования</h2>
+          <div class="cards c3 text-sm">
+            <div class="card"><h3>1 · Конвертер длины</h3><p>Расстояние в футах → в километрах.<br>1 км = 3280,84 фут<br><code>km = feet / 3280.84;</code></p></div>
+            <div class="card"><h3>2 · Конвертер валюты</h3><p>Сумма в фунтах стерлингов (GBP) → в тенге (KZT) по текущему курсу.<br><code>tenge = gbp * rate;</code></p></div>
+            <div class="card"><h3>3 · Расчёт крыши</h3><p>Двускатная крыша: длина x, ширина y, высота z (см). Сколько кв. метров материала нужно? Скат — прямоугольный треугольник с катетами y/2 и z (c² = a² + b²).</p></div>
+          </div>
+          ${reveal("r-ft", "Тест для задачи 1", "Ввод 3280.84 фут → <b>1</b> км; ввод 6561.68 фут → <b>2</b> км.")}
+        </div>${src(P2 + "слайд 12 (задачи 1–3)")}`;
+      },
+    },
+    {
+      badge: "Подготовка к СОЧ",
+      shortTitle: "Тестирование и формат СОЧ",
+      timing: "62–70 мин",
+      source: SPEC + "; " + P2 + "слайды 9, 11",
+      notes: "Тестирование на целых и дробных числах: если ввод дробного числа даёт ошибку, проверьте в Visual Studio, какой разделитель (запятая или точка) принимает программа. Затем — тренировочное задание в формате СОЧ (краткий ответ), не из СОЧ.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;align-items:start;">
+          <div class="stack">
+            <div class="text-xs text-muted">Тренировочное задание · КО · 3 балла</div>
+            <p class="text-sm" style="margin:0;">Программа вычисляет периметр квадрата по стороне из <code>textBox1</code> (целое число) и выводит его в <code>label1</code>. <b>Допишите</b> пропуски.</p>
+            ${code(`int a, p;
+a = __________(textBox1.Text);
+p = __________;
+label1.Text = __________;`, 16)}
+            <div class="card text-xs"><b>Дескрипторы:</b> преобразует строку в int; записывает формулу; преобразует результат в строку.</div>
+          </div>
+          <div class="stack">
+            ${reveal("r-soch", "Ключ", "<code>a = Convert.ToInt32(textBox1.Text);</code> (или <code>int.Parse</code>); <code>p = 4 * a;</code>; <code>label1.Text = p.ToString();</code> (или <code>Convert.ToString(p)</code>).")}
+            <div class="note text-xs"><b>СОЧ 3 четверти:</b> проверяется цель «использовать функции преобразования типов данных» (уровень — применение).</div>
+          </div>
+        </div></div>${src(SPEC + " (тип КО, цель о преобразовании типов); " + P2 + "слайд 9 (методы); задание — условное")}`;
+      },
+    },
+
+    /* ---------------- КОНЕЦ УРОКА (10 мин) ---------------- */
+    {
+      badge: "Конец урока · проверка",
+      shortTitle: "Исправь ошибку",
+      timing: "70–76 мин",
+      source: P1 + "слайды 10, 16; " + P2 + "слайды 9, 11",
+      notes: "Упражнение «Исправь ошибку». Ученики решают, верна ли строка, и предлагают исправление; щёлкните, чтобы показать ответ.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Верна ли строка? Если нет — исправь</h2>
+          ${statements("fix", [
+            { t: "<code>int a = textBox1.Text;</code>", ok: false, why: "Text — строка: Convert.ToInt32(textBox1.Text)" },
+            { t: "<code>label1.Text = 25;</code>", ok: false, why: "нужна строка: \"25\" или число.ToString()" },
+            { t: "<code>const double g = 9.8;  g = 10;</code>", ok: false, why: "константу менять нельзя" },
+            { t: "<code>textBox2.Text = Massa.ToString();</code>", ok: true, why: "число → строка" },
+            { t: "<code>double h = Convert.ToDouble(textBox1);</code>", ok: false, why: "преобразуем строку: textBox1.Text" },
+          ])}
+        </div>${src(P1 + "слайд 10 (const), слайд 16 (Convert); " + P2 + "слайд 9 (методы), слайд 11 (ToString)")}`;
+      },
+    },
+    {
+      badge: "Конец урока · рефлексия",
+      shortTitle: "Рефлексия и домашнее задание",
+      timing: "76–80 мин",
+      source: P2 + "слайд 12; КСП урока 4",
+      notes: "Рефлексия. Домашнее задание — по КСП.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;">
+          <div class="stack">
+            <h2 class="slide-h2">Рефлексия</h2>
+            <div class="card"><p>Какой метод преобразования вы использовали чаще всего? Почему?</p></div>
+            <div class="card"><p>Какая из задач показалась самой интересной?</p></div>
+          </div>
+          <div class="stack">
+            <h2 class="slide-h2">Домашнее задание</h2>
+            <div class="card"><h3>📝 Повторить</h3><p>Методы класса Convert и Parse, ToString().</p></div>
+            <div class="card"><h3>💻 Написать код</h3><p>Обработчик кнопки: площадь и периметр прямоугольника по двум полям TextBox.</p></div>
+          </div>
+        </div></div>${src(P2 + "слайд 12 (рефлексия); КСП урока 4 (домашнее задание)")}`;
+      },
+    },
+  ],
+});
+</script>
+</body>
+</html>

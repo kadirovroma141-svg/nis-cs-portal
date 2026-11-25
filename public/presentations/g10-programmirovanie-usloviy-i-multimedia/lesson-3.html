@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>10.3В · Урок 3 · Циклы в приложениях C# и компонент ListBox</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+  <link rel="stylesheet" href="../_engine/lesson.css" />
+</head>
+<body class="lesson">
+<script src="../_engine/deck.js"></script>
+<script src="../_engine/lesson.js"></script>
+<script>
+/*
+ * 10.3В «Разработка приложений (C#)», урок 3 (КТП) — «Циклические алгоритмы в приложениях C#
+ * (while, do...while, for) и работа с компонентом ListBox».
+ * Цели обучения: 10.4.3.12 использовать ООП для решения задач из различных предметных областей;
+ *                10.4.3.14 использовать условный оператор в ООП.
+ * Ход урока — КСП content/lesson-plans/g10-programmirovanie-usloviy-i-multimedia.json, урок 3 (10 + 60 + 10 мин).
+ * Содержание — только из материалов: презентации «Циклы в ООП» (ПЦ), слайды 2–8, 10–13, и
+ * «Циклы 2 Практика с ListBox» (ПЛ), слайды 3–7.
+ * Не использовано: табулирование с условием x <= z + 0.1 (ПЦ слайды 9–10, лишняя точка за z);
+ * Console.WriteLine в примере while (ПЛ слайд 4) — для Windows Forms взят вывод в label (ПЦ слайд 3).
+ */
+const PC = "Презентация «Циклы в ООП», ";
+const PL = "Презентация «Циклы 2. Практика с ListBox», ";
+const { src, reveal, statements, quiz, matcher } = LESSON;
+const S = () => window.DECK_STATE;
+const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const code = (t, fs = 16) => `<pre class="code-block" style="font-size:${fs}px;line-height:1.42;margin:0;">${esc(t)}</pre>`;
+
+function tracer(key, head, rows) {
+  const n = Number(S().selected[key] || 0);
+  const body = rows.map((r, i) => `<tr style="${i < n ? "" : "visibility:hidden;"}">${r.map((v) => `<td>${v}</td>`).join("")}</tr>`).join("");
+  return `<table class="t"><tr>${head.map((h) => `<th>${h}</th>`).join("")}</tr>${body}</table>
+    <div style="display:flex;gap:10px;">
+      <button type="button" class="btn btn-primary" onclick="DECK.setSelected('${key}','${Math.min(n + 1, rows.length)}')" ${n >= rows.length ? "disabled" : ""}>Следующий шаг</button>
+      <button type="button" class="btn" onclick="DECK.setSelected('${key}','${rows.length}')">Все шаги</button>
+      <button type="button" class="btn" onclick="DECK.setSelected('${key}','0')">Сначала</button>
+    </div>`;
+}
+
+/* Модель компонента ListBox: кнопки вызывают Items.Add / Items.Clear, показывается Items.Count и Items[i]. */
+function listBoxDemo() {
+  const items = (S().selected["lb"] || "").split(",").filter(Boolean);
+  const add = (v) => `DECK.setSelected('lb','${[...items, v].join(",")}')`;
+  const list = items.map((v, i) => `<div style="padding:3px 10px;border-bottom:1px solid var(--border);font-family:ui-monospace,monospace;font-size:16px;"><span class="text-muted">[${i}]</span> ${v}</div>`).join("");
+  return `<div class="grid-2" style="gap:14px;grid-template-columns:1fr 1fr;">
+    <div style="border:2px solid var(--border-strong);border-radius:8px;height:200px;overflow:auto;background:var(--surface);">${list || '<div class="text-muted" style="padding:8px;font-size:15px;">listBox1 пуст</div>'}</div>
+    <div class="stack" style="gap:8px;">
+      <button type="button" class="btn" onclick="${add(7)}">listBox1.Items.Add(7)</button>
+      <button type="button" class="btn" onclick="${add(12)}">listBox1.Items.Add(12)</button>
+      <button type="button" class="btn" onclick="${add(5)}">listBox1.Items.Add(5)</button>
+      <button type="button" class="btn" onclick="DECK.setSelected('lb','')">listBox1.Items.Clear()</button>
+      <div class="mono" style="font-size:16px;">Items.Count = <b>${items.length}</b>${items.length ? ` · Items[0] = <b>${items[0]}</b>` : ""}</div>
+    </div>
+  </div>`;
+}
+
+initDeck({
+  badge: "10.3В · Урок 3",
+  title: "Циклы в приложениях C# и компонент ListBox",
+  subtitle: "10 класс · 3 четверть · цели 10.4.3.12, 10.4.3.14 · 80 минут",
+  footer: "НИШ ЕМН г. Кызылорда · Информатика · 10 класс · Раздел 10.3В «Разработка приложений (C#)»",
+  slides: [
+    /* ---------------- НАЧАЛО УРОКА (10 мин) ---------------- */
+    {
+      badge: "Начало урока",
+      shortTitle: "Тема, цели и критерии",
+      timing: "0–3 мин",
+      source: "КТП 2026; КСП урока 3; " + PL + "слайд 2",
+      notes: "Организационный момент. Тема, цели, критерии. Трассировка алгоритма с промежуточными величинами — уровень «Применение» в спецификации СОЧ: сегодня будем составлять трассировочные таблицы для циклов.",
+      render() {
+        return `<div class="hero">
+          <div>
+            <div class="hero-kicker">Раздел 10.3В · Разработка приложений (C#)</div>
+            <h1>Циклы в приложениях C# и компонент ListBox</h1>
+            <div class="stack">
+              <div class="goal"><b>10.4.3.12</b> — использовать ООП для решения задач из различных предметных областей.</div>
+              <div class="goal"><b>10.4.3.14</b> — использовать условный оператор в ООП.</div>
+            </div>
+          </div>
+          <div class="stack text-sm">
+            <div class="card"><h3>🎯 Цели урока</h3><p>Применять циклы <span class="mono">while</span>, <span class="mono">do…while</span> и <span class="mono">for</span> в Windows Forms. Использовать ListBox и методы коллекции Items для вывода результатов.</p></div>
+            <div class="card"><h3>✅ Критерии оценивания</h3><p>Сравнивает три вида циклов и предотвращает зацикливание. Программирует «Волшебное число» и алгоритм Евклида. Использует Items.Add, Items.Clear, Items.Count, Items[i].</p></div>
+          </div>
+        </div>${src("КТП 2026 (цели 10.4.3.12, 10.4.3.14); КСП урока 3; " + PL + "слайд 2 (критерии)")}`;
+      },
+    },
+    {
+      badge: "Начало урока",
+      shortTitle: "Интеллектуальная разминка",
+      timing: "3–10 мин",
+      source: "КСП урока 3; " + PC + "слайды 5, 8, 13",
+      notes: "Разминка из КСП. Ученики предлагают, сколько шагов понадобится. Подведите к выводу: когда число повторений заранее неизвестно, используют цикл while.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Знаем ли мы заранее, сколько шагов потребуется?</h2>
+          <div class="cards c3">
+            <div class="card"><h3><span class="ico">🔢</span>Массив из 10 элементов</h3><p>Обработать все элементы — цикл повторится ровно 10 раз.</p></div>
+            <div class="card"><h3><span class="ico">🔁</span>Перевернуть число</h3><p>Из 12345 получить 54321 — сколько повторений, если число вводит пользователь?</p></div>
+            <div class="card"><h3><span class="ico">➗</span>НОД двух чисел</h3><p>Сколько вычитаний понадобится для чисел 24 и 18? А для 35 и 14?</p></div>
+          </div>
+          ${reveal("r-hook", "Вывод", "Когда число повторений <b>известно</b> — цикл <span class='mono'>for</span> (сумма от 1 до N, обход массива). Когда <b>неизвестно</b> — <span class='mono'>while</span> (НОД, разбор цифр числа). Когда действие нужно выполнить хотя бы 1 раз — <span class='mono'>do…while</span>.")}
+        </div>${src("КСП урока 3; " + PC + "слайд 13 (когда применять каждый цикл)")}`;
+      },
+    },
+
+    /* ---------------- СЕРЕДИНА УРОКА (60 мин) ---------------- */
+    {
+      badge: "Новое · виды циклов",
+      shortTitle: "Три оператора цикла",
+      timing: "10–15 мин",
+      source: PC + "слайды 2–4, 13",
+      notes: "Определения цикла и тела цикла, затем три оператора. Обратите внимание: после do…while ставится точка с запятой. Условие против зацикливания: внутри тела должна изменяться переменная из условия.",
+      render() {
+        return `<div class="body">
+          <div class="def" style="font-size:20px;"><b>Цикл</b> — управляющая конструкция для многократного исполнения набора инструкций. <b>Тело цикла</b> — последовательность инструкций, предназначенная для многократного исполнения.</div>
+          <div class="cards c3">
+            <div class="card"><h3>while</h3>${code(`while (условие)
+{ тело; }`, 15)}<p>Условие проверяется <b>до</b> тела. Минимум итераций — <b>0</b>.</p></div>
+            <div class="card"><h3>do … while</h3>${code(`do
+{ тело; }
+while (условие);`, 15)}<p>Условие проверяется <b>после</b> тела. Выполняется минимум <b>1</b> раз.</p></div>
+            <div class="card"><h3>for</h3>${code(`for (иниц; условие; шаг)
+{ тело; }`, 15)}<p>Счётчик меняется от начального до конечного значения с шагом.</p></div>
+          </div>
+        </div>${src(PC + "слайд 2 (цикл, тело цикла), слайды 3–4 (синтаксис), слайд 13 (сравнение)")}`;
+      },
+    },
+    {
+      badge: "Практика · цикл while",
+      shortTitle: "Сколько раз выполнится?",
+      timing: "15–20 мин",
+      source: PC + "слайд 3",
+      notes: "Индивидуально в тетради: сколько раз выполнится тело цикла при a = 4, b = 6. Затем щёлкайте ответ в каждой строке. Последняя строка — зацикливание: a уменьшается, условие a < b никогда не станет ложным.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">a = 4; b = 6. Сколько раз выполнится цикл?</h2>
+          ${matcher("wh", [["0", "0 раз"], ["1", "1 раз"], ["2", "2 раза"], ["inf", "зацикливание"]], [
+            { t: "<span class='mono'>while (a &lt; b) a = a + 1;</span>", ans: "2" },
+            { t: "<span class='mono'>while (a &lt; b) a = a + b;</span>", ans: "1" },
+            { t: "<span class='mono'>while (a &gt; b) a++;</span>", ans: "0" },
+            { t: "<span class='mono'>while (a &lt; b) b = a - b;</span>", ans: "1" },
+            { t: "<span class='mono'>while (a &lt; b) a--;</span>", ans: "inf" },
+          ])}
+          ${reveal("r-wh", "Значения после цикла", "1) a = 6; 2) a = 10; 3) a = 4; 4) b = −2; 5) значения не установятся — программа «зависнет».")}
+        </div>${src(PC + "слайд 3 (таблица «Сколько раз?»)")}`;
+      },
+    },
+    {
+      badge: "Практика · цикл for",
+      shortTitle: "Цикл for: прямой и обратный",
+      timing: "20–24 мин",
+      source: PC + "слайды 4–5; " + PL + "слайд 3",
+      notes: "Прямой счёт i++ и обратный i--. Ученики определяют результат каждого фрагмента. Обсудите строку с зацикливанием: i уменьшается, а условие i <= 3 остаётся истинным.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:18px;grid-template-columns:1fr 1.4fr;">
+          <div class="stack">${code(`// сумма чисел от 1 до 100
+int sum = 0;
+for (int i = 1; i <= 100; i++)
+    sum += i;
+
+// обратный порядок: от 9 до 1
+for (int i = 9; i > 0; i--)
+{ /* действия */ }`, 15)}
+            <div class="note">Если шаг изменить с <span class="mono">i++</span> на <span class="mono">i+=2</span> — получим сумму нечётных чисел.</div></div>
+          <div class="stack"><b>a = 1. Какой будет результат?</b>
+          ${matcher("fr", [["a4", "a = 4"], ["a1", "a = 1"], ["inf", "зацикливание"]], [
+            { t: "<span class='mono'>for (i = 1; i &lt;= 3; i++) a = a + 1;</span>", ans: "a4" },
+            { t: "<span class='mono'>for (i = 3; i &lt;= 1; i++) a = a + 1;</span>", ans: "a1" },
+            { t: "<span class='mono'>for (i = 1; i &lt;= 3; i--) a = a + 1;</span>", ans: "inf" },
+            { t: "<span class='mono'>for (i = 3; i &gt;= 1; i--) a = a + 1;</span>", ans: "a4" },
+          ])}</div>
+        </div></div>${src(PC + "слайд 4 (for: сумма от 1 до 100), слайд 5 (таблица результатов); " + PL + "слайд 3 (прямой и обратный ход)")}`;
+      },
+    },
+    {
+      badge: "Новое · «Волшебное число»",
+      shortTitle: "Перевёртыш числа",
+      timing: "24–31 мин",
+      source: PC + "слайды 5–6",
+      notes: "Разберите код: a — последняя цифра (n % 10), n / 10 — отбрасывает цифру, m собирает перевёрнутое число. Ученики заполняют трассировку для n = 136, затем открывайте шаги.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:18px;grid-template-columns:1fr 1.3fr;">
+          ${code(`private void button1_Click(object sender, EventArgs e)
+{
+    int n, m, a;
+    n = Convert.ToInt32(textBox1.Text);
+    m = 0;
+    while (n > 0)
+    {
+        a = n % 10;      // последняя цифра
+        n = n / 10;      // отбрасываем цифру
+        m = m * 10 + a;  // собираем число
+    }
+    label2.Text = "Перевернутое число " + m.ToString();
+}`, 14)}
+          <div class="stack"><b>Трассировка для n = 136</b>${tracer("tr-rev", ["n &gt; 0?", "a = n % 10", "n = n / 10", "m = m * 10 + a"], [
+            ["136 &gt; 0 — да", "6", "13", "0 · 10 + 6 = 6"],
+            ["13 &gt; 0 — да", "3", "1", "6 · 10 + 3 = 63"],
+            ["1 &gt; 0 — да", "1", "0", "63 · 10 + 1 = 631"],
+            ["0 &gt; 0 — нет", "—", "0", "итог: <b>631</b>"],
+          ])}</div>
+        </div></div>${src(PC + "слайд 5 (код «Волшебное число»), слайд 6 (трассировочная таблица n = 136)")}`;
+      },
+    },
+    {
+      badge: "Новое · алгоритм Евклида",
+      shortTitle: "НОД двух чисел",
+      timing: "31–37 мин",
+      source: PC + "слайд 8",
+      notes: "Алгоритм Евклида: пока числа не равны, из большего вычитаем меньшее. Внутри цикла — условный оператор (цель 10.4.3.14). Трассировка для 24 и 18, затем ученики проверяют пару 35 и 14 (НОД = 7).",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:18px;grid-template-columns:1fr 1.2fr;">
+          <div class="stack">${code(`a = Convert.ToInt32(textBox1.Text);
+b = Convert.ToInt32(textBox2.Text);
+while (a != b)
+{
+    if (a > b) a = a - b;
+    else b = b - a;
+}
+label4.Text = "НОД = " + Convert.ToString(a);`, 15)}
+            <div class="note">Если a &gt; b, то НОД(a, b) = НОД(a − b, b). Уменьшаем большее число на величину меньшего, пока значения не станут равными.</div></div>
+          <div class="stack"><b>Трассировка: a = 24, b = 18</b>${tracer("tr-nod", ["a != b?", "a &gt; b?", "a", "b"], [
+            ["—", "—", "24", "18"],
+            ["24 != 18 — да", "да: a = 24 − 18", "6", "18"],
+            ["6 != 18 — да", "нет: b = 18 − 6", "6", "12"],
+            ["6 != 12 — да", "нет: b = 12 − 6", "6", "6"],
+            ["6 != 6 — нет", "выход из цикла", "<b>6</b>", "6"],
+          ])}
+            ${reveal("r-nod2", "Проверь: 35 и 14", "НОД = <b>7</b>: (35, 14) → (21, 14) → (7, 14) → (7, 7).")}</div>
+        </div></div>${src(PC + "слайд 8 (листинг НОД, описание алгоритма, тесты 24 и 18, 35 и 14)")}`;
+      },
+    },
+    {
+      badge: "Новое · ListBox",
+      shortTitle: "Коллекция Items",
+      timing: "37–42 мин",
+      source: PL + "слайд 4; " + PC + "слайд 10",
+      notes: "Шпаргалка по Items. Щёлкайте кнопки-команды — модель списка показывает результат, Count и Items[0]. Спросите: какой индекс у последнего элемента списка? (Count − 1). Зачем очищать список перед новым расчётом?",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:20px;grid-template-columns:1fr 1.2fr;">
+          <table class="t">
+            <tr><th>Команда</th><th>Назначение</th></tr>
+            <tr><td class="mono">listBox1.Items.Add(значение)</td><td>добавляет элемент в конец списка</td></tr>
+            <tr><td class="mono">listBox1.Items.Count</td><td>количество элементов в списке</td></tr>
+            <tr><td class="mono">listBox1.Items[i].ToString()</td><td>элемент с индексом i (нумерация с 0)</td></tr>
+            <tr><td class="mono">listBox1.Items.Clear()</td><td>полностью очищает список</td></tr>
+          </table>
+          <div class="stack">${listBoxDemo()}
+            ${reveal("r-lb", "Индекс последнего элемента?", "<span class='mono'>listBox1.Items.Count - 1</span>. Список очищают <span class='mono'>Items.Clear()</span>, чтобы старые значения не смешались с новыми (например, по щелчку в textBox1).")}</div>
+        </div></div>${src(PL + "слайд 4 (шпаргалка Items); " + PC + "слайд 10 (очистка listBox1 по щелчку textBox)")}`;
+      },
+    },
+    {
+      badge: "Новое · обход ListBox",
+      shortTitle: "Обработка списка циклом",
+      timing: "42–46 мин",
+      source: PL + "слайды 5–7; " + PC + "слайд 11",
+      notes: "Шаблон обхода элементов ListBox циклом while из презентации. Ученики объясняют каждую строку. Вопрос: что будет в listBox2 и label1 для списка 7, 12, 5?",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:18px;">
+          ${code(`int i = 0, sumEven = 0;
+listBox2.Items.Clear();
+while (i < listBox1.Items.Count)
+{
+    int val = Convert.ToInt32(listBox1.Items[i]);
+    listBox2.Items.Add(val * val);  // квадрат во второй ListBox
+    if (val % 2 == 0)
+        sumEven += val;             // сумма чётных
+    i++;
+}
+label1.Text = "Сумма четных чисел = " + sumEven.ToString();`, 13)}
+          <div class="stack">
+            <div class="card"><h3>❓ В listBox1: 7, 12, 5</h3><p>Что окажется в listBox2 и в label1?</p></div>
+            ${reveal("r-obh", "Ответ", "listBox2: <b>49, 144, 25</b>; label1: «Сумма четных чисел = <b>12</b>».")}
+            <div class="note">Произведение чисел: начальное значение <span class="mono">p = 1</span> (сумма — 0).</div>
+          </div>
+        </div></div>${src(PL + "слайд 5 (произведение, p = 1), слайд 7 (шаблон обхода ListBox); " + PC + "слайд 11 (f = 1)")}`;
+      },
+    },
+    {
+      badge: "Практика · Visual Studio",
+      shortTitle: "Практическая работа",
+      timing: "46–62 мин",
+      source: "КСП урока 3; " + PC + "слайды 5, 8; " + PL + "слайды 5–6",
+      notes: "Проект 1 — все, проект 2 — большинство, Activity 2 из презентации — некоторые. Ученики сверяются с дескрипторами (по образцу Activity 1).",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:18px;">
+          <div class="stack">
+            <div class="card"><h3>Проект 1 · «Математический практикум»</h3><p>Кнопки «Перевёртыш» и «НОД»: каждый шаг алгоритма выводится в ListBox (<span class="mono">listBoxSteps.Items.Add(...)</span>), чтобы была видна вся история вычислений.</p></div>
+            <div class="card"><h3>Проект 2 · «Квадраты и сумма»</h3><p>Вывести в listBox1 значения <span class="mono">y = x * x</span> для x от a до b с шагом 1 (цикл <span class="mono">for</span>), затем найти сумму чисел из <span class="mono">listBox1.Items[i]</span> (цикл <span class="mono">while</span>).</p></div>
+            <div class="card text-xs"><b>Некоторые:</b> скопировать список в listBox2 в обратном порядке (for от Count − 1 до 0, шаг i--).</div>
+          </div>
+          <div class="card"><h3>✅ Дескрипторы</h3><p>
+            1. Использует Label для подписей и вывода результата.<br>
+            2. Использует TextBox для ввода данных.<br>
+            3. Использует Button для запуска расчёта.<br>
+            4. Использует ListBox: Items.Add, Items.Clear, Items.Count, Items[i].<br>
+            5. Задаёт верное начальное значение накопителя (сумма — 0).<br>
+            6. Использует оператор цикла while и изменяет в теле переменную условия.<br>
+            7. Использует цикл for со счётчиком.</p></div>
+        </div></div>${src("КСП урока 3 (проекты 1–2); " + PL + "слайд 5 (дескрипторы Activity 1), слайд 6 (Activity 2); " + PC + "слайды 5, 8")}`;
+      },
+    },
+    {
+      badge: "Эксперимент · while и do…while",
+      shortTitle: "Предусловие и постусловие",
+      timing: "62–70 мин",
+      source: PC + "слайды 3–4, 13",
+      notes: "Эксперимент из КСП: одинаковое тело цикла, начальное значение, при котором условие сразу ложно. Ученики предсказывают результат, затем проверяют в Visual Studio.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Начальное значение i = 11. Что будет в label1?</h2>
+          <div class="grid-2" style="gap:18px;">
+            <div class="stack">${code(`int i = 11;
+while (i <= 10)
+{
+    label1.Text += i + " ";
+    i++;
+}`, 16)}${quiz("e1", "Цикл while:", ["выведет 11", "ничего не выведет — 0 итераций", "зациклится", "выведет 1 … 10"], 1)}</div>
+            <div class="stack">${code(`int i = 11;
+do
+{
+    label1.Text += i + " ";
+    i++;
+}
+while (i <= 10);`, 16)}${quiz("e2", "Цикл do…while:", ["выведет 11 — тело выполнится 1 раз", "ничего не выведет", "зациклится", "выведет 1 … 10"], 0)}</div>
+          </div>
+        </div>${src(PC + "слайд 3 (while: может не выполниться ни разу), слайд 4 (do…while: хотя бы один раз), слайд 13")}`;
+      },
+    },
+
+    /* ---------------- КОНЕЦ УРОКА (10 мин) ---------------- */
+    {
+      badge: "Конец урока · блиц",
+      shortTitle: "Блиц-диагностика",
+      timing: "70–75 мин",
+      source: "КСП урока 3; " + PC + "слайды 3–5; " + PL + "слайд 4",
+      notes: "Блиц-диагностика: щёлкните вариант после ответов учеников (карточки или поднятая рука).",
+      render() {
+        return `<div class="body"><div class="grid-2 quizgrid" style="gap:14px;">
+          ${quiz("b1", "1. a = 2; b = 5; while (a &lt; b) a = a + 2; — сколько раз?", ["1 раз", "2 раза", "3 раза", "0 раз"], 1)}
+          ${quiz("b2", "2. for (int i = 1; i &lt;= 5; i++) listBox1.Items.Add(i); — чему равно Items.Count?", ["4", "5", "6", "0"], 1)}
+          ${quiz("b3", "3. Какой цикл выполнится хотя бы один раз?", ["while", "for", "do…while", "любой"], 2)}
+          ${quiz("b4", "4. Что делает listBox1.Items.Clear()?", ["удаляет последний элемент", "очищает весь список", "считает элементы", "добавляет пустую строку"], 1)}
+        </div></div>${src("КСП урока 3 (блиц); " + PC + "слайды 3–5; " + PL + "слайд 4")}`;
+      },
+    },
+    {
+      badge: "Конец урока · рефлексия",
+      shortTitle: "Рефлексия и домашнее задание",
+      timing: "75–80 мин",
+      source: PC + "слайд 14; КСП урока 3",
+      notes: "Рефлексия «Мишень»: ученики отмечают, что умеют уверенно, а что требует практики. Домашнее задание из КСП.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;">
+          <div class="stack">
+            <h2 class="slide-h2">Мишень</h2>
+            <div class="card"><h3>🎯 Уверенно владею</h3><p>Различаю while, do…while и for; составляю трассировочную таблицу; вывожу результаты в Label и ListBox; предотвращаю зацикливание.</p></div>
+            <div class="card"><h3>🔁 Нужно потренироваться</h3><p>Разбиение числа на цифры через % 10 и / 10; сложные условия выхода из цикла.</p></div>
+          </div>
+          <div class="stack">
+            <h2 class="slide-h2">Домашнее задание</h2>
+            <div class="card"><h3>📝 Программа</h3><p>Найти сумму и количество цифр введённого натурального числа с выводом протокола шагов в ListBox.</p></div>
+            <div class="note">Подсказка: используй цикл <span class="mono">while (n &gt; 0)</span> и операции <span class="mono">n % 10</span>, <span class="mono">n / 10</span>, как в «Волшебном числе».</div>
+          </div>
+        </div></div>${src(PC + "слайд 14 (рефлексия), слайд 6 (модификация: сумма цифр); КСП урока 3 (домашнее задание)")}`;
+      },
+    },
+  ],
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>10.2А · Урок 4 · Списки в HTML (ol, ul, dl, вложенные)</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+</head>
+<body>
+<script src="../_engine/deck.js"></script>
+<script>
+const L4_NESTED_INIT = `<h2>Классификация видов спорта</h2>
+<ol type="I">
+  <li>Зимние виды спорта:
+    <ul type="disc">
+      <li>фигурное катание</li>
+      <li>хоккей</li>
+    </ul>
+  </li>
+  <li>Летние виды спорта:
+    <ul type="circle">
+      <li>волейбол</li>
+      <li>футбол</li>
+    </ul>
+  </li>
+  <li>Единоборства:
+    <ul type="square">
+      <li>дзюдо</li>
+      <li>борьба на поясах</li>
+    </ul>
+  </li>
+</ol>`;
+
+const L4_DL_PRESET = `<h2>Словарь веб-разработчика (&lt;dl&gt;)</h2>
+<dl>
+  <dt><b>HTML</b></dt>
+  <dd>Язык разметки гипертекста для создания веб-страниц.</dd>
+  <dt><b>Тег</b></dt>
+  <dd>Команда браузеру в угловых скобках &lt;...&gt;.</dd>
+  <dt><b>Атрибут</b></dt>
+  <dd>Дополнительный параметр внутри открывающего тега.</dd>
+</dl>`;
+
+DECK_INITIALS = { lists: L4_NESTED_INIT };
+DECK_PRESETS = {
+  lists: [
+    () => DECK.resetEditor("lists", L4_NESTED_INIT),
+    () => DECK.resetEditor("lists", L4_DL_PRESET)
+  ]
+};
+
+initDeck({
+  badge: "</> 10.2А · Урок 4",
+  title: "Создание списков в HTML: <ol>, <ul>, <dl> и вложенные списки",
+  subtitle: "10 класс · 2 четверть · Цели 10.1.2.4, 10.1.2.5 · 80 мин · Мини-HTML",
+  initialState: {
+    selected: { olType: "I", olStart: 1, ulType: "square" },
+    revealed: { s2List: false, olRev: false }
+  },
+  slides: [
+    {
+      badge: "Этап 1 · Введение",
+      shortTitle: "Титул и цели урока",
+      timing: "0–2 мин",
+      source: "КСП 10.2А Урок 4 · SB 10 кл. стр. 77–79",
+      notes: "Озвучьте тему, цели 10.1.2.4 и 10.1.2.5. Подчеркните важность отступов (Tab) при создании вложенных списков.",
+      render() {
+        return `
+          <div class="stack">
+            <div class="text-xs font-bold text-muted" style="text-transform:uppercase;">Информатика · 10 класс · Раздел 10.2А · Урок 4 из 10</div>
+            <h1 class="slide-h1">Списки в HTML: <span class="mono">&lt;ol&gt;</span>, <span class="mono">&lt;ul&gt;</span>, <span class="mono">&lt;dl&gt;</span></h1>
+            <p class="lead">Научимся создавать нумерованные, маркированные списки, списки определений и многоуровневые вложенные структуры.</p>
+            <div class="grid-2">
+              <div class="box-primary">
+                <div class="box-title mono">Цель 10.1.2.4</div>
+                <div class="text-xs">Использовать <span class="mono">&lt;ol&gt;, &lt;ul&gt;, &lt;li&gt;</span> и <span class="mono">&lt;dl&gt;/&lt;dt&gt;/&lt;dd&gt;</span> для структурирования перечислений.</div>
+              </div>
+              <div class="box-accent">
+                <div class="box-title mono" style="color:var(--accent);">Цель 10.1.2.5</div>
+                <div class="text-xs">Управлять нумерацией (<span class="mono">type, start, reversed</span>) и маркерами (<span class="mono">disc, circle, square</span>).</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 1 · Стартер",
+      shortTitle: "Текст через запятую vs Список",
+      timing: "2–10 мин",
+      source: "КСП 10.2А Урок 4",
+      notes: "Переключите вид и обсудите с классом: когда нужен строгий порядок (<ol>), а когда просто перечень (<ul>)?",
+      render(st) {
+        const asList = !!st.revealed.s2List;
+        return `
+          <div class="flex-between">
+            <div>
+              <h2 class="slide-h2">Зачем на веб-странице списки?</h2>
+              <p class="lead">Сравните восприятие одной и той же информации.</p>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="DECK.toggleReveal('s2List')">
+              ${asList ? "Показать сплошным текстом" : "Превратить в многоуровневый список →"}
+            </button>
+          </div>
+          <div class="browser-frame">
+            <div class="browser-bar"><span class="browser-tab">🌐 Виды спорта</span></div>
+            <div style="padding:22px;background:#fff;color:#111;font-size:14px;">
+              ${asList ? `
+                <ol type="I" style="margin:0;">
+                  <li><strong>Зимние виды спорта:</strong><ul type="disc"><li>фигурное катание</li><li>хоккей</li></ul></li>
+                  <li><strong>Летние виды спорта:</strong><ul type="circle"><li>волейбол</li><li>футбол</li></ul></li>
+                </ol>
+              ` : `
+                <p style="margin:0;">Виды спорта делятся на зимние виды спорта, такие как фигурное катание, хоккей, а также летние виды спорта, среди которых волейбол, футбол и многие другие.</p>
+              `}
+            </div>
+          </div>
+          <div class="grid-2 text-xs">
+            <div class="box-primary"><strong>Нумерованный &lt;ol&gt; (Ordered List):</strong> когда важен порядок (алгоритм, рейтинг Топ-5, рецепт).</div>
+            <div class="box-accent"><strong>Маркированный &lt;ul&gt; (Unordered List):</strong> когда порядок не важен (список покупок, инвентарь).</div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Конструктор <ol> и <ul>",
+      shortTitle: "Атрибуты type, start, reversed",
+      timing: "10–22 мин",
+      source: "SB 10 кл. стр. 77–78",
+      notes: "Попереключайте атрибуты type, start и reversed для <ol>, а также disc/circle/square для <ul>.",
+      render(st) {
+        const olT = st.selected.olType || "I";
+        const olS = st.selected.olStart || 1;
+        const olR = !!st.revealed.olRev;
+        const ulT = st.selected.ulType || "square";
+        const olTag = `<ol type="${olT}"${olS > 1 ? ` start="${olS}"` : ""}${olR ? " reversed" : ""}>`;
+        const ulTag = `<ul type="${ulT}">`;
+        return `
+          <h2 class="slide-h2">Настройка нумерации и маркеров</h2>
+          <div class="grid-2">
+            <div class="box stack text-xs">
+              <div class="font-bold">Нумерованный список <span class="mono">&lt;ol&gt;</span>:</div>
+              <div class="flex-row">
+                <span>type:</span>
+                ${["1","A","a","I","i"].map(t => `<button type="button" class="btn mono ${olT === t ? "btn-primary" : ""}" onclick="DECK.setSelected('olType','${t}')">${t}</button>`).join("")}
+              </div>
+              <div class="flex-row">
+                <span>start:</span>
+                ${[1,3,5].map(n => `<button type="button" class="btn mono ${olS === n ? "btn-primary" : ""}" onclick="DECK.setSelected('olStart',${n})">${n}</button>`).join("")}
+                <button type="button" class="btn ${olR ? "btn-accent" : ""}" onclick="DECK.toggleReveal('olRev')">reversed</button>
+              </div>
+              <pre class="code-block">${DECK.esc(olTag + "\n  <li>HTML</li>\n  <li>CSS</li>\n  <li>JavaScript</li>\n</ol>")}</pre>
+              <div style="padding:10px 14px;background:#fff;color:#111;border-radius:8px;border:1px solid var(--border);">
+                <ol type="${olT}" start="${olS}" ${olR ? "reversed" : ""} style="margin:0;padding-left:22px;">
+                  <li>HTML</li><li>CSS</li><li>JavaScript</li>
+                </ol>
+              </div>
+            </div>
+            <div class="box stack text-xs">
+              <div class="font-bold">Маркированный список <span class="mono">&lt;ul&gt;</span>:</div>
+              <div class="flex-row">
+                <span>type:</span>
+                ${["disc","circle","square"].map(t => `<button type="button" class="btn mono ${ulT === t ? "btn-primary" : ""}" onclick="DECK.setSelected('ulType','${t}')">${t}</button>`).join("")}
+              </div>
+              <pre class="code-block">${DECK.esc(ulTag + "\n  <li>Футбол</li>\n  <li>Хоккей</li>\n  <li>Теннис</li>\n</ul>")}</pre>
+              <div style="padding:10px 14px;background:#fff;color:#111;border-radius:8px;border:1px solid var(--border);">
+                <ul type="${ulT}" style="margin:0;padding-left:22px;list-style-type:${ulT};">
+                  <li>Футбол</li><li>Хоккей</li><li>Теннис</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Живая песочница",
+      shortTitle: "Вложенные списки и словарь <dl>",
+      timing: "22–34 мин",
+      source: "SB 10 кл. стр. 78–79",
+      notes: "Обратите внимание: вложенный <ul> всегда ставится ВНУТРИ пункта <li> родительского <ol>, до закрывающего </li>!",
+      render(st, api) {
+        return `
+          <div>
+            <h2 class="slide-h2">Многоуровневые списки и список определений <span class="mono">&lt;dl&gt;</span></h2>
+            <p class="lead">Правило: вложенный список помещается <strong>внутри</strong> тега <span class="mono">&lt;li&gt;…&lt;/li&gt;</span> родительского пункта.</p>
+          </div>
+          ${api.renderPlayground({
+            key: "lists",
+            initial: L4_NESTED_INIT,
+            tabTitle: "sports.html",
+            presets: [
+              { label: "Вложенный «Виды спорта»" },
+              { label: "Список определений <dl>" }
+            ]
+          })}
+        `;
+      }
+    },
+    {
+      badge: "Мини-HTML №1 · Практика",
+      pillClass: "pill-accent",
+      shortTitle: "Мини-HTML: Списки (ol, ul, вложенный)",
+      timing: "34–52 мин",
+      source: "Мини-HTML (/html?task=g10-html-spiski)",
+      notes: "Практика в живом Мини-HTML по созданию маркированного, нумерованного и вложенного списков.",
+      render(st, api) {
+        return api.renderMiniHtmlTask({
+          taskId: "g10-html-spiski",
+          title: "Практика 1: Списки — маркированный, нумерованный, вложенный",
+          summary: "Создайте все три вида списков прямо в редакторе Мини-HTML и проверьте критерии.",
+          steps: ["<ul> и <li>", "<ol> и <li>", "Вложенный список внутри <li>"],
+          meta: "10 мин · Цель 10.1.2.4"
+        });
+      }
+    },
+    {
+      badge: "Мини-HTML №2 · Практика",
+      pillClass: "pill-accent",
+      shortTitle: "Мини-HTML: «Виды спорта» (маркеры)",
+      timing: "52–70 мин",
+      source: "Мини-HTML (/html?task=g10-html-vidy-markerov)",
+      notes: "Реальное задание по учебнику SB: римская нумерация верхнего уровня + disc, circle, square на втором уровне.",
+      render(st, api) {
+        return api.renderMiniHtmlTask({
+          taskId: "g10-html-vidy-markerov",
+          title: "Практика 2: Многоуровневый список «Виды спорта»",
+          summary: "Сверстайте 3 раздела римскими цифрами (type=\"I\") и вложите списки с маркерами disc, circle, square.",
+          steps: ["<ol type=\"I\"> (3 раздела)", "Зимние: disc", "Летние: circle", "Единоборства: square"],
+          meta: "8 мин · Цели 10.1.2.4, 10.1.2.5"
+        });
+      }
+    },
+    {
+      badge: "Этап 3 · Блиц и ДЗ",
+      shortTitle: "«Угадай результат кода» и ДЗ",
+      timing: "70–80 мин",
+      source: "КСП 10.2А Урок 4 · Мини-HTML (g10-html-dz-oglavlenie)",
+      notes: "Пусть ученики устно назовут отображение каждого кода, затем раскройте ответы. Выдайте ДЗ g10-html-dz-oglavlenie.",
+      render(st) {
+        const qa = [
+          { k: "l4q1", q: '<ol type="I" start="3"><li>А</li><li>Б</li></ol>', a: "III. А  и  IV. Б (римские заглавные цифры, начиная с 3)." },
+          { k: "l4q2", q: "В чём ошибка: <ol><li>Раздел</li><ul><li>Тема</li></ul></ol>?", a: "Вложенный <ul> стоит прямо в <ol>, а должен быть ВНУТРИ <li>Раздел<ul>...</ul></li>." }
+        ];
+        return `
+          <h2 class="slide-h2">Упражнение «Угадай результат» и домашнее задание</h2>
+          <div class="stack">
+            ${qa.map((item, i) => `
+              <button type="button" class="interactive-card ${st.revealed[item.k] ? "revealed" : ""}" onclick="DECK.toggleReveal('${item.k}')">
+                <div class="mono font-bold text-xs">${i + 1}. ${DECK.esc(item.q)}</div>
+                <div class="text-xs" style="margin-top:6px;">${st.revealed[item.k] ? "✓ " + DECK.esc(item.a) : "Показать ответ →"}</div>
+              </button>
+            `).join("")}
+          </div>
+          <div class="box-primary flex-between text-xs">
+            <div><strong>Домашнее задание:</strong> сверстать двухуровневое оглавление (разделы — <span class="mono">type="I"</span>, темы — <span class="mono">type="square"</span>).</div>
+            <a class="btn btn-accent" href="/html?task=g10-html-dz-oglavlenie" target="_blank" rel="noopener noreferrer">ДЗ в Мини-HTML (g10-html-dz-oglavlenie) ↗</a>
+          </div>
+        `;
+      }
+    }
+  ]
+});
+</script>
+</body>
+</html>

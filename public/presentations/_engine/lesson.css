@@ -1,0 +1,149 @@
+/* Lesson layer: projector-friendly look for decks rebuilt by the KTP/КСП template.
+   Loaded after deck.css; only decks that link it change. */
+
+.lesson .deck-main { max-width: 1280px; }
+.lesson .slide-card { min-height: 600px; padding: 28px 34px 18px; gap: 20px; font-size: 19px; line-height: 1.45; }
+.lesson .slide-top .pill { font-size: 13px; padding: 4px 12px; }
+.lesson .timing { font-size: 13px; }
+.lesson h1.slide-h1 { font-size: clamp(30px, 3.6vw, 44px); }
+.lesson h2.slide-h2 { font-size: clamp(24px, 2.7vw, 32px); }
+.lesson .lead { font-size: 19px; }
+.lesson .text-sm { font-size: 17px; }
+.lesson .text-xs { font-size: 15px; }
+.lesson .body { flex: 1; display: flex; flex-direction: column; gap: 16px; }
+
+/* Source line at the bottom of every slide */
+.lesson .src {
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border);
+  font-size: 13px;
+  color: var(--muted);
+}
+.lesson .src::before { content: "Источник: "; font-weight: 700; }
+
+/* Title slide */
+.lesson .hero { display: grid; grid-template-columns: 1.3fr 1fr; gap: 28px; align-items: center; flex: 1; }
+.lesson .hero-kicker { font-size: 15px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.lesson .hero h1 { margin: 8px 0 14px; font-size: clamp(34px, 4.4vw, 54px); line-height: 1.08; letter-spacing: -0.02em; }
+.lesson .goal {
+  border-left: 6px solid var(--primary);
+  background: var(--primary-soft);
+  padding: 12px 16px;
+  border-radius: 10px;
+}
+.lesson .goal b { color: var(--primary); }
+
+/* Cards */
+.lesson .cards { display: grid; gap: 14px; }
+.lesson .cards.c2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.lesson .cards.c3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.lesson .card {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+.lesson .card h3 { margin: 0 0 6px; font-size: 20px; display: flex; gap: 10px; align-items: center; }
+.lesson .card p { margin: 0; font-size: 17px; }
+.lesson .ico {
+  display: inline-grid; place-items: center;
+  width: 38px; height: 38px; border-radius: 10px;
+  background: var(--primary); color: var(--primary-fg);
+  font-size: 20px; flex: none;
+}
+.lesson .def {
+  font-size: 24px; line-height: 1.4;
+  background: var(--surface-2); border-radius: 14px; padding: 18px 22px;
+  border: 2px solid var(--primary);
+}
+.lesson .def b { color: var(--primary); }
+.lesson .note {
+  border-radius: 12px; padding: 12px 16px; font-size: 17px;
+  background: var(--warning-soft); color: var(--fg); border: 1px solid color-mix(in srgb, var(--warning) 40%, transparent);
+}
+.lesson .note b { color: var(--warning); }
+
+/* Interactive: clickable statements / options */
+.lesson .opts { display: grid; gap: 10px; }
+.lesson .opt {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  text-align: left; font: inherit; font-size: 18px; color: var(--fg);
+  background: var(--surface); border: 2px solid var(--border); border-radius: 12px;
+  padding: 10px 14px; cursor: pointer; transition: border-color .12s, background .12s;
+}
+.lesson .opt:hover { border-color: var(--primary); }
+.lesson .opt .n { font-weight: 800; color: var(--primary); min-width: 26px; }
+.lesson .opt.ok { border-color: var(--success); background: var(--success-soft); }
+.lesson .opt.bad { border-color: var(--danger); background: var(--danger-soft); }
+.lesson .opt .why { margin-left: auto; font-size: 15px; color: var(--muted); }
+
+/* Interactive: situation → choose function */
+.lesson .match { display: grid; gap: 10px; }
+.lesson .match { gap: 8px; }
+.lesson .match-row { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; background: var(--surface-2); border-radius: 12px; padding: 8px 12px; border: 2px solid transparent; font-size: 17px; }
+.lesson .match-row.ok { border-color: var(--success); }
+.lesson .match-row.bad { border-color: var(--danger); }
+.lesson .chips { display: flex; flex-wrap: nowrap; gap: 6px; }
+.lesson .chip {
+  font: inherit; font-size: 14px; padding: 5px 10px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--border-strong); background: var(--surface); color: var(--fg);
+}
+.lesson .chip.on { background: var(--primary); color: var(--primary-fg); border-color: var(--primary); }
+.lesson .score { font-weight: 800; color: var(--primary); }
+
+/* Reveal blocks */
+.lesson .reveal-btn { align-self: flex-start; }
+.lesson .answer { border-radius: 12px; padding: 12px 16px; background: var(--success-soft); border: 1px solid color-mix(in srgb, var(--success) 40%, transparent); }
+
+/* Steps (ordered process) */
+.lesson .steps { counter-reset: st; display: grid; gap: 8px; }
+.lesson .step { counter-increment: st; display: flex; gap: 12px; align-items: flex-start; background: var(--surface-2); padding: 10px 14px; border-radius: 12px; }
+.lesson .step::before { content: counter(st); display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: var(--accent-fg); font-weight: 800; flex: none; }
+
+/* Tables */
+.lesson table.t { width: 100%; border-collapse: collapse; font-size: 16px; }
+.lesson table.t th, .lesson table.t td { border: 1px solid var(--border); padding: 8px 10px; vertical-align: top; }
+.lesson table.t th { background: var(--primary-soft); color: var(--primary); text-align: left; }
+
+/* Timer */
+.lesson .timer { display: inline-flex; align-items: center; gap: 8px; font-weight: 800; font-size: 22px; font-family: ui-monospace, monospace; }
+
+/* SVG diagrams */
+.lesson svg.dia { width: 100%; height: auto; }
+.lesson svg.dia .blk { fill: var(--surface-2); stroke: var(--border-strong); stroke-width: 2; }
+.lesson svg.dia .blk-p { fill: var(--primary-soft); stroke: var(--primary); stroke-width: 2.5; }
+.lesson svg.dia .blk-a { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2; }
+.lesson svg.dia text { fill: var(--fg); font-family: inherit; font-size: 18px; font-weight: 700; }
+.lesson svg.dia text.s { font-size: 14px; font-weight: 500; fill: var(--muted); }
+.lesson svg.dia .ar { stroke: var(--primary); stroke-width: 2.5; fill: none; marker-end: url(#arw); }
+
+@media (max-width: 860px) {
+  .lesson .hero, .lesson .cards.c2, .lesson .cards.c3, .lesson .match-row { grid-template-columns: 1fr; }
+}
+
+/* Плотные слайды (тест, сопоставление): помещаются на проекторе 1366×768 */
+.lesson .slide-card { min-height: 560px; }
+.lesson .quizgrid .opt { font-size: 15px; padding: 6px 10px; }
+.lesson .quizgrid .opts { gap: 6px; }
+.lesson .quizgrid .font-bold { font-size: 17px; }
+.lesson .match-row { padding: 6px 12px; font-size: 16px; }
+.lesson .chip { font-size: 13px; padding: 4px 9px; }
+.lesson .match-row { padding: 4px 12px; font-size: 15.5px; line-height: 1.35; }
+.lesson .match { gap: 6px; }
+
+/* Таблицы с выбором ячеек (поле/запись, поиск ошибок) */
+.lesson table.pickable .pick { cursor: pointer; }
+.lesson table.pickable .pick:hover { outline: 2px solid var(--primary); outline-offset: -2px; }
+.lesson table.pickable .hl { background: var(--primary-soft); }
+.lesson table.pickable th.hl { background: var(--primary); color: var(--primary-fg); }
+.lesson table.pickable .rownum { width: 44px; text-align: center; font-weight: 800; color: var(--primary); background: var(--surface-2); }
+.lesson table.pickable .cell-bad { background: var(--danger-soft); outline: 2px solid var(--danger); outline-offset: -2px; }
+.lesson table.pickable .cell-ok { background: var(--success-soft); }
+.lesson .cell-why { font-size: 13px; color: var(--danger); font-weight: 600; margin-top: 2px; }
+.lesson .opt[disabled] { cursor: default; opacity: .75; }
+.lesson .text-block { background: var(--surface-2); border-radius: 14px; padding: 16px 18px; font-size: 18px; line-height: 1.55; border-left: 6px solid var(--accent); }
+.lesson .steps { align-content: start; }
+.lesson .ordergame .opt { font-size: 16px; padding: 7px 12px; }
+.lesson .ordergame .opts { gap: 7px; }
+.lesson .ordergame .step { padding: 7px 12px; font-size: 16px; }

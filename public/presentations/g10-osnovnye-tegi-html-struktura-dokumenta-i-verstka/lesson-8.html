@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>10.2А · Урок 8 · Объединение ячеек colspan и rowspan</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+</head>
+<body>
+<script src="../_engine/deck.js"></script>
+<script>
+const L8_COLSPAN = `<table border="1" cellpadding="8" width="100%" style="border-collapse:collapse;">
+  <tr bgcolor="#e4e6f7">
+    <th colspan="3">Виды спорта (colspan="3")</th>
+  </tr>
+  <tr>
+    <td>Футбол</td><td>Хоккей</td><td>Теннис</td>
+  </tr>
+</table>`;
+
+const L8_ROWSPAN = `<table border="1" cellpadding="8" width="100%" style="border-collapse:collapse;">
+  <tr>
+    <th rowspan="2" bgcolor="#fbe6da">Командные<br>(rowspan="2")</th>
+    <td>Футбол</td><td>11 игроков</td>
+  </tr>
+  <tr>
+    <!-- Во 2-й строке на один <td> меньше! -->
+    <td>Волейбол</td><td>6 игроков</td>
+  </tr>
+</table>`;
+
+const L8_MIXED = `<table border="1" cellpadding="8" width="100%" style="border-collapse:collapse;">
+  <tr bgcolor="#e4e6f7"><th colspan="3">Спортивный клуб</th></tr>
+  <tr>
+    <td rowspan="2" bgcolor="#e1f0e2"><b>Зимние</b></td>
+    <td>Хоккей</td><td>Вт, Чт</td>
+  </tr>
+  <tr>
+    <td>Фигурное катание</td><td>Пн, Ср</td>
+  </tr>
+</table>`;
+
+const L8_BROKEN = `<table border="1" cellpadding="8" width="100%" style="border-collapse:collapse;">
+  <tr>
+    <td rowspan="2" bgcolor="#f9e1e6"><b>rowspan="2"</b></td>
+    <td>B1</td><td>C1</td>
+  </tr>
+  <tr>
+    <td>ЛИШНИЙ TD!</td><td>B2</td><td>C2</td>
+  </tr>
+</table>`;
+
+DECK_INITIALS = { span: L8_MIXED };
+DECK_PRESETS = {
+  span: [
+    () => DECK.resetEditor("span", L8_COLSPAN),
+    () => DECK.resetEditor("span", L8_ROWSPAN),
+    () => DECK.resetEditor("span", L8_MIXED),
+    () => DECK.resetEditor("span", L8_BROKEN)
+  ]
+};
+
+initDeck({
+  badge: "</> 10.2А · Урок 8",
+  title: "Объединение ячеек по горизонтали (colspan) и вертикали (rowspan)",
+  subtitle: "10 класс · 2 четверть · Цели 10.1.2.9, 10.1.2.8 · 80 мин · Мини-HTML",
+  slides: [
+    {
+      badge: "Этап 1 · Введение",
+      shortTitle: "Титул и золотое правило сетки",
+      timing: "0–10 мин",
+      source: "КСП 10.2А Урок 8 · SB 10 кл. стр. 89–90",
+      notes: "Объясните проблему: если в первой строке 1 ячейка, а во второй 3 — без colspan она останется узкой над первым столбцом.",
+      render() {
+        return `
+          <div class="stack">
+            <div class="text-xs font-bold text-muted" style="text-transform:uppercase;">Информатика · 10 класс · Раздел 10.2А · Урок 8 из 10</div>
+            <h1 class="slide-h1">Сложные таблицы: <span class="mono">colspan</span> и <span class="mono">rowspan</span></h1>
+            <p class="lead">Научимся объединять ячейки по горизонтали и вертикали и рассчитывать число тегов <span class="mono">&lt;td&gt;</span> в каждой строке, чтобы сетка не «развалилась».</p>
+            <div class="grid-2">
+              <div class="box-primary">
+                <div class="box-title mono">colspan="N" (column span)</div>
+                <div class="text-xs">Объединяет <strong>N ячеек по горизонтали</strong> (вдоль строки). В этой же строке <span class="mono">&lt;tr&gt;</span> пишем на <span class="mono">N − 1</span> тегов меньше!</div>
+              </div>
+              <div class="box-accent">
+                <div class="box-title mono" style="color:var(--accent);">rowspan="M" (row span)</div>
+                <div class="text-xs">Объединяет <strong>M ячеек по вертикали</strong> (вдоль столбца). В следующих <span class="mono">M − 1</span> строках пропускаем по одному тегу <span class="mono">&lt;td&gt;</span>!</div>
+              </div>
+            </div>
+            <div class="box-warning text-xs">
+              <strong>Золотое правило сетки (инвариант):</strong> сумма ширин ячеек (с учётом <span class="mono">colspan</span> и «спускающихся» сверху <span class="mono">rowspan</span>) в КАЖДОЙ строке <span class="mono">&lt;tr&gt;</span> должна быть одинаковой!
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Живая лаборатория",
+      shortTitle: "Песочница colspan, rowspan и ошибка лишнего <td>",
+      timing: "10–26 мин",
+      source: "Презентация «Таблицы», слайды 8–9 · SB стр. 89–90",
+      notes: "Переключайте 4 пресета! Обязательно покажите пресет «Ошибка: лишний <td>», чтобы класс увидел, как таблица выпадает вправо.",
+      render(st, api) {
+        return `
+          <div>
+            <h2 class="slide-h2">Лаборатория сложных таблиц</h2>
+            <p class="lead">Переключайте готовые примеры — особенно посмотрите, что делает лишний тег <span class="mono">&lt;td&gt;</span> при <span class="mono">rowspan</span>!</p>
+          </div>
+          ${api.renderPlayground({
+            key: "span",
+            initial: L8_MIXED,
+            tabTitle: "complex-table.html",
+            presets: [
+              { label: "colspan=\"3\"" },
+              { label: "rowspan=\"2\"" },
+              { label: "Смешанная 3×3" },
+              { label: "Ошибка: лишний <td> ⚡" }
+            ]
+          })}
+        `;
+      }
+    },
+    {
+      badge: "Мини-HTML №1 · colspan",
+      pillClass: "pill-accent",
+      shortTitle: "Мини-HTML: Объединение столбцов (colspan)",
+      timing: "26–40 мин",
+      source: "Мини-HTML (/html?task=g10-html-colspan)",
+      notes: "Быстрое задание на горизонтальное объединение столбцов в Мини-HTML.",
+      render(st, api) {
+        return api.renderMiniHtmlTask({
+          taskId: "g10-html-colspan",
+          title: "Практика 1: Объединение столбцов (colspan)",
+          summary: "Объедините ячейки по горизонтали атрибутом colspan и проверьте целостность сетки.",
+          steps: ["colspan=\"N\"", "Уменьшить число ячеек в этой строке", "Проверить кнопкой «Проверить»"],
+          meta: "8 мин · Цели 10.1.2.8, 10.1.2.9"
+        });
+      }
+    },
+    {
+      badge: "Мини-HTML №2 · rowspan",
+      pillClass: "pill-accent",
+      shortTitle: "Мини-HTML: Объединение строк (rowspan)",
+      timing: "40–54 мин",
+      source: "Мини-HTML (/html?task=g10-html-rowspan)",
+      notes: "Задание на вертикальное объединение строк rowspan в Мини-HTML.",
+      render(st, api) {
+        return api.renderMiniHtmlTask({
+          taskId: "g10-html-rowspan",
+          title: "Практика 2: Объединение строк (rowspan)",
+          summary: "Объедините ячейки по вертикали атрибутом rowspan и не забудьте пропустить занятые места в нижних строках.",
+          steps: ["rowspan=\"M\"", "Убрать лишние <td> в строках ниже", "Проверка сетки"],
+          meta: "10 мин · Цели 10.1.2.8, 10.1.2.9"
+        });
+      }
+    },
+    {
+      badge: "Мини-HTML №3 · Сложная таблица",
+      pillClass: "pill-accent",
+      shortTitle: "Мини-HTML: Таблица с colspan и rowspan",
+      timing: "54–70 мин",
+      source: "Мини-HTML (/html?task=g10-html-slozhnaya-tablitsa)",
+      notes: "Комбинированная задача уровня СОР/СОЧ: одновременное использование colspan и rowspan по макету.",
+      render(st, api) {
+        return api.renderMiniHtmlTask({
+          taskId: "g10-html-slozhnaya-tablitsa",
+          title: "Практика 3: Сложная таблица с colspan и rowspan по макету",
+          summary: "Сверстайте таблицу со смешанным объединением ячеек и проверьте по всем критериям.",
+          steps: ["Посчитайте число столбцов", "Проверьте сумму в каждом <tr>", "Автопроверка"],
+          meta: "12 мин · Цели 10.1.2.8, 10.1.2.9"
+        });
+      }
+    },
+    {
+      badge: "Этап 3 · Блиц и ДЗ",
+      shortTitle: "«Найди лишний <td>» и ДЗ",
+      timing: "70–80 мин",
+      source: "КСП 10.2А Урок 8 · Мини-HTML (g10-html-pr-tablitsa-kluba)",
+      notes: "Разберите задачу на поиск лишней ячейки и выдайте дополнительное задание в Мини-HTML (g10-html-pr-tablitsa-kluba).",
+      render(st) {
+        return `
+          <h2 class="slide-h2">Мини-практикум «Найди лишний <span class="mono">&lt;td&gt;</span>»</h2>
+          <pre class="code-block">${DECK.esc(`<table border="1">\n  <tr><td rowspan="2">A</td><td colspan="2">B+C</td></tr>\n  <tr><td>D</td><td>E</td><td>F</td></tr>\n</table>`)}</pre>
+          <button type="button" class="interactive-card ${st.revealed.extraTd ? "revealed" : ""}" onclick="DECK.toggleReveal('extraTd')">
+            <div class="font-bold">В таблице 3 столбца. Какая строка содержит ошибку и почему?</div>
+            <div class="text-xs" style="margin-top:6px;">
+              ${st.revealed.extraTd
+                ? "✓ Ошибка во 2-й строке! Ячейка A с rowspan=\"2\" уже заняла 1-й столбец во 2-й строке, значит во 2-й строке должно остаться только ДВА тега <td> (1 + 2 = 3), а записано три (D, E, F → получается 4 столбца!)."
+                : "Нажмите, чтобы показать разбор →"}
+            </div>
+          </button>
+          <div class="box-primary flex-between text-xs">
+            <div><strong>Домашнее задание:</strong> начертить макет сложной таблицы 4×4 (два colspan + два rowspan) и выполнить «Прейскурант клуба» в Мини-HTML.</div>
+            <a class="btn btn-accent" href="/html?task=g10-html-pr-tablitsa-kluba" target="_blank" rel="noopener noreferrer">Мини-HTML (g10-html-pr-tablitsa-kluba) ↗</a>
+          </div>
+        `;
+      }
+    }
+  ]
+});
+</script>
+</body>
+</html>

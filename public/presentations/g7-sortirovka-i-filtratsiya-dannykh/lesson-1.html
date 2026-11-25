@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>7.2B · Урок 2 · Сортировка и фильтрация данных в электронных таблицах</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+</head>
+<body>
+<script src="../_engine/deck.js"></script>
+<script>
+const G7SF_LAPTOPS = [
+  { name: "Lenovo IdeaPad 3", brand: "Lenovo", ram: 8, price: 244990 },
+  { name: "Acer Nitro 5", brand: "Acer", ram: 16, price: 349970 },
+  { name: "Apple Macbook Air 13", brand: "Apple", ram: 8, price: 469725 },
+  { name: "ASUS X515EA", brand: "ASUS", ram: 8, price: 319899 },
+  { name: "Huawei MateBook", brand: "Huawei", ram: 16, price: 669990 }
+];
+
+const G7SF_BLITZ = [
+  { k: "q1", q: "1. Удаляет ли фильтр те строки, которые исчезли с экрана?", a: "НЕТ! Скрытые записи остаются в таблице и возвращаются после снятия фильтра." },
+  { k: "q2", q: "2. Чем сортировка отличается от фильтрации по количеству видимых строк?", a: "При сортировке видны ВСЕ записи (в новом порядке); при фильтрации — только подходящие под условие." },
+  { k: "q3", q: "3. Рейтинг фото ровно 4,5. Попадёт ли оно в фильтр «выше 4,5» vs «4,5 и выше»?", a: "В «выше 4,5» (>) — НЕТ! В «4,5 и выше» (>=) — ДА! Всегда проверяйте строгость границы!" },
+  { k: "q4", q: "4. Какой фильтр использовать для условия «Цена > 250 000 И Цена <= 400 000»?", a: "Числовой пользовательский автофильтр (Между / два условия с логикой И)." }
+];
+
+window.G7SF_UPD = function(patch) {
+  Object.assign(window.DECK_STATE.custom, patch);
+  window.DECK.render();
+};
+
+initDeck({
+  badge: "🔍 7.2B · Урок 2",
+  title: "Сортировка и фильтрация данных в электронных таблицах",
+  subtitle: "7 класс · 2 четверть · Цель 7.1.2.2 · 80 мин · Мини-Таблицы (/excel)",
+  footer: "НИШ ЕМН г. Кызылорда · 7 класс · 2 четверть · Мини-Таблицы (/excel)",
+  initialState: {
+    custom: { sort: "none", filter: "all" }
+  },
+  slides: [
+    {
+      badge: "Этап 1 · Сортировка vs Фильтрация",
+      shortTitle: "В чём главное отличие сортировки от фильтрации",
+      timing: "0–8 мин",
+      source: "КСП 7.2B Урок 2 · Теория g7-sortirovka-i-filtratsiya-dannykh",
+      notes: "Сразу чётко разведите два понятия по 4 критериям из учебника: сортировка переставляет ВСЕ строки; фильтр скрывает лишние (НЕ удаляя их!). Цель 7.1.2.2.",
+      render() {
+        return `
+          <div class="stack">
+            <div class="text-xs font-bold text-muted" style="text-transform:uppercase;">Информатика · 7 класс · Раздел 7.2B «Табличная модель» · Урок 2 из 2</div>
+            <h1 class="slide-h1">Сортировка и фильтрация данных</h1>
+            <p class="lead">Научимся упорядочивать записи по 1 и 2 полям, применять текстовые, числовые фильтры и пользовательский автофильтр в таблицах.</p>
+            <table class="data-table">
+              <thead><tr><th>Критерий</th><th>↕ Сортировка</th><th>🔍 Фильтрация</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Что делает</strong></td><td>Упорядочивает (переставляет) записи</td><td>Отбирает записи по заданному условию</td></tr>
+                <tr><td><strong>Сколько записей видно</strong></td><td><strong>Все записи</strong> таблицы</td><td><strong>Только записи</strong>, подходящие под критерий</td></tr>
+                <tr><td><strong>Остальные записи</strong></td><td>Все на месте в новом порядке</td><td>Скрыты, но <strong>НЕ удаляются</strong> (возвращаются снятием фильтра)</td></tr>
+                <tr><td><strong>Пример</strong></td><td>Книги по алфавиту от А до Я</td><td>Показать только мальчиков из списка класса</td></tr>
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Сортировка данных",
+      shortTitle: "Примеры SB: алфавит, цены ноутбуков и многоуровневая сортировка",
+      timing: "8–17 мин",
+      source: "Теория 7.2B · «Сортировка от А до Я» и «Продажа ноутбуков»",
+      notes: "Напомните правило целостности: при сортировке таблицы по цене перемещается ВСЯ строка (модель + ОЗУ + цена), а если нужно отсортировать сначала по бренду, а затем по цене — используют «Настраиваемую сортировку» (Добавить уровень).",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Виды сортировки в электронных таблицах</h2>
+            <div class="grid-3 text-xs">
+              <div class="box-primary"><strong>Текстовая (А→Я / Я→А)</strong><br>Лошадь, Медведь, Кролик, Верблюд → <strong>Верблюд, Кролик, Лошадь, Медведь</strong>.</div>
+              <div class="box-accent"><strong>Числовая (↑ / ↓)</strong><br>Ноутбуки по убыванию: от <strong>669 990 ₸</strong> (Huawei) до <strong>244 990 ₸</strong> (Lenovo).</div>
+              <div class="box-success"><strong>По дате и по 2 полям</strong><br>От старых к новым; кнопка <strong>«Настраиваемая сортировка»</strong> задаёт 2 уровня (напр. ОЗУ ↑, затем Цена ↓).</div>
+            </div>
+            <div class="box-warning text-xs">
+              <strong>Обрати внимание:</strong> при сортировке Excel переставляет <strong>всю строку целиком</strong>, поэтому номера записей в столбце «№» (1, 2, 3…) тоже переместятся вместе со своими строками!
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · 4 вида фильтров",
+      shortTitle: "Текстовые, числовые, по дате и пользовательский автофильтр",
+      timing: "17–26 мин",
+      source: "Теория 7.2B · 4 вида фильтров и предупреждение о границах",
+      notes: "Разберите 4 типа фильтров и обязательно акцентируйте предупреждение из теории про строгие (> 14) и нестрогие (>= 14) границы!",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">4 вида фильтров и ловушка границы условия</h2>
+            <table class="data-table">
+              <thead><tr><th>Вид фильтра</th><th>Тип данных</th><th>Пример условия из учебника</th></tr></thead>
+              <tbody>
+                <tr><td><strong>1. Текстовый фильтр</strong></td><td>Текст</td><td>Город = «Актау», начинается на «А», больше «М» (<span class="mono">&gt; М</span>)</td></tr>
+                <tr><td><strong>2. Числовой фильтр</strong></td><td>Число</td><td>Премия больше 130 000; Цена меньше 350 000; Между</td></tr>
+                <tr><td><strong>3. Фильтр по дате</strong></td><td>Дата</td><td>Премии после <span class="mono">01.05.2020</span>; за этот месяц</td></tr>
+                <tr><td><strong>4. Пользовательский автофильтр</strong></td><td>2 условия в 1 поле</td><td><span class="mono">&gt; 130 000</span> <strong>И</strong> <span class="mono">&lt;= 150 000</span></td></tr>
+              </tbody>
+            </table>
+            <div class="box-danger text-xs">
+              <strong>Внимание на границы (ловушка СОР!):</strong> «больше 14» (<span class="mono">&gt; 14</span>) и «больше или равно 14» (<span class="mono">&gt;= 14</span>), «выше 4,5» и «4,5 и выше» дают <strong>разный результат</strong>! Граничное значение попадает в ответ ТОЛЬКО при «или равно»!
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Живой симулятор SB",
+      shortTitle: "Интерактивная таблица SB «Продажа ноутбуков»",
+      timing: "26–37 мин",
+      source: "Теория 7.2B · Точные данные «Продажа ноутбуков»",
+      notes: "Нажимайте кнопки сортировки и фильтрации на точной таблице из учебника — ученики сразу проверяют результат вживую!",
+      render(st) {
+        const c = st.custom;
+        let list = G7SF_LAPTOPS.slice();
+        if (c.filter === "ram16") list = list.filter(x => x.ram === 16);
+        else if (c.filter === "lt350") list = list.filter(x => x.price < 350000);
+        else if (c.filter === "mid") list = list.filter(x => x.price >= 300000 && x.price <= 500000);
+
+        if (c.sort === "priceDesc") list.sort((a,b) => b.price - a.price);
+        else if (c.sort === "priceAsc") list.sort((a,b) => a.price - b.price);
+        else if (c.sort === "nameAsc") list.sort((a,b) => a.name.localeCompare(b.name));
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <h2 class="slide-h2">Симулятор SB: «Продажа ноутбуков»</h2>
+              <span class="pill pill-success mono">Показано: ${list.length} из ${G7SF_LAPTOPS.length}</span>
+            </div>
+            <div class="grid-2 text-xs">
+              <div class="box flex-row">
+                <strong>Сортировка:</strong>
+                <button type="button" class="btn ${c.sort === "priceDesc" ? "btn-primary" : ""}" onclick="G7SF_UPD({sort:'priceDesc'})">Цена ↓</button>
+                <button type="button" class="btn ${c.sort === "priceAsc" ? "btn-primary" : ""}" onclick="G7SF_UPD({sort:'priceAsc'})">Цена ↑</button>
+                <button type="button" class="btn ${c.sort === "nameAsc" ? "btn-primary" : ""}" onclick="G7SF_UPD({sort:'nameAsc'})">Название А→Я</button>
+              </div>
+              <div class="box flex-row">
+                <strong>Фильтр:</strong>
+                <button type="button" class="btn ${c.filter === "all" ? "btn-accent" : ""}" onclick="G7SF_UPD({filter:'all'})">Все</button>
+                <button type="button" class="btn ${c.filter === "ram16" ? "btn-accent" : ""}" onclick="G7SF_UPD({filter:'ram16'})">ОЗУ = 16 ГБ</button>
+                <button type="button" class="btn ${c.filter === "lt350" ? "btn-accent" : ""}" onclick="G7SF_UPD({filter:'lt350'})">Цена &lt; 350k</button>
+                <button type="button" class="btn ${c.filter === "mid" ? "btn-accent" : ""}" onclick="G7SF_UPD({filter:'mid'})">300k..500k</button>
+              </div>
+            </div>
+            <table class="data-table">
+              <thead><tr><th>Модель ноутбука</th><th>Бренд</th><th>ОЗУ</th><th>Цена (тенге)</th></tr></thead>
+              <tbody>
+                ${list.map(x => `<tr><td><strong>${x.name}</strong></td><td>${x.brand}</td><td class="mono">${x.ram} ГБ</td><td class="mono font-bold">${x.price.toLocaleString("ru-RU")} ₸</td></tr>`).join("")}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Мини-Таблицы · Практика 1",
+      pillClass: "pill-accent",
+      shortTitle: "Мини-Таблицы: Сортировка «Ноутбуки по цене»",
+      timing: "37–55 мин",
+      source: "Мини-Таблицы (/excel?task=g7-sf-sort)",
+      notes: "Живая практика в Мини-Таблицах: сначала «Сортировка: ноутбуки по цене» (g7-sf-sort), затем «Настраиваемая сортировка по двум полям» (g7-sf-sort2) и «Фильтр по значению» (g7-sf-filtr).",
+      render(st, api) {
+        return api.renderMiniExcelTask({
+          key: "g7sf1",
+          taskId: "g7-sf-sort",
+          title: "Практика в Мини-Таблицах: Сортировка ноутбуков",
+          summary: "Отсортируйте таблицу ноутбуков по цене по убыванию и проверьте результат автопроверкой.",
+          steps: ["Выделите диапазон таблицы", "Примените сортировку по цене (по убыванию)", "Нажмите «Проверить»"],
+          meta: "Цель 7.1.2.2 · Автопроверка"
+        });
+      }
+    },
+    {
+      badge: "Мини-Таблицы · Практика 2",
+      pillClass: "pill-accent",
+      shortTitle: "Мини-Таблицы: Числовой фильтр с условием И",
+      timing: "55–68 мин",
+      source: "Мини-Таблицы (/excel?task=g7-sf-chislovoy)",
+      notes: "Отработка пользовательского числового автофильтра с двумя условиями (И) прямо в слайде!",
+      render(st, api) {
+        return api.renderMiniExcelTask({
+          key: "g7sf2",
+          taskId: "g7-sf-chislovoy",
+          title: "Практика 2 в Мини-Таблицах: Числовой фильтр (И)",
+          summary: "Включите автофильтр и отберите записи по двум числовым границам одновременно.",
+          steps: ["Включите фильтр на шапке таблицы", "Задайте числовой фильтр с условием И", "Нажмите «Проверить»"],
+          meta: "Цель 7.1.2.2 · Автопроверка"
+        });
+      }
+    },
+    {
+      badge: "Этап 3 · Доп. задания",
+      shortTitle: "Ещё 3 практики: 2 поля, Команда школы, Фотовыставка",
+      timing: "68–72 мин",
+      source: "Мини-Таблицы · g7-sf-sort2, g7-sf-filtr, g7-sf-p-vystavka",
+      notes: "Для углублённой отработки всех вариантов сортировки и фильтрации.",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Дополнительные задания в Мини-Таблицах</h2>
+            <div class="grid-3 text-xs">
+              <div class="box-primary stack"><strong>1. Сортировка по 2 полям</strong><div>Настраиваемая 2-уровневая сортировка.</div><a class="btn btn-primary" href="/excel?task=g7-sf-sort2" target="_blank" rel="noopener noreferrer">Открыть ↗</a></div>
+              <div class="box-accent stack"><strong>2. Команда школы</strong><div>Фильтр по текстовому значению.</div><a class="btn btn-accent" href="/excel?task=g7-sf-filtr" target="_blank" rel="noopener noreferrer">Открыть ↗</a></div>
+              <div class="box-success stack"><strong>3. Виртуальная фотовыставка</strong><div>Анализ данных: жанр, год, рейтинг.</div><a class="btn" href="/excel?task=g7-sf-p-vystavka" target="_blank" rel="noopener noreferrer">Открыть ↗</a></div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 3 · Итоговый блиц",
+      shortTitle: "Блиц-проверка 7.2B (4 вопроса)",
+      timing: "72–76 мин",
+      source: "КСП 7.2B Урок 2",
+      notes: "Финальная проверка перед ДЗ и СОР.",
+      render(st) {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Итоговый блиц по сортировке и фильтрации</h2>
+            <div class="grid-2">
+              ${G7SF_BLITZ.map(x => `
+                <button type="button" class="interactive-card ${st.revealed[x.k] ? "revealed" : ""}" onclick="DECK.toggleReveal('${x.k}')">
+                  <div class="font-bold text-xs">${x.q}</div>
+                  <div class="text-xs" style="margin-top:6px;">${st.revealed[x.k] ? "✓ " + x.a : "Нажмите →"}</div>
+                </button>
+              `).join("")}
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 3 · ДЗ и финиш 2 четверти",
+      shortTitle: "Домашнее задание: Участники (сортировка и фильтр)",
+      timing: "76–80 мин",
+      source: "Мини-Таблицы · g7-sf-dz-uchastniki",
+      notes: "Выдайте ДЗ «Участники: сортировка и фильтр» (g7-sf-dz-uchastniki). Поздравьте класс с завершением 2 четверти!",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Домашнее задание и завершение 2 четверти 7 класса</h2>
+            <div class="box-primary flex-between text-xs">
+              <div><strong>Домашнее задание в Мини-Таблицах (/excel):</strong> <strong>«ДЗ. Участники: сортировка и фильтр»</strong> (<span class="mono">g7-sf-dz-uchastniki</span>).</div>
+              <a class="btn btn-accent" href="/excel?task=g7-sf-dz-uchastniki" target="_blank" rel="noopener noreferrer">Открыть ДЗ ↗</a>
+            </div>
+          </div>
+        `;
+      }
+    }
+  ]
+});
+</script>
+</body>
+</html>

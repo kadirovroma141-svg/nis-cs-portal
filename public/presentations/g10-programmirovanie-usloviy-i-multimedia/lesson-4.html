@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>10.3В · Урок 4 · RadioButton и CheckBox: организация выбора</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+  <link rel="stylesheet" href="../_engine/lesson.css" />
+</head>
+<body class="lesson">
+<script src="../_engine/deck.js"></script>
+<script src="../_engine/lesson.js"></script>
+<script>
+/*
+ * 10.3В «Разработка приложений (C#)», урок 4 (КТП) — «Элементы управления для организации выбора
+ * (RadioButton и CheckBox): свойства и программирование разветвляющихся алгоритмов».
+ * Цели обучения: 10.4.3.13 использовать компоненты ООП для организации выбора;
+ *                10.4.3.14 использовать условный оператор в ООП.
+ * Ход урока — КСП content/lesson-plans/g10-programmirovanie-usloviy-i-multimedia.json, урок 4 (10 + 60 + 10 мин).
+ * Содержание — только из материалов: учебник 10 кл. стр. 188–192 (урок 7.5), стр. 131 (независимые checkBox);
+ * презентация «Массивы и языки программирования», слайд 8 (проверка деления на 0).
+ * В материалах нет: контейнера GroupBox/Panel и значения FlatStyle = System (упомянуты в КСП) — не использованы.
+ * В учебнике опечатки «TextAllign», «CheckAllign», «FlatS tyle» — здесь TextAlign, CheckAlign, FlatStyle.
+ * Аналогия RadioButton ↔ дизъюнкция, CheckBox ↔ конъюнкция (стр. 188) сомнительна — не используется.
+ */
+const SB = "Учебник 10 кл., ";
+const PM = "Презентация «Массивы и языки программирования», ";
+const { src, reveal, statements, quiz, matcher } = LESSON;
+const S = () => window.DECK_STATE;
+const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const code = (t, fs = 16) => `<pre class="code-block" style="font-size:${fs}px;line-height:1.42;margin:0;">${esc(t)}</pre>`;
+
+/* Внешний вид переключателя и флажка */
+const radio = (on, label, click) => `<button type="button" class="opt" style="padding:6px 10px;font-size:16px;" onclick="${click}"><span style="display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;border:2px solid var(--primary);">${on ? '<span style="width:10px;height:10px;border-radius:50%;background:var(--primary);"></span>' : ""}</span><span>${label}</span></button>`;
+const check = (on, label, click) => `<button type="button" class="opt" style="padding:6px 10px;font-size:16px;" onclick="${click}"><span style="display:inline-grid;place-items:center;width:20px;height:20px;border-radius:4px;border:2px solid var(--primary);background:${on ? "var(--primary)" : "transparent"};color:var(--primary-fg);font-size:14px;font-weight:800;">${on ? "✓" : ""}</span><span>${label}</span></button>`;
+
+/* ---------- модель приложения из учебника (стр. 189–191) ---------- */
+window.APP = {
+  array() {
+    const st = S();
+    const m = st.selected["mode"];
+    let B = [];
+    if (m === "rnd") for (let i = 0; i <= 9; i++) B.push(1 + Math.floor(Math.random() * 9)); // B[i] = rnd.Next(1, 10)
+    else if (m === "code") B = [12, 5, 8, 23, 45, 6];
+    else if (m === "kbd") B = [4, -8, 6, 3, -7, 18]; // строки richTextBox1 (рис. на стр. 189)
+    st.selected["arr"] = B.join(" ");
+    st.selected["show"] = "";
+    DECK.render();
+  },
+  count() {
+    const st = S();
+    st.selected["show"] = (st.revealed["cb1"] ? "1" : "") + (st.revealed["cb2"] ? "2" : "");
+    DECK.render();
+  },
+  clear() {
+    const st = S();
+    st.selected["arr"] = "";
+    st.selected["show"] = "";
+    DECK.render();
+  },
+};
+function appDemo() {
+  const st = S();
+  const m = st.selected["mode"];
+  const arr = (st.selected["arr"] || "").split(" ").filter(Boolean).map(Number);
+  const show = st.selected["show"] || "";
+  const max = arr.length ? Math.max(...arr) : "";
+  const sum = arr.reduce((a, b) => a + b, 0);
+  return `<div class="card" style="padding:12px 14px;">
+    <div class="grid-2" style="gap:14px;">
+      <div class="stack" style="gap:6px;">
+        <b class="text-xs">Способ задания массива</b>
+        ${radio(m === "rnd", "Массив случайных чисел", "DECK.setSelected('mode','rnd')")}
+        ${radio(m === "code", "Определение массива в программном коде", "DECK.setSelected('mode','code')")}
+        ${radio(m === "kbd", "Ввод массива с клавиатуры", "DECK.setSelected('mode','kbd')")}
+        ${m === "kbd" ? '<div class="mono text-xs" style="border:1px solid var(--border-strong);border-radius:6px;padding:4px 8px;">richTextBox1: 4 / -8 / 6 / 3 / -7 / 18</div>' : ""}
+      </div>
+      <div class="stack" style="gap:6px;">
+        <b class="text-xs">Что вывести</b>
+        ${check(st.revealed["cb1"], "Максимум элементов", "DECK.toggleReveal('cb1')")}
+        ${check(st.revealed["cb2"], "Сумма элементов", "DECK.toggleReveal('cb2')")}
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button type="button" class="btn btn-primary" onclick="APP.array()" ${m ? "" : "disabled"}>Массив</button>
+          <button type="button" class="btn" onclick="APP.count()" ${arr.length ? "" : "disabled"}>Подсчет</button>
+          <button type="button" class="btn" onclick="APP.clear()">Очистить</button>
+        </div>
+      </div>
+    </div>
+    <div class="mono" style="margin-top:10px;font-size:16px;">Сформированный массив: <b>${arr.join(" ")}</b></div>
+    <div class="mono" style="font-size:16px;">${show.includes("1") ? `Максимум элементов = <b>${max}</b> &nbsp; ` : ""}${show.includes("2") ? `Сумма элементов = <b>${sum}</b>` : ""}</div>
+  </div>`;
+}
+
+/* ---------- окно заказа (условный пример из КСП) ---------- */
+function orderDemo() {
+  const st = S();
+  const size = st.selected["pz"];
+  const tops = ["Сыр", "Грибы", "Оливки"];
+  return `<div class="grid-2" style="gap:16px;">
+    <div class="card stack" style="gap:6px;"><b>Размер (один вариант)</b>
+      ${["Маленькая", "Средняя", "Большая"].map((s) => radio(size === s, s, `DECK.setSelected('pz','${s}')`)).join("")}</div>
+    <div class="card stack" style="gap:6px;"><b>Добавки (любое количество)</b>
+      ${tops.map((s, i) => check(st.revealed["tp" + i], s, `DECK.toggleReveal('tp${i}')`)).join("")}</div>
+  </div>`;
+}
+
+initDeck({
+  badge: "10.3В · Урок 4",
+  title: "RadioButton и CheckBox: организация выбора",
+  subtitle: "10 класс · 3 четверть · цели 10.4.3.13, 10.4.3.14 · 80 минут",
+  footer: "НИШ ЕМН г. Кызылорда · Информатика · 10 класс · Раздел 10.3В «Разработка приложений (C#)»",
+  slides: [
+    /* ---------------- НАЧАЛО УРОКА (10 мин) ---------------- */
+    {
+      badge: "Начало урока",
+      shortTitle: "Тема, цели и критерии",
+      timing: "0–3 мин",
+      source: "КТП 2026; КСП урока 4",
+      notes: "Организационный момент. Тема, цели, критерии оценивания. Логические операции в ООП — уровень «Применение» в спецификации СОЧ.",
+      render() {
+        return `<div class="hero">
+          <div>
+            <div class="hero-kicker">Раздел 10.3В · Разработка приложений (C#)</div>
+            <h1>RadioButton и CheckBox: организация выбора</h1>
+            <div class="stack">
+              <div class="goal"><b>10.4.3.13</b> — использовать компоненты ООП для организации выбора.</div>
+              <div class="goal"><b>10.4.3.14</b> — использовать условный оператор в ООП.</div>
+            </div>
+          </div>
+          <div class="stack text-sm">
+            <div class="card"><h3>🎯 Цели урока</h3><p>Классифицировать и настраивать свойства переключателя RadioButton и флажка CheckBox. Использовать их для программирования разветвляющихся алгоритмов.</p></div>
+            <div class="card"><h3>✅ Критерии оценивания</h3><p>Объясняет различие RadioButton (один вариант) и CheckBox (несколько). Настраивает свойства Checked, Text, TextAlign, CheckAlign, AutoCheck, FlatStyle, Enabled, Visible. Проверяет <span class="mono">Checked</span> в коде C#.</p></div>
+          </div>
+        </div>${src("КТП 2026 (цели 10.4.3.13, 10.4.3.14); КСП урока 4")}`;
+      },
+    },
+    {
+      badge: "Начало урока",
+      shortTitle: "Два типа выбора",
+      timing: "3–10 мин",
+      source: "КСП урока 4 (условный пример); " + SB + "стр. 188",
+      notes: "Демонстрация окна заказа (условный пример из КСП). Ученики выбирают: в первом блоке выбирается только один размер, во втором — сколько угодно добавок. Вопрос классу — затем откройте ответ.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Окно заказа: попробуйте выбрать</h2>
+          ${orderDemo()}
+          <p class="text-sm"><b>Какими двумя компонентами Windows Forms реализуются эти два типа выбора и чем отличается их проверка в C#?</b></p>
+          ${reveal("r-hook", "Ответ", "<b>RadioButton</b> (переключатель) — можно выбрать только один объект из предложенных. <b>CheckBox</b> (флажок) — для выбора нескольких объектов. Оба компонента имеют два состояния: установлен / сброшен — свойство <span class='mono'>Checked</span>.")}
+        </div>${src("КСП урока 4 (окно заказа — условный пример); " + SB + "стр. 188 (RadioButton и CheckBox)")}`;
+      },
+    },
+
+    /* ---------------- СЕРЕДИНА УРОКА (60 мин) ---------------- */
+    {
+      badge: "Новое · свойства",
+      shortTitle: "Свойства RadioButton и CheckBox",
+      timing: "10–17 мин",
+      source: SB + "стр. 188–189",
+      notes: "Фронтально по таблице учебника. Главное свойство — Checked (True/False). Покажите в окне «Свойства» Visual Studio, где меняются TextAlign, CheckAlign и FlatStyle.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Основные свойства компонентов</h2>
+          <table class="t">
+            <tr><th style="width:150px;">Свойство</th><th>Назначение</th></tr>
+            <tr><td class="mono">Text</td><td>текст, поясняющий назначение компонента</td></tr>
+            <tr><td class="mono">TextAlign</td><td>выравнивание текста: MiddleCenter, MiddleLeft, MiddleRight</td></tr>
+            <tr><td class="mono">Checked</td><td>при установленном состоянии значение True, иначе False</td></tr>
+            <tr><td class="mono">CheckAlign</td><td>выравнивание компонента (кружка или квадратика): TopLeft, MiddleLeft</td></tr>
+            <tr><td class="mono">Enabled</td><td>при истинном значении компонент доступен, при ложном неактивен</td></tr>
+            <tr><td class="mono">Visible</td><td>при истинном значении компонент отображается на форме, при ложном скрыт</td></tr>
+            <tr><td class="mono">AutoCheck</td><td>автоматическая смена состояния компонента (установлен / сброшен)</td></tr>
+            <tr><td class="mono">FlatStyle</td><td>стиль компонента: обычный — Standard, плоский — Flat, всплывающий — Popup</td></tr>
+          </table>
+        </div>${src(SB + "стр. 188 (два состояния), стр. 189 (таблица свойств)")}`;
+      },
+    },
+    {
+      badge: "Практика · свойства",
+      shortTitle: "Какое свойство?",
+      timing: "17–22 мин",
+      source: SB + "стр. 189",
+      notes: "Индивидуально, затем проверка у доски: ученик называет свойство и его значение. Щёлкните вариант в строке.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Какое свойство нужно изменить?</h2>
+          ${matcher("pr1", [["chk", "Checked"], ["en", "Enabled"], ["vis", "Visible"], ["fs", "FlatStyle"]], [
+            { t: "Переключатель должен быть выбран при запуске программы.", ans: "chk" },
+            { t: "Флажок виден, но щёлкнуть по нему нельзя — он неактивен.", ans: "en" },
+            { t: "Поле ввода richTextBox1 скрыто, пока не выбран «Ввод с клавиатуры».", ans: "vis" },
+            { t: "Флажок должен выглядеть «всплывающим» (Popup).", ans: "fs" },
+          ])}
+          ${matcher("pr2", [["tx", "Text"], ["ta", "TextAlign"], ["ca", "CheckAlign"], ["ac", "AutoCheck"]], [
+            { t: "Изменить подпись «radioButton1» на «Сумма элементов».", ans: "tx" },
+            { t: "Расположить квадратик флажка слева или справа от подписи.", ans: "ca" },
+            { t: "Выровнять подпись по центру (MiddleCenter).", ans: "ta" },
+            { t: "Состояние не должно меняться автоматически при щелчке.", ans: "ac" },
+          ])}
+        </div>${src(SB + "стр. 189 (таблица свойств)")}`;
+      },
+    },
+    {
+      badge: "Новое · ветвление",
+      shortTitle: "Проверка Checked в коде",
+      timing: "22–28 мин",
+      source: SB + "стр. 190–191",
+      notes: "Разберите правило по коду учебника. Для группы переключателей — цепочка if … else if (выбран только один). Для флажков — независимые if: каждый флажок проверяется отдельно. Вопрос: что будет при двух отмеченных флажках, если написать else if? Откройте ответ.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:18px;">
+          <div class="stack"><b>RadioButton — один вариант: if … else if</b>${code(`if (radioButton1.Checked)
+{ // массив случайных чисел
+}
+else if (radioButton2.Checked)
+{ // массив в программном коде
+}
+else if (radioButton3.Checked)
+{ // ввод с клавиатуры
+}`, 15)}</div>
+          <div class="stack"><b>CheckBox — независимые опции: отдельные if</b>${code(`private void button2_Click(object sender, EventArgs e)
+{
+    if (checkBox1.Checked) label1.Visible = true;
+    if (checkBox2.Checked) label2.Visible = true;
+}`, 14.5)}
+            ${reveal("r-elseif", "А если написать else if?", "При двух отмеченных флажках сработает только <b>первая</b> ветка: label2 не появится. Поэтому флажки проверяют независимыми операторами if.")}</div>
+        </div></div>${src(SB + "стр. 190 (button2_Click), стр. 190–191 (button1_Click: if … else if)")}`;
+      },
+    },
+    {
+      badge: "Модель · приложение учебника",
+      shortTitle: "Переключатели и флажки",
+      timing: "28–36 мин",
+      source: SB + "стр. 189–191",
+      notes: "Модель приложения из учебника. Выберите способ задания массива, нажмите «Массив», отметьте флажки и нажмите «Подсчет». Спросите учеников перед каждым нажатием, что появится. Ввод с клавиатуры — строки richTextBox1 с рисунка учебника (максимум 18, сумма 16).",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:18px;grid-template-columns:1.25fr 1fr;">
+          <div>${appDemo()}</div>
+          <div class="stack">${code(`// фрагмент button1_Click (радио 2)
+int[] B = new int[6] {12,5,8,23,45,6};
+int m = B.Length;
+label3.Text = "";
+for (int i = 0; i <= m - 1; i++)
+  label3.Text = label3.Text + " "
+              + Convert.ToString(B[i]);
+label1.Text = " =" + B.Max();
+label2.Text = " =" + B.Sum();`, 13.5)}
+            <div class="note"><span class="mono">B.Max()</span> и <span class="mono">B.Sum()</span> — максимум и сумма элементов массива.</div></div>
+        </div></div>${src(SB + "стр. 189 (интерфейс приложения), стр. 190–191 (код программы)")}`;
+      },
+    },
+    {
+      badge: "Практика · анализ кода",
+      shortTitle: "Что увидит пользователь?",
+      timing: "36–42 мин",
+      source: SB + "стр. 190–191",
+      notes: "Краткий ответ: выбран переключатель «Определение массива в программном коде», нажаты «Массив» и «Подсчет». Ученики определяют, какие результаты появятся. Проверьте на модели предыдущего слайда.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Массив {12, 5, 8, 23, 45, 6}. Что появится после «Подсчет»?</h2>
+          ${matcher("vis", [["max", "только максимум = 45"], ["sum", "только сумма = 99"], ["both", "максимум и сумма"], ["none", "ничего"]], [
+            { t: "Отмечен только checkBox1 «Максимум элементов».", ans: "max" },
+            { t: "Отмечены оба флажка.", ans: "both" },
+            { t: "Флажки не отмечены.", ans: "none" },
+            { t: "Отмечен только checkBox2 «Сумма элементов».", ans: "sum" },
+            { t: "Отмечены оба флажка, но в коде <span class='mono'>else if (checkBox2.Checked)</span>.", ans: "max" },
+          ])}
+        </div>${src(SB + "стр. 190 (button2_Click), стр. 191 (массив B, B.Max(), B.Sum())")}`;
+      },
+    },
+    {
+      badge: "Практика · Visual Studio",
+      shortTitle: "Практическая работа",
+      timing: "42–62 мин",
+      source: "КСП урока 4; " + SB + "стр. 189–191; " + PM + "слайд 8",
+      notes: "Проект 1 — все (по учебнику), проект 2 — большинство, задание 3 учебника — некоторые. Ученики сверяются с дескрипторами. Напомните: во второй ветке учебника объявлен новый локальный массив int[] B — лучше использовать поле B.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:18px;">
+          <div class="stack">
+            <div class="card"><h3>Проект 1 · «Анализатор массива»</h3><p>Три RadioButton: случайные числа, массив в коде, ввод в richTextBox1. Два CheckBox: максимум и сумма. Кнопки «Массив», «Подсчет», «Очистить».</p></div>
+            <div class="card"><h3>Проект 2 · «Калькулятор на переключателях»</h3><p>Четыре RadioButton: +, −, *, /. По кнопке выполнить выбранную операцию над числами из textBox1 и textBox2; при делении проверить <span class="mono">if (b == 0)</span> и вывести «Ошибка: деление на 0!».</p></div>
+            <div class="card text-xs"><b>Некоторые (задание 3, стр. 191):</b> вместо максимума и суммы подсчитать количество отрицательных чётных и положительных нечётных чисел.</div>
+          </div>
+          <div class="card"><h3>✅ Дескрипторы</h3><p>
+            1. Размещает RadioButton и CheckBox, задаёт свойство Text.<br>
+            2. Использует свойство Visible для скрытия и показа компонентов.<br>
+            3. Проверяет переключатели цепочкой <span class="mono">if … else if</span> по свойству Checked.<br>
+            4. Проверяет флажки независимыми операторами <span class="mono">if</span>.<br>
+            5. Заполняет массив выбранным способом и выводит его.<br>
+            6. Обрабатывает деление на 0 условным оператором.</p></div>
+        </div></div>${src("КСП урока 4 (проекты); " + SB + "стр. 189–191 (приложение, задание 3); " + PM + "слайд 8 (проверка деления на 0)")}`;
+      },
+    },
+    {
+      badge: "Практика · тестирование",
+      shortTitle: "Тестирование комбинаций",
+      timing: "62–70 мин",
+      source: SB + "стр. 190–191; " + PM + "слайд 8",
+      notes: "Взаимопроверка: соседи по парте проверяют все комбинации переключателей и флажков, затем калькулятор. Ученики отмечают верные утверждения — щёлкните для проверки.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Проверь своё приложение</h2>
+          ${statements("tst", [
+            { t: "Если не выбран ни один переключатель, кнопка «Массив» не сформирует массив.", ok: true, why: "ни одна ветка if не выполнится" },
+            { t: "Можно одновременно выбрать «Массив случайных чисел» и «Ввод с клавиатуры».", ok: false, why: "переключатель — только один вариант" },
+            { t: "Можно одновременно отметить «Максимум» и «Сумма».", ok: true },
+            { t: "При b = 0 и выбранном «/» программа выводит сообщение об ошибке, а не аварийно завершается.", ok: true },
+            { t: "Кнопка «Очистить» должна снова скрыть label1 и label2 (Visible = false).", ok: true },
+          ])}
+        </div>${src(SB + "стр. 188 (выбор одного/нескольких), стр. 190 (button3_Click); " + PM + "слайд 8 (деление на 0)")}`;
+      },
+    },
+
+    /* ---------------- КОНЕЦ УРОКА (10 мин) ---------------- */
+    {
+      badge: "Конец урока · блиц",
+      shortTitle: "Блиц-опрос по свойствам",
+      timing: "70–75 мин",
+      source: "КСП урока 4; " + SB + "стр. 189–190",
+      notes: "Блиц-опрос из КСП: щёлкните вариант после ответов учеников.",
+      render() {
+        return `<div class="body"><div class="grid-2 quizgrid" style="gap:14px;">
+          ${quiz("b1", "1. Какое свойство задаёт положение квадратика флажка относительно надписи?", ["TextAlign", "CheckAlign", "FlatStyle", "AutoCheck"], 1)}
+          ${quiz("b2", "2. Какое свойство равно True, если флажок отмечен?", ["Enabled", "Visible", "Checked", "Text"], 2)}
+          ${quiz("b3", "3. Какой компонент позволяет выбрать только один вариант из нескольких?", ["CheckBox", "RadioButton", "ListBox", "Button"], 1)}
+          ${quiz("b4", "4. Почему для двух CheckBox не используют else if?", ["так короче", "иначе при двух отмеченных сработает только первый", "else if не работает в C#", "CheckBox не имеет Checked"], 1)}
+        </div></div>${src("КСП урока 4 (блиц-опрос); " + SB + "стр. 189 (свойства), стр. 190 (button2_Click)")}`;
+      },
+    },
+    {
+      badge: "Конец урока · рефлексия",
+      shortTitle: "Рефлексия и домашнее задание",
+      timing: "75–80 мин",
+      source: "КСП урока 4; " + SB + "стр. 189",
+      notes: "Рефлексия: ученики завершают фразы в тетради. Сверьтесь с критериями. Домашнее задание из КСП.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;">
+          <div class="stack">
+            <h2 class="slide-h2">Рефлексия</h2>
+            <div class="card"><p>Я различаю RadioButton и CheckBox так: …</p></div>
+            <div class="card"><p>В коде я проверяю выбор с помощью свойства …</p></div>
+            <div class="card"><p>Мне ещё трудно …</p></div>
+          </div>
+          <div class="stack">
+            <h2 class="slide-h2">Домашнее задание</h2>
+            <div class="card"><h3>📝 Повторить</h3><p>Таблицу свойств RadioButton и CheckBox (учебник, стр. 189).</p></div>
+            <div class="card"><h3>✏ Спроектировать</h3><p>Интерфейс формы расчёта стоимости заказа: переключатели способа доставки и флажки дополнительных услуг. Запиши, какой оператор if проверяет каждый компонент.</p></div>
+          </div>
+        </div></div>${src("КСП урока 4 (домашнее задание); " + SB + "стр. 189 (таблица свойств)")}`;
+      },
+    },
+  ],
+});
+</script>
+</body>
+</html>

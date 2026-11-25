@@ -1,0 +1,4917 @@
+{
+  "topic": "g10-osnovnye-tegi-html-struktura-dokumenta-i-verstka",
+  "summary": "Структура HTML-документа, теги форматирования текста и абзацев, списки, атрибуты, гиперссылки, мультимедиа, таблицы с объединением ячеек, CSS (внешний, внутренний, встроенный), селекторы и блочная вёрстка.",
+  "theory": [
+    {
+      "title": "Язык HTML и структура HTML-документа",
+      "objectives": [
+        "10.1.2.2"
+      ],
+      "blocks": [
+        {
+          "type": "definition",
+          "term": "HTML (HyperText Markup Language)",
+          "content": "Язык разметки (маркировки) гипертекста. HTML **не является языком программирования** — он создан для разметки веб-страниц. С помощью языка разметки браузер получает инструкции об отображении текстов, мультимедиа и других элементов страницы на экране."
+        },
+        {
+          "type": "paragraph",
+          "content": "HTML-документ создаётся в простом текстовом редакторе (Блокнот, Notepad++, VS Code) и не требует специальной среды разработки. Расширение файлов — **.htm** или **.html**.\n\nОтображение одного и того же кода может отличаться в разных браузерах и даже в разных версиях одного браузера. Поэтому после разработки страницу нужно **протестировать в разных браузерах**."
+        },
+        {
+          "type": "heading",
+          "text": "Правила записи тегов",
+          "level": 3
+        },
+        {
+          "type": "list",
+          "items": [
+            "Код разметки состоит из **тегов**. Название тега заключается в угловые скобки `<` и `>`.",
+            "Различают **открывающие** `<тег>` и **закрывающие** `</тег>` теги — у закрывающего есть символ `/`.",
+            "**Парные теги** (контейнеры) показывают диапазон влияния правила: `<название> … </название>`. Парные теги должны быть строго вложены друг в друга.",
+            "**Непарные (одиночные) теги** — только открывающие, сразу содержат название и атрибуты: `<название атрибут=\"значение\">`. Примеры: `<br>`, `<hr>`, `<img>`, `<meta>`."
+          ],
+          "ordered": false
+        },
+        {
+          "type": "heading",
+          "text": "Две части документа: заголовок и «тело»",
+          "level": 3
+        },
+        {
+          "type": "paragraph",
+          "content": "Внутри корневого контейнера `<html>` документ состоит из двух частей: **заголовка** `<head>` и **«тела»** `<body>`.\n\n| Тег | Назначение | Пример |\n|---|---|---|\n| `<html>…</html>` | Корневой элемент — контейнер всей веб-страницы; есть во всех HTML-документах | — |\n| `<head>…</head>` | Служебный заголовок: теги внутри него **не отображаются** на странице, а описывают кодировку, стили, связи между файлами, имя вкладки | `<meta charset=\"utf-8\">` — кодировка Unicode (UTF-8); `<title>Моя первая программа</title>` — заголовок вкладки |\n| `<body>…</body>` | «Тело»: здесь формируется **видимое содержание** страницы | `<p align=center>Привет, МИР!!!</p>` |"
+        },
+        {
+          "type": "diagram",
+          "format": "mermaid",
+          "content": "flowchart TD\n  H[\"html — корневой элемент\"] --> HEAD[\"head — заголовок (не виден на странице)\"]\n  H --> BODY[\"body — тело (видимое содержание)\"]\n  HEAD --> M[\"meta charset=utf-8 — кодировка\"]\n  HEAD --> T[\"title — имя вкладки\"]\n  BODY --> P[\"p, h1…h6, списки, таблицы, ссылки, изображения\"]",
+          "caption": "Структура HTML-документа"
+        },
+        {
+          "type": "code",
+          "language": "html",
+          "content": "<!DOCTYPE html>\n<html>\n<head>\n    <meta charset=\"utf-8\">\n    <title>Моя первая программа</title>\n</head>\n<body bgcolor=\"red\">\n    <p align=center>Привет, МИР!!!</p>\n</body>\n</html>",
+          "caption": "index.html — первая веб-страница"
+        },
+        {
+          "type": "html_preview",
+          "title": "Результат: содержимое <body>",
+          "html": "<p align=center>Привет, МИР!!!</p>",
+          "height": 90
+        },
+        {
+          "type": "paragraph",
+          "content": "Если русские буквы отображаются неправильно, проверьте строку `<meta charset=\"utf-8\">` и сохраните файл в кодировке UTF-8."
+        },
+        {
+          "type": "definition",
+          "term": "Комментарий в HTML",
+          "content": "Пояснение в коде, записанное внутри `<!-- текст комментария -->`. Комментарии не видны в окне браузера и используются, чтобы аннотировать (пояснять) разметку."
+        },
+        {
+          "type": "exam_tip",
+          "content": "`<title>` задаёт заголовок **вкладки браузера**, а не заголовок на самой странице (для него — `<h1>…<h6>`). Тег `<title>` находится в `<head>`."
+        }
+      ]
+    },
+    {
+      "title": "Атрибуты тегов и их значения",
+      "objectives": [
+        "10.1.2.5"
+      ],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "content": "Многие теги уточняются **атрибутами**. Атрибут записывается в открывающем теге после его названия, а его **значение** — после знака `=`, обычно в кавычках:\n\n`<название_тега атрибут=\"значение\">`\n\nНапример, в `<body bgcolor=\"yellow\">` тег — `body`, атрибут — `bgcolor`, значение — `yellow` (жёлтый фон всей страницы)."
+        },
+        {
+          "type": "paragraph",
+          "content": "| Тег | Атрибут | Возможные значения | Что задаёт |\n|---|---|---|---|\n| `<body>` | `bgcolor` | название цвета: `red`, `yellow`… | цвет фона страницы |\n| `<p>`, `<h1>`…`<h6>` | `align` | `left`, `center`, `right` (у заголовка ещё `justify`) | горизонтальное выравнивание |\n| `<font>` | `size` | 1–7 (условные единицы) | размер шрифта |\n| `<font>` | `color` | название цвета | цвет текста |\n| `<font>` | `face` | `Arial`, `Times New Roman`… | гарнитура шрифта |\n| `<hr>` | `align`, `color`, `size`, `width`, `noshade` | `center`; `red`; `3px`; `70%`; без значения | выравнивание, цвет, толщина, ширина линии; `noshade` — без трёхмерного эффекта |\n| `<ul>` | `type` | `disc`, `circle`, `square` | вид маркера |\n| `<ol>` | `type` | `1`, `A`, `a`, `I`, `i` | вид нумерации |"
+        },
+        {
+          "type": "code",
+          "language": "html",
+          "content": "<p><font size=\"5\" color=\"red\" face=\"Arial\">Мое хобби</font> футбол.\nЯ занимаюсь этим видом спорта с 5 лет.</p>\n<hr align=center color=red noshade size=3px width=70%>",
+          "caption": "Тег <font> и тег <hr> с атрибутами"
+        },
+        {
+          "type": "html_preview",
+          "title": "Результат",
+          "html": "<p><font size=\"5\" color=\"red\" face=\"Arial\">Мое хобби</font> футбол.\nЯ занимаюсь этим видом спорта с 5 лет.</p>\n<hr align=center color=red noshade size=3px width=70%>",
+          "height": 130
+        },
+        {
+          "type": "example",
+          "title": "Как найти тег, атрибут и значение",
+          "content": "`<font size=\"6\" color=\"blue\" face=\"times new roman\">`\n\n- тег — `font`;\n- атрибуты — `size`, `color`, `face`;\n- их значения — `6`, `blue`, `times new roman`.\n\nВ одном теге может быть несколько атрибутов; они разделяются пробелами."
+        },
+        {
+          "type": "warning",
+          "content": "Атрибут пишут **внутри открывающего** тега, а не в закрывающем: `<p align=center>…</p>`, а не `<p>…</p align=center>`."
+        }
+      ]
+    },
+    {
+      "title": "Заголовки, абзацы и списки",
+      "objectives": [
+        "10.1.2.4"
+      ],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "content": "| Тег | Назначение | Пример |\n|---|---|---|\n| `<h1>…</h1>` … `<h6>…</h6>` | заголовки шести уровней (`<Hn>`, 1 ≤ n ≤ 6); атрибут `align` | `<H1 align=center>Привет!</H1>` |\n| `<p>…</p>` | абзац текста | `<p align=center>Привет, МИР!!!</p>` |\n| `<br>` (непарный) | переход на новую строку — аналог клавиши Enter | `Привет, МИР!!! <BR> Привет, мой город!` |\n| `<hr>` (непарный) | горизонтальная разделительная линия | `<HR width=70%>` |"
+        },
+        {
+          "type": "html_preview",
+          "title": "Заголовок, абзацы, перенос строки и линия",
+          "html": "<H1 align=center>Привет!</H1>\n<p align=center>Привет, МИР!!! <BR> Привет, мой город!</p>\n<HR align=center color=red noshade size=3px width=70%>\n<p>Второй абзац начинается с новой строки.</p>",
+          "height": 220
+        },
+        {
+          "type": "heading",
+          "text": "Списки",
+          "level": 3
+        },
+        {
+          "type": "paragraph",
+          "content": "Списки делают перечисления наглядными, показывают иерархию категорий и облегчают чтение страницы. Для списков используются два парных тега-контейнера, а каждый пункт создаётся парным тегом `<li>…</li>` (List Item):\n\n- `<ol>…</ol>` (Ordered List) — **нумерованный** список; атрибут `type`: `1` — арабские числа, `A` — прописные латинские буквы, `a` — строчные латинские буквы, `I` — римские числа в верхнем регистре, `i` — в нижнем регистре;\n- `<ul>…</ul>` (Unordered List) — **маркированный** список; атрибут `type`: `disc` — закрашенный кружок (по умолчанию), `circle` — пустой кружок, `square` — квадратик."
+        },
+        {
+          "type": "paragraph",
+          "content": "Список `<ul>` можно вложить внутрь пункта `<li>` нумерованного списка `<ol>` — получится многоуровневый список."
+        },
+        {
+          "type": "code",
+          "language": "html",
+          "content": "<H1 align=center><font color=\"red\">Виды спорта</font></H1>\n<OL>\n  <LI>Зимние виды спорта:\n    <UL type=\"disc\">\n      <LI>фигурное катание;</LI>\n      <LI>хоккей;</LI>\n    </UL>\n  </LI>\n  <LI>Летние виды спорта:\n    <UL type=\"circle\">\n      <LI>пляжный волейбол;</LI>\n      <LI>футбол;</LI>\n    </UL>\n  </LI>\n  <LI>Единоборства:\n    <UL type=\"square\">\n      <LI>джиу-джитсу;</LI>\n      <LI>женская борьба;</LI>\n      <LI>борьба на поясах.</LI>\n    </UL>\n  </LI>\n</OL>",
+          "caption": "lists.html — вложенные списки"
+        },
+        {
+          "type": "html_preview",
+          "title": "Результат: вложенные списки",
+          "html": "<H1 align=center><font color=\"red\">Виды спорта</font></H1>\n<OL>\n  <LI>Зимние виды спорта:\n    <UL type=\"disc\"><LI>фигурное катание;</LI><LI>хоккей;</LI></UL>\n  </LI>\n  <LI>Летние виды спорта:\n    <UL type=\"circle\"><LI>пляжный волейбол;</LI><LI>футбол;</LI></UL>\n  </LI>\n  <LI>Единоборства:\n    <UL type=\"square\"><LI>джиу-джитсу;</LI><LI>женская борьба;</LI><LI>борьба на поясах.</LI></UL>\n  </LI>\n</OL>",
+          "height": 360
+        },
+        {
+          "type": "html_preview",
+          "title": "Атрибут type у <ol>",
+          "html": "<ol type=\"A\"><li>Футбол</li><li>Хоккей</li></ol>\n<ol type=\"i\"><li>Футбол</li><li>Хоккей</li></ol>",
+          "height": 170
+        },
+        {
+          "type": "warning",
+          "content": "Не путайте: `<ol>` — **нумерованный** (ordered), `<ul>` — **маркированный** (unordered). `<li>` — это пункт списка, а не сам список."
+        }
+      ]
+    },
+    {
+      "title": "Теги форматирования текста",
+      "objectives": [
+        "10.1.2.3"
+      ],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "content": "| Тег | Логический (семантический) аналог | Действие |\n|---|---|---|\n| `<b>…</b>` | `<strong>…</strong>` | жирное начертание (важный текст) |\n| `<i>…</i>` | `<em>…</em>` | курсив (акцент) |\n| `<u>…</u>` | `<ins>…</ins>` | подчёркнутый (вставленный) текст |\n| `<s>…</s>` | `<del>…</del>` | перечёркнутый (удалённый) текст |\n| — | `<mark>…</mark>` | выделение ярким жёлтым маркером |\n| `<small>…</small>` | — | уменьшение размера шрифта; при вложении `<small>` в `<small>` текст уменьшается ещё |\n| `<sup>…</sup>` | — | верхний индекс: `x<sup>2</sup>` |\n| `<sub>…</sub>` | — | нижний индекс: `H<sub>2</sub>O` |"
+        },
+        {
+          "type": "html_preview",
+          "title": "Результат тегов форматирования",
+          "html": "<p><b>Привет</b> и <strong>Привет</strong> — жирный</p>\n<p><i>Привет</i> и <em>Привет</em> — курсив</p>\n<p><u>Привет</u> и <ins>Привет</ins> — подчёркнутый</p>\n<p><s>Привет</s> и <del>Привет</del> — перечёркнутый</p>\n<p><mark>Привет</mark> — маркер; <small>Привет <small>Привет</small></small> — уменьшение</p>\n<p>x<sup>2</sup> и H<sub>2</sub>O — индексы</p>",
+          "height": 290
+        },
+        {
+          "type": "callout",
+          "tone": "info",
+          "title": "Чем <b> отличается от <strong>?",
+          "content": "Визуально в обычном браузере `<b>` и `<strong>`, `<i>` и `<em>` выглядят одинаково. Разница проявляется в **речевых браузерах** (экранных дикторах) для слабовидящих людей: слова внутри `<strong>` и `<em>` выделяются голосовой интонацией."
+        },
+        {
+          "type": "paragraph",
+          "content": "Теги можно комбинировать, вкладывая один в другой. Например, жирный курсив получится и так: `<I><B>Привет!</B></I>`, и так: `<em><strong>Привет!</strong></em>`, и так: `<em><B>Привет!</B></em>`."
+        },
+        {
+          "type": "html_preview",
+          "title": "Жирный курсив тремя способами",
+          "html": "<p><I><B>Привет!</B></I></p>\n<p><em><strong>Привет!</strong></em></p>\n<p><em><B>Привет!</B></em></p>",
+          "height": 150
+        },
+        {
+          "type": "code",
+          "language": "html",
+          "content": "<p align=center>\n    <font size=\"6\" color=\"red\" face=\"arial\"><b>Моё хобби!</b></font>\n</p>\n<hr>\n<font color=\"blue\" face=\"times new roman\">\n    В свободное время <i>я люблю заниматься спортом.</i>\n    Но больше всего я люблю <u>футбол.</u>\n    Я болею за футбольный клуб <b>\"Шахтер\".</b>\n</font>",
+          "caption": "Фрагмент страницы «Обо мне»"
+        },
+        {
+          "type": "html_preview",
+          "title": "Результат: фрагмент страницы «Обо мне»",
+          "html": "<p align=center>\n    <font size=\"6\" color=\"red\" face=\"arial\"><b>Моё хобби!</b></font>\n</p>\n<hr>\n<font color=\"blue\" face=\"times new roman\">\n    В свободное время <i>я люблю заниматься спортом.</i>\n    Но больше всего я люблю <u>футбол.</u>\n    Я болею за футбольный клуб <b>\"Шахтер\".</b>\n</font>",
+          "height": 180
+        },
+        {
+          "type": "warning",
+          "content": "Вложенные теги закрываются в обратном порядке: `<I><B>Привет!</B></I>`, а не `<I><B>Привет!</I></B>`."
+        }
+      ]
+    },
+    {
+      "title": "Гиперссылки",
+      "objectives": [
+        "10.1.2.6"
+      ],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "content": "Просмотр HTML-документов в браузере организован с помощью **гиперссылок**: нажав на ссылку, можно сразу перейти к другому документу или разделу. Ссылку можно сделать и на файл любого типа. При наведении на ссылку курсор-стрелка превращается в «маленькую руку»."
+        },
+        {
+          "type": "definition",
+          "term": "Тег <a>…</a>",
+          "content": "Парный тег гиперссылки (anchor). Его обязательный атрибут **href** задаёт адрес (URL), куда перейдёт браузер. Ссылка состоит из **указателя** — видимой части между `<a …>` и `</a>` (текст или изображение) — и **адресной части**, где указан адрес ресурса."
+        },
+        {
+          "type": "code",
+          "language": "html",
+          "content": "<a href=\"https://www.w3schools.com/html/\">Visit our HTML tutorial</a>",
+          "caption": "Тег a, атрибут href и текст ссылки"
+        },
+        {
+          "type": "definition",
+          "term": "URL (Uniform Resource Locator)",
+          "content": "Унифицированный адрес ресурса в формате `протокол://имя сервера:порт/путь`. Протоколы: **File** — доступ к файлу на локальном диске; **HTTP** — доступ к веб-странице; **HTTPS** — HTTP с шифрованием (высокая защита данных); **FTP** — получение файлов; **MailTo** — почтовое соединение с адресатом."
+        },
+        {
+          "type": "heading",
+          "text": "Виды адресов в href",
+          "level": 3
+        },
+        {
+          "type": "paragraph",
+          "content": "| Вид ссылки | Запись в `href` | Назначение |\n|---|---|---|\n| Внешняя (абсолютная) | `href=\"https://site.kz\"` | полный адрес, начиная с протокола; переход на другой сайт |\n| Локальная (относительная) | `href=\"about.html\"` | переход к файлу того же сайта; такие ссылки короче и не загромождают код |\n| Закладка (якорь) | `href=\"#C4\"` → `id=\"C4\"` | прокрутка к разделу текущей страницы |\n| Закладка на другой странице | `href=\"page.html#C4\"` | переход на другую страницу сразу к разделу C4 |"
+        },
+        {
+          "type": "heading",
+          "text": "Атрибут target",
+          "level": 3
+        },
+        {
+          "type": "paragraph",
+          "content": "Атрибут `target` указывает, **где открыть** документ по ссылке:\n\n| Значение | Поведение |\n|---|---|\n| `_self` | в том же окне/вкладке (по умолчанию) |\n| `_blank` | в новом окне или новой вкладке |\n| `_parent` | во фрейм-родитель |\n| `_top` | в полное окно браузера |"
+        },
+        {
+          "type": "code",
+          "language": "html",
+          "content": "<p><a href=\"https://www.w3schools.com/\" target=\"_blank\">Открыть учебник в новой вкладке</a></p>\n<p><a href=\"contacts.html\" target=\"_self\">Перейти к контактам в этом же окне</a></p>",
+          "caption": "Атрибут target"
+        },
+        {
+          "type": "paragraph",
+          "content": "Другие атрибуты тега `<a>`: `download` — при клике файл загружается; `hreflang` — помогает искать ресурсы на языке пользователя."
+        },
+        {
+          "type": "heading",
+          "text": "Ссылка-изображение",
+          "level": 3
+        },
+        {
+          "type": "paragraph",
+          "content": "Указателем ссылки может быть не только текст, но и изображение: тег `<img>` вкладывается внутрь тега `<a>`."
+        },
+        {
+          "type": "code",
+          "language": "html",
+          "content": "<a href=\"https://www.w3schools.com\" target=\"_blank\">\n    <img src=\"logo.png\" alt=\"Логотип\" width=\"120\">\n</a>",
+          "caption": "Кликабельное изображение"
+        },
+        {
+          "type": "heading",
+          "text": "HTML-закладки (якоря)",
+          "level": 3
+        },
+        {
+          "type": "paragraph",
+          "content": "Закладки позволяют быстро переходить к нужным частям **длинной** страницы (статья, оглавление книги)."
+        },
+        {
+          "type": "steps",
+          "title": "Как создать закладку",
+          "items": [
+            "Отметьте нужный элемент закладкой с уникальным именем через атрибут `id`: `<h2 id=\"C4\">Chapter 4</h2>`.",
+            "Создайте ссылку на закладку: в `href` перед именем поставьте символ `#`: `<a href=\"#C4\">Jump to Chapter 4</a>`.",
+            "При нажатии на ссылку страница прокрутится к месту с закладкой."
+          ]
+        },
+        {
+          "type": "code",
+          "language": "html",
+          "content": "<ul id=\"navbar\">\n  <li><a href=\"#messi\">Лионель Месси</a></li>\n  <li><a href=\"#diego\">Диего Марадона</a></li>\n</ul>\n<h2 id=\"messi\">Лионель Месси</h2>\n<p>Игрок сборной Аргентины.</p>\n<h2 id=\"diego\">Диего Марадона</h2>\n<p>Аргентинская легенда.</p>",
+          "caption": "Меню из закладок (оформление меню — во внутреннем CSS)"
+        },
+        {
+          "type": "html_preview",
+          "title": "Результат: меню-закладки",
+          "html": "<ul id=\"navbar\">\n  <li><a href=\"#messi\">Лионель Месси</a></li>\n  <li><a href=\"#diego\">Диего Марадона</a></li>\n</ul>\n<h2 id=\"messi\">Лионель Месси</h2>\n<p>Игрок сборной Аргентины.</p>\n<h2 id=\"diego\">Диего Марадона</h2>\n<p>Аргентинская легенда.</p>",
+          "css": "#navbar { margin: 0; padding: 0; list-style-type: none; width: 160px; }\n#navbar li { border-left: 10px solid SlateBlue; border-bottom: 2px solid SlateBlue; }\n#navbar a { background-color: Pink; color: Blue; padding: 5px;\n            text-decoration: none; font-weight: bold; display: block; }",
+          "height": 280
+        },
+        {
+          "type": "paragraph",
+          "content": "Ссылкой можно открыть и почту: `<a href=\"mailto:aibar@mail.ru\">Email Us</a>`."
+        },
+        {
+          "type": "warning",
+          "content": "Имя закладки в `id` пишут **без** `#`, а в `href` — **с** `#`: `id=\"C4\"` и `href=\"#C4\"`."
+        }
+      ]
+    },
+    {
+      "title": "Мультимедиа на веб-странице и авторские права",
+      "objectives": [
+        "10.1.2.7"
+      ],
+      "blocks": [
+        {
+          "type": "cards",
+          "items": [
+            {
+              "title": "Уровень структуры — HTML (content layer)",
+              "content": "Структура и содержимое страницы: теги, вставка изображений, видео и аудио, комментарии `<!-- … -->`."
+            },
+            {
+              "title": "Уровень презентации — CSS (presentation layer)",
+              "content": "Внешний вид: дизайн, цвета, шрифты, расположение блоков, размеры и фоновые изображения."
+            },
+            {
+              "title": "Уровень поведения — JavaScript (behavior layer)",
+              "content": "Интерактивность, сценарии и реакция страницы на действия пользователя."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": "Три вида мультимедиа на сайте: **изображения** (фотографии, иллюстрации, иконки, инфографика), **видео** (обучающие ролики, обзоры, фоновые заставки) и **аудио** (подкасты, произношение слов, музыкальное сопровождение)."
+        },
+        {
+          "type": "paragraph",
+          "content": "| Формат | Особенности в вебе |\n|---|---|\n| JPG / JPEG | растровый со сжатием — для фотографий |\n| PNG / GIF | PNG поддерживает прозрачный фон; GIF — простую покадровую анимацию |\n| SVG | векторный, масштабируется без потери качества (иконки, логотипы) |\n| BMP | несжатый растровый, большой вес файла, в Интернете используется редко |\n\nВидеоформаты: MPG, MPEG, AVI, WMV, MOV, RM, RAM, SWF, FLV, OGG, WEBM, MP4. Аудиоформаты: MID, MIDI, RM, RAM, WMA, AAC, WAV, OGG, MP3. В веб-дизайне чаще всего используют JPG и PNG, аудио MP3 и видео MP4."
+        },
+        {
+          "type": "heading",
+          "text": "Изображение: тег <img>",
+          "level": 3
+        },
+        {
+          "type": "definition",
+          "term": "<img>",
+          "content": "Непарный тег для вставки изображения. Два обязательных атрибута: **src** (source) — путь к файлу изображения; **alt** (alternative text) — альтернативный текст: он показывается, если картинка не загрузилась, и озвучивается программами чтения с экрана."
+        },
+        {
+          "type": "code",
+          "language": "html",
+          "content": "<img src=\"A-study-in-scarlet.jpg\" alt=\"Title of Novel\">",
+          "caption": "Синтаксис тега img"
+        },
+        {
+          "type": "html_preview",
+          "title": "Файл не найден — браузер показывает текст alt",
+          "html": "<h2>The first book about Sherlock Holmes was published in 1887</h2>\n<img src=\"A-study-in-scarlet.jpg\" alt=\"Title of Novel\">",
+          "height": 150
+        },
+        {
+          "type": "paragraph",
+          "content": "Путь в `src`:\n\n- только имя файла — файл лежит в той же папке, что и HTML-документ: `src=\"1.png\"`;\n- имя папки и `/` — файл во вложенной папке: `src=\"/images/A-study-in-scarlet.jpg\"`;\n- полный URL, начиная с `https://` — картинка на другом сайте (нужен Интернет и соблюдение авторских прав)."
+        },
+        {
+          "type": "paragraph",
+          "content": "| Атрибут `<img>` | Что задаёт | Пример |\n|---|---|---|\n| `width`, `height` | ширину и высоту (по умолчанию в пикселях, можно без «px») | `width=\"500\" height=\"600\"` |\n| `style` | размеры через встроенный CSS | `style=\"width:500px;height:600px;\"` |\n| `align` | обтекание текстом: `top`, `bottom`, `middle`, `left`, `right` | `align=\"right\"` |\n| `border` | ширину рамки изображения | `border=\"2px\"` |\n| `hspace`, `vspace` | горизонтальный (слева и справа) и вертикальный (сверху и снизу) отступ | `hspace=\"5px\"` |"
+        },
+        {
+          "type": "heading",
+          "text": "Аудио и видео",
+          "level": 3
+        },
+        {
+          "type": "code",
+          "language": "html",
+          "content": "<!-- 1. Вставка звукового файла (аудиоплеер): -->\n<audio controls>\n    <source src=\"music.mp3\" type=\"audio/mpeg\">\n    Ваш браузер не поддерживает аудио элемент.\n</audio>\n<!-- 2. Вставка видеоролика (видеоплеер): -->\n<video width=\"480\" height=\"320\" controls>\n    <source src=\"movie.mp4\" type=\"video/mp4\">\n    Ваш браузер не поддерживает видео тег.\n</video>",
+          "caption": "Теги audio и video"
+        },
+        {
+          "type": "paragraph",
+          "content": "Вложенный тег `<source>` указывает путь к медиафайлу (`src`) и его тип (`audio/mpeg`, `video/mp4`). Текст внутри `<audio>`/`<video>` браузер покажет, только если не поддерживает этот тег.\n\n| Атрибут | Описание |\n|---|---|\n| `controls` | вывод панели управления (Play/Pause, полоса прокрутки, громкость) |\n| `autoplay` | автоматическое воспроизведение после загрузки |\n| `loop` | многократное воспроизведение |\n| `width`, `height` | ширина и высота области воспроизведения видео |\n| `preload` | загрузка мультимедиа вместе с загрузкой страницы |\n| `src` | путь к воспроизводимому файлу |"
+        },
+        {
+          "type": "callout",
+          "tone": "warning",
+          "title": "Авторские права",
+          "content": "При размещении изображений, музыки и видео обязательно проверяйте **лицензию** (например, Creative Commons) и **указывайте автора** источника. Для картинки с чужого сайта, вставленной по URL, тоже нужно соблюдать авторские права."
+        }
+      ]
+    },
+    {
+      "title": "Таблицы в HTML",
+      "objectives": [
+        "10.1.2.8"
+      ],
+      "blocks": [
+        {
+          "type": "definition",
+          "term": "Таблица в HTML",
+          "content": "Способ организации и представления данных в виде строк и столбцов, чтобы информация выглядела структурированной и легко читалась. Таблицы используют для систематизации данных (списки товаров, оценки, расписание), сравнения значений, наглядного показа числовых и текстовых данных, отчётов и прайс-листов."
+        },
+        {
+          "type": "paragraph",
+          "content": "| Тег | Расшифровка | Назначение |\n|---|---|---|\n| `<table>…</table>` | Table | парный контейнер — начало и конец таблицы |\n| `<caption>…</caption>` | Table Caption | наименование (заголовок) таблицы — над таблицей по центру |\n| `<tr>…</tr>` | Table Row | новая строка |\n| `<th>…</th>` | Table Header | ячейка-заголовок столбца (текст жирный и по центру) |\n| `<td>…</td>` | Table Data | обычная ячейка данных внутри строки `<tr>` |"
+        },
+        {
+          "type": "code",
+          "language": "html",
+          "content": "<table border=\"1\">\n  <caption>Образец таблицы</caption>\n  <tr>\n    <th>Поле1</th> <th>Поле2</th> <th>Поле3</th>\n  </tr>\n  <tr>\n    <td>Инфо1</td> <td>Инфо2</td> <td>Инфо3</td>\n  </tr>\n</table>",
+          "caption": "Таблица с заголовком"
+        },
+        {
+          "type": "html_preview",
+          "title": "Результат",
+          "html": "<table border=\"1\">\n  <caption>Образец таблицы</caption>\n  <tr><th>Поле1</th><th>Поле2</th><th>Поле3</th></tr>\n  <tr><td>Инфо1</td><td>Инфо2</td><td>Инфо3</td></tr>\n</table>",
+          "height": 130
+        },
+        {
+          "type": "heading",
+          "text": "Атрибуты тега <table>",
+          "level": 3
+        },
+        {
+          "type": "paragraph",
+          "content": "| Атрибут | Описание | Пример |\n|---|---|---|\n| `border` | толщина рамки в пикселях | `border=\"3\"` |\n| `bordercolor` | цвет рамки | `bordercolor=red` |\n| `bgcolor` | цвет фона таблицы | `bgcolor=yellow` |\n| `background` | фоновый рисунок таблицы | `background=\"C:/1.png\"` |\n| `cellpadding` | отступ от рамки до содержимого ячейки | `cellpadding=\"2\"` |\n| `cellspacing` | расстояние между ячейками | `cellspacing=\"5\"` |\n| `width`, `height` | ширина и высота таблицы | `width=70%` |\n| `align` | выравнивание таблицы | `align=center` |"
+        },
+        {
+          "type": "html_preview",
+          "title": "cellpadding и cellspacing",
+          "html": "<table border=\"1\" cellpadding=\"10\" cellspacing=\"5\" bgcolor=\"yellow\">\n  <tr><th>Имя</th><th>Фамилия</th></tr>\n  <tr><td>Айбар</td><td>Ахметов</td></tr>\n</table>",
+          "height": 140
+        },
+        {
+          "type": "heading",
+          "text": "Выравнивание в ячейках",
+          "level": 3
+        },
+        {
+          "type": "paragraph",
+          "content": "- `align` — по горизонтали: `left` (по умолчанию для `<td>`), `center` (по умолчанию для `<th>`), `right` (удобно для чисел, цен, итогов);\n- `valign` — по вертикали: `top`, `middle` (по умолчанию), `bottom`."
+        },
+        {
+          "type": "html_preview",
+          "title": "align и valign",
+          "html": "<table border=\"1\" width=\"100%\" height=\"90\">\n  <tr>\n    <td align=\"left\" valign=\"top\">left, top</td>\n    <td align=\"center\" valign=\"middle\">center, middle</td>\n    <td align=\"right\" valign=\"bottom\">right, bottom</td>\n  </tr>\n</table>",
+          "height": 120
+        },
+        {
+          "type": "warning",
+          "content": "Заголовок **столбца** создаётся тегом `<th>`, а не `<td>`. Наименование всей таблицы — только `<caption>` (тега `<name>` нет). `bordercolor` — цвет **рамки**, а не фона."
+        }
+      ]
+    },
+    {
+      "title": "Объединение ячеек: colspan и rowspan",
+      "objectives": [
+        "10.1.2.9"
+      ],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "content": "- `colspan` — число объединяемых **столбцов** (ячейка растягивается по горизонтали);\n- `rowspan` — число объединяемых **строк** (ячейка растягивается вниз, по вертикали).\n\nАтрибуты пишут в тегах `<td>` или `<th>`."
+        },
+        {
+          "type": "code",
+          "language": "html",
+          "content": "<table border=\"1\">\n  <tr>\n    <td rowspan=\"3\">span 3 rows</td>\n    <td colspan=\"3\">span 3 columns</td>\n  </tr>\n  <tr>\n    <td>H</td>\n    <td>T</td>\n    <td rowspan=\"2\">span 2 rows</td>\n  </tr>\n  <tr>\n    <td>M</td>\n    <td>L</td>\n  </tr>\n  <tr>\n    <td colspan=\"4\">span 4 columns</td>\n  </tr>\n</table>",
+          "caption": "span_table.html"
+        },
+        {
+          "type": "html_preview",
+          "title": "Результат",
+          "html": "<table border=\"1\">\n  <tr><td rowspan=\"3\">span 3 rows</td><td colspan=\"3\">span 3 columns</td></tr>\n  <tr><td>H</td><td>T</td><td rowspan=\"2\">span 2 rows</td></tr>\n  <tr><td>M</td><td>L</td></tr>\n  <tr><td colspan=\"4\">span 4 columns</td></tr>\n</table>",
+          "height": 170
+        },
+        {
+          "type": "paragraph",
+          "content": "Разбор: `border=\"1\"` — рамка 1 пиксель; четыре `<tr>` — четыре строки. Первая ячейка растянута на 3 строки вниз (`rowspan=\"3\"`), правая во второй строке — на 2 строки (`rowspan=\"2\"`). Верхняя ячейка объединяет 3 столбца (`colspan=\"3\"`), нижняя строка — все 4 (`colspan=\"4\"`). Поэтому в третьей строке записаны только две ячейки: M и L — остальные места уже заняты растянутыми ячейками."
+        },
+        {
+          "type": "heading",
+          "text": "colspan и rowspan на одном примере",
+          "level": 3
+        },
+        {
+          "type": "code",
+          "language": "html",
+          "content": "<table border=\"1\">\n  <tr>\n    <th>Имя</th>\n    <th colspan=\"2\">Телефон</th>\n  </tr>\n  <tr>\n    <td>Петя Иванов</td>\n    <td>123 45 67</td>\n    <td>234 56 78</td>\n  </tr>\n</table>",
+          "caption": "colspan: «Телефон» над двумя столбцами"
+        },
+        {
+          "type": "html_preview",
+          "title": "Результат: colspan=\"2\"",
+          "html": "<table border=\"1\">\n  <tr><th>Имя</th><th colspan=\"2\">Телефон</th></tr>\n  <tr><td>Петя Иванов</td><td>123 45 67</td><td>234 56 78</td></tr>\n</table>",
+          "height": 110
+        },
+        {
+          "type": "code",
+          "language": "html",
+          "content": "<table border=\"1\">\n  <tr><th>Имя</th><td>Петя Иванов</td></tr>\n  <tr>\n    <th rowspan=\"2\">Телефон</th>\n    <td>123 45 67</td>\n  </tr>\n  <tr>\n    <td>234 56 78</td>\n  </tr>\n</table>",
+          "caption": "rowspan: «Телефон» на две строки"
+        },
+        {
+          "type": "html_preview",
+          "title": "Результат: rowspan=\"2\"",
+          "html": "<table border=\"1\">\n  <tr><th>Имя</th><td>Петя Иванов</td></tr>\n  <tr><th rowspan=\"2\">Телефон</th><td>123 45 67</td></tr>\n  <tr><td>234 56 78</td></tr>\n</table>",
+          "height": 140
+        },
+        {
+          "type": "paragraph",
+          "content": "Во втором примере «Телефон» растягивается на 2 строки вниз, поэтому в третьей строке указан только второй номер."
+        },
+        {
+          "type": "html_preview",
+          "title": "Таблица «Виды спорта» с rowspan",
+          "html": "<table border=\"1\">\n  <tr><th>Вид спорта</th><th>Направления</th></tr>\n  <tr><td rowspan=\"2\">Зимние виды спорта</td><td>фигурное катание</td></tr>\n  <tr><td>хоккей</td></tr>\n  <tr><td rowspan=\"2\">Летние виды спорта</td><td>пляжный волейбол</td></tr>\n  <tr><td>футбол</td></tr>\n  <tr><td rowspan=\"3\">Единоборства</td><td>джиу-джитсу</td></tr>\n  <tr><td>женская борьба</td></tr>\n  <tr><td>борьба на поясах</td></tr>\n</table>",
+          "height": 270
+        },
+        {
+          "type": "exam_tip",
+          "content": "Запомните по названию: **col**umn — столбец (colspan, по горизонтали), **row** — строка (rowspan, по вертикали). Варианты `rows`, `columns`, `collspan` — это не атрибуты объединения ячеек."
+        }
+      ]
+    },
+    {
+      "title": "CSS: внешний, внутренний и встроенный стиль",
+      "objectives": [
+        "10.1.2.10"
+      ],
+      "blocks": [
+        {
+          "type": "definition",
+          "term": "CSS (Cascading Style Sheets)",
+          "content": "Каскадные таблицы стилей — предназначены для установки цветов, фона, окантовки, шрифтов и других визуальных свойств элементов. Если сайт состоит из нескольких страниц и нужен единый дизайн таблиц, текста и блоков, используют CSS."
+        },
+        {
+          "type": "paragraph",
+          "content": "Правило CSS: **селектор** (кому) и в фигурных скобках — пары `свойство: значение;`. Например, `p {color: green;}` — текст всех абзацев зелёный."
+        },
+        {
+          "type": "cards",
+          "items": [
+            {
+              "title": "1. Внешний (External CSS)",
+              "content": "Стили хранятся в **отдельном файле .css** и подключаются тегом `<link rel=\"stylesheet\" href=\"st.css\">` в разделе `<head>`. Удобен для одинаковых стилей на многих страницах сайта: изменили один CSS-файл — дизайн поменялся на всех страницах; HTML-код становится проще."
+            },
+            {
+              "title": "2. Внутренний (Internal CSS)",
+              "content": "Стили записаны внутри парного тега `<style>…</style>` в **головной части** `<head>`. Подходит для оформления одностраничных сайтов."
+            },
+            {
+              "title": "3. Встроенный (Inline CSS)",
+              "content": "Стиль указывается **атрибутом `style=\"…\"`** прямо в конкретном теге. Используется при однократном применении или чтобы подавить ранее указанные стили."
+            }
+          ]
+        },
+        {
+          "type": "code",
+          "language": "html",
+          "content": "<head>\n  <style>\n    p { color: red; font-size: 30px; font-family: Arial; font-style: italic; }\n    .st1 { color: green; font-size: 40px; font-family: Times New Roman;\n           font-style: normal; font-weight: bold; }\n    #st2 { color: yellow; font-size: 50px; font-family: Calibri;\n           font-style: normal; text-decoration: underline; }\n  </style>\n</head>\n<body>\n  <p>Сегодня прекрасный день!!</p>\n  <p class=\"st1\">У меня хорошее настроение!</p>\n  <p id=\"st2\">Поэтому я желаю всем Удачного дня!!!</p>\n</body>",
+          "caption": "Внутренний CSS: селектор тега p, класса .st1 и id #st2"
+        },
+        {
+          "type": "html_preview",
+          "title": "Результат: внутренний CSS",
+          "html": "<p>Сегодня прекрасный день!!</p>\n<p class=\"st1\">У меня хорошее настроение!</p>\n<p id=\"st2\">Поэтому я желаю всем Удачного дня!!!</p>",
+          "css": "p { color: red; font-size: 30px; font-family: Arial; font-style: italic; }\n.st1 { color: green; font-size: 40px; font-family: Times New Roman; font-style: normal; font-weight: bold; }\n#st2 { color: yellow; font-size: 50px; font-family: Calibri; font-style: normal; text-decoration: underline; }",
+          "height": 300
+        },
+        {
+          "type": "code",
+          "language": "html",
+          "content": "<p style=\"color: red; font-size: 30px; font-family: Arial; font-style: italic;\">\n  Сегодня прекрасный день!!</p>\n<p style=\"color: blue; font-size: 30px; font-family: Consolas; text-decoration: line-through;\">\n  Жду от вас обратную связь!</p>",
+          "caption": "Встроенный CSS: атрибут style"
+        },
+        {
+          "type": "html_preview",
+          "title": "Результат: встроенный CSS",
+          "html": "<p style=\"color: red; font-size: 30px; font-family: Arial; font-style: italic;\">Сегодня прекрасный день!!</p>\n<p style=\"color: blue; font-size: 30px; font-family: Consolas; text-decoration: line-through;\">Жду от вас обратную связь!</p>",
+          "height": 190
+        },
+        {
+          "type": "code",
+          "language": "html",
+          "content": "<!-- 1.html -->\n<head>\n    <link rel=\"stylesheet\" href=\"st.css\">\n</head>\n<body>\n    <p><font class=\"st1\">Сегодня прекрасный день!!</font></p>\n</body>",
+          "caption": "Внешний CSS: подключение файла"
+        },
+        {
+          "type": "code",
+          "language": "css",
+          "content": "/* st.css */\n.st1 {\n    color: red; font-size: 30px;\n    font-family: Arial; font-style: italic;\n}",
+          "caption": "Содержимое файла st.css"
+        },
+        {
+          "type": "heading",
+          "text": "Свойства форматирования текста",
+          "level": 3
+        },
+        {
+          "type": "paragraph",
+          "content": "| Свойство | Значения | Что задаёт |\n|---|---|---|\n| `color` | `red`, `green`, `#fff`… | цвет текста |\n| `font-size` | `14px`, `pt`, `%`; или `xx-small` … `xx-large` (HTML-размеры 1–6) | размер шрифта |\n| `font-family` | `Arial`, `Times New Roman`… | шрифт |\n| `font-style` | `italic`, `normal` | курсив |\n| `font-weight` | `bold`, `normal` или число 100–900 | полужирный |\n| `text-decoration` | `underline`, `line-through`, `overline`, `none` | подчёркнутый, перечёркнутый, линия над текстом, отмена эффектов |\n| `text-align` | `left`, `center`, `right` | выравнивание текста |\n| `background` / `background-color` | цвет | фон элемента |"
+        },
+        {
+          "type": "exam_tip",
+          "content": "Определяйте способ по месту записи: тег `<link>` и файл .css — **внешний**; тег `<style>` в `<head>` — **внутренний**; атрибут `style` в теге — **встроенный**."
+        }
+      ]
+    },
+    {
+      "title": "Селекторы CSS и оформление таблиц",
+      "objectives": [
+        "10.1.2.11"
+      ],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "content": "| Тип селектора | Запись в CSS | Вызов в HTML | Когда применять |\n|---|---|---|---|\n| Селектор **тега** | `p { color: red; }`, `div { margin: 5px; }` | `<p>Текст</p>` | единый стиль **всем** одноимённым тегам страницы |\n| Селектор **класса** (с точкой) | `.st1 { color: green; }` | `<p class=\"st1\">…</p>` | один стиль для нескольких разных элементов |\n| Селектор **id** (с решёткой) | `#st2 { color: yellow; }` | `<p id=\"st2\">…</p>` | уникальный элемент, который встречается один раз (шапка, подвал) |"
+        },
+        {
+          "type": "paragraph",
+          "content": "Селектор по тегу — это просто имя тега без `<` `>`. Одно правило можно задать сразу нескольким тегам, перечислив их через запятую: `table, td, th { … }`. В HTML у элемента в атрибутах `class` и `id` пишут имя **без** точки и решётки."
+        },
+        {
+          "type": "heading",
+          "text": "Рамки: свойство border",
+          "level": 3
+        },
+        {
+          "type": "paragraph",
+          "content": "`border` выставляет все свойства границ одним объявлением, например `border: 1px solid black;` (толщина, стиль, цвет). Отдельно: `border-color` — цвет, `border-style` — стиль, `border-width` — толщина (в px или `thin`, `medium`, `thick`). Для одной стороны — `border-top`, `border-bottom`, `border-left`, `border-right` и их варианты `-color`, `-style`, `-width` — всего 20 свойств."
+        },
+        {
+          "type": "html_preview",
+          "title": "Значения border-style",
+          "html": "<p style=\"border: 5px solid Blue\">solid — сплошная</p>\n<p style=\"border: 5px dotted Blue\">dotted — из точек</p>\n<p style=\"border: 5px dashed Blue\">dashed — из штрихов</p>\n<p style=\"border: 5px double Blue\">double — двойная</p>\n<p style=\"border: 5px groove Blue\">groove — вдавленная выемка</p>\n<p style=\"border: 5px ridge Blue\">ridge — выпуклая кромка</p>\n<p style=\"border: 5px outset Blue\">outset — выдавленная</p>\n<p style=\"border: 5px inset Blue\">inset — вдавленная</p>",
+          "css": "p { padding: 4px 8px; margin: 6px 0; }",
+          "height": 480
+        },
+        {
+          "type": "paragraph",
+          "content": "`border-color` с несколькими значениями задаёт цвета сторон **по часовой стрелке от верхней**:\n\n| Запись | Верх | Право | Низ | Лево |\n|---|---|---|---|---|\n| `border-color: red green;` | red | green | red | green |\n| `border-color: red green blue;` | red | green | blue | green |\n| `border-color: red blue green gold;` | red | blue | green | gold |"
+        },
+        {
+          "type": "heading",
+          "text": "Таблицы в CSS",
+          "level": 3
+        },
+        {
+          "type": "paragraph",
+          "content": "- `padding` — внутренние поля вокруг содержимого (от рамки до текста);\n- `border-spacing` (в HTML — атрибут `cellspacing`) — расстояние между внешними границами соседних ячеек;\n- `border-collapse: separate` — у каждой ячейки своя рамка (видны двойные линии); `border-collapse: collapse` — соседние рамки сливаются в одну общую линию."
+        },
+        {
+          "type": "code",
+          "language": "html",
+          "content": "<style>\n  table, td, th { border: 4px outset blue; border-spacing: 5px; }\n  .st1 { border-collapse: collapse; }\n</style>\n<table>\n  <tr><th>Имя</th><th>Фамилия</th></tr>\n  <tr><td>Айбар</td><td>Ахметов</td></tr>\n</table>\n<br>\n<table class=\"st1\">\n  <tr><th>Имя</th><th>Фамилия</th></tr>\n  <tr><td>Айбар</td><td>Ахметов</td></tr>\n</table>",
+          "caption": "Селектор по тегам table, td, th и класс .st1"
+        },
+        {
+          "type": "html_preview",
+          "title": "separate (вверху) и collapse (внизу)",
+          "html": "<table>\n  <tr><th>Имя</th><th>Фамилия</th></tr>\n  <tr><td>Айбар</td><td>Ахметов</td></tr>\n  <tr><td>Арслан</td><td>Нурланов</td></tr>\n</table>\n<br>\n<table class=\"st1\">\n  <tr><th>Имя</th><th>Фамилия</th></tr>\n  <tr><td>Айбар</td><td>Ахметов</td></tr>\n  <tr><td>Арслан</td><td>Нурланов</td></tr>\n</table>",
+          "css": "table, td, th { border: 4px outset blue; border-spacing: 5px; }\n.st1 { border-collapse: collapse; }",
+          "height": 300
+        },
+        {
+          "type": "code",
+          "language": "css",
+          "content": "table { width: 40%; border-collapse: collapse; }\ntd, th { border: 1px solid SeaGreen; padding: 3px 7px 2px 7px; }\nth { text-align: center; padding: 1px; background-color: OliveDrab; color: #fff; }\n.alt td { background-color: YellowGreen; }\n.alt1 td { background-color: PaleGreen; }",
+          "caption": "Таблица «Семья»: селекторы тегов и классов"
+        },
+        {
+          "type": "html_preview",
+          "title": "Результат: таблица «Семья»",
+          "html": "<table>\n  <tr><th>Имя</th><th>Фамилия</th><th>Статус</th></tr>\n  <tr class=\"alt\"><td>Нурлан</td><td>Ахметов</td><td>отец</td></tr>\n  <tr class=\"alt1\"><td>Арзу</td><td>Ахметова</td><td>мать</td></tr>\n  <tr class=\"alt\"><td>Айбар</td><td>Ахметов</td><td>сын</td></tr>\n  <tr><td>Айна</td><td>Ахметова</td><td>дочь</td></tr>\n</table>",
+          "css": "table { width: 60%; border-collapse: collapse; }\ntd, th { border: 1px solid SeaGreen; padding: 3px 7px 2px 7px; }\nth { text-align: center; padding: 1px; background-color: OliveDrab; color: #fff; }\n.alt td { background-color: YellowGreen; }\n.alt1 td { background-color: PaleGreen; }",
+          "height": 190
+        },
+        {
+          "type": "example",
+          "title": "Чтение стиля",
+          "content": "`TABLE { background: grey; border: double blue; color: green; }` — серый фон таблицы, двойная рамка синего цвета, зелёный цвет текста. Селектор `TABLE` — по тегу: стиль получат все таблицы страницы."
+        },
+        {
+          "type": "warning",
+          "content": "В CSS класс пишут с точкой (`.st1`), id — с решёткой (`#st1`), а в HTML — без них: `class=\"st1\"`, `id=\"st1\"`. Запись `id=\"#st1\"` — ошибка."
+        }
+      ]
+    },
+    {
+      "title": "Блочная вёрстка: <div>, <span> и макет сайта",
+      "objectives": [
+        "10.1.2.10",
+        "10.1.2.11"
+      ],
+      "blocks": [
+        {
+          "type": "definition",
+          "term": "Вёрстка",
+          "content": "Структура расположения всех элементов на странице документа, сайта или другого носителя: изображений, заголовков, таблиц, инфографики, меню и текста."
+        },
+        {
+          "type": "paragraph",
+          "content": "Различают **табличную** вёрстку (теги `<table>`, `<tr>`, `<th>`, `<td>`; страница — сетка ячеек) и **блочную** (тег `<div>` и семантические теги HTML5; оформление — в CSS)."
+        },
+        {
+          "type": "heading",
+          "text": "Теги <div> и <span>",
+          "level": 3
+        },
+        {
+          "type": "paragraph",
+          "content": "- `<div>…</div>` — **блочный** элемент, универсальный контейнер для каркаса страницы. С его помощью любой элемент можно разместить в любой части страницы; `<div>` может содержать вложенные `<div>` и любые другие теги. Стиль к блоку привязывают атрибутами `class` или `id`.\n- `<span>…</span>` — **строчный** контейнер: выделяет слова или фразы внутри строки, **не создавая переноса** на новую строку."
+        },
+        {
+          "type": "html_preview",
+          "title": "span внутри абзаца",
+          "html": "<p>Цена: <span style=\"font-weight: bold; font-size:24px;\">500</span> р.</p>",
+          "height": 90
+        },
+        {
+          "type": "heading",
+          "text": "Свойства блоков",
+          "level": 3
+        },
+        {
+          "type": "paragraph",
+          "content": "| Свойство | Что задаёт |\n|---|---|\n| `margin` | **внешние** отступы блока от соседних объектов |\n| `padding` | **внутреннее** пространство между рамкой блока и текстом |\n| `width`, `height` | ширина (px или %) и высота блока |\n| `border`, `border-width` | рамка блока (стили — как у рамок таблицы) |\n| `float: left / right` | обтекание: блок прижимается к левому/правому краю, следующие встают рядом |\n| `clear: both` | отмена обтекания (следующий блок — ниже плавающих) |\n| `box-sizing` | задают ли `width` и `height` размеры только содержания или всего блока вместе с `padding` и `border` |\n| `position` | способ позиционирования относительно окна браузера или других объектов (`static`, `relative`, `absolute`, `fixed`) |\n| `display` | способ отображения (размещения) блока |"
+        },
+        {
+          "type": "code",
+          "language": "html",
+          "content": "<style>\n  .block1 { width: 100%; float: left; }\n  .block2 { float: left; width: 25%; }\n  .block3 { margin: 10px; padding: 10px; height: 200px;\n            border: 5px dashed Violet; background: SlateBlue;\n            color: White; font-weight: 600; }\n  .block4 { margin: 10px; padding: 10px; border: 5px dotted Red;\n            margin-top: 20%; height: 300px; background: Pink;\n            color: DodgerBlue; font-weight: 600; }\n</style>\n<div class=\"block1\">\n  <div class=\"block2\"><div class=\"block3\">Блок 1</div></div>\n  <div class=\"block2\"><div class=\"block4\">Блок 2</div></div>\n  <div class=\"block2\"><div class=\"block3\">Блок 3</div></div>\n  <div class=\"block2\"><div class=\"block4\">Блок 4</div></div>\n</div>\n<div style=\"clear: both;\"></div>",
+          "caption": "Четыре колонки по 25 % (float: left)"
+        },
+        {
+          "type": "html_preview",
+          "title": "Результат: 4 колонки",
+          "html": "<div class=\"block1\">\n  <div class=\"block2\"><div class=\"block3\">Блок 1</div></div>\n  <div class=\"block2\"><div class=\"block4\">Блок 2</div></div>\n  <div class=\"block2\"><div class=\"block3\">Блок 3</div></div>\n  <div class=\"block2\"><div class=\"block4\">Блок 4</div></div>\n</div>\n<div style=\"clear: both;\"></div>",
+          "css": ".block1 { width: 100%; float: left; }\n.block2 { float: left; width: 25%; }\n.block3 { margin: 10px; padding: 10px; height: 200px; border: 5px dashed Violet; background: SlateBlue; color: White; font-weight: 600; }\n.block4 { margin: 10px; padding: 10px; border: 5px dotted Red; margin-top: 20%; height: 300px; background: Pink; color: DodgerBlue; font-weight: 600; }",
+          "height": 420
+        },
+        {
+          "type": "paragraph",
+          "content": "Каждый `.block2` имеет `float: left` и `width: 25%`, поэтому четыре блока стоят в один ряд (4 × 25 % = 100 %). Блоки 1 и 3 (`.block3`) — высотой 200px с фиолетовой пунктирной рамкой; блоки 2 и 4 (`.block4`) — высотой 300px, смещены вниз `margin-top: 20%`, с красной точечной рамкой."
+        },
+        {
+          "type": "heading",
+          "text": "Макет сайта на блоках",
+          "level": 3
+        },
+        {
+          "type": "diagram",
+          "format": "mermaid",
+          "content": "flowchart TD\n  C[\"#container — обёртка, 80% ширины окна\"] --> H[\"#header — шапка, 100%\"]\n  C --> N[\"#navigation — меню, 100%\"]\n  C --> S[\"#sidebar — левая панель, 20%, float: left\"]\n  C --> K[\"#content — контент, 80%, float: right\"]\n  C --> CL[\"#clear — clear: both\"]\n  C --> F[\"#footer — подвал, 100%\"]",
+          "caption": "Иерархия блоков макета"
+        },
+        {
+          "type": "code",
+          "language": "html",
+          "content": "<div id=\"container\">\n  <div id=\"header\"><h2>header (шапка сайта)</h2></div>\n  <div id=\"navigation\"><h2>Блок навигации</h2></div>\n  <div id=\"sidebar\"><h2>Левая панель</h2></div>\n  <div id=\"content\"><h2>Основной контент страницы</h2></div>\n  <div id=\"clear\"></div>\n  <div id=\"footer\"><h2>footer (низ сайта)</h2></div>\n</div>",
+          "caption": "index.html — каркас (стили — в style.css, селекторы id)"
+        },
+        {
+          "type": "html_preview",
+          "title": "Результат: блочный макет",
+          "html": "<div id=\"container\">\n  <div id=\"header\"><h2>header (шапка сайта)</h2></div>\n  <div id=\"navigation\"><h2>Блок навигации</h2></div>\n  <div id=\"sidebar\"><h2>Левая панель</h2></div>\n  <div id=\"content\"><h2>Основной контент страницы</h2></div>\n  <div id=\"clear\"></div>\n  <div id=\"footer\"><h2>footer (низ сайта)</h2></div>\n</div>",
+          "css": "body { background: #FFF; color: #000; font-family: Arial, sans-serif; font-size: 14px; }\nh2 { margin: 0; font-size: 14px; }\n#header { background: #F5DEB3; width: 100%; height: 55px; }\n#container { background: #FFD700; margin: auto auto; text-align: center; width: 80%; height: 400px; }\n#navigation { background: #FE9798; width: 100%; height: 25px; }\n#sidebar { background: #40E0D0; float: left; width: 20%; height: 280px; }\n#content { background: #DCDCDC; float: right; width: 80%; height: 280px; }\n#clear { clear: both; }\n#footer { background: #00BFFF; width: 100%; height: 40px; }",
+          "height": 440
+        },
+        {
+          "type": "paragraph",
+          "content": "Сумма ширин `#sidebar` (20 %) и `#content` (80 %) равна 100 %, поэтому они стоят рядом. Пустой блок `#clear` со свойством `clear: both` отменяет обтекание, и `#footer` оказывается ниже."
+        },
+        {
+          "type": "heading",
+          "text": "Табличная вёрстка того же макета",
+          "level": 3
+        },
+        {
+          "type": "html_preview",
+          "title": "Табличный макет",
+          "html": "<table border=\"1\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">\n  <tr><th colspan=2>шапка сайта (логотип, слоган, телефон)</th></tr>\n  <tr><th width=\"20%\">навигация</th><th width=\"80%\">заголовок</th></tr>\n  <tr>\n    <td width=\"20%\"><ul>\n      <li><a href=\"index.html\" title=\"Ссылка 1\">Ссылка 1</a></li>\n      <li><a href=\"index.html\" title=\"Ссылка 2\">Ссылка 2</a></li>\n    </ul></td>\n    <td width=\"80%\">контент</td>\n  </tr>\n  <tr><td colspan=2>Низ сайта (баннеры, счетчики, информация)</td></tr>\n</table>",
+          "height": 200
+        },
+        {
+          "type": "comparison",
+          "title": "Табличная и блочная вёрстка",
+          "columns": [
+            "Критерий",
+            "Табличная (<table>)",
+            "Блочная (<div> + CSS)"
+          ],
+          "rows": [
+            [
+              "Назначение",
+              "для табличных данных (прайс-листы, расписания); как каркас сайта устарела",
+              "современный стандарт макетов любой сложности"
+            ],
+            [
+              "Код",
+              "громоздкий, много вложенных <tr> и <td>",
+              "компактный; оформление вынесено в style.css"
+            ],
+            [
+              "Загрузка",
+              "браузер ждёт загрузки всей таблицы",
+              "блоки отображаются по мере загрузки"
+            ],
+            [
+              "Гибкость",
+              "жёсткая сетка, трудно адаптировать под смартфоны",
+              "блоки легко перестраиваются под любые экраны"
+            ],
+            [
+              "Возможности",
+              "положение и число ячеек фиксировано",
+              "блоки можно накладывать и размещать произвольно"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": "Семантические теги HTML5 заменяют блоки с id: `<header>` — шапка, `<nav>` — меню навигации, `<main>` — главное содержимое, `<aside>` — боковая панель, `<footer>` — подвал."
+        },
+        {
+          "type": "exam_tip",
+          "content": "`margin` — снаружи рамки (отступ от соседей), `padding` — внутри рамки (от рамки до текста)."
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "key": "web-html-definition",
+      "title": "Что такое HTML",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.2"
+      ],
+      "text": "Что такое HTML?",
+      "source": "teacher",
+      "source_reference": "1 ур 2 четв 10 кл Основные теги HTML (Обновлено).pptx, слайд 4; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 70",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B (1)",
+        "explanation": "HTML (HyperText Markup Language) — язык разметки гипертекста; языком программирования он не является.",
+        "accepted": {
+          "correct": "B"
+        }
+      },
+      "options": [
+        {
+          "key": "A",
+          "content": "Язык программирования для создания игр"
+        },
+        {
+          "key": "B",
+          "content": "Язык разметки гипертекста для разметки веб-страниц"
+        },
+        {
+          "key": "C",
+          "content": "Программа-браузер для просмотра сайтов"
+        },
+        {
+          "key": "D",
+          "content": "Протокол передачи веб-страниц"
+        }
+      ]
+    },
+    {
+      "key": "web-html-not-programming",
+      "title": "HTML и программирование",
+      "type": "true_false",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.2"
+      ],
+      "text": "HTML является языком программирования.",
+      "source": "teacher",
+      "source_reference": "G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 70; 1 ур 2 четв 10 кл Основные теги HTML (Обновлено).pptx, слайд 4",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "Неверно (1)",
+        "explanation": "Неверно: HTML — язык разметки, он создан для разметки (структурирования) веб-страниц.",
+        "accepted": {
+          "correct": false
+        }
+      }
+    },
+    {
+      "key": "web-head-or-body",
+      "title": "Где видимое содержание",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.2"
+      ],
+      "text": "В каком разделе HTML-документа формируется содержание, которое пользователь видит в окне браузера?",
+      "source": "teacher",
+      "source_reference": "1 ур 2 четв 10 кл Основные теги HTML (Обновлено).pptx, слайд 5; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 71",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "C (1)",
+        "explanation": "Видимое содержание — в «теле» `<body>`. Теги в `<head>` на странице не отображаются.",
+        "accepted": {
+          "correct": "C"
+        }
+      },
+      "options": [
+        {
+          "key": "A",
+          "content": "`<head>…</head>`"
+        },
+        {
+          "key": "B",
+          "content": "`<title>…</title>`"
+        },
+        {
+          "key": "C",
+          "content": "`<body>…</body>`"
+        },
+        {
+          "key": "D",
+          "content": "`<meta>`"
+        }
+      ]
+    },
+    {
+      "key": "web-title-tab",
+      "title": "Заголовок вкладки",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.2"
+      ],
+      "text": "Какой тег задаёт заголовок страницы на вкладке браузера?",
+      "source": "teacher",
+      "source_reference": "1 ур 2 четв 10 кл Основные теги HTML (Обновлено).pptx, слайды 5, 12",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B (1)",
+        "explanation": "`<title>` (внутри `<head>`) задаёт имя вкладки; `<h1>` — заголовок на самой странице.",
+        "accepted": {
+          "correct": "B"
+        }
+      },
+      "options": [
+        {
+          "key": "A",
+          "content": "`<head>`"
+        },
+        {
+          "key": "B",
+          "content": "`<title>`"
+        },
+        {
+          "key": "C",
+          "content": "`<h1>`"
+        },
+        {
+          "key": "D",
+          "content": "`<header>`"
+        }
+      ]
+    },
+    {
+      "key": "web-structure-tags",
+      "title": "Теги структуры документа",
+      "type": "matching",
+      "marks": 4,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.2"
+      ],
+      "text": "Соотнесите тег с его назначением.",
+      "source": "teacher",
+      "source_reference": "1 ур 2 четв 10 кл Основные теги HTML (Обновлено).pptx, слайды 5, 13; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 71",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "L1–R2; L2–R4; L3–R1; L4–R3 (по 1 за пару)",
+        "explanation": "html — корень; head — служебная часть; body — видимое содержание; meta charset — кодировка.",
+        "accepted": {
+          "pairs": {
+            "L1": "R2",
+            "L2": "R4",
+            "L3": "R1",
+            "L4": "R3"
+          }
+        }
+      },
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "`<html>…</html>`"
+          },
+          {
+            "key": "L2",
+            "text": "`<head>…</head>`"
+          },
+          {
+            "key": "L3",
+            "text": "`<body>…</body>`"
+          },
+          {
+            "key": "L4",
+            "text": "`<meta charset=\"utf-8\">`"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "Раздел видимого содержания страницы"
+          },
+          {
+            "key": "R2",
+            "text": "Корневой элемент, контейнер всей страницы"
+          },
+          {
+            "key": "R3",
+            "text": "Настройка кодировки текста (Unicode UTF-8)"
+          },
+          {
+            "key": "R4",
+            "text": "Служебный заголовок: кодировка, стили, имя вкладки — не отображается на странице"
+          }
+        ]
+      }
+    },
+    {
+      "key": "web-unpaired-tags",
+      "title": "Непарные теги",
+      "type": "multiple_response",
+      "marks": 3,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.2"
+      ],
+      "text": "Выберите **непарные** (одиночные) теги.",
+      "source": "teacher",
+      "source_reference": "1 ур 2 четв 10 кл Основные теги HTML (Обновлено).pptx, слайд 4; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 71–72",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "A, C, D (по 1 за каждый)",
+        "explanation": "Непарные теги только открывающие: `<br>`, `<hr>`, `<img>`, `<meta>`. `<p>`, `<b>`, `<ol>` — парные контейнеры.",
+        "accepted": {
+          "correct": [
+            "A",
+            "C",
+            "D"
+          ]
+        }
+      },
+      "options": [
+        {
+          "key": "A",
+          "content": "`<br>`"
+        },
+        {
+          "key": "B",
+          "content": "`<p>`"
+        },
+        {
+          "key": "C",
+          "content": "`<hr>`"
+        },
+        {
+          "key": "D",
+          "content": "`<img>`"
+        },
+        {
+          "key": "E",
+          "content": "`<b>`"
+        },
+        {
+          "key": "F",
+          "content": "`<ol>`"
+        }
+      ]
+    },
+    {
+      "key": "web-tag-rules",
+      "title": "Правила записи тегов",
+      "type": "fill_blank",
+      "marks": 3,
+      "difficulty": "easy",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.2"
+      ],
+      "text": "Название тега заключается в [[1]] скобки. Закрывающий тег отличается от открывающего символом [[2]]. Файлы HTML-документов имеют расширение .htm или .[[3]].",
+      "source": "teacher",
+      "source_reference": "G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 71; 1 ур 2 четв 10 кл Основные теги HTML (Обновлено).pptx, слайд 4",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "[[1]]: угловые (1); [[2]]: / (1); [[3]]: html (1)",
+        "explanation": "Теги пишут в угловых скобках < >; закрывающий тег содержит «/»; расширения .htm и .html.",
+        "accepted": {
+          "blanks": [
+            [
+              "угловые"
+            ],
+            [
+              "/",
+              "слэш",
+              "слеш",
+              "косая черта"
+            ],
+            [
+              "html"
+            ]
+          ]
+        }
+      },
+      "content": {
+        "blank_count": 3
+      }
+    },
+    {
+      "key": "web-crossbrowser",
+      "title": "Тестирование в браузерах",
+      "type": "short_answer",
+      "marks": 2,
+      "difficulty": "easy",
+      "command_word": "explain",
+      "grading": "AI",
+      "objectives": [
+        "10.1.2.2"
+      ],
+      "text": "Почему готовую веб-страницу нужно проверить в нескольких разных браузерах?",
+      "source": "teacher",
+      "source_reference": "G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 70; 1 ур 2 четв 10 кл Основные теги HTML (Обновлено).pptx, слайд 4",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "Отображение одного и того же кода может отличаться в разных браузерах и их версиях (1); Поэтому страницу тестируют, чтобы убедиться, что она везде отображается правильно (1)",
+        "explanation": "Один и тот же HTML-код может отображаться по-разному в разных браузерах и даже в разных версиях одного браузера, поэтому после разработки страницу тестируют в нескольких браузерах.",
+        "points": [
+          {
+            "criterion": "Отображение одного и того же кода может отличаться в разных браузерах и их версиях",
+            "marks": 1
+          },
+          {
+            "criterion": "Поэтому страницу тестируют, чтобы убедиться, что она везде отображается правильно",
+            "marks": 1
+          }
+        ],
+        "model_answer": "Один и тот же HTML-код может отображаться по-разному в разных браузерах и даже в разных версиях одного браузера, поэтому после разработки страницу тестируют в нескольких браузерах."
+      },
+      "content": {
+        "answer_lines": 4
+      }
+    },
+    {
+      "key": "web-comment",
+      "title": "Комментарий в HTML",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.2"
+      ],
+      "text": "Как записать в HTML комментарий, который не будет виден в браузере?",
+      "source": "teacher",
+      "source_reference": "3 ур 2 четв Мультимедиа (Обновлено).pptx, слайды 8, 10",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B (1)",
+        "explanation": "Комментарии в HTML записываются внутри `<!-- … -->`.",
+        "accepted": {
+          "correct": "B"
+        }
+      },
+      "options": [
+        {
+          "key": "A",
+          "content": "`// комментарий`"
+        },
+        {
+          "key": "B",
+          "content": "`<!-- комментарий -->`"
+        },
+        {
+          "key": "C",
+          "content": "`/* комментарий */`"
+        },
+        {
+          "key": "D",
+          "content": "`<comment>комментарий</comment>`"
+        }
+      ]
+    },
+    {
+      "key": "web-attr-find",
+      "title": "Тег, атрибут, значение",
+      "type": "matching",
+      "marks": 4,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.5"
+      ],
+      "text": "Дан фрагмент: `<font size=\"6\" color=\"blue\">`. Соотнесите части записи с их ролью.",
+      "source": "teacher",
+      "source_reference": "1 ур 2 четв 10 кл Основные теги HTML (Обновлено).pptx, слайды 7, 13; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 72",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "L1–R1; L2–R2; L3–R3; L4–R4 (по 1 за пару)",
+        "explanation": "font — тег; size и color — атрибуты; blue — значение атрибута color.",
+        "accepted": {
+          "pairs": {
+            "L1": "R1",
+            "L2": "R2",
+            "L3": "R3",
+            "L4": "R4"
+          }
+        }
+      },
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "`font`"
+          },
+          {
+            "key": "L2",
+            "text": "`color`"
+          },
+          {
+            "key": "L3",
+            "text": "`blue`"
+          },
+          {
+            "key": "L4",
+            "text": "`size`"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "Тег"
+          },
+          {
+            "key": "R2",
+            "text": "Атрибут, задающий цвет текста"
+          },
+          {
+            "key": "R3",
+            "text": "Значение атрибута"
+          },
+          {
+            "key": "R4",
+            "text": "Атрибут, задающий размер шрифта"
+          }
+        ]
+      }
+    },
+    {
+      "key": "web-bgcolor",
+      "title": "Цвет фона страницы",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.5"
+      ],
+      "text": "Какой атрибут тега `<body>` задаёт цвет фона всей веб-страницы?",
+      "source": "teacher",
+      "source_reference": "1 ур 2 четв 10 кл Основные теги HTML (Обновлено).pptx, слайд 6",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "C (1)",
+        "explanation": "`<body bgcolor=\"yellow\">` — жёлтый фон страницы. `color` у `<font>` — цвет текста, `face` — шрифт.",
+        "accepted": {
+          "correct": "C"
+        }
+      },
+      "options": [
+        {
+          "key": "A",
+          "content": "`color`"
+        },
+        {
+          "key": "B",
+          "content": "`background-text`"
+        },
+        {
+          "key": "C",
+          "content": "`bgcolor`"
+        },
+        {
+          "key": "D",
+          "content": "`face`"
+        }
+      ]
+    },
+    {
+      "key": "web-attr-purpose",
+      "title": "Назначение тегов и атрибутов",
+      "type": "matching",
+      "marks": 4,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.5",
+        "10.1.2.3"
+      ],
+      "text": "Установите соответствие между записью и её назначением.",
+      "source": "teacher",
+      "source_reference": "G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 73–74; 1 ур 2 четв 10 кл Основные теги HTML (Обновлено).pptx, слайды 10, 13",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "L1–R1; L2–R2; L3–R3; L4–R4 (по 1 за пару)",
+        "explanation": "bgcolor — фон, color — цвет текста, align — выравнивание, type=square — квадратные маркеры.",
+        "accepted": {
+          "pairs": {
+            "L1": "R1",
+            "L2": "R2",
+            "L3": "R3",
+            "L4": "R4"
+          }
+        }
+      },
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "`<body bgcolor=red>`"
+          },
+          {
+            "key": "L2",
+            "text": "`<font color=red>`"
+          },
+          {
+            "key": "L3",
+            "text": "`<p align=center>`"
+          },
+          {
+            "key": "L4",
+            "text": "`<ul type=\"square\">`"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "Задание цвета фона страницы"
+          },
+          {
+            "key": "R2",
+            "text": "Установка цвета текста"
+          },
+          {
+            "key": "R3",
+            "text": "Выравнивание абзаца по центру"
+          },
+          {
+            "key": "R4",
+            "text": "Маркеры списка — квадратики"
+          }
+        ]
+      }
+    },
+    {
+      "key": "web-font-face",
+      "title": "Атрибут face",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.5"
+      ],
+      "text": "Что задаёт атрибут `face` тега `<font>`?",
+      "source": "teacher",
+      "source_reference": "1 ур 2 четв 10 кл Основные теги HTML (Обновлено).pptx, слайд 7; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 72",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "C (1)",
+        "explanation": "`face` — гарнитура шрифта, `size` — размер (1–7), `color` — цвет.",
+        "accepted": {
+          "correct": "C"
+        }
+      },
+      "options": [
+        {
+          "key": "A",
+          "content": "Размер шрифта"
+        },
+        {
+          "key": "B",
+          "content": "Цвет текста"
+        },
+        {
+          "key": "C",
+          "content": "Гарнитуру шрифта (например, Arial)"
+        },
+        {
+          "key": "D",
+          "content": "Выравнивание текста"
+        }
+      ]
+    },
+    {
+      "key": "web-hr-attributes",
+      "title": "Атрибуты тега <hr>",
+      "type": "short_answer",
+      "marks": 4,
+      "difficulty": "medium",
+      "command_word": "explain",
+      "grading": "AI",
+      "objectives": [
+        "10.1.2.5"
+      ],
+      "text": "Объясните, что задаёт каждый атрибут в записи `<hr align=center color=red size=3px width=70%>`.",
+      "source": "teacher",
+      "source_reference": "G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 72",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "align=center — выравнивание линии по центру (1); color=red — красный цвет линии (1); size=3px — толщина линии 3 пикселя (1); width=70% — ширина линии 70 % ширины страницы (1)",
+        "explanation": "align=center — линия выровнена по центру; color=red — линия красная; size=3px — толщина 3 px; width=70% — ширина 70 %.",
+        "points": [
+          {
+            "criterion": "align=center — выравнивание линии по центру",
+            "marks": 1
+          },
+          {
+            "criterion": "color=red — красный цвет линии",
+            "marks": 1
+          },
+          {
+            "criterion": "size=3px — толщина линии 3 пикселя",
+            "marks": 1
+          },
+          {
+            "criterion": "width=70% — ширина линии 70 % ширины страницы",
+            "marks": 1
+          }
+        ],
+        "model_answer": "align=center — линия выровнена по центру; color=red — линия красная; size=3px — толщина 3 px; width=70% — ширина 70 %."
+      },
+      "content": {
+        "answer_lines": 4
+      }
+    },
+    {
+      "key": "web-p-tag",
+      "title": "Абзац",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.4"
+      ],
+      "text": "Какой тег используется для создания абзаца?",
+      "source": "teacher",
+      "source_reference": "1 ур 2 четв 10 кл Основные теги HTML (Обновлено).pptx, слайд 12",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B (1)",
+        "explanation": "`<p>…</p>` — абзац; `<br>` — только перенос строки.",
+        "accepted": {
+          "correct": "B"
+        }
+      },
+      "options": [
+        {
+          "key": "A",
+          "content": "`<br>`"
+        },
+        {
+          "key": "B",
+          "content": "`<p>`"
+        },
+        {
+          "key": "C",
+          "content": "`<h1>`"
+        },
+        {
+          "key": "D",
+          "content": "`<text>`"
+        }
+      ]
+    },
+    {
+      "key": "web-ol-tag",
+      "title": "Нумерованный список",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.4"
+      ],
+      "text": "Какой тег создаёт нумерованный список?",
+      "source": "teacher",
+      "source_reference": "1 ур 2 четв 10 кл Основные теги HTML (Обновлено).pptx, слайды 10, 12",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "D (1)",
+        "explanation": "`<ol>` (Ordered List) — нумерованный, `<ul>` — маркированный, `<li>` — пункт списка.",
+        "accepted": {
+          "correct": "D"
+        }
+      },
+      "options": [
+        {
+          "key": "A",
+          "content": "`<ul>`"
+        },
+        {
+          "key": "B",
+          "content": "`<list>`"
+        },
+        {
+          "key": "C",
+          "content": "`<li>`"
+        },
+        {
+          "key": "D",
+          "content": "`<ol>`"
+        }
+      ]
+    },
+    {
+      "key": "web-ul-numbered",
+      "title": "UL и OL",
+      "type": "true_false",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.4"
+      ],
+      "text": "Нумерованные списки создаются тегом `<UL>…</UL>`, а маркированные — тегом `<OL>…</OL>`.",
+      "source": "teacher",
+      "source_reference": "G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 78; 4 ур 2 четв 10 кл Таблицы в HTML (Обновлено).pptx, слайд 8",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "Неверно (1)",
+        "explanation": "Неверно — наоборот: `<OL>` нумерованный, `<UL>` маркированный.",
+        "accepted": {
+          "correct": false
+        }
+      }
+    },
+    {
+      "key": "web-list-type",
+      "title": "Атрибут type у списков",
+      "type": "matching",
+      "marks": 4,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.4",
+        "10.1.2.5"
+      ],
+      "text": "Соотнесите запись с видом пунктов списка.",
+      "source": "teacher",
+      "source_reference": "G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 74; 1 ур 2 четв 10 кл Основные теги HTML (Обновлено).pptx, слайд 10",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "L1–R1; L2–R2; L3–R3; L4–R4 (по 1 за пару)",
+        "explanation": "circle — пустой кружок, square — квадрат, I — римские числа, a — строчные латинские буквы.",
+        "accepted": {
+          "pairs": {
+            "L1": "R1",
+            "L2": "R2",
+            "L3": "R3",
+            "L4": "R4"
+          }
+        }
+      },
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "`<ul type=\"circle\">`"
+          },
+          {
+            "key": "L2",
+            "text": "`<ul type=\"square\">`"
+          },
+          {
+            "key": "L3",
+            "text": "`<ol type=\"I\">`"
+          },
+          {
+            "key": "L4",
+            "text": "`<ol type=\"a\">`"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "Пустой кружок ○"
+          },
+          {
+            "key": "R2",
+            "text": "Закрашенный квадратик"
+          },
+          {
+            "key": "R3",
+            "text": "Римские числа: I, II, III"
+          },
+          {
+            "key": "R4",
+            "text": "Строчные латинские буквы: a, b, c"
+          }
+        ]
+      }
+    },
+    {
+      "key": "web-br-hr",
+      "title": "br и hr",
+      "type": "fill_blank",
+      "marks": 3,
+      "difficulty": "easy",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.4"
+      ],
+      "text": "Переход на новую строку внутри абзаца (аналог клавиши Enter) — тег [[1]]. Горизонтальная разделительная линия — тег [[2]]. Заголовки бывают шести уровней — от <h1> до [[3]].",
+      "source": "teacher",
+      "source_reference": "G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 72; 1 ур 2 четв 10 кл Основные теги HTML (Обновлено).pptx, слайды 7, 13",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "[[1]]: <br> (1); [[2]]: <hr> (1); [[3]]: <h6> (1)",
+        "explanation": "<br> — перенос строки, <hr> — горизонтальная линия, заголовки <h1>…<h6>.",
+        "accepted": {
+          "blanks": [
+            [
+              "<br>",
+              "br",
+              "<BR>"
+            ],
+            [
+              "<hr>",
+              "hr",
+              "<HR>"
+            ],
+            [
+              "<h6>",
+              "h6",
+              "<H6>"
+            ]
+          ]
+        }
+      },
+      "content": {
+        "blank_count": 3
+      }
+    },
+    {
+      "key": "web-write-list",
+      "title": "Код вложенного списка",
+      "type": "html_css",
+      "marks": 4,
+      "difficulty": "medium",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "10.1.2.4"
+      ],
+      "text": "Напишите HTML-код нумерованного списка из двух пунктов «Гимнастика» и «Теннис». Внутри пункта «Теннис» должен быть маркированный список с квадратными маркерами: «большой», «настольный».",
+      "source": "teacher",
+      "source_reference": "G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 74; 1 ур 2 четв 10 кл Основные теги HTML (Обновлено).pptx, слайды 10–11",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "Внешний список <ol> с двумя пунктами <li> (1); Вложенный список <ul> находится внутри пункта <li> «Теннис» (1); У <ul> атрибут type=\"square\" (1); Все парные теги закрыты, вложенность соблюдена (1)",
+        "explanation": "<ol>\n  <li>Гимнастика</li>\n  <li>Теннис\n    <ul type=\"square\">\n      <li>большой</li>\n      <li>настольный</li>\n    </ul>\n  </li>\n</ol>",
+        "points": [
+          {
+            "criterion": "Внешний список <ol> с двумя пунктами <li>",
+            "marks": 1
+          },
+          {
+            "criterion": "Вложенный список <ul> находится внутри пункта <li> «Теннис»",
+            "marks": 1
+          },
+          {
+            "criterion": "У <ul> атрибут type=\"square\"",
+            "marks": 1
+          },
+          {
+            "criterion": "Все парные теги закрыты, вложенность соблюдена",
+            "marks": 1
+          }
+        ],
+        "model_answer": "<ol>\n  <li>Гимнастика</li>\n  <li>Теннис\n    <ul type=\"square\">\n      <li>большой</li>\n      <li>настольный</li>\n    </ul>\n  </li>\n</ol>"
+      },
+      "content": {
+        "language": "html",
+        "starter_code": "<ol>\n  \n</ol>"
+      }
+    },
+    {
+      "key": "web-alt-b",
+      "title": "Альтернатива <b>",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.3"
+      ],
+      "text": "Какой тег является логическим аналогом тега `<b>…</b>` (жирный текст)?",
+      "source": "teacher",
+      "source_reference": "G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 73; 1 ур 2 четв 10 кл Основные теги HTML (Обновлено).pptx, слайды 7, 9",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B (1)",
+        "explanation": "`<strong>` — жирный (важный) текст, аналог `<b>`. `<em>` — аналог `<i>`, `<ins>` — аналог `<u>`.",
+        "accepted": {
+          "correct": "B"
+        }
+      },
+      "options": [
+        {
+          "key": "A",
+          "content": "`<em>…</em>`"
+        },
+        {
+          "key": "B",
+          "content": "`<strong>…</strong>`"
+        },
+        {
+          "key": "C",
+          "content": "`<ins>…</ins>`"
+        },
+        {
+          "key": "D",
+          "content": "`<mark>…</mark>`"
+        }
+      ]
+    },
+    {
+      "key": "web-format-tags",
+      "title": "Теги форматирования",
+      "type": "matching",
+      "marks": 5,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.3"
+      ],
+      "text": "Соотнесите тег с результатом.",
+      "source": "teacher",
+      "source_reference": "1 ур 2 четв 10 кл Основные теги HTML (Обновлено).pptx, слайд 7; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 72",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "L1–R1; L2–R2; L3–R3; L4–R4; L5–R5 (по 1 за пару)",
+        "explanation": "em — курсив, del — перечёркнутый, mark — маркер, sub — нижний индекс, ins — подчёркнутый.",
+        "accepted": {
+          "pairs": {
+            "L1": "R1",
+            "L2": "R2",
+            "L3": "R3",
+            "L4": "R4",
+            "L5": "R5"
+          }
+        }
+      },
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "`<em>…</em>`"
+          },
+          {
+            "key": "L2",
+            "text": "`<del>…</del>`"
+          },
+          {
+            "key": "L3",
+            "text": "`<mark>…</mark>`"
+          },
+          {
+            "key": "L4",
+            "text": "`<sub>…</sub>`"
+          },
+          {
+            "key": "L5",
+            "text": "`<ins>…</ins>`"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "Курсив"
+          },
+          {
+            "key": "R2",
+            "text": "Перечёркнутый (удалённый) текст"
+          },
+          {
+            "key": "R3",
+            "text": "Выделение жёлтым маркером"
+          },
+          {
+            "key": "R4",
+            "text": "Нижний индекс, как в H₂O"
+          },
+          {
+            "key": "R5",
+            "text": "Подчёркнутый (вставленный) текст"
+          }
+        ]
+      }
+    },
+    {
+      "key": "web-bold-italic",
+      "title": "Жирный курсив",
+      "type": "multiple_response",
+      "marks": 3,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.3"
+      ],
+      "text": "Какие записи дают **жирный курсивный** текст «Ура!»?",
+      "source": "teacher",
+      "source_reference": "1 ур 2 четв 10 кл Основные теги HTML (Обновлено).pptx, слайд 9; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 73",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "A, C, D (по 1 за каждый)",
+        "explanation": "Нужны тег курсива (`<I>` или `<em>`) и тег жирного (`<B>` или `<strong>`). `<U>` и `<ins>` — подчёркивание.",
+        "accepted": {
+          "correct": [
+            "A",
+            "C",
+            "D"
+          ]
+        }
+      },
+      "options": [
+        {
+          "key": "A",
+          "content": "`<I><B>Ура!</B></I>`"
+        },
+        {
+          "key": "B",
+          "content": "`<U><B>Ура!</B></U>`"
+        },
+        {
+          "key": "C",
+          "content": "`<em><strong>Ура!</strong></em>`"
+        },
+        {
+          "key": "D",
+          "content": "`<em><B>Ура!</B></em>`"
+        },
+        {
+          "key": "E",
+          "content": "`<ins><B>Ура!</B></ins>`"
+        }
+      ]
+    },
+    {
+      "key": "web-b-vs-strong",
+      "title": "<b> и <strong>",
+      "type": "short_answer",
+      "marks": 2,
+      "difficulty": "medium",
+      "command_word": "explain",
+      "grading": "AI",
+      "objectives": [
+        "10.1.2.3"
+      ],
+      "text": "Визуально `<b>Привет</b>` и `<strong>Привет</strong>` выглядят одинаково. В чём разница между этими тегами?",
+      "source": "teacher",
+      "source_reference": "1 ур 2 четв 10 кл Основные теги HTML (Обновлено).pptx, слайд 7",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "В обычном браузере выглядят одинаково (жирный текст) (1); В речевых браузерах (экранных дикторах) для слабовидящих текст в <strong> выделяется голосовой интонацией (1)",
+        "explanation": "В обычном браузере оба тега дают жирный текст. Различие — в речевых браузерах для слабовидящих: слова внутри <strong> выделяются голосовой интонацией.",
+        "points": [
+          {
+            "criterion": "В обычном браузере выглядят одинаково (жирный текст)",
+            "marks": 1
+          },
+          {
+            "criterion": "В речевых браузерах (экранных дикторах) для слабовидящих текст в <strong> выделяется голосовой интонацией",
+            "marks": 1
+          }
+        ],
+        "model_answer": "В обычном браузере оба тега дают жирный текст. Различие — в речевых браузерах для слабовидящих: слова внутри <strong> выделяются голосовой интонацией."
+      },
+      "content": {
+        "answer_lines": 4
+      }
+    },
+    {
+      "key": "web-sup",
+      "title": "Верхний индекс",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.3"
+      ],
+      "text": "Какой код выведет «x²» (двойка — верхний индекс)?",
+      "source": "teacher",
+      "source_reference": "G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 72",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B (1)",
+        "explanation": "`<sup>` — верхний индекс, `<sub>` — нижний.",
+        "accepted": {
+          "correct": "B"
+        }
+      },
+      "options": [
+        {
+          "key": "A",
+          "content": "`x<sub>2</sub>`"
+        },
+        {
+          "key": "B",
+          "content": "`x<sup>2</sup>`"
+        },
+        {
+          "key": "C",
+          "content": "`x<small>2</small>`"
+        },
+        {
+          "key": "D",
+          "content": "`x<up>2</up>`"
+        }
+      ]
+    },
+    {
+      "key": "web-about-me-page",
+      "title": "Страница о хобби",
+      "type": "html_css",
+      "marks": 5,
+      "difficulty": "hard",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "10.1.2.3",
+        "10.1.2.4",
+        "10.1.2.5"
+      ],
+      "text": "Напишите HTML-код страницы о своём хобби: жёлтый фон страницы, заголовок по центру, два абзаца, в тексте есть курсив, полужирный и подчёркнутый фрагменты, между заголовком и текстом — горизонтальная линия, в одном абзаце — переход на новую строку.",
+      "source": "teacher",
+      "source_reference": "G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 73 (критерии задания 5*); 1 ур 2 четв 10 кл Основные теги HTML (Обновлено).pptx, слайд 8",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "Структура html/head/title/body (1); Фон через bgcolor у <body> и заголовок <h1>…</h1> (или <p>) с align=center (1); Два абзаца <p> и тег <br> внутри абзаца (1); Теги <i>/<em>, <b>/<strong>, <u>/<ins> (1); Горизонтальная линия <hr> (1)",
+        "explanation": "<html>\n<head><meta charset=\"utf-8\"><title>Моё хобби</title></head>\n<body bgcolor=\"yellow\">\n  <h1 align=center>Моё хобби!</h1>\n  <hr>\n  <p>В свободное время <i>я люблю спорт</i>, больше всего — <b>футбол</b>.</p>\n  <p>Я болею за <u>«Шахтер»</u>.<br>Я много времени провожу на поле.</p>\n</body>\n</html>",
+        "points": [
+          {
+            "criterion": "Структура html/head/title/body",
+            "marks": 1
+          },
+          {
+            "criterion": "Фон через bgcolor у <body> и заголовок <h1>…</h1> (или <p>) с align=center",
+            "marks": 1
+          },
+          {
+            "criterion": "Два абзаца <p> и тег <br> внутри абзаца",
+            "marks": 1
+          },
+          {
+            "criterion": "Теги <i>/<em>, <b>/<strong>, <u>/<ins>",
+            "marks": 1
+          },
+          {
+            "criterion": "Горизонтальная линия <hr>",
+            "marks": 1
+          }
+        ],
+        "model_answer": "<html>\n<head><meta charset=\"utf-8\"><title>Моё хобби</title></head>\n<body bgcolor=\"yellow\">\n  <h1 align=center>Моё хобби!</h1>\n  <hr>\n  <p>В свободное время <i>я люблю спорт</i>, больше всего — <b>футбол</b>.</p>\n  <p>Я болею за <u>«Шахтер»</u>.<br>Я много времени провожу на поле.</p>\n</body>\n</html>"
+      },
+      "content": {
+        "language": "html"
+      }
+    },
+    {
+      "key": "web-a-tag",
+      "title": "Тег ссылки",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.6"
+      ],
+      "text": "Какой тег используется для переходов между веб-страницами?",
+      "source": "teacher",
+      "source_reference": "G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 96, 99; 2 ур 2 четв Гиперссылки (Обновлено).pptx, слайд 3",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "C (1)",
+        "explanation": "Гиперссылка создаётся парным тегом `<a>…</a>`.",
+        "accepted": {
+          "correct": "C"
+        }
+      },
+      "options": [
+        {
+          "key": "A",
+          "content": "`<HR>`"
+        },
+        {
+          "key": "B",
+          "content": "`<BR>`"
+        },
+        {
+          "key": "C",
+          "content": "`<A>…</A>`"
+        },
+        {
+          "key": "D",
+          "content": "`<LINK>…</LINK>`"
+        }
+      ]
+    },
+    {
+      "key": "web-href",
+      "title": "Атрибут адреса",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.6"
+      ],
+      "text": "Какой атрибут тега `<a>` задаёт адрес, на который ведёт ссылка?",
+      "source": "teacher",
+      "source_reference": "G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 96–97; 2 ур 2 четв Гиперссылки (Обновлено).pptx, слайды 3, 9",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B (1)",
+        "explanation": "`href` — обязательный атрибут с URL-адресом. `target` — где открыть, `download` — загрузка файла, `hreflang` — язык ресурса.",
+        "accepted": {
+          "correct": "B"
+        }
+      },
+      "options": [
+        {
+          "key": "A",
+          "content": "`download`"
+        },
+        {
+          "key": "B",
+          "content": "`href`"
+        },
+        {
+          "key": "C",
+          "content": "`hreflang`"
+        },
+        {
+          "key": "D",
+          "content": "`target`"
+        }
+      ]
+    },
+    {
+      "key": "web-target-values",
+      "title": "Значения target",
+      "type": "matching",
+      "marks": 4,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.6"
+      ],
+      "text": "Соотнесите значение атрибута `target` с поведением браузера.",
+      "source": "teacher",
+      "source_reference": "G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 97; 2 ур 2 четв Гиперссылки (Обновлено).pptx, слайд 5",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "L1–R1; L2–R2; L3–R3; L4–R4 (по 1 за пару)",
+        "explanation": "_self — то же окно, _blank — новое, _parent — фрейм-родитель, _top — полное окно.",
+        "accepted": {
+          "pairs": {
+            "L1": "R1",
+            "L2": "R2",
+            "L3": "R3",
+            "L4": "R4"
+          }
+        }
+      },
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "`_self`"
+          },
+          {
+            "key": "L2",
+            "text": "`_blank`"
+          },
+          {
+            "key": "L3",
+            "text": "`_parent`"
+          },
+          {
+            "key": "L4",
+            "text": "`_top`"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "Открыть в текущем окне"
+          },
+          {
+            "key": "R2",
+            "text": "Открыть в новом окне (вкладке)"
+          },
+          {
+            "key": "R3",
+            "text": "Открыть во фрейме-родителе"
+          },
+          {
+            "key": "R4",
+            "text": "Открыть в полном окне браузера"
+          }
+        ]
+      }
+    },
+    {
+      "key": "web-absolute-url",
+      "title": "Абсолютная ссылка",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.6"
+      ],
+      "text": "Какая ссылка является **абсолютной**?",
+      "source": "teacher",
+      "source_reference": "2 ур 2 четв Гиперссылки (Обновлено).pptx, слайды 4, 8; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 97",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "C (1)",
+        "explanation": "Абсолютная ссылка содержит полный адрес, начиная с протокола (https://). Остальные — относительные и закладки.",
+        "accepted": {
+          "correct": "C"
+        }
+      },
+      "options": [
+        {
+          "key": "A",
+          "content": "`<a href=\"about.html\">О нас</a>`"
+        },
+        {
+          "key": "B",
+          "content": "`<a href=\"#C4\">Глава 4</a>`"
+        },
+        {
+          "key": "C",
+          "content": "`<a href=\"https://site.kz\">Сайт</a>`"
+        },
+        {
+          "key": "D",
+          "content": "`<a href=\"page.html#C4\">Глава 4</a>`"
+        }
+      ]
+    },
+    {
+      "key": "web-abs-vs-rel",
+      "title": "Абсолютный и относительный URL",
+      "type": "short_answer",
+      "marks": 2,
+      "difficulty": "medium",
+      "command_word": "explain",
+      "grading": "AI",
+      "objectives": [
+        "10.1.2.6"
+      ],
+      "text": "Чем абсолютный URL отличается от относительного? Когда используют каждый из них?",
+      "source": "teacher",
+      "source_reference": "2 ур 2 четв Гиперссылки (Обновлено).pptx, слайд 4; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 97",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "Абсолютный — полный адрес с протоколом и доменным именем; для перехода на внешние сайты (1); Относительный — без протокола и домена, путь к файлу того же сайта; для переходов внутри сайта (короче, не загромождает код) (1)",
+        "explanation": "Абсолютный URL содержит полный адрес, начиная с протокола (https://…), и используется для внешних сайтов. Относительный указывает файл того же сайта без https://www…, например about.html; он короче и удобен для переходов внутри сайта.",
+        "points": [
+          {
+            "criterion": "Абсолютный — полный адрес с протоколом и доменным именем; для перехода на внешние сайты",
+            "marks": 1
+          },
+          {
+            "criterion": "Относительный — без протокола и домена, путь к файлу того же сайта; для переходов внутри сайта (короче, не загромождает код)",
+            "marks": 1
+          }
+        ],
+        "model_answer": "Абсолютный URL содержит полный адрес, начиная с протокола (https://…), и используется для внешних сайтов. Относительный указывает файл того же сайта без https://www…, например about.html; он короче и удобен для переходов внутри сайта."
+      },
+      "content": {
+        "answer_lines": 4
+      }
+    },
+    {
+      "key": "web-bookmark",
+      "title": "Закладка на странице",
+      "type": "fill_blank",
+      "marks": 2,
+      "difficulty": "easy",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.6"
+      ],
+      "text": "Чтобы ссылка `<a href=\"#rules\">Правила</a>` вела к заголовку «Правила игры» на той же странице, заголовок нужно записать так: `<h2 [[1]]=\"rules\">Правила игры</h2>`. Символ [[2]] в атрибуте href означает переход к закладке.",
+      "source": "teacher",
+      "source_reference": "2 ур 2 четв Гиперссылки (Обновлено).pptx, слайды 7–8; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 98",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "[[1]]: id (1); [[2]]: # (1)",
+        "explanation": "Закладка создаётся атрибутом id, а ссылка на неё — через # в href.",
+        "accepted": {
+          "blanks": [
+            [
+              "id"
+            ],
+            [
+              "#",
+              "решётка",
+              "решетка"
+            ]
+          ]
+        }
+      },
+      "content": {
+        "blank_count": 2
+      }
+    },
+    {
+      "key": "web-image-link",
+      "title": "Ссылка-картинка",
+      "type": "html_css",
+      "marks": 3,
+      "difficulty": "medium",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "10.1.2.6",
+        "10.1.2.7"
+      ],
+      "text": "Напишите код: изображение `flower.png` (альтернативный текст «Цветок», ширина 150) является ссылкой на страницу `flowers.html`, которая открывается в новой вкладке.",
+      "source": "teacher",
+      "source_reference": "2 ур 2 четв Гиперссылки (Обновлено).pptx, слайд 6; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 97, 99",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "Тег <a> с href=\"flowers.html\" (1); target=\"_blank\" (1); Внутри <a> тег <img> с src=\"flower.png\", alt и width=\"150\" (1)",
+        "explanation": "<a href=\"flowers.html\" target=\"_blank\">\n  <img src=\"flower.png\" alt=\"Цветок\" width=\"150\">\n</a>",
+        "points": [
+          {
+            "criterion": "Тег <a> с href=\"flowers.html\"",
+            "marks": 1
+          },
+          {
+            "criterion": "target=\"_blank\"",
+            "marks": 1
+          },
+          {
+            "criterion": "Внутри <a> тег <img> с src=\"flower.png\", alt и width=\"150\"",
+            "marks": 1
+          }
+        ],
+        "model_answer": "<a href=\"flowers.html\" target=\"_blank\">\n  <img src=\"flower.png\" alt=\"Цветок\" width=\"150\">\n</a>"
+      },
+      "content": {
+        "language": "html"
+      }
+    },
+    {
+      "key": "web-link-text-only",
+      "title": "Ссылка — только текст",
+      "type": "true_false",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.6"
+      ],
+      "text": "Указателем гиперссылки может быть только текст.",
+      "source": "teacher",
+      "source_reference": "2 ур 2 четв Гиперссылки (Обновлено).pptx, слайд 2; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 96",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "Неверно (1)",
+        "explanation": "Неверно: указателем может быть и изображение `<img>` или другой элемент HTML.",
+        "accepted": {
+          "correct": false
+        }
+      }
+    },
+    {
+      "key": "web-img-required",
+      "title": "Обязательные атрибуты img",
+      "type": "multiple_response",
+      "marks": 2,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.7"
+      ],
+      "text": "Какие два атрибута тега `<img>` являются обязательными?",
+      "source": "teacher",
+      "source_reference": "3 ур 2 четв Мультимедиа (Обновлено).pptx, слайды 4, 10",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "A, B (по 1 за каждый)",
+        "explanation": "Обязательны src (путь к файлу) и alt (альтернативный текст). width и height — необязательные размеры.",
+        "accepted": {
+          "correct": [
+            "A",
+            "B"
+          ]
+        }
+      },
+      "options": [
+        {
+          "key": "A",
+          "content": "`src`"
+        },
+        {
+          "key": "B",
+          "content": "`alt`"
+        },
+        {
+          "key": "C",
+          "content": "`width`"
+        },
+        {
+          "key": "D",
+          "content": "`height`"
+        },
+        {
+          "key": "E",
+          "content": "`border`"
+        }
+      ]
+    },
+    {
+      "key": "web-alt-purpose",
+      "title": "Атрибут alt",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.7"
+      ],
+      "text": "Для чего нужен атрибут `alt` у изображения?",
+      "source": "teacher",
+      "source_reference": "3 ур 2 четв Мультимедиа (Обновлено).pptx, слайд 4; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 91",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B (1)",
+        "explanation": "alt — альтернативный текст. Путь задаёт src, рамку — border, обтекание — align.",
+        "accepted": {
+          "correct": "B"
+        }
+      },
+      "options": [
+        {
+          "key": "A",
+          "content": "Задаёт путь к файлу изображения"
+        },
+        {
+          "key": "B",
+          "content": "Задаёт альтернативный текст, который виден, если картинка не загрузилась, и озвучивается программами чтения с экрана"
+        },
+        {
+          "key": "C",
+          "content": "Задаёт ширину рамки изображения"
+        },
+        {
+          "key": "D",
+          "content": "Включает обтекание изображения текстом"
+        }
+      ]
+    },
+    {
+      "key": "web-media-attrs",
+      "title": "Атрибуты аудио и видео",
+      "type": "matching",
+      "marks": 4,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.7"
+      ],
+      "text": "Соотнесите атрибут тегов `<audio>`/`<video>` с назначением.",
+      "source": "teacher",
+      "source_reference": "G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 94; 3 ур 2 четв Мультимедиа (Обновлено).pptx, слайд 8",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "L1–R1; L2–R2; L3–R3; L4–R4 (по 1 за пару)",
+        "explanation": "controls — панель, autoplay — автозапуск, loop — повтор, src — путь.",
+        "accepted": {
+          "pairs": {
+            "L1": "R1",
+            "L2": "R2",
+            "L3": "R3",
+            "L4": "R4"
+          }
+        }
+      },
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "`controls`"
+          },
+          {
+            "key": "L2",
+            "text": "`autoplay`"
+          },
+          {
+            "key": "L3",
+            "text": "`loop`"
+          },
+          {
+            "key": "L4",
+            "text": "`src`"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "Вывод панели управления плеером"
+          },
+          {
+            "key": "R2",
+            "text": "Автоматическое воспроизведение после загрузки"
+          },
+          {
+            "key": "R3",
+            "text": "Многократное воспроизведение файла"
+          },
+          {
+            "key": "R4",
+            "text": "Путь к воспроизводимому файлу"
+          }
+        ]
+      }
+    },
+    {
+      "key": "web-formats",
+      "title": "Форматы файлов",
+      "type": "matching",
+      "marks": 6,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.7"
+      ],
+      "text": "Отнесите формат файла к виду мультимедиа.",
+      "source": "teacher",
+      "source_reference": "G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 94; 3 ур 2 четв Мультимедиа (Обновлено).pptx, слайд 3",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "L1–R1; L2–R2; L3–R3; L4–R2; L5–R1; L6–R3 (по 1 за пару)",
+        "explanation": "Видео: MP4, AVI. Аудио: MP3, WAV. Графика: PNG, GIF.",
+        "accepted": {
+          "pairs": {
+            "L1": "R1",
+            "L2": "R2",
+            "L3": "R3",
+            "L4": "R2",
+            "L5": "R1",
+            "L6": "R3"
+          }
+        }
+      },
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "MP4"
+          },
+          {
+            "key": "L2",
+            "text": "MP3"
+          },
+          {
+            "key": "L3",
+            "text": "PNG"
+          },
+          {
+            "key": "L4",
+            "text": "WAV"
+          },
+          {
+            "key": "L5",
+            "text": "AVI"
+          },
+          {
+            "key": "L6",
+            "text": "GIF"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "Видео"
+          },
+          {
+            "key": "R2",
+            "text": "Аудио"
+          },
+          {
+            "key": "R3",
+            "text": "Графика"
+          }
+        ]
+      }
+    },
+    {
+      "key": "web-img-size",
+      "title": "Размер изображения",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.7"
+      ],
+      "text": "Какая запись задаёт изображению ширину 500 и высоту 600 пикселей?",
+      "source": "teacher",
+      "source_reference": "3 ур 2 четв Мультимедиа (Обновлено).pptx, слайд 7; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 92",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B (1)",
+        "explanation": "Размеры задают атрибутами width и height (в пикселях) или через style='width:500px;height:600px;'.",
+        "accepted": {
+          "correct": "B"
+        }
+      },
+      "options": [
+        {
+          "key": "A",
+          "content": "`<img src='a.jpg' alt='A' size='500x600'>`"
+        },
+        {
+          "key": "B",
+          "content": "`<img src='a.jpg' alt='A' width='500' height='600'>`"
+        },
+        {
+          "key": "C",
+          "content": "`<img src='a.jpg' alt='A' style='500px;600px;'>`"
+        },
+        {
+          "key": "D",
+          "content": "`<img src='a.jpg' alt='A' wide='500' high='600'>`"
+        }
+      ]
+    },
+    {
+      "key": "web-video-code",
+      "title": "Код видеоплеера",
+      "type": "html_css",
+      "marks": 3,
+      "difficulty": "medium",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "10.1.2.7"
+      ],
+      "text": "Напишите фрагмент HTML-кода для вставки видео `film.mp4` шириной 300 пикселей с панелью управления и многократным повторением.",
+      "source": "teacher",
+      "source_reference": "G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 93–95; 3 ур 2 четв Мультимедиа (Обновлено).pptx, слайд 8",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "Тег <video> с width=\"300\" (1); Атрибуты controls и loop (1); Вложенный <source src=\"film.mp4\" type=\"video/mp4\"> (или src у video) (1)",
+        "explanation": "<video width=\"300\" controls loop>\n  <source src=\"film.mp4\" type=\"video/mp4\">\n</video>",
+        "points": [
+          {
+            "criterion": "Тег <video> с width=\"300\"",
+            "marks": 1
+          },
+          {
+            "criterion": "Атрибуты controls и loop",
+            "marks": 1
+          },
+          {
+            "criterion": "Вложенный <source src=\"film.mp4\" type=\"video/mp4\"> (или src у video)",
+            "marks": 1
+          }
+        ],
+        "model_answer": "<video width=\"300\" controls loop>\n  <source src=\"film.mp4\" type=\"video/mp4\">\n</video>"
+      },
+      "content": {
+        "language": "html"
+      }
+    },
+    {
+      "key": "web-copyright",
+      "title": "Мультимедиа и авторские права",
+      "type": "short_answer",
+      "marks": 2,
+      "difficulty": "easy",
+      "command_word": "explain",
+      "grading": "AI",
+      "objectives": [
+        "10.1.2.7"
+      ],
+      "text": "Что нужно сделать, прежде чем разместить на своём сайте чужое изображение, музыку или видео?",
+      "source": "teacher",
+      "source_reference": "3 ур 2 четв Мультимедиа (Обновлено).pptx, слайды 6, 8",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "Проверить лицензию (например, Creative Commons) (1); Указать автора источника (1)",
+        "explanation": "Нужно проверить лицензию материала (например, Creative Commons) и указать автора источника.",
+        "points": [
+          {
+            "criterion": "Проверить лицензию (например, Creative Commons)",
+            "marks": 1
+          },
+          {
+            "criterion": "Указать автора источника",
+            "marks": 1
+          }
+        ],
+        "model_answer": "Нужно проверить лицензию материала (например, Creative Commons) и указать автора источника."
+      },
+      "content": {
+        "answer_lines": 4
+      }
+    },
+    {
+      "key": "web-layers",
+      "title": "Уровни веб-страницы",
+      "type": "matching",
+      "marks": 3,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.7"
+      ],
+      "text": "Соотнесите уровень разработки веб-страницы с языком.",
+      "source": "teacher",
+      "source_reference": "3 ур 2 четв Мультимедиа (Обновлено).pptx, слайды 2, 10",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "L1–R1; L2–R2; L3–R3 (по 1 за пару)",
+        "explanation": "Структура — HTML, внешний вид — CSS, интерактивность — JavaScript.",
+        "accepted": {
+          "pairs": {
+            "L1": "R1",
+            "L2": "R2",
+            "L3": "R3"
+          }
+        }
+      },
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "Уровень структуры (content layer)"
+          },
+          {
+            "key": "L2",
+            "text": "Уровень презентации (presentation layer)"
+          },
+          {
+            "key": "L3",
+            "text": "Уровень поведения (behavior layer)"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "HTML"
+          },
+          {
+            "key": "R2",
+            "text": "CSS"
+          },
+          {
+            "key": "R3",
+            "text": "JavaScript"
+          }
+        ]
+      }
+    },
+    {
+      "key": "web-caption",
+      "title": "Наименование таблицы",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.8"
+      ],
+      "text": "Какой тег задаёт наименование (заголовок) таблицы над ней по центру?",
+      "source": "teacher",
+      "source_reference": "4 ур 2 четв 10 кл Таблицы в HTML (Обновлено).pptx, слайды 3, 7; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 75, 78",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "C (1)",
+        "explanation": "`<caption>` — наименование таблицы. `<th>` — заголовок столбца, тега `<name>` нет.",
+        "accepted": {
+          "correct": "C"
+        }
+      },
+      "options": [
+        {
+          "key": "A",
+          "content": "`<table>…</table>`"
+        },
+        {
+          "key": "B",
+          "content": "`<name>…</name>`"
+        },
+        {
+          "key": "C",
+          "content": "`<caption>…</caption>`"
+        },
+        {
+          "key": "D",
+          "content": "`<th>…</th>`"
+        }
+      ]
+    },
+    {
+      "key": "web-table-tags",
+      "title": "Теги таблицы",
+      "type": "matching",
+      "marks": 4,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.8"
+      ],
+      "text": "Соотнесите тег с назначением.",
+      "source": "teacher",
+      "source_reference": "4 ур 2 четв 10 кл Таблицы в HTML (Обновлено).pptx, слайд 3; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 75",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "L1–R1; L2–R2; L3–R3; L4–R4 (по 1 за пару)",
+        "explanation": "tr — строка, td — ячейка, th — заголовок столбца, table — таблица.",
+        "accepted": {
+          "pairs": {
+            "L1": "R1",
+            "L2": "R2",
+            "L3": "R3",
+            "L4": "R4"
+          }
+        }
+      },
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "`<tr>`"
+          },
+          {
+            "key": "L2",
+            "text": "`<td>`"
+          },
+          {
+            "key": "L3",
+            "text": "`<th>`"
+          },
+          {
+            "key": "L4",
+            "text": "`<table>`"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "Строка таблицы"
+          },
+          {
+            "key": "R2",
+            "text": "Обычная ячейка данных"
+          },
+          {
+            "key": "R3",
+            "text": "Ячейка-заголовок столбца (жирный текст по центру)"
+          },
+          {
+            "key": "R4",
+            "text": "Контейнер всей таблицы"
+          }
+        ]
+      }
+    },
+    {
+      "key": "web-table-attrs",
+      "title": "Атрибуты таблицы",
+      "type": "matching",
+      "marks": 5,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.8"
+      ],
+      "text": "Соотнесите атрибут тега `<table>` с назначением.",
+      "source": "teacher",
+      "source_reference": "4 ур 2 четв 10 кл Таблицы в HTML (Обновлено).pptx, слайд 3; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 76",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "L1–R1; L2–R2; L3–R3; L4–R4; L5–R5 (по 1 за пару)",
+        "explanation": "border — толщина рамки, bordercolor — цвет рамки, background — фоновый рисунок, cellpadding — внутренний отступ, cellspacing — промежуток между ячейками.",
+        "accepted": {
+          "pairs": {
+            "L1": "R1",
+            "L2": "R2",
+            "L3": "R3",
+            "L4": "R4",
+            "L5": "R5"
+          }
+        }
+      },
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "`border`"
+          },
+          {
+            "key": "L2",
+            "text": "`bordercolor`"
+          },
+          {
+            "key": "L3",
+            "text": "`background`"
+          },
+          {
+            "key": "L4",
+            "text": "`cellpadding`"
+          },
+          {
+            "key": "L5",
+            "text": "`cellspacing`"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "Толщина рамки в пикселях"
+          },
+          {
+            "key": "R2",
+            "text": "Цвет рамки"
+          },
+          {
+            "key": "R3",
+            "text": "Фоновый рисунок таблицы"
+          },
+          {
+            "key": "R4",
+            "text": "Отступ от рамки до содержимого ячейки"
+          },
+          {
+            "key": "R5",
+            "text": "Расстояние между ячейками"
+          }
+        ]
+      }
+    },
+    {
+      "key": "web-bordercolor-bg",
+      "title": "bordercolor — фон?",
+      "type": "true_false",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.8"
+      ],
+      "text": "Атрибуты background, bgcolor и bordercolor задают параметры фона таблицы.",
+      "source": "teacher",
+      "source_reference": "4 ур 2 четв 10 кл Таблицы в HTML (Обновлено).pptx, слайд 8; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 78",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "Неверно (1)",
+        "explanation": "Неверно: bordercolor задаёт цвет рамки, а не фона.",
+        "accepted": {
+          "correct": false
+        }
+      }
+    },
+    {
+      "key": "web-valign",
+      "title": "Вертикальное выравнивание",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.8"
+      ],
+      "text": "Какая запись прижимает текст к **нижнему** краю ячейки?",
+      "source": "teacher",
+      "source_reference": "4 ур 2 четв 10 кл Таблицы в HTML (Обновлено).pptx, слайд 9",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B (1)",
+        "explanation": "Вертикальное выравнивание — valign (top, middle, bottom); align — горизонтальное.",
+        "accepted": {
+          "correct": "B"
+        }
+      },
+      "options": [
+        {
+          "key": "A",
+          "content": "`<td align=\"bottom\">`"
+        },
+        {
+          "key": "B",
+          "content": "`<td valign=\"bottom\">`"
+        },
+        {
+          "key": "C",
+          "content": "`<td align=\"right\">`"
+        },
+        {
+          "key": "D",
+          "content": "`<td valign=\"middle\">`"
+        }
+      ]
+    },
+    {
+      "key": "web-write-table",
+      "title": "Код таблицы",
+      "type": "html_css",
+      "marks": 4,
+      "difficulty": "medium",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "10.1.2.8"
+      ],
+      "text": "Напишите HTML-код таблицы с рамкой толщиной 1 и наименованием «Расписание». Первая строка — заголовки столбцов «День» и «Урок», вторая — «Понедельник» и «Информатика».",
+      "source": "teacher",
+      "source_reference": "G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 75–76; 4 ур 2 четв 10 кл Таблицы в HTML (Обновлено).pptx, слайды 3, 10",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "<table border=\"1\"> … </table> (1); <caption>Расписание</caption> (1); Строка заголовков: <tr> с двумя <th> (1); Строка данных: <tr> с двумя <td> (1)",
+        "explanation": "<table border=\"1\">\n  <caption>Расписание</caption>\n  <tr><th>День</th><th>Урок</th></tr>\n  <tr><td>Понедельник</td><td>Информатика</td></tr>\n</table>",
+        "points": [
+          {
+            "criterion": "<table border=\"1\"> … </table>",
+            "marks": 1
+          },
+          {
+            "criterion": "<caption>Расписание</caption>",
+            "marks": 1
+          },
+          {
+            "criterion": "Строка заголовков: <tr> с двумя <th>",
+            "marks": 1
+          },
+          {
+            "criterion": "Строка данных: <tr> с двумя <td>",
+            "marks": 1
+          }
+        ],
+        "model_answer": "<table border=\"1\">\n  <caption>Расписание</caption>\n  <tr><th>День</th><th>Урок</th></tr>\n  <tr><td>Понедельник</td><td>Информатика</td></tr>\n</table>"
+      },
+      "content": {
+        "language": "html"
+      }
+    },
+    {
+      "key": "web-rowspan",
+      "title": "Объединение строк",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.9"
+      ],
+      "text": "Какой атрибут указывает число объединяемых **строк** (ячейка растягивается вниз)?",
+      "source": "teacher",
+      "source_reference": "4 ур 2 четв 10 кл Таблицы в HTML (Обновлено).pptx, слайды 3, 7",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "D (1)",
+        "explanation": "rowspan — по вертикали (строки), colspan — по горизонтали (столбцы).",
+        "accepted": {
+          "correct": "D"
+        }
+      },
+      "options": [
+        {
+          "key": "A",
+          "content": "`rows`"
+        },
+        {
+          "key": "B",
+          "content": "`colspan`"
+        },
+        {
+          "key": "C",
+          "content": "`columns`"
+        },
+        {
+          "key": "D",
+          "content": "`rowspan`"
+        },
+        {
+          "key": "E",
+          "content": "`collspan`"
+        }
+      ]
+    },
+    {
+      "key": "web-colspan-code",
+      "title": "Ячейка на три столбца",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.9"
+      ],
+      "text": "В таблице 3 столбца. Какая запись создаёт в первой строке одну ячейку «Итоги» на всю ширину таблицы?",
+      "source": "teacher",
+      "source_reference": "4 ур 2 четв 10 кл Таблицы в HTML (Обновлено).pptx, слайды 4–5; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 76",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B (1)",
+        "explanation": "Объединение столбцов по горизонтали — colspan в теге ячейки <td>.",
+        "accepted": {
+          "correct": "B"
+        }
+      },
+      "options": [
+        {
+          "key": "A",
+          "content": "`<tr><td rowspan=\"3\">Итоги</td></tr>`"
+        },
+        {
+          "key": "B",
+          "content": "`<tr><td colspan=\"3\">Итоги</td></tr>`"
+        },
+        {
+          "key": "C",
+          "content": "`<tr><td width=\"3\">Итоги</td></tr>`"
+        },
+        {
+          "key": "D",
+          "content": "`<tr colspan=\"3\"><td>Итоги</td></tr>`"
+        }
+      ]
+    },
+    {
+      "key": "web-span-analysis",
+      "title": "Анализ таблицы с rowspan",
+      "type": "short_answer",
+      "marks": 2,
+      "difficulty": "medium",
+      "command_word": "analyse",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.9"
+      ],
+      "text": "Дан код:\n\n```html\n<table border=\"1\">\n  <tr><th>Имя</th><td>Петя Иванов</td></tr>\n  <tr><th rowspan=\"2\">Телефон</th><td>123 45 67</td></tr>\n  <tr><td>234 56 78</td></tr>\n</table>\n```\n\nСколько **строк** в таблице и на сколько строк растянута ячейка «Телефон»? Ответ запишите двумя числами через пробел.",
+      "source": "teacher",
+      "source_reference": "4 ур 2 четв 10 кл Таблицы в HTML (Обновлено).pptx, слайд 5; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 77",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "3 2 (по 1 за каждое число)",
+        "explanation": "Три тега <tr> — три строки; rowspan=\"2\" растягивает «Телефон» на 2 строки, поэтому в третьей строке только второй номер.",
+        "accepted": {
+          "values": [
+            "3 2",
+            "3, 2",
+            "3,2"
+          ],
+          "ignore_spaces": false
+        }
+      },
+      "content": {
+        "answer_lines": 1
+      }
+    },
+    {
+      "key": "web-debug-table",
+      "title": "Найдите ошибки в таблице",
+      "type": "code_analysis",
+      "marks": 2,
+      "difficulty": "medium",
+      "command_word": "analyse",
+      "grading": "AI",
+      "objectives": [
+        "10.1.2.9",
+        "10.1.2.8"
+      ],
+      "text": "В коде таблицы есть две ошибки. Найдите их и запишите исправленные строки.\n\n```html\n<table border=\"1\">\n  <tr><th>Вид спорта</th><th>Направления</th></tr>\n  <tr><td rowspan=\"2\">Командные</td>волейбол</td></tr>\n  <tr><td>футбол</td></tr>\n  <tr>< rowspan=\"2\">Единоборства</td><td>дзюдо</td></tr>\n  <tr><td>борьба на поясах</td></tr>\n</table>\n```",
+      "source": "teacher",
+      "source_reference": "4 ур 2 четв 10 кл Таблицы в HTML (Обновлено).pptx, слайд 6",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "Пропущен открывающий тег <td> перед «волейбол»: <td>волейбол</td> (1); Пропущено имя тега: <td rowspan=\"2\">Единоборства</td> (1)",
+        "explanation": "1) <td rowspan=\"2\">Командные</td><td>волейбол</td> — не хватало открывающего <td>. 2) <td rowspan=\"2\">Единоборства</td> — после «<» было пропущено имя тега td.",
+        "points": [
+          {
+            "criterion": "Пропущен открывающий тег <td> перед «волейбол»: <td>волейбол</td>",
+            "marks": 1
+          },
+          {
+            "criterion": "Пропущено имя тега: <td rowspan=\"2\">Единоборства</td>",
+            "marks": 1
+          }
+        ],
+        "model_answer": "1) <td rowspan=\"2\">Командные</td><td>волейбол</td> — не хватало открывающего <td>. 2) <td rowspan=\"2\">Единоборства</td> — после «<» было пропущено имя тега td."
+      },
+      "content": {
+        "language": "html"
+      }
+    },
+    {
+      "key": "web-span-write",
+      "title": "Таблица с rowspan",
+      "type": "html_css",
+      "marks": 3,
+      "difficulty": "medium",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "10.1.2.9"
+      ],
+      "text": "Напишите код таблицы с рамкой: в левом столбце ячейка «Зимние виды спорта» растянута на две строки, справа от неё в двух строках — «хоккей» и «фигурное катание».",
+      "source": "teacher",
+      "source_reference": "4 ур 2 четв 10 кл Таблицы в HTML (Обновлено).pptx, слайд 6; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 77",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "<table border=\"1\"> и две строки <tr> (1); <td rowspan=\"2\">Зимние виды спорта</td> в первой строке (1); Во второй строке только одна ячейка (без повторения левой) (1)",
+        "explanation": "<table border=\"1\">\n  <tr><td rowspan=\"2\">Зимние виды спорта</td><td>хоккей</td></tr>\n  <tr><td>фигурное катание</td></tr>\n</table>",
+        "points": [
+          {
+            "criterion": "<table border=\"1\"> и две строки <tr>",
+            "marks": 1
+          },
+          {
+            "criterion": "<td rowspan=\"2\">Зимние виды спорта</td> в первой строке",
+            "marks": 1
+          },
+          {
+            "criterion": "Во второй строке только одна ячейка (без повторения левой)",
+            "marks": 1
+          }
+        ],
+        "model_answer": "<table border=\"1\">\n  <tr><td rowspan=\"2\">Зимние виды спорта</td><td>хоккей</td></tr>\n  <tr><td>фигурное катание</td></tr>\n</table>"
+      },
+      "content": {
+        "language": "html"
+      }
+    },
+    {
+      "key": "web-css-ways",
+      "title": "Способы подключения CSS",
+      "type": "matching",
+      "marks": 3,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.10"
+      ],
+      "text": "Соотнесите описание со способом задания стилей.",
+      "source": "teacher",
+      "source_reference": "5 ур 2 четв CSS и Блочная верстка (Обновлено).pptx, слайды 4, 8; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 79–80, 82",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "L1–R1; L2–R2; L3–R3 (по 1 за пару)",
+        "explanation": "link и файл .css — внешний; <style> в <head> — внутренний; атрибут style — встроенный.",
+        "accepted": {
+          "pairs": {
+            "L1": "R1",
+            "L2": "R2",
+            "L3": "R3"
+          }
+        }
+      },
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "Стили в отдельном файле .css, подключаются тегом `<link>`"
+          },
+          {
+            "key": "L2",
+            "text": "Стили в теге `<style>` в разделе `<head>`"
+          },
+          {
+            "key": "L3",
+            "text": "Стиль в атрибуте `style` конкретного тега"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "Внешний (External CSS)"
+          },
+          {
+            "key": "R2",
+            "text": "Внутренний (Internal CSS)"
+          },
+          {
+            "key": "R3",
+            "text": "Встроенный (Inline CSS)"
+          }
+        ]
+      }
+    },
+    {
+      "key": "web-inline-when",
+      "title": "Когда встроенный стиль",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.10"
+      ],
+      "text": "Когда уместнее всего использовать встроенный (Inline) стиль?",
+      "source": "teacher",
+      "source_reference": "G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 80; 5 ур 2 четв CSS и Блочная верстка (Обновлено).pptx, слайд 4",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B (1)",
+        "explanation": "Inline CSS — для однократного использования или подавления ранее указанных стилей. Для многих страниц — внешний CSS.",
+        "accepted": {
+          "correct": "B"
+        }
+      },
+      "options": [
+        {
+          "key": "A",
+          "content": "Для единого дизайна многих страниц сайта"
+        },
+        {
+          "key": "B",
+          "content": "При однократном применении стиля или чтобы подавить ранее указанные стили"
+        },
+        {
+          "key": "C",
+          "content": "Только для подключения шрифтов"
+        },
+        {
+          "key": "D",
+          "content": "Для одностраничного сайта со множеством одинаковых элементов"
+        }
+      ]
+    },
+    {
+      "key": "web-internal-code",
+      "title": "Определите способ",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.10"
+      ],
+      "text": "Каким способом подключён стиль?\n\n```html\n<head>\n  <style> p { color: green; } </style>\n</head>\n<body><p>Текст</p></body>\n```",
+      "source": "teacher",
+      "source_reference": "G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 79",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B (1)",
+        "explanation": "Тег <style> в разделе <head> — внутренний (Internal) CSS.",
+        "accepted": {
+          "correct": "B"
+        }
+      },
+      "options": [
+        {
+          "key": "A",
+          "content": "Внешний"
+        },
+        {
+          "key": "B",
+          "content": "Внутренний"
+        },
+        {
+          "key": "C",
+          "content": "Встроенный"
+        },
+        {
+          "key": "D",
+          "content": "Это не CSS"
+        }
+      ]
+    },
+    {
+      "key": "web-inline-to-internal",
+      "title": "Из встроенного во внутренний",
+      "type": "html_css",
+      "marks": 3,
+      "difficulty": "hard",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "10.1.2.10",
+        "10.1.2.11"
+      ],
+      "text": "Перепишите код, заменив встроенные стили внутренним CSS с **селектором по тегу** (все абзацы оформлены одинаково):\n\n```html\n<p style=\"color: red; font-size: 30px;\">Сегодня прекрасный день!</p>\n<p style=\"color: red; font-size: 30px;\">У меня хорошее настроение!</p>\n```",
+      "source": "teacher",
+      "source_reference": "5 ур 2 четв CSS и Блочная верстка (Обновлено).pptx, слайд 4; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 79–80",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "Тег <style> в разделе <head> (1); Правило с селектором тега: p { color: red; font-size: 30px; } (1); Атрибуты style у абзацев удалены (1)",
+        "explanation": "<head>\n  <style>\n    p { color: red; font-size: 30px; }\n  </style>\n</head>\n<body>\n  <p>Сегодня прекрасный день!</p>\n  <p>У меня хорошее настроение!</p>\n</body>",
+        "points": [
+          {
+            "criterion": "Тег <style> в разделе <head>",
+            "marks": 1
+          },
+          {
+            "criterion": "Правило с селектором тега: p { color: red; font-size: 30px; }",
+            "marks": 1
+          },
+          {
+            "criterion": "Атрибуты style у абзацев удалены",
+            "marks": 1
+          }
+        ],
+        "model_answer": "<head>\n  <style>\n    p { color: red; font-size: 30px; }\n  </style>\n</head>\n<body>\n  <p>Сегодня прекрасный день!</p>\n  <p>У меня хорошее настроение!</p>\n</body>"
+      },
+      "content": {
+        "language": "html"
+      }
+    },
+    {
+      "key": "web-text-props",
+      "title": "Свойства текста в CSS",
+      "type": "matching",
+      "marks": 5,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.10"
+      ],
+      "text": "Соотнесите свойство CSS с его действием.",
+      "source": "teacher",
+      "source_reference": "G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 88; 5 ур 2 четв CSS и Блочная верстка (Обновлено).pptx, слайды 3–4",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "L1–R1; L2–R2; L3–R3; L4–R4; L5–R5 (по 1 за пару)",
+        "explanation": "Сопоставление по таблице свойств текста.",
+        "accepted": {
+          "pairs": {
+            "L1": "R1",
+            "L2": "R2",
+            "L3": "R3",
+            "L4": "R4",
+            "L5": "R5"
+          }
+        }
+      },
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "`font-style: italic`"
+          },
+          {
+            "key": "L2",
+            "text": "`font-weight: bold`"
+          },
+          {
+            "key": "L3",
+            "text": "`text-decoration: line-through`"
+          },
+          {
+            "key": "L4",
+            "text": "`text-decoration: underline`"
+          },
+          {
+            "key": "L5",
+            "text": "`font-family: Arial`"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "Курсив"
+          },
+          {
+            "key": "R2",
+            "text": "Полужирный"
+          },
+          {
+            "key": "R3",
+            "text": "Перечёркнутый текст"
+          },
+          {
+            "key": "R4",
+            "text": "Подчёркнутый текст"
+          },
+          {
+            "key": "R5",
+            "text": "Шрифт Arial"
+          }
+        ]
+      }
+    },
+    {
+      "key": "web-table-style",
+      "title": "Чтение стиля таблицы",
+      "type": "multiple_response",
+      "marks": 2,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.10"
+      ],
+      "text": "Что означает стиль `TABLE { background: grey; border: double blue; color: green; }`?",
+      "source": "teacher",
+      "source_reference": "5 ур 2 четв CSS и Блочная верстка (Обновлено).pptx, слайд 9; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 84; G10_Информатика_TG_RU_ФИНАЛ_16.11.22 1.pdf, стр. 56",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B, C (по 1 за каждый)",
+        "explanation": "background: grey — серый фон; border: double blue — двойная синяя рамка; color: green — зелёный текст.",
+        "accepted": {
+          "correct": [
+            "B",
+            "C"
+          ]
+        }
+      },
+      "options": [
+        {
+          "key": "A",
+          "content": "Пунктирная рамка"
+        },
+        {
+          "key": "B",
+          "content": "Серый фон и двойная рамка синего цвета"
+        },
+        {
+          "key": "C",
+          "content": "Цвет текста — зелёный"
+        },
+        {
+          "key": "D",
+          "content": "Цвет текста — серый"
+        },
+        {
+          "key": "E",
+          "content": "Двойная рамка серого цвета"
+        }
+      ]
+    },
+    {
+      "key": "web-padding",
+      "title": "padding",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.10"
+      ],
+      "text": "Какое свойство определяет внутренние поля вокруг содержимого элемента (от рамки до текста)?",
+      "source": "teacher",
+      "source_reference": "5 ур 2 четв CSS и Блочная верстка (Обновлено).pptx, слайды 8, 11; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 80",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B (1)",
+        "explanation": "padding — внутренние поля; margin — внешние отступы; cellspacing — расстояние между ячейками.",
+        "accepted": {
+          "correct": "B"
+        }
+      },
+      "options": [
+        {
+          "key": "A",
+          "content": "`double`"
+        },
+        {
+          "key": "B",
+          "content": "`padding`"
+        },
+        {
+          "key": "C",
+          "content": "`cellspacing`"
+        },
+        {
+          "key": "D",
+          "content": "`separate`"
+        },
+        {
+          "key": "E",
+          "content": "`margin`"
+        }
+      ]
+    },
+    {
+      "key": "web-collapse",
+      "title": "Общая граница ячеек",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.10"
+      ],
+      "text": "Какое значение `border-collapse` сливает рамки соседних ячеек в одну общую линию?",
+      "source": "teacher",
+      "source_reference": "5 ур 2 четв CSS и Блочная верстка (Обновлено).pptx, слайд 6; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 83; G10_Информатика_TG_RU_ФИНАЛ_16.11.22 1.pdf, стр. 55",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B (1)",
+        "explanation": "collapse — одна общая граница; separate — у каждой ячейки своя рамка.",
+        "accepted": {
+          "correct": "B"
+        }
+      },
+      "options": [
+        {
+          "key": "A",
+          "content": "`separate`"
+        },
+        {
+          "key": "B",
+          "content": "`collapse`"
+        },
+        {
+          "key": "C",
+          "content": "`double`"
+        },
+        {
+          "key": "D",
+          "content": "`groove`"
+        }
+      ]
+    },
+    {
+      "key": "web-border-color",
+      "title": "border-color по сторонам",
+      "type": "matching",
+      "marks": 4,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.10"
+      ],
+      "text": "Запись `border-color: red blue green gold;` задаёт цвета сторон по часовой стрелке. Соотнесите сторону с цветом.",
+      "source": "teacher",
+      "source_reference": "5 ур 2 четв CSS и Блочная верстка (Обновлено).pptx, слайд 9; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 83",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "L1–R1; L2–R2; L3–R3; L4–R4 (по 1 за пару)",
+        "explanation": "Порядок четырёх значений: верх, право, низ, лево.",
+        "accepted": {
+          "pairs": {
+            "L1": "R1",
+            "L2": "R2",
+            "L3": "R3",
+            "L4": "R4"
+          }
+        }
+      },
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "Верхняя"
+          },
+          {
+            "key": "L2",
+            "text": "Правая"
+          },
+          {
+            "key": "L3",
+            "text": "Нижняя"
+          },
+          {
+            "key": "L4",
+            "text": "Левая"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "red"
+          },
+          {
+            "key": "R2",
+            "text": "blue"
+          },
+          {
+            "key": "R3",
+            "text": "green"
+          },
+          {
+            "key": "R4",
+            "text": "gold"
+          }
+        ]
+      }
+    },
+    {
+      "key": "web-border-style",
+      "title": "Стили рамки",
+      "type": "multiple_response",
+      "marks": 3,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.10"
+      ],
+      "text": "Какие значения относятся к свойству `border-style` (стиль линии рамки)?",
+      "source": "teacher",
+      "source_reference": "5 ур 2 четв CSS и Блочная верстка (Обновлено).pptx, слайды 6, 9; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 83, 86",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "A, C, E (по 1 за каждый)",
+        "explanation": "dashed, groove, dotted — стили рамки. separate — значение border-collapse, padding — отдельное свойство.",
+        "accepted": {
+          "correct": [
+            "A",
+            "C",
+            "E"
+          ]
+        }
+      },
+      "options": [
+        {
+          "key": "A",
+          "content": "`dashed`"
+        },
+        {
+          "key": "B",
+          "content": "`padding`"
+        },
+        {
+          "key": "C",
+          "content": "`groove`"
+        },
+        {
+          "key": "D",
+          "content": "`separate`"
+        },
+        {
+          "key": "E",
+          "content": "`dotted`"
+        }
+      ]
+    },
+    {
+      "key": "web-selectors",
+      "title": "Виды селекторов",
+      "type": "matching",
+      "marks": 4,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.11"
+      ],
+      "text": "Соотнесите запись правила CSS с видом селектора.",
+      "source": "teacher",
+      "source_reference": "5 ур 2 четв CSS и Блочная верстка (Обновлено).pptx, слайды 4, 6, 15; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 79–80",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "L1–R1; L2–R2; L3–R3; L4–R4 (по 1 за пару)",
+        "explanation": "Имя тега без скобок — селектор тега; точка — класс; решётка — id; через запятую — одно правило для нескольких тегов.",
+        "accepted": {
+          "pairs": {
+            "L1": "R1",
+            "L2": "R2",
+            "L3": "R3",
+            "L4": "R4"
+          }
+        }
+      },
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "`p { color: red; }`"
+          },
+          {
+            "key": "L2",
+            "text": "`.st1 { color: green; }`"
+          },
+          {
+            "key": "L3",
+            "text": "`#header { height: 55px; }`"
+          },
+          {
+            "key": "L4",
+            "text": "`table, td, th { border: 1px solid; }`"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "Селектор тега"
+          },
+          {
+            "key": "R2",
+            "text": "Селектор класса"
+          },
+          {
+            "key": "R3",
+            "text": "Селектор id"
+          },
+          {
+            "key": "R4",
+            "text": "Несколько селекторов тегов через запятую"
+          }
+        ]
+      }
+    },
+    {
+      "key": "web-tag-selector-effect",
+      "title": "Действие селектора тега",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "explain",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.11"
+      ],
+      "text": "Во внутреннем CSS записано `h2 { color: blue; }`. Какие элементы страницы станут синими?",
+      "source": "teacher",
+      "source_reference": "5 ур 2 четв CSS и Блочная верстка (Обновлено).pptx, слайд 15",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B (1)",
+        "explanation": "Селектор тега задаёт единый стиль сразу всем одноимённым тегам страницы.",
+        "accepted": {
+          "correct": "B"
+        }
+      },
+      "options": [
+        {
+          "key": "A",
+          "content": "Только первый заголовок `<h2>`"
+        },
+        {
+          "key": "B",
+          "content": "Все заголовки `<h2>` на странице"
+        },
+        {
+          "key": "C",
+          "content": "Только элементы с `class=\"h2\"`"
+        },
+        {
+          "key": "D",
+          "content": "Только элемент с `id=\"h2\"`"
+        }
+      ]
+    },
+    {
+      "key": "web-class-id-use",
+      "title": "Применение класса и id",
+      "type": "multiple_response",
+      "marks": 2,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.11"
+      ],
+      "text": "Во внутреннем CSS созданы правила `.st1 {…}` и `#st1 {…}`. Какие записи в HTML правильно применяют эти стили?",
+      "source": "teacher",
+      "source_reference": "5 ур 2 четв CSS и Блочная верстка (Обновлено).pptx, слайд 9; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 84; G10_Информатика_TG_RU_ФИНАЛ_16.11.22 1.pdf, стр. 56",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B, D (по 1 за каждый)",
+        "explanation": "В HTML пишут class=\"st1\" и id=\"st1\" — без точки и решётки.",
+        "accepted": {
+          "correct": [
+            "B",
+            "D"
+          ]
+        }
+      },
+      "options": [
+        {
+          "key": "A",
+          "content": "`<link rel=\"stylesheet\" href=\"st.css\">`"
+        },
+        {
+          "key": "B",
+          "content": "`<font class=\"st1\">`"
+        },
+        {
+          "key": "C",
+          "content": "`<p style=\"color:green;\">`"
+        },
+        {
+          "key": "D",
+          "content": "`<font id=\"st1\">`"
+        },
+        {
+          "key": "E",
+          "content": "`<font id=\"#st1\">`"
+        }
+      ]
+    },
+    {
+      "key": "web-selector-choice",
+      "title": "Какой селектор выбрать",
+      "type": "short_answer",
+      "marks": 3,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AI",
+      "objectives": [
+        "10.1.2.11"
+      ],
+      "text": "Для каждого случая назовите вид селектора (тега, класса или id): а) все абзацы страницы — шрифт Arial; б) шапка сайта, которая встречается один раз; в) один стиль для нескольких разных элементов.",
+      "source": "teacher",
+      "source_reference": "5 ур 2 четв CSS и Блочная верстка (Обновлено).pptx, слайд 15",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "а) селектор тега (p {…}) (1); б) селектор id (#header {…}) (1); в) селектор класса (.имя {…}) (1)",
+        "explanation": "а) селектор тега: p { font-family: Arial; }; б) селектор id: #header {…}; в) селектор класса: .st1 {…}.",
+        "points": [
+          {
+            "criterion": "а) селектор тега (p {…})",
+            "marks": 1
+          },
+          {
+            "criterion": "б) селектор id (#header {…})",
+            "marks": 1
+          },
+          {
+            "criterion": "в) селектор класса (.имя {…})",
+            "marks": 1
+          }
+        ],
+        "model_answer": "а) селектор тега: p { font-family: Arial; }; б) селектор id: #header {…}; в) селектор класса: .st1 {…}."
+      },
+      "content": {
+        "answer_lines": 4
+      }
+    },
+    {
+      "key": "web-div-main",
+      "title": "Тег блочной вёрстки",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.10"
+      ],
+      "text": "Какой тег является основным для блочной вёрстки?",
+      "source": "teacher",
+      "source_reference": "5 ур 2 четв CSS и Блочная верстка (Обновлено).pptx, слайды 10, 14; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 85, 89",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B (1)",
+        "explanation": "Блочная вёрстка строится на `<div>`.",
+        "accepted": {
+          "correct": "B"
+        }
+      },
+      "options": [
+        {
+          "key": "A",
+          "content": "`<table>…</table>`"
+        },
+        {
+          "key": "B",
+          "content": "`<div>…</div>`"
+        },
+        {
+          "key": "C",
+          "content": "`<ol>…</ol>`"
+        },
+        {
+          "key": "D",
+          "content": "`<hr>`"
+        }
+      ]
+    },
+    {
+      "key": "web-box-props",
+      "title": "Свойства блоков",
+      "type": "matching",
+      "marks": 5,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.10"
+      ],
+      "text": "Соотнесите свойство CSS с описанием.",
+      "source": "teacher",
+      "source_reference": "5 ур 2 четв CSS и Блочная верстка (Обновлено).pptx, слайды 11, 14; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 85",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "L1–R1; L2–R2; L3–R3; L4–R4; L5–R5 (по 1 за пару)",
+        "explanation": "margin — снаружи, padding — внутри, position — позиционирование, box-sizing — способ расчёта размеров, float — обтекание.",
+        "accepted": {
+          "pairs": {
+            "L1": "R1",
+            "L2": "R2",
+            "L3": "R3",
+            "L4": "R4",
+            "L5": "R5"
+          }
+        }
+      },
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "`margin`"
+          },
+          {
+            "key": "L2",
+            "text": "`padding`"
+          },
+          {
+            "key": "L3",
+            "text": "`position`"
+          },
+          {
+            "key": "L4",
+            "text": "`box-sizing`"
+          },
+          {
+            "key": "L5",
+            "text": "`float: left`"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "Внешние отступы от соседних объектов"
+          },
+          {
+            "key": "R2",
+            "text": "Внутреннее пространство между рамкой и текстом"
+          },
+          {
+            "key": "R3",
+            "text": "Способ позиционирования относительно окна браузера или других объектов"
+          },
+          {
+            "key": "R4",
+            "text": "Задают ли width и height размеры содержания или всего блока"
+          },
+          {
+            "key": "R5",
+            "text": "Прижимает блок к левому краю, следующие встают рядом"
+          }
+        ]
+      }
+    },
+    {
+      "key": "web-span-vs-div",
+      "title": "<span>",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "compare",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.10"
+      ],
+      "text": "Чем `<span>` отличается от `<div>`?",
+      "source": "teacher",
+      "source_reference": "5 ур 2 четв CSS и Блочная верстка (Обновлено).pptx, слайд 10",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "A (1)",
+        "explanation": "`<div>` — блочный контейнер каркаса, `<span>` — строчный, выделяет слова внутри абзаца.",
+        "accepted": {
+          "correct": "A"
+        }
+      },
+      "options": [
+        {
+          "key": "A",
+          "content": "`<span>` — строчный элемент: выделяет фрагмент внутри строки без переноса на новую строку"
+        },
+        {
+          "key": "B",
+          "content": "`<span>` создаёт таблицу"
+        },
+        {
+          "key": "C",
+          "content": "`<span>` нельзя оформлять через CSS"
+        },
+        {
+          "key": "D",
+          "content": "`<span>` — блочный контейнер для каркаса сайта"
+        }
+      ]
+    },
+    {
+      "key": "web-clear-both",
+      "title": "Зачем clear: both",
+      "type": "short_answer",
+      "marks": 2,
+      "difficulty": "medium",
+      "command_word": "explain",
+      "grading": "AI",
+      "objectives": [
+        "10.1.2.10"
+      ],
+      "text": "В блочном макете `#sidebar` имеет `float: left`, `#content` — `float: right`. Зачем перед `#footer` добавляют пустой блок `<div id=\"clear\">` со стилем `clear: both`?",
+      "source": "teacher",
+      "source_reference": "6 ур 2 четв Верстка сайта (Обновлено).pptx, слайды 4, 6, 9",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "clear: both отменяет (сбрасывает) обтекание float (1); Поэтому подвал #footer размещается ниже плавающих блоков на всю ширину (1)",
+        "explanation": "Свойство clear: both отменяет обтекание float, поэтому #footer располагается под блоками #sidebar и #content, а не рядом с ними.",
+        "points": [
+          {
+            "criterion": "clear: both отменяет (сбрасывает) обтекание float",
+            "marks": 1
+          },
+          {
+            "criterion": "Поэтому подвал #footer размещается ниже плавающих блоков на всю ширину",
+            "marks": 1
+          }
+        ],
+        "model_answer": "Свойство clear: both отменяет обтекание float, поэтому #footer располагается под блоками #sidebar и #content, а не рядом с ними."
+      },
+      "content": {
+        "answer_lines": 4
+      }
+    },
+    {
+      "key": "web-four-columns",
+      "title": "Четыре колонки",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.10"
+      ],
+      "text": "Блоки с `float: left` должны встать в один ряд и вместе занять 100 % ширины. Какую ширину `width` (в %) нужно задать каждому из 4 одинаковых блоков?",
+      "source": "teacher",
+      "source_reference": "5 ур 2 четв CSS и Блочная верстка (Обновлено).pptx, слайд 13; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 85",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "25 (1)",
+        "explanation": "100 % : 4 = 25 %, поэтому в примере .block2 { float: left; width: 25%; }.",
+        "accepted": {
+          "values": [
+            "25"
+          ],
+          "numeric": true,
+          "tolerance": 0
+        }
+      },
+      "content": {
+        "unit": "%"
+      }
+    },
+    {
+      "key": "web-table-vs-block",
+      "title": "Табличная и блочная вёрстка",
+      "type": "extended",
+      "marks": 4,
+      "difficulty": "hard",
+      "command_word": "compare",
+      "grading": "AI",
+      "objectives": [
+        "10.1.2.10"
+      ],
+      "text": "Сравните табличную и блочную вёрстку сайта. Приведите не менее двух преимуществ блочной вёрстки и укажите, для чего табличная вёрстка по-прежнему подходит.",
+      "source": "teacher",
+      "source_reference": "6 ур 2 четв Верстка сайта (Обновлено).pptx, слайды 2, 8; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 85",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "Табличная — теги table/tr/td, жёсткая сетка ячеек; блочная — div + CSS (1); Преимущество: компактный код, оформление вынесено в CSS-файл (1); Преимущество: блоки отображаются по мере загрузки / гибкость, адаптация под экраны / произвольное размещение и наложение блоков (1); Таблицы подходят для табличных данных (прайс-листы, расписания) (1)",
+        "explanation": "Табличная вёрстка строится на <table>, <tr>, <td>: страница — жёсткая сетка ячеек, код громоздкий, браузер ждёт загрузки всей таблицы. Блочная вёрстка строится на <div> и CSS: код компактный, оформление вынесено в style.css, блоки отображаются по мере загрузки и легко перестраиваются под разные экраны, их можно размещать произвольно. Таблицы по-прежнему подходят для табличных данных — прайс-листов, расписаний.",
+        "points": [
+          {
+            "criterion": "Табличная — теги table/tr/td, жёсткая сетка ячеек; блочная — div + CSS",
+            "marks": 1
+          },
+          {
+            "criterion": "Преимущество: компактный код, оформление вынесено в CSS-файл",
+            "marks": 1
+          },
+          {
+            "criterion": "Преимущество: блоки отображаются по мере загрузки / гибкость, адаптация под экраны / произвольное размещение и наложение блоков",
+            "marks": 1
+          },
+          {
+            "criterion": "Таблицы подходят для табличных данных (прайс-листы, расписания)",
+            "marks": 1
+          }
+        ],
+        "model_answer": "Табличная вёрстка строится на <table>, <tr>, <td>: страница — жёсткая сетка ячеек, код громоздкий, браузер ждёт загрузки всей таблицы. Блочная вёрстка строится на <div> и CSS: код компактный, оформление вынесено в style.css, блоки отображаются по мере загрузки и легко перестраиваются под разные экраны, их можно размещать произвольно. Таблицы по-прежнему подходят для табличных данных — прайс-листов, расписаний."
+      },
+      "content": {
+        "answer_lines": 8
+      }
+    },
+    {
+      "key": "web-semantic",
+      "title": "Семантические теги HTML5",
+      "type": "matching",
+      "marks": 5,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "10.1.2.10"
+      ],
+      "text": "Соотнесите семантический тег HTML5 с блоком макета.",
+      "source": "teacher",
+      "source_reference": "6 ур 2 четв Верстка сайта (Обновлено).pptx, слайд 7",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "L1–R1; L2–R2; L3–R3; L4–R4; L5–R5 (по 1 за пару)",
+        "explanation": "header — шапка, nav — меню, main — контент, aside — боковая панель, footer — подвал.",
+        "accepted": {
+          "pairs": {
+            "L1": "R1",
+            "L2": "R2",
+            "L3": "R3",
+            "L4": "R4",
+            "L5": "R5"
+          }
+        }
+      },
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "`<header>`"
+          },
+          {
+            "key": "L2",
+            "text": "`<nav>`"
+          },
+          {
+            "key": "L3",
+            "text": "`<main>`"
+          },
+          {
+            "key": "L4",
+            "text": "`<aside>`"
+          },
+          {
+            "key": "L5",
+            "text": "`<footer>`"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "Шапка сайта"
+          },
+          {
+            "key": "R2",
+            "text": "Меню навигации"
+          },
+          {
+            "key": "R3",
+            "text": "Главное содержимое страницы"
+          },
+          {
+            "key": "R4",
+            "text": "Боковая панель"
+          },
+          {
+            "key": "R5",
+            "text": "Подвал сайта"
+          }
+        ]
+      }
+    },
+    {
+      "key": "web-exam-1",
+      "title": "Страница «Мой кружок»",
+      "type": "structured",
+      "marks": 8,
+      "difficulty": "exam",
+      "command_word": null,
+      "grading": "AI",
+      "objectives": [],
+      "source": "nis_style",
+      "source_reference": "1 ур 2 четв 10 кл Основные теги HTML (Обновлено).pptx, слайды 4–8, 13; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 70–73",
+      "practice": false,
+      "text": "Ученик начал страницу о школьном кружке робототехники:\n\n```html\n<html>\n<head>\n  <meta charset=\"utf-8\">\n  <title>Кружок</title>\n</head>\n<body bgcolor=\"yellow\">\n  <p align=center><font size=\"6\" color=\"blue\">Робототехника</font></p>\n</body>\n</html>\n```",
+      "scheme": {
+        "mark_scheme": ""
+      },
+      "parts": [
+        {
+          "key": "web-exam-1a",
+          "part_label": "(a)",
+          "title": "Две части документа",
+          "type": "short_answer",
+          "marks": 2,
+          "difficulty": "exam",
+          "command_word": "explain",
+          "grading": "AI",
+          "objectives": [
+            "10.1.2.2"
+          ],
+          "source": "nis_style",
+          "source_reference": "G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 71; 1 ур 2 четв 10 кл Основные теги HTML (Обновлено).pptx, слайд 5",
+          "practice": false,
+          "text": "Назовите две части HTML-документа внутри `<html>` и объясните, чем отличается их содержимое.",
+          "scheme": {
+            "mark_scheme": "<head> — заголовок: служебные теги (кодировка, имя вкладки), на странице не отображаются (1); <body> — «тело»: видимое содержание страницы (1)",
+            "points": [
+              {
+                "criterion": "<head> — заголовок: служебные теги (кодировка, имя вкладки), на странице не отображаются",
+                "marks": 1
+              },
+              {
+                "criterion": "<body> — «тело»: видимое содержание страницы",
+                "marks": 1
+              }
+            ],
+            "model_answer": "<head> — служебный заголовок: кодировка (meta charset), имя вкладки (title); на странице не отображается. <body> — тело: всё, что видно в окне браузера.",
+            "explanation": "<head> — служебный заголовок: кодировка (meta charset), имя вкладки (title); на странице не отображается. <body> — тело: всё, что видно в окне браузера."
+          },
+          "content": {
+            "answer_lines": 3
+          }
+        },
+        {
+          "key": "web-exam-1b",
+          "part_label": "(b)",
+          "title": "Атрибуты и значения",
+          "type": "matching",
+          "marks": 3,
+          "difficulty": "exam",
+          "command_word": "identify",
+          "grading": "AUTO",
+          "objectives": [
+            "10.1.2.5"
+          ],
+          "source": "nis_style",
+          "source_reference": "1 ур 2 четв 10 кл Основные теги HTML (Обновлено).pptx, слайды 6–7; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 72",
+          "practice": false,
+          "text": "Соотнесите атрибут из кода с тем, что задаёт его значение.",
+          "scheme": {
+            "mark_scheme": "L1–R1; L2–R2; L3–R3 (по 1)",
+            "accepted": {
+              "pairs": {
+                "L1": "R1",
+                "L2": "R2",
+                "L3": "R3"
+              }
+            }
+          },
+          "content": {
+            "left": [
+              {
+                "key": "L1",
+                "text": "bgcolor=\"yellow\""
+              },
+              {
+                "key": "L2",
+                "text": "align=center"
+              },
+              {
+                "key": "L3",
+                "text": "size=\"6\""
+              }
+            ],
+            "right": [
+              {
+                "key": "R1",
+                "text": "Жёлтый фон страницы"
+              },
+              {
+                "key": "R2",
+                "text": "Выравнивание абзаца по центру"
+              },
+              {
+                "key": "R3",
+                "text": "Размер шрифта"
+              }
+            ]
+          }
+        },
+        {
+          "key": "web-exam-1c",
+          "part_label": "(c)",
+          "title": "Дописать страницу",
+          "type": "html_css",
+          "marks": 3,
+          "difficulty": "exam",
+          "command_word": "write",
+          "grading": "AI",
+          "objectives": [
+            "10.1.2.3",
+            "10.1.2.4"
+          ],
+          "source": "nis_style",
+          "source_reference": "G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 72–74; 1 ур 2 четв 10 кл Основные теги HTML (Обновлено).pptx, слайды 7, 10",
+          "practice": false,
+          "text": "Допишите в `<body>` после заголовка: горизонтальную линию; абзац, в котором слово **Arduino** выделено полужирным, а слово *роботы* — курсивом; после абзаца — нумерованный список из двух пунктов «Сборка» и «Программирование».",
+          "scheme": {
+            "mark_scheme": "Тег <hr> и абзац <p>…</p> (1); <b>/<strong> для Arduino и <i>/<em> для «роботы» (1); <ol> с двумя <li>, теги закрыты (1)",
+            "points": [
+              {
+                "criterion": "Тег <hr> и абзац <p>…</p>",
+                "marks": 1
+              },
+              {
+                "criterion": "<b>/<strong> для Arduino и <i>/<em> для «роботы»",
+                "marks": 1
+              },
+              {
+                "criterion": "<ol> с двумя <li>, теги закрыты",
+                "marks": 1
+              }
+            ],
+            "model_answer": "<hr>\n<p>Мы собираем <i>роботы</i> на платформе <b>Arduino</b>.</p>\n<ol>\n  <li>Сборка</li>\n  <li>Программирование</li>\n</ol>",
+            "explanation": "<hr>\n<p>Мы собираем <i>роботы</i> на платформе <b>Arduino</b>.</p>\n<ol>\n  <li>Сборка</li>\n  <li>Программирование</li>\n</ol>"
+          },
+          "content": {
+            "language": "html"
+          }
+        }
+      ]
+    },
+    {
+      "key": "web-exam-2",
+      "title": "Таблица расписания кружков",
+      "type": "structured",
+      "marks": 6,
+      "difficulty": "exam",
+      "command_word": null,
+      "grading": "AI",
+      "objectives": [],
+      "source": "nis_style",
+      "source_reference": "4 ур 2 четв 10 кл Таблицы в HTML (Обновлено).pptx, слайды 3–6; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 75–77",
+      "practice": false,
+      "text": "Нужно создать на странице таблицу расписания кружков.",
+      "scheme": {
+        "mark_scheme": ""
+      },
+      "parts": [
+        {
+          "key": "web-exam-2a",
+          "part_label": "(a)",
+          "title": "Код таблицы",
+          "type": "html_css",
+          "marks": 3,
+          "difficulty": "exam",
+          "command_word": "write",
+          "grading": "AI",
+          "objectives": [
+            "10.1.2.8"
+          ],
+          "source": "nis_style",
+          "source_reference": "4 ур 2 четв 10 кл Таблицы в HTML (Обновлено).pptx, слайд 3; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 75–76",
+          "practice": false,
+          "text": "Напишите код таблицы с рамкой толщиной 2 и наименованием «Кружки». Первая строка — заголовки столбцов «Кружок» и «День», вторая — «Шахматы» и «Вторник», третья — «Робототехника» и «Четверг».",
+          "scheme": {
+            "mark_scheme": "<table border=\"2\">…</table> и <caption>Кружки</caption> (1); Строка заголовков <tr> с двумя <th> (1); Две строки <tr> с ячейками <td> (1)",
+            "points": [
+              {
+                "criterion": "<table border=\"2\">…</table> и <caption>Кружки</caption>",
+                "marks": 1
+              },
+              {
+                "criterion": "Строка заголовков <tr> с двумя <th>",
+                "marks": 1
+              },
+              {
+                "criterion": "Две строки <tr> с ячейками <td>",
+                "marks": 1
+              }
+            ],
+            "model_answer": "<table border=\"2\">\n  <caption>Кружки</caption>\n  <tr><th>Кружок</th><th>День</th></tr>\n  <tr><td>Шахматы</td><td>Вторник</td></tr>\n  <tr><td>Робототехника</td><td>Четверг</td></tr>\n</table>",
+            "explanation": "<table border=\"2\">\n  <caption>Кружки</caption>\n  <tr><th>Кружок</th><th>День</th></tr>\n  <tr><td>Шахматы</td><td>Вторник</td></tr>\n  <tr><td>Робототехника</td><td>Четверг</td></tr>\n</table>"
+          },
+          "content": {
+            "language": "html"
+          }
+        },
+        {
+          "key": "web-exam-2b",
+          "part_label": "(b)",
+          "title": "Объединение ячеек",
+          "type": "html_css",
+          "marks": 2,
+          "difficulty": "exam",
+          "command_word": "write",
+          "grading": "AI",
+          "objectives": [
+            "10.1.2.9"
+          ],
+          "source": "nis_style",
+          "source_reference": "4 ур 2 четв 10 кл Таблицы в HTML (Обновлено).pptx, слайды 5–6; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 76–77",
+          "practice": false,
+          "text": "Кружок «Робототехника» проходит в четверг и в пятницу. Измените строки таблицы так, чтобы ячейка «Робототехника» была растянута на **две строки**, а справа от неё были «Четверг» и «Пятница».",
+          "scheme": {
+            "mark_scheme": "<td rowspan=\"2\">Робототехника</td> (1); В следующей строке только одна ячейка <td>Пятница</td> (1)",
+            "points": [
+              {
+                "criterion": "<td rowspan=\"2\">Робототехника</td>",
+                "marks": 1
+              },
+              {
+                "criterion": "В следующей строке только одна ячейка <td>Пятница</td>",
+                "marks": 1
+              }
+            ],
+            "model_answer": "<tr><td rowspan=\"2\">Робототехника</td><td>Четверг</td></tr>\n<tr><td>Пятница</td></tr>",
+            "explanation": "<tr><td rowspan=\"2\">Робототехника</td><td>Четверг</td></tr>\n<tr><td>Пятница</td></tr>"
+          },
+          "content": {
+            "language": "html"
+          }
+        },
+        {
+          "key": "web-exam-2c",
+          "part_label": "(c)",
+          "title": "Атрибут отступа",
+          "type": "mcq",
+          "marks": 1,
+          "difficulty": "exam",
+          "command_word": "identify",
+          "grading": "AUTO",
+          "objectives": [
+            "10.1.2.8"
+          ],
+          "source": "nis_style",
+          "source_reference": "4 ур 2 четв 10 кл Таблицы в HTML (Обновлено).pptx, слайд 3; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 76",
+          "practice": false,
+          "text": "Какой атрибут тега `<table>` задаёт отступ от рамки до содержимого ячейки?",
+          "scheme": {
+            "mark_scheme": "C (1)",
+            "accepted": {
+              "correct": "C"
+            }
+          },
+          "options": [
+            {
+              "key": "A",
+              "content": "`cellspacing`"
+            },
+            {
+              "key": "B",
+              "content": "`bordercolor`"
+            },
+            {
+              "key": "C",
+              "content": "`cellpadding`"
+            },
+            {
+              "key": "D",
+              "content": "`colspan`"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "web-exam-3",
+      "title": "Навигация по сайту кружка",
+      "type": "structured",
+      "marks": 4,
+      "difficulty": "exam",
+      "command_word": null,
+      "grading": "AI",
+      "objectives": [],
+      "source": "nis_style",
+      "source_reference": "2 ур 2 четв Гиперссылки (Обновлено).pptx, слайды 3–8; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 96–98",
+      "practice": false,
+      "text": "Сайт кружка состоит из нескольких страниц, а страница `index.html` очень длинная.",
+      "scheme": {
+        "mark_scheme": ""
+      },
+      "parts": [
+        {
+          "key": "web-exam-3a",
+          "part_label": "(a)",
+          "title": "Ссылка на файл сайта",
+          "type": "html_css",
+          "marks": 2,
+          "difficulty": "exam",
+          "command_word": "write",
+          "grading": "AI",
+          "objectives": [
+            "10.1.2.6"
+          ],
+          "source": "nis_style",
+          "source_reference": "2 ур 2 четв Гиперссылки (Обновлено).pptx, слайды 4–5; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 97",
+          "practice": false,
+          "text": "Напишите ссылку с текстом «Наши проекты» на файл `projects.html` того же сайта, которая открывается в **новой вкладке**. Какой это вид ссылки — абсолютная или относительная?",
+          "scheme": {
+            "mark_scheme": "<a href=\"projects.html\" target=\"_blank\">Наши проекты</a> (1); Относительная ссылка (без протокола, файл того же сайта) (1)",
+            "points": [
+              {
+                "criterion": "<a href=\"projects.html\" target=\"_blank\">Наши проекты</a>",
+                "marks": 1
+              },
+              {
+                "criterion": "Относительная ссылка (без протокола, файл того же сайта)",
+                "marks": 1
+              }
+            ],
+            "model_answer": "<a href=\"projects.html\" target=\"_blank\">Наши проекты</a> — относительная ссылка.",
+            "explanation": "<a href=\"projects.html\" target=\"_blank\">Наши проекты</a> — относительная ссылка."
+          },
+          "content": {
+            "language": "html"
+          }
+        },
+        {
+          "key": "web-exam-3b",
+          "part_label": "(b)",
+          "title": "Закладка",
+          "type": "html_css",
+          "marks": 2,
+          "difficulty": "exam",
+          "command_word": "write",
+          "grading": "AI",
+          "objectives": [
+            "10.1.2.6"
+          ],
+          "source": "nis_style",
+          "source_reference": "2 ур 2 четв Гиперссылки (Обновлено).pptx, слайды 7–8; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 98",
+          "practice": false,
+          "text": "Внизу страницы есть заголовок «Контакты». Напишите код закладки на этом заголовке и ссылку вверху страницы, которая к нему переходит.",
+          "scheme": {
+            "mark_scheme": "Заголовок с атрибутом id, например <h2 id=\"contacts\">Контакты</h2> (1); Ссылка <a href=\"#contacts\">…</a> с символом # и тем же именем (1)",
+            "points": [
+              {
+                "criterion": "Заголовок с атрибутом id, например <h2 id=\"contacts\">Контакты</h2>",
+                "marks": 1
+              },
+              {
+                "criterion": "Ссылка <a href=\"#contacts\">…</a> с символом # и тем же именем",
+                "marks": 1
+              }
+            ],
+            "model_answer": "<a href=\"#contacts\">Контакты</a> … <h2 id=\"contacts\">Контакты</h2>",
+            "explanation": "<a href=\"#contacts\">Контакты</a> … <h2 id=\"contacts\">Контакты</h2>"
+          },
+          "content": {
+            "language": "html"
+          }
+        }
+      ]
+    },
+    {
+      "key": "web-exam-4",
+      "title": "Мультимедиа на странице кружка",
+      "type": "structured",
+      "marks": 4,
+      "difficulty": "exam",
+      "command_word": null,
+      "grading": "AI",
+      "objectives": [],
+      "source": "nis_style",
+      "source_reference": "3 ур 2 четв Мультимедиа (Обновлено).pptx, слайды 4–8; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 91–94",
+      "practice": false,
+      "text": "На страницу кружка нужно добавить фотографию робота и видеоролик о соревнованиях.",
+      "scheme": {
+        "mark_scheme": ""
+      },
+      "parts": [
+        {
+          "key": "web-exam-4a",
+          "part_label": "(a)",
+          "title": "Изображение",
+          "type": "html_css",
+          "marks": 2,
+          "difficulty": "exam",
+          "command_word": "write",
+          "grading": "AI",
+          "objectives": [
+            "10.1.2.7"
+          ],
+          "source": "nis_style",
+          "source_reference": "3 ур 2 четв Мультимедиа (Обновлено).pptx, слайды 4, 6–7; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 91–92",
+          "practice": false,
+          "text": "Напишите тег для вставки изображения `robot.jpg` из папки `images` с альтернативным текстом «Наш робот» и шириной 300.",
+          "scheme": {
+            "mark_scheme": "<img> с src=\"images/robot.jpg\" (или \"/images/robot.jpg\") (1); alt=\"Наш робот\" и width=\"300\" (1)",
+            "points": [
+              {
+                "criterion": "<img> с src=\"images/robot.jpg\" (или \"/images/robot.jpg\")",
+                "marks": 1
+              },
+              {
+                "criterion": "alt=\"Наш робот\" и width=\"300\"",
+                "marks": 1
+              }
+            ],
+            "model_answer": "<img src=\"images/robot.jpg\" alt=\"Наш робот\" width=\"300\">",
+            "explanation": "<img src=\"images/robot.jpg\" alt=\"Наш робот\" width=\"300\">"
+          },
+          "content": {
+            "language": "html"
+          }
+        },
+        {
+          "key": "web-exam-4b",
+          "part_label": "(b)",
+          "title": "Видео",
+          "type": "html_css",
+          "marks": 1,
+          "difficulty": "exam",
+          "command_word": "write",
+          "grading": "AI",
+          "objectives": [
+            "10.1.2.7"
+          ],
+          "source": "nis_style",
+          "source_reference": "3 ур 2 четв Мультимедиа (Обновлено).pptx, слайд 8; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 93–94",
+          "practice": false,
+          "text": "Напишите код видеоплеера для файла `contest.mp4` с панелью управления.",
+          "scheme": {
+            "mark_scheme": "Тег <video> с атрибутом controls и <source src=\"contest.mp4\" type=\"video/mp4\"> (или src у video) (1)",
+            "points": [
+              {
+                "criterion": "Тег <video> с атрибутом controls и <source src=\"contest.mp4\" type=\"video/mp4\"> (или src у video)",
+                "marks": 1
+              }
+            ],
+            "model_answer": "<video controls>\n  <source src=\"contest.mp4\" type=\"video/mp4\">\n</video>",
+            "explanation": "<video controls>\n  <source src=\"contest.mp4\" type=\"video/mp4\">\n</video>"
+          },
+          "content": {
+            "language": "html"
+          }
+        },
+        {
+          "key": "web-exam-4c",
+          "part_label": "(c)",
+          "title": "Авторские права",
+          "type": "short_answer",
+          "marks": 1,
+          "difficulty": "exam",
+          "command_word": "state",
+          "grading": "AI",
+          "objectives": [
+            "10.1.2.7"
+          ],
+          "source": "nis_style",
+          "source_reference": "3 ур 2 четв Мультимедиа (Обновлено).pptx, слайды 6, 8",
+          "practice": false,
+          "text": "Видеоролик снят другой школой. Что нужно сделать, чтобы разместить его на сайте с соблюдением авторских прав?",
+          "scheme": {
+            "mark_scheme": "Проверить лицензию (например, Creative Commons) и указать автора источника (1)",
+            "points": [
+              {
+                "criterion": "Проверить лицензию (например, Creative Commons) и указать автора источника",
+                "marks": 1
+              }
+            ],
+            "model_answer": "Проверить лицензию (например, Creative Commons) и указать автора источника.",
+            "explanation": "Проверить лицензию (например, Creative Commons) и указать автора источника."
+          },
+          "content": {
+            "answer_lines": 2
+          }
+        }
+      ]
+    },
+    {
+      "key": "web-exam-5",
+      "title": "Оформление сайта кружка с CSS",
+      "type": "structured",
+      "marks": 8,
+      "difficulty": "exam",
+      "command_word": null,
+      "grading": "AI",
+      "objectives": [],
+      "source": "nis_style",
+      "source_reference": "5 ур 2 четв CSS и Блочная верстка (Обновлено).pptx, слайды 2–15; 6 ур 2 четв Верстка сайта (Обновлено).pptx, слайды 4–5; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 79–87",
+      "practice": false,
+      "text": "Страница кружка содержит абзацы и таблицу. Её нужно оформить с помощью CSS.",
+      "scheme": {
+        "mark_scheme": ""
+      },
+      "parts": [
+        {
+          "key": "web-exam-5a",
+          "part_label": "(a)",
+          "title": "Способы CSS",
+          "type": "matching",
+          "marks": 3,
+          "difficulty": "exam",
+          "command_word": "identify",
+          "grading": "AUTO",
+          "objectives": [
+            "10.1.2.10"
+          ],
+          "source": "nis_style",
+          "source_reference": "5 ур 2 четв CSS и Блочная верстка (Обновлено).pptx, слайды 3–4, 8; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 79–80",
+          "practice": false,
+          "text": "Определите способ подключения стиля.",
+          "scheme": {
+            "mark_scheme": "L1–R2; L2–R3; L3–R1 (по 1)",
+            "accepted": {
+              "pairs": {
+                "L1": "R2",
+                "L2": "R3",
+                "L3": "R1"
+              }
+            }
+          },
+          "content": {
+            "left": [
+              {
+                "key": "L1",
+                "text": "<head><style> p { color: green; } </style></head>"
+              },
+              {
+                "key": "L2",
+                "text": "<p style=\"color: green;\">Текст</p>"
+              },
+              {
+                "key": "L3",
+                "text": "<head><link rel=\"stylesheet\" href=\"club.css\"></head>"
+              }
+            ],
+            "right": [
+              {
+                "key": "R1",
+                "text": "Внешний (External CSS)"
+              },
+              {
+                "key": "R2",
+                "text": "Внутренний (Internal CSS)"
+              },
+              {
+                "key": "R3",
+                "text": "Встроенный (Inline CSS)"
+              }
+            ]
+          }
+        },
+        {
+          "key": "web-exam-5b",
+          "part_label": "(b)",
+          "title": "Селекторы по тегу",
+          "type": "html_css",
+          "marks": 3,
+          "difficulty": "exam",
+          "command_word": "write",
+          "grading": "AI",
+          "objectives": [
+            "10.1.2.10",
+            "10.1.2.11"
+          ],
+          "source": "nis_style",
+          "source_reference": "5 ур 2 четв CSS и Блочная верстка (Обновлено).pptx, слайды 4, 6, 15; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 80, 88",
+          "practice": false,
+          "text": "Напишите внутренний CSS с **селекторами по тегу**: все абзацы — шрифт Arial, размер 16px; у таблицы и всех её ячеек `td`, `th` — сплошная синяя рамка 1px, соседние рамки ячеек сливаются в одну линию.",
+          "scheme": {
+            "mark_scheme": "Тег <style> в <head> (1); p { font-family: Arial; font-size: 16px; } (1); table, td, th { border: 1px solid blue; } и border-collapse: collapse у table (1)",
+            "points": [
+              {
+                "criterion": "Тег <style> в <head>",
+                "marks": 1
+              },
+              {
+                "criterion": "p { font-family: Arial; font-size: 16px; }",
+                "marks": 1
+              },
+              {
+                "criterion": "table, td, th { border: 1px solid blue; } и border-collapse: collapse у table",
+                "marks": 1
+              }
+            ],
+            "model_answer": "<head>\n<style>\n  p { font-family: Arial; font-size: 16px; }\n  table, td, th { border: 1px solid blue; }\n  table { border-collapse: collapse; }\n</style>\n</head>",
+            "explanation": "<head>\n<style>\n  p { font-family: Arial; font-size: 16px; }\n  table, td, th { border: 1px solid blue; }\n  table { border-collapse: collapse; }\n</style>\n</head>"
+          },
+          "content": {
+            "language": "html"
+          }
+        },
+        {
+          "key": "web-exam-5c",
+          "part_label": "(c)",
+          "title": "Два блока рядом",
+          "type": "html_css",
+          "marks": 2,
+          "difficulty": "exam",
+          "command_word": "write",
+          "grading": "AI",
+          "objectives": [
+            "10.1.2.10",
+            "10.1.2.11"
+          ],
+          "source": "nis_style",
+          "source_reference": "5 ур 2 четв CSS и Блочная верстка (Обновлено).pptx, слайды 12–13; 6 ур 2 четв Верстка сайта (Обновлено).pptx, слайды 4–5; G10_Информатика_SB_RU_ФИНАЛ_16.11.22 1.pdf, стр. 86–87",
+          "practice": false,
+          "text": "Сверстайте блоками `<div>` две колонки одинаковой ширины, стоящие рядом: «Новости» и «Расписание». Под ними — блок «Контакты» на всю ширину. Используйте внутренний CSS.",
+          "scheme": {
+            "mark_scheme": "Два блока с float: left и width: 50% (1); Перед «Контакты» отмена обтекания clear: both (1)",
+            "points": [
+              {
+                "criterion": "Два блока с float: left и width: 50%",
+                "marks": 1
+              },
+              {
+                "criterion": "Перед «Контакты» отмена обтекания clear: both",
+                "marks": 1
+              }
+            ],
+            "model_answer": "<style> .col { float: left; width: 50%; } </style>\n<div class=\"col\">Новости</div>\n<div class=\"col\">Расписание</div>\n<div style=\"clear: both;\">Контакты</div>",
+            "explanation": "<style> .col { float: left; width: 50%; } </style>\n<div class=\"col\">Новости</div>\n<div class=\"col\">Расписание</div>\n<div style=\"clear: both;\">Контакты</div>"
+          },
+          "content": {
+            "language": "html"
+          }
+        }
+      ]
+    }
+  ],
+  "topic_exam": {
+    "duration": 40,
+    "title": "Основные теги HTML, структура документа и верстка — экзамен",
+    "instructions": "Ответьте на **все** вопросы. Код пишите на HTML и CSS. Баллы за каждую часть указаны рядом с ней. Всего: 30 баллов. Время: 40 минут.",
+    "questions": [
+      "web-exam-1",
+      "web-exam-2",
+      "web-exam-3",
+      "web-exam-4",
+      "web-exam-5"
+    ]
+  }
+}

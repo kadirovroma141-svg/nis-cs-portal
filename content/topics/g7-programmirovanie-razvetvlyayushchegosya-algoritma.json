@@ -1,0 +1,1349 @@
+{
+  "topic": "g7-programmirovanie-razvetvlyayushchegosya-algoritma",
+  "summary": "Условный оператор if … else в C++: полная и неполная формы, операторы сравнения (== и =), несколько действий в фигурных скобках, входные, выходные и промежуточные данные, комментарии, тернарная форма.",
+  "theory": [
+    {
+      "title": "Условный оператор if … else",
+      "objectives": [
+        "7.4.3.6"
+      ],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "content": "Разветвляющийся алгоритм на C++ записывают условным оператором `if` (если) и `else` (иначе). Условие пишут в круглых скобках после `if`."
+        },
+        {
+          "type": "comparison",
+          "title": "Псевдокод и C++",
+          "columns": [
+            "Псевдокод",
+            "C++"
+          ],
+          "rows": [
+            [
+              "ЕСЛИ <условие> ТО <действие 1> ИНАЧЕ <действие 2>",
+              "`if (условие) действие1; else действие2;`"
+            ],
+            [
+              "ЕСЛИ <условие> ТО <действие>",
+              "`if (условие) действие;`"
+            ]
+          ]
+        },
+        {
+          "type": "example",
+          "title": "Полная форма: растает ли лед",
+          "content": "ЕСЛИ <температура 0 и больше> ТО <лед тает> ИНАЧЕ <лед не тает> (`temp` — температура в градусах Цельсия)."
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "#include <iostream>\nusing namespace std;\nint main() {\n    int temp;\n    cout << \"Введи температуру:\";\n    cin >> temp;\n    if (temp >= 0)\n        cout << \"лед тает\";\n    else\n        cout << \"лед не тает\";\n}",
+          "caption": "Полная форма ветвления: есть if и else"
+        },
+        {
+          "type": "diagram",
+          "format": "mermaid",
+          "content": "flowchart TD\n    A([\"Начало\"]) --> B[/\"Ввод temp\"/]\n    B --> C{\"temp >= 0?\"}\n    C -->|Да| D[/\"Вывод: лед тает\"/]\n    C -->|Нет| E[/\"Вывод: лед не тает\"/]\n    D --> F([\"Конец\"])\n    E --> F",
+          "caption": "Блок-схема к программе"
+        },
+        {
+          "type": "example",
+          "title": "Неполная форма: можно ли работать",
+          "content": "По закону «О правах ребенка в Республике Казахстан» с 14 лет школьникам можно работать в свободное от учебы время. Программа спрашивает возраст и сообщает, может ли пользователь работать. В неполной форме `else` нет.\n\n```\nВведите свой возраст: 14\nМожешь работать\n```"
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "#include <iostream>\nusing namespace std;\nint main() {\n    int vozrast;\n    cout << \"Введите свой возраст:\";\n    cin >> vozrast;\n    if (vozrast >= 14)\n        cout << \"Можешь работать\";\n}",
+          "caption": "Неполная форма ветвления: только if"
+        }
+      ]
+    },
+    {
+      "title": "Правила записи условий",
+      "objectives": [
+        "7.4.3.6"
+      ],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "content": "В условии разветвляющегося алгоритма вместо знака равно «=» ставится знак сравнения «==». Например, в `if (n == 5)` сравниваются переменная `n` и число 5."
+        },
+        {
+          "type": "comparison",
+          "title": "Отличие «=» от «==»",
+          "columns": [
+            "Запись",
+            "Смысл"
+          ],
+          "rows": [
+            [
+              "`number = 5`",
+              "значение переменной number равно 5 (присвоение)"
+            ],
+            [
+              "`number == 5`",
+              "оператор «==» проверяет, равны ли number и 5 друг другу"
+            ]
+          ]
+        },
+        {
+          "type": "comparison",
+          "title": "Операторы C++",
+          "columns": [
+            "Оператор",
+            "Запись на C++",
+            "Пример"
+          ],
+          "rows": [
+            [
+              "Присвоение",
+              "`=`",
+              "`a=b;`"
+            ],
+            [
+              "Сравнение (равно)",
+              "`==`",
+              "`if (a==b)`"
+            ],
+            [
+              "Сравнение (не равно)",
+              "`!=`",
+              "`if (a!=b)`"
+            ],
+            [
+              "Больше или равно",
+              "`>=`",
+              "`if (a>=b)`"
+            ],
+            [
+              "Меньше или равно",
+              "`<=`",
+              "`if (a<=b)`"
+            ]
+          ]
+        },
+        {
+          "type": "warning",
+          "content": "Между двумя знаками равно пробел не ставится. Пишется: `==`."
+        },
+        {
+          "type": "example",
+          "title": "Сравнение строк",
+          "content": "Ответ пользователя можно сравнивать со словом в кавычках:\n\n```cpp\nstring a;\ncout << \"Уважаешь старших?\" << endl;\ncin >> a;\nif (a == \"да\")\n    cout << \"...\";\nelse cout << \"...\" << endl;\n```"
+        },
+        {
+          "type": "example",
+          "title": "Неравенство",
+          "content": "«Если переменная summa не равна 10, тогда выводится «Ошибка!», иначе «Ответ верный»»:\n\n```cpp\nif (summa != 10)\n    cout << \"Ошибка!\";\nelse\n    cout << \"Ответ верный\";\n```"
+        }
+      ]
+    },
+    {
+      "title": "Несколько действий в ветви: фигурные скобки",
+      "objectives": [
+        "7.4.3.6"
+      ],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "content": "Чаще всего после условия нужно выполнить последовательность действий. В C++ эти действия объединяют фигурными скобками `{…}`. Если условие ложное, код внутри фигурных скобок не выполняется."
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "int sor;\ncout << \"Максимальное количество баллов за СОР: 20\\n\";\ncout << \"Введи полученные баллы за СОР:\";\ncin >> sor;\nif (sor == 20)\n{\n    cout << \"Ты молодец!\" << endl;\n    cout << \"Ура!\" << endl;\n}\nelse cout << \"Это не максимальное количество баллов\";",
+          "caption": "При 20 баллах выводятся два сообщения: «Ты молодец!» и «Ура!»"
+        },
+        {
+          "type": "example",
+          "title": "Скидка 3 % при покупке дороже 5000 тенге",
+          "content": "Скидка предоставляется только тогда, когда стоимость покупки больше 5000 тенге. Все три действия ветки «Да» (вычислить скидку, итог и вывести итог) стоят в фигурных скобках."
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "#include <iostream>\nusing namespace std;\nint main() {\n    int skidka, pokupka, itog;\n    cout << \"Введите стоимость покупки:\";\n    cin >> pokupka;\n    if (pokupka > 5000)\n    {\n        skidka = pokupka * 3 / 100;\n        itog = pokupka - skidka;\n        cout << \"Итог(тенге):\" << itog;\n    }\n    else cout << \"СКИДКИ НЕТ\";\n}",
+          "caption": "Правильная программа"
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "    if (pokupka > 5000)\n        skidka = pokupka * 3 / 100;\n    else cout << \"СКИДКИ НЕТ\";\n    itog = pokupka - skidka;\n    cout << \"Итог(тенге):\" << itog;",
+          "caption": "Неправильный вариант: скобок нет, в if попадает только одна строка"
+        },
+        {
+          "type": "comparison",
+          "title": "Что выведет правильная программа",
+          "columns": [
+            "Ввод pokupka",
+            "Вывод"
+          ],
+          "rows": [
+            [
+              "6000",
+              "`Итог(тенге):5820` (скидка 6000·3/100 = 180)"
+            ],
+            [
+              "2000",
+              "`СКИДКИ НЕТ`"
+            ]
+          ]
+        },
+        {
+          "type": "warning",
+          "content": "Во втором варианте при вводе 2000 строки `itog = …` и `cout << …` выполнятся всегда, а переменная `skidka` не получит значения — на экране появится «СКИДКИ НЕТИтог (тенге): …» с непонятным числом."
+        },
+        {
+          "type": "paragraph",
+          "content": "**Действия в ветви «НЕТ».** В ветви «НЕТ» тоже может быть несколько действий — тогда фигурные скобки ставят после слова `else`. Условие можно заменить на противоположное: `pokupka <= 5000` — тогда «СКИДКИ НЕТ» выводится по ветке «Да», а расчет скидки уходит в `else { … }`."
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "#include <iostream>\nusing namespace std;\nint main() {\n    int rez; string name;\n    cout << \"Введи свое имя:\" << endl;\n    cin >> name;\n    cout << \"Сколько бит в двух Кб?\" << endl;\n    cin >> rez;\n    if (rez != 2048)\n    {\n        cout << name << \", ответ неправильный!\" << endl;\n        cout << \"Правильный ответ: 2048\" << endl;\n    }\n    else\n        cout << \"Правильно, \" << name << endl;\n}",
+          "caption": "Проверка знаний: два действия в ветке if, одно — в else"
+        }
+      ]
+    },
+    {
+      "title": "Входные, выходные и промежуточные данные",
+      "objectives": [
+        "7.4.3.6"
+      ],
+      "blocks": [
+        {
+          "type": "definition",
+          "term": "Входные (исходные) данные",
+          "content": "Данные, известные из условия задачи. Вводятся с помощью `cin`."
+        },
+        {
+          "type": "definition",
+          "term": "Выходные данные",
+          "content": "Результат решения задачи. Выводятся с помощью `cout`."
+        },
+        {
+          "type": "definition",
+          "term": "Промежуточные данные",
+          "content": "Данные, которые не заданы в условии и не являются результатом работы программы. Эти данные используются в процессе работы программы."
+        },
+        {
+          "type": "paragraph",
+          "content": "Если нужно ввести несколько переменных, пишут `cin >> x >> y >> z;`. В блок-схемах входные и выходные данные чаще всего располагают в параллелограммах."
+        },
+        {
+          "type": "example",
+          "title": "Скидка по пятницам",
+          "content": "В строительном магазине по пятницам скидка 20 %, в остальные дни — 3 %. Одна переменная (`itog`) на выходе может иметь разные значения — в зависимости от выбранной ветки.\n\n- входные: `pokupka`, `friday`\n- выходные: `itog`\n- промежуточные: `skidka`"
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "#include <iostream>\nusing namespace std;\nint main() {\n    /* pokupka - стоимость покупки без скидки,\n       itog - окончательная стоимость,\n       skidka - скидка при покупке */\n    int pokupka, itog, skidka;\n    string friday;\n    cout << \"Введи стоимость покупки\" << endl;\n    cin >> pokupka;\n    cout << \"Сегодня пятница? (да/нет)\" << endl;\n    cin >> friday;\n    if (friday == \"да\")\n    {\n        skidka = pokupka * 20 / 100;\n        itog = pokupka - skidka;\n    }\n    else\n    {\n        skidka = pokupka * 3 / 100;\n        itog = pokupka - skidka;\n    }\n    cout << itog << endl;\n}",
+          "caption": "Ввод 30000 и «да» → 24000; 30000 и «нет» → 29100"
+        },
+        {
+          "type": "diagram",
+          "format": "mermaid",
+          "content": "flowchart TD\n    A([\"Начало\"]) --> B[/\"Ввод pokupka, friday\"/]\n    B --> C{\"friday == да?\"}\n    C -->|Да| D[\"skidka = pokupka * 20%\"]\n    D --> E[\"itog = pokupka - skidka\"]\n    C -->|Нет| F[\"skidka = pokupka * 3%\"]\n    F --> G[\"itog = pokupka - skidka\"]\n    E --> H[/\"Вывод itog\"/]\n    G --> H\n    H --> I([\"Конец\"])",
+          "caption": "Блок-схема «Скидка по пятницам»"
+        }
+      ]
+    },
+    {
+      "title": "Комментарии и тернарная форма",
+      "objectives": [
+        "7.4.3.6"
+      ],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "content": "В коде часто требуются пояснения — **комментарии**. Любой текст, оформленный в виде комментария, программа игнорирует (не выполняет). Часть кода тоже можно не удалять, а превратить в комментарий, чтобы потом к ней вернуться."
+        },
+        {
+          "type": "comparison",
+          "title": "Виды комментариев",
+          "columns": [
+            "Вид",
+            "Запись",
+            "Пример"
+          ],
+          "rows": [
+            [
+              "Однострочный",
+              "начинается с `//`",
+              "`cin >> pokupka;  // pokupka – стоимость покупки`"
+            ],
+            [
+              "Многострочный",
+              "начинается с `/*`, заканчивается `*/`",
+              "`/* skidka – скидка, itog – итоговая сумма */`"
+            ]
+          ]
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "// Программа для приветствия.\n// time – переменная для времени суток\nint time;\n/* пользователю будет предложено ввести\n   время в часах */\ncout << \"Введи время в часах\" << endl;\ncin >> time;   // time – время\nif (time <= 11)\n    cout << \"Доброе утро!\";",
+          "caption": "Компьютер обработает только строки без комментариев"
+        },
+        {
+          "type": "paragraph",
+          "content": "**Для любознательных: тернарная форма.** Это сокращенная запись ветвления в одну строку: `условие ? значение_если_да : значение_если_нет`."
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "int answer; string result;\ncout << \"Введи, чему равно 2*2=\";\ncin >> answer;\nresult = (answer == 4) ? \"Молодец\" : \"Ошибка\";\ncout << result;",
+          "caption": "Если ввести 4 — «Молодец», иначе — «Ошибка»"
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "key": "if7-eq",
+      "title": "Сравнение на равенство",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.6"
+      ],
+      "text": "Какая запись **проверяет**, равна ли переменная `n` числу 5?",
+      "options": [
+        {
+          "key": "A",
+          "content": "`if (n = 5)`"
+        },
+        {
+          "key": "B",
+          "content": "`if (n == 5)`"
+        },
+        {
+          "key": "C",
+          "content": "`if (n = = 5)`"
+        },
+        {
+          "key": "D",
+          "content": "`n == 5;`"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 140–141; 6 ур Ветвление код.pptx, слайды 5–6",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "model_answer": "B",
+        "explanation": "В условии ставят знак сравнения «==» без пробела между знаками."
+      }
+    },
+    {
+      "key": "if7-ops",
+      "title": "Операторы",
+      "type": "matching",
+      "marks": 4,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.6"
+      ],
+      "text": "Сопоставь запись на C++ и оператор.",
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "`=`"
+          },
+          {
+            "key": "L2",
+            "text": "`==`"
+          },
+          {
+            "key": "L3",
+            "text": "`!=`"
+          },
+          {
+            "key": "L4",
+            "text": "`<=`"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "Сравнение (не равно)"
+          },
+          {
+            "key": "R2",
+            "text": "Присвоение"
+          },
+          {
+            "key": "R3",
+            "text": "Меньше или равно"
+          },
+          {
+            "key": "R4",
+            "text": "Сравнение (равно)"
+          }
+        ]
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 140–141; 6 ур Ветвление код.pptx, слайды 5–6",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "L1–R2; L2–R4; L3–R1; L4–R3. Всего 4 б.",
+        "accepted": {
+          "pairs": {
+            "L1": "R2",
+            "L2": "R4",
+            "L3": "R1",
+            "L4": "R3"
+          }
+        },
+        "explanation": "= — присвоение, == — равно, != — не равно, <= — меньше или равно."
+      }
+    },
+    {
+      "key": "if7-summa",
+      "title": "Вставь оператор",
+      "type": "fill_blank",
+      "marks": 2,
+      "difficulty": "medium",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.6"
+      ],
+      "text": "«Если переменная summa не равна 10, тогда выводится «Ошибка!», иначе — «Ответ верный»».\n\n```cpp\nif (summa [[1]] 10)\n    cout << \"Ошибка!\";\n[[2]]\n    cout << \"Ответ верный\";\n```",
+      "content": {
+        "blank_count": 2
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 141 (задание 3); 6 ур Ветвление код.pptx, слайд 5",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "[[1]] !=; [[2]] else — по 1 баллу",
+        "accepted": {
+          "blanks": [
+            [
+              "!="
+            ],
+            [
+              "else"
+            ]
+          ],
+          "ignore_spaces": true
+        },
+        "explanation": "Не равно — !=; ветка «иначе» — else."
+      }
+    },
+    {
+      "key": "if7-ves",
+      "title": "Условие: вес 40 кг",
+      "type": "fill_blank",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.6"
+      ],
+      "text": "По задаче вес должен быть равен 40 кг (переменная `ves`). Вставь условие:\n\n```cpp\nif ([[1]]) cout << \"Правильно\";\nelse cout << \"Проверь решение\" << endl;\n```",
+      "content": {
+        "blank_count": 1
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 141 («Проверь себя», 1)",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "[[1]] ves==40 — по 1 баллу",
+        "accepted": {
+          "blanks": [
+            [
+              "ves==40",
+              "40==ves"
+            ]
+          ],
+          "ignore_spaces": true
+        },
+        "explanation": "Проверка равенства: ves == 40."
+      }
+    },
+    {
+      "key": "if7-ice",
+      "title": "Что выведет программа",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.6"
+      ],
+      "text": "```cpp\n#include <iostream>\nusing namespace std;\nint main() {\n    int temp;\n    cout << \"Введи температуру:\";\n    cin >> temp;\n    if (temp >= 0)\n        cout << \"лед тает\";\n    else\n        cout << \"лед не тает\";\n}\n```\n\nЧто выведет программа, если ввести 0?",
+      "options": [
+        {
+          "key": "A",
+          "content": "лед тает"
+        },
+        {
+          "key": "B",
+          "content": "лед не тает"
+        },
+        {
+          "key": "C",
+          "content": "Ничего"
+        },
+        {
+          "key": "D",
+          "content": "Ошибку"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 138",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "A — 1 балл.",
+        "accepted": {
+          "correct": "A"
+        },
+        "model_answer": "A",
+        "explanation": "0 >= 0 — истина, выполняется ветка if: «лед тает»."
+      }
+    },
+    {
+      "key": "if7-incomplete",
+      "title": "Неполная форма",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.6"
+      ],
+      "text": "```cpp\n#include <iostream>\nusing namespace std;\nint main() {\n    int vozrast;\n    cout << \"Введите свой возраст:\";\n    cin >> vozrast;\n    if (vozrast >= 14)\n        cout << \"Можешь работать\";\n}\n```\n\nЧто выведет программа, если ввести 12?",
+      "options": [
+        {
+          "key": "A",
+          "content": "Можешь работать"
+        },
+        {
+          "key": "B",
+          "content": "Не можешь работать"
+        },
+        {
+          "key": "C",
+          "content": "Ничего не выведет после вопроса"
+        },
+        {
+          "key": "D",
+          "content": "12"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 139",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "C — 1 балл.",
+        "accepted": {
+          "correct": "C"
+        },
+        "model_answer": "C",
+        "explanation": "12 >= 14 — ложь, а ветки else нет, поэтому сообщение не выводится."
+      }
+    },
+    {
+      "key": "if7-braces-tf",
+      "title": "Фигурные скобки",
+      "type": "true_false",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.6"
+      ],
+      "text": "Если условие ложное, то код внутри фигурных скобок после `if` не выполняется.",
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 142–143",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "Верно — 1 балл.",
+        "accepted": {
+          "correct": true
+        },
+        "explanation": "Фигурные скобки объединяют действия ветки; при ложном условии они пропускаются."
+      }
+    },
+    {
+      "key": "if7-sale-choice",
+      "title": "Выбери программу",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.6"
+      ],
+      "text": "Скидка 3 % дается, только если покупка дороже 5000 тенге; программа должна вывести новую стоимость. Какой фрагмент правильный?",
+      "options": [
+        {
+          "key": "A",
+          "content": "`if (pokupka > 5000) skidka = pokupka*3/100; else cout << \"СКИДКИ НЕТ\"; itog = pokupka - skidka; cout << itog;`"
+        },
+        {
+          "key": "B",
+          "content": "`if (pokupka > 5000) { skidka = pokupka*3/100; itog = pokupka - skidka; cout << itog; } else cout << \"СКИДКИ НЕТ\";`"
+        },
+        {
+          "key": "C",
+          "content": "`if (pokupka = 5000) { skidka = pokupka*3/100; } else cout << \"СКИДКИ НЕТ\";`"
+        },
+        {
+          "key": "D",
+          "content": "`if (pokupka < 5000) { skidka = pokupka*3/100; itog = pokupka - skidka; cout << itog; }`"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 142–143",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "model_answer": "B",
+        "explanation": "Все действия для ветки «Да» должны стоять в фигурных скобках; условие — pokupka > 5000."
+      }
+    },
+    {
+      "key": "if7-sale-calc",
+      "title": "Посчитай итог",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "calculate",
+      "grading": "HYBRID",
+      "objectives": [
+        "7.4.3.6"
+      ],
+      "text": "```cpp\n#include <iostream>\nusing namespace std;\nint main() {\n    int skidka, pokupka, itog;\n    cout << \"Введите стоимость покупки:\";\n    cin >> pokupka;\n    if (pokupka > 5000)\n    {\n        skidka = pokupka * 3 / 100;\n        itog = pokupka - skidka;\n        cout << \"Итог(тенге):\" << itog;\n    }\n    else cout << \"СКИДКИ НЕТ\";\n}\n```\n\nЧто выведет программа после «Итог(тенге):», если ввести 8000?",
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 142–143",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "7760 — 1 балл.",
+        "accepted": {
+          "values": [
+            "7760"
+          ],
+          "numeric": true,
+          "tolerance": 0.001
+        },
+        "model_answer": "7760",
+        "explanation": "8000 > 5000; skidka = 8000*3/100 = 240; itog = 8000 − 240 = 7760."
+      }
+    },
+    {
+      "key": "if7-friday-calc",
+      "title": "Скидка по пятницам",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "calculate",
+      "grading": "HYBRID",
+      "objectives": [
+        "7.4.3.6"
+      ],
+      "text": "```cpp\n#include <iostream>\nusing namespace std;\nint main() {\n    /* pokupka - стоимость покупки без скидки,\n       itog - окончательная стоимость,\n       skidka - скидка при покупке */\n    int pokupka, itog, skidka;\n    string friday;\n    cout << \"Введи стоимость покупки\" << endl;\n    cin >> pokupka;\n    cout << \"Сегодня пятница? (да/нет)\" << endl;\n    cin >> friday;\n    if (friday == \"да\")\n    {\n        skidka = pokupka * 20 / 100;\n        itog = pokupka - skidka;\n    }\n    else\n    {\n        skidka = pokupka * 3 / 100;\n        itog = pokupka - skidka;\n    }\n    cout << itog << endl;\n}\n```\n\nЧто выведет программа, если ввести 20000 и «да»?",
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 150",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "16000 — 1 балл.",
+        "accepted": {
+          "values": [
+            "16000"
+          ],
+          "numeric": true,
+          "tolerance": 0.001
+        },
+        "model_answer": "16000",
+        "explanation": "friday == \"да\": skidka = 20000*20/100 = 4000; itog = 16000."
+      }
+    },
+    {
+      "key": "if7-data",
+      "title": "Виды данных",
+      "type": "matching",
+      "marks": 4,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.6"
+      ],
+      "text": "В программе «Скидка по пятницам» определи вид данных для каждой переменной.",
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "`pokupka`"
+          },
+          {
+            "key": "L2",
+            "text": "`friday`"
+          },
+          {
+            "key": "L3",
+            "text": "`skidka`"
+          },
+          {
+            "key": "L4",
+            "text": "`itog`"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "Входные"
+          },
+          {
+            "key": "R2",
+            "text": "Выходные"
+          },
+          {
+            "key": "R3",
+            "text": "Промежуточные"
+          }
+        ]
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 148, 150",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "L1–R1; L2–R1; L3–R3; L4–R2. Всего 4 б.",
+        "accepted": {
+          "pairs": {
+            "L1": "R1",
+            "L2": "R1",
+            "L3": "R3",
+            "L4": "R2"
+          }
+        },
+        "explanation": "pokupka и friday известны из условия (вводятся), itog — результат, skidka используется в процессе работы."
+      }
+    },
+    {
+      "key": "if7-comment",
+      "title": "Многострочный комментарий",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.6"
+      ],
+      "text": "Как оформляют **многострочный** комментарий в C++?",
+      "options": [
+        {
+          "key": "A",
+          "content": "`// текст //`"
+        },
+        {
+          "key": "B",
+          "content": "`/* текст */`"
+        },
+        {
+          "key": "C",
+          "content": "`<!-- текст -->`"
+        },
+        {
+          "key": "D",
+          "content": "`# текст`"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 144",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "model_answer": "B",
+        "explanation": "Однострочный — //, многострочный — начинается с /* и заканчивается */."
+      }
+    },
+    {
+      "key": "if7-comment-tf",
+      "title": "Комментарии выполняются?",
+      "type": "true_false",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.6"
+      ],
+      "text": "Текст, оформленный как комментарий, программа выполняет как обычную команду.",
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 144",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "Неверно — 1 балл.",
+        "accepted": {
+          "correct": false
+        },
+        "explanation": "Любой текст в комментарии программа игнорирует."
+      }
+    },
+    {
+      "key": "if7-rez",
+      "title": "Проверка знаний",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.6"
+      ],
+      "text": "```cpp\n#include <iostream>\nusing namespace std;\nint main() {\n    int rez; string name;\n    cout << \"Введи свое имя:\" << endl;\n    cin >> name;\n    cout << \"Сколько бит в двух Кб?\" << endl;\n    cin >> rez;\n    if (rez != 2048)\n    {\n        cout << name << \", ответ неправильный!\" << endl;\n        cout << \"Правильный ответ: 2048\" << endl;\n    }\n    else\n        cout << \"Правильно, \" << name << endl;\n}\n```\n\nПользователь ввел имя `Ринат` и ответ `1024`. Сколько строк выведет программа после ввода ответа?",
+      "options": [
+        {
+          "key": "A",
+          "content": "Одну: «Правильно, Ринат»"
+        },
+        {
+          "key": "B",
+          "content": "Две: «Ринат, ответ неправильный!» и «Правильный ответ: 2048»"
+        },
+        {
+          "key": "C",
+          "content": "Одну: «Ринат, ответ неправильный!»"
+        },
+        {
+          "key": "D",
+          "content": "Три строки"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 146–147",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "model_answer": "B",
+        "explanation": "1024 != 2048 — истина; в фигурных скобках два вывода."
+      }
+    },
+    {
+      "key": "if7-ternary",
+      "title": "Тернарная форма",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.6"
+      ],
+      "text": "```cpp\nint answer; string result;\ncout << \"Введи, чему равно 2*2=\";\ncin >> answer;\nresult = (answer == 4) ? \"Молодец\" : \"Ошибка\";\ncout << result;\n```\n\nЧто выведет программа, если ввести 5?",
+      "options": [
+        {
+          "key": "A",
+          "content": "Молодец"
+        },
+        {
+          "key": "B",
+          "content": "Ошибка"
+        },
+        {
+          "key": "C",
+          "content": "5"
+        },
+        {
+          "key": "D",
+          "content": "4"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 141 (задание 4); 6 ур Ветвление код.pptx, слайд 6",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "model_answer": "B",
+        "explanation": "answer == 4 — ложь, поэтому result получает значение после «:» — «Ошибка»."
+      }
+    },
+    {
+      "key": "if7-write-baggage",
+      "title": "Программа: багаж",
+      "type": "code_completion",
+      "marks": 4,
+      "difficulty": "medium",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "7.4.3.6"
+      ],
+      "text": "На рейс можно провезти багаж весом не более 20 кг. Напиши программу: пользователь вводит вес багажа, программа выводит «Можете провозить багаж» или «Требуется доплата».\n\n```\nВведите вес багажа:\n24\nТребуется доплата\n```",
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 139 («Проверь себя», 1)",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "- Структура программы, объявлена переменная для веса (1)\n- Вывод подсказки и ввод веса через cin (1)\n- Верное условие if (ves <= 20) (или ves > 20 с переставленными ветками) (1)\n- Оба сообщения выводятся в нужных ветках if / else (1)",
+        "points": [
+          {
+            "criterion": "Структура программы, объявлена переменная для веса",
+            "marks": 1
+          },
+          {
+            "criterion": "Вывод подсказки и ввод веса через cin",
+            "marks": 1
+          },
+          {
+            "criterion": "Верное условие if (ves <= 20) (или ves > 20 с переставленными ветками)",
+            "marks": 1
+          },
+          {
+            "criterion": "Оба сообщения выводятся в нужных ветках if / else",
+            "marks": 1
+          }
+        ],
+        "model_answer": "int ves; cout << \"Введите вес багажа:\" << endl; cin >> ves; if (ves <= 20) cout << \"Можете провозить багаж\"; else cout << \"Требуется доплата\";"
+      },
+      "content": {
+        "starter_code": "#include <iostream>\nusing namespace std;\nint main()\n{\n\n}",
+        "answer_lines": 12
+      }
+    },
+    {
+      "key": "if7-write-sensor",
+      "title": "Программа: датчик температуры",
+      "type": "code_completion",
+      "marks": 4,
+      "difficulty": "medium",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "7.4.3.6"
+      ],
+      "text": "Если температура в кабинете 60 градусов и выше, датчик выводит два сообщения: «Датчик подает сигнал.» и «Датчик подает воду.». Иначе — «Датчик молчит». Напиши программу с комментарием к переменной.",
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 144–145 (задание 3)",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "- Ввод температуры с подсказкой (1)\n- Условие t >= 60 (1)\n- Два сообщения в фигурных скобках в ветке if (1)\n- else с сообщением «Датчик молчит»; есть комментарий // или /* */ (1)",
+        "points": [
+          {
+            "criterion": "Ввод температуры с подсказкой",
+            "marks": 1
+          },
+          {
+            "criterion": "Условие t >= 60",
+            "marks": 1
+          },
+          {
+            "criterion": "Два сообщения в фигурных скобках в ветке if",
+            "marks": 1
+          },
+          {
+            "criterion": "else с сообщением «Датчик молчит»; есть комментарий // или /* */",
+            "marks": 1
+          }
+        ],
+        "model_answer": "int t; // t – температура в кабинете\ncout << \"Введи температуру в кабинете:\" << endl; cin >> t;\nif (t >= 60) { cout << \"Датчик подает сигнал.\" << endl; cout << \"Датчик подает воду.\" << endl; }\nelse cout << \"Датчик молчит\";"
+      },
+      "content": {
+        "starter_code": "#include <iostream>\nusing namespace std;\nint main()\n{\n\n}",
+        "answer_lines": 14
+      }
+    },
+    {
+      "key": "if7-else-brace",
+      "title": "Скобка после else",
+      "type": "short_answer",
+      "marks": 2,
+      "difficulty": "medium",
+      "command_word": "explain",
+      "grading": "AI",
+      "objectives": [
+        "7.4.3.6"
+      ],
+      "text": "В программе «Скидка» условие `pokupka <= 5000`: в ветке `if` — вывод «СКИДКИ НЕТ», в ветке `else` — три команды (расчет skidka, itog и вывод itog). Зачем после `else` нужна открывающая фигурная скобка?",
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 146–147",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "- Чтобы объединить несколько действий ветки «Нет» в одну последовательность (1)\n- Без скобок к else относилась бы только первая команда, остальные выполнялись бы всегда (1)",
+        "points": [
+          {
+            "criterion": "Чтобы объединить несколько действий ветки «Нет» в одну последовательность",
+            "marks": 1
+          },
+          {
+            "criterion": "Без скобок к else относилась бы только первая команда, остальные выполнялись бы всегда",
+            "marks": 1
+          }
+        ],
+        "model_answer": "Скобки объединяют все действия ветки «Нет». Без них к else относится только первая строка, а расчет итога и вывод выполнятся при любом условии."
+      },
+      "content": {
+        "answer_lines": 3
+      }
+    },
+    {
+      "key": "if7-exam-1",
+      "title": "= и ==",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "exam",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.6"
+      ],
+      "text": "Чем отличается `a = b` от `a == b` в C++?",
+      "options": [
+        {
+          "key": "A",
+          "content": "Ничем, это одно и то же"
+        },
+        {
+          "key": "B",
+          "content": "`=` присваивает значение, `==` сравнивает на равенство"
+        },
+        {
+          "key": "C",
+          "content": "`=` сравнивает, `==` присваивает"
+        },
+        {
+          "key": "D",
+          "content": "`==` используется только для строк"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 140–141; 6 ур Ветвление код.pptx, слайды 5–6",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "model_answer": "B",
+        "explanation": "= — присвоение, == — сравнение (равно)."
+      }
+    },
+    {
+      "key": "if7-exam-2",
+      "title": "Дополни код",
+      "type": "fill_blank",
+      "marks": 2,
+      "difficulty": "exam",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.6"
+      ],
+      "text": "«Если переменная k не равна 0, вывести «Делить можно», иначе — «Делить нельзя»».\n\n```cpp\nif (k [[1]] 0)\n    cout << \"Делить можно\";\n[[2]]\n    cout << \"Делить нельзя\";\n```",
+      "content": {
+        "blank_count": 2
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 140–141; 6 ур Ветвление код.pptx, слайды 5–6",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "[[1]] !=; [[2]] else — по 1 баллу",
+        "accepted": {
+          "blanks": [
+            [
+              "!="
+            ],
+            [
+              "else"
+            ]
+          ],
+          "ignore_spaces": true
+        },
+        "explanation": "Не равно — !=, иначе — else."
+      }
+    },
+    {
+      "key": "if7-exam-3",
+      "title": "Результат программы",
+      "type": "fill_blank",
+      "marks": 2,
+      "difficulty": "exam",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.6"
+      ],
+      "text": "```cpp\nint p, s, itog;\ncin >> p;\nif (p <= 5000)\n    cout << \"СКИДКИ НЕТ\";\nelse\n{\n    s = p * 3 / 100;\n    itog = p - s;\n    cout << itog;\n}\n```\n\nВвод 4000 → вывод [[1]]; ввод 10000 → вывод [[2]]",
+      "content": {
+        "blank_count": 2
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 146–147",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "[[1]] СКИДКИ НЕТ; [[2]] 9700 — по 1 баллу",
+        "accepted": {
+          "blanks": [
+            [
+              "СКИДКИ НЕТ"
+            ],
+            [
+              "9700"
+            ]
+          ],
+          "ignore_spaces": true
+        },
+        "explanation": "4000 <= 5000 — «СКИДКИ НЕТ»; 10000: s = 300, itog = 9700."
+      }
+    },
+    {
+      "key": "if7-exam-4",
+      "title": "Входные, выходные, промежуточные",
+      "type": "matching",
+      "marks": 4,
+      "difficulty": "exam",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.6"
+      ],
+      "text": "```cpp\nint n, cena, itog; string det;\ncin >> n >> det;   // n – количество билетов, det – детский билет (да/нет)\nif (det == \"да\") cena = 1000;\nelse cena = 1500;\nitog = n * cena;\ncout << itog;\n```\n\nОпредели вид данных для каждой переменной.",
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "`n`"
+          },
+          {
+            "key": "L2",
+            "text": "`det`"
+          },
+          {
+            "key": "L3",
+            "text": "`cena`"
+          },
+          {
+            "key": "L4",
+            "text": "`itog`"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "Входные"
+          },
+          {
+            "key": "R2",
+            "text": "Выходные"
+          },
+          {
+            "key": "R3",
+            "text": "Промежуточные"
+          }
+        ]
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 148, 150",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "L1–R1; L2–R1; L3–R3; L4–R2. Всего 4 б.",
+        "accepted": {
+          "pairs": {
+            "L1": "R1",
+            "L2": "R1",
+            "L3": "R3",
+            "L4": "R2"
+          }
+        },
+        "explanation": "n и det вводятся (известны из условия), itog выводится (результат), cena используется в процессе работы."
+      }
+    },
+    {
+      "key": "if7-exam-5",
+      "title": "Программа: результат теста",
+      "type": "code_completion",
+      "marks": 5,
+      "difficulty": "exam",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "7.4.3.6"
+      ],
+      "text": "Напиши программу: пользователь вводит количество баллов за тест (из 20). Если баллов 18 или больше, программа выводит две строки: «Отлично!» и «Так держать!». Иначе выводит «Нужно повторить тему».",
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 142–143",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "- Структура программы, объявлена переменная int (1)\n- Вывод подсказки и ввод баллов через cin (1)\n- Верное условие if (b >= 18) (1)\n- Два вывода в фигурных скобках в ветке if (1)\n- Ветка else с сообщением «Нужно повторить тему» (1)",
+        "points": [
+          {
+            "criterion": "Структура программы, объявлена переменная int",
+            "marks": 1
+          },
+          {
+            "criterion": "Вывод подсказки и ввод баллов через cin",
+            "marks": 1
+          },
+          {
+            "criterion": "Верное условие if (b >= 18)",
+            "marks": 1
+          },
+          {
+            "criterion": "Два вывода в фигурных скобках в ветке if",
+            "marks": 1
+          },
+          {
+            "criterion": "Ветка else с сообщением «Нужно повторить тему»",
+            "marks": 1
+          }
+        ],
+        "model_answer": "#include <iostream>\nusing namespace std;\nint main() {\n int b;\n cout << \"Введи баллы:\"; cin >> b;\n if (b >= 18) { cout << \"Отлично!\" << endl; cout << \"Так держать!\" << endl; }\n else cout << \"Нужно повторить тему\";\n}"
+      },
+      "content": {
+        "starter_code": "#include <iostream>\nusing namespace std;\nint main()\n{\n\n}",
+        "answer_lines": 14
+      }
+    },
+    {
+      "key": "if7-exam-6",
+      "title": "Ошибка: нет фигурных скобок",
+      "type": "code_analysis",
+      "marks": 2,
+      "difficulty": "exam",
+      "command_word": "explain",
+      "grading": "AI",
+      "objectives": [
+        "7.4.3.6"
+      ],
+      "text": "```cpp\nif (sor == 20)\n    cout << \"Ты молодец!\" << endl;\n    cout << \"Ура!\" << endl;\n```\n\nУченик ввел `sor = 15`. Что выведет фрагмент? Объясни ошибку и как ее исправить.",
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 142–143",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "- Будет выведено «Ура!» (хотя условие ложное) (1)\n- Без фигурных скобок к if относится только первая команда; нужно заключить оба вывода в { } (1)",
+        "points": [
+          {
+            "criterion": "Будет выведено «Ура!» (хотя условие ложное)",
+            "marks": 1
+          },
+          {
+            "criterion": "Без фигурных скобок к if относится только первая команда; нужно заключить оба вывода в { }",
+            "marks": 1
+          }
+        ],
+        "model_answer": "Выведется «Ура!», потому что к if относится только первая строка. Нужно: if (sor == 20) { cout << \"Ты молодец!\" << endl; cout << \"Ура!\" << endl; }"
+      },
+      "content": {
+        "answer_lines": 4
+      }
+    },
+    {
+      "key": "if7-exam-7",
+      "title": "Комментарий",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "exam",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.6"
+      ],
+      "text": "Какая строка будет **проигнорирована** программой?",
+      "options": [
+        {
+          "key": "A",
+          "content": "`cin >> time;`"
+        },
+        {
+          "key": "B",
+          "content": "`// time – время суток`"
+        },
+        {
+          "key": "C",
+          "content": "`cout << \"Доброе утро!\";`"
+        },
+        {
+          "key": "D",
+          "content": "`int time;`"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 144",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "model_answer": "B",
+        "explanation": "Строка, начинающаяся с //, — однострочный комментарий."
+      }
+    },
+    {
+      "key": "if7-exam-8",
+      "title": "Скидка не в пятницу",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "exam",
+      "command_word": "calculate",
+      "grading": "HYBRID",
+      "objectives": [
+        "7.4.3.6"
+      ],
+      "text": "```cpp\n#include <iostream>\nusing namespace std;\nint main() {\n    /* pokupka - стоимость покупки без скидки,\n       itog - окончательная стоимость,\n       skidka - скидка при покупке */\n    int pokupka, itog, skidka;\n    string friday;\n    cout << \"Введи стоимость покупки\" << endl;\n    cin >> pokupka;\n    cout << \"Сегодня пятница? (да/нет)\" << endl;\n    cin >> friday;\n    if (friday == \"да\")\n    {\n        skidka = pokupka * 20 / 100;\n        itog = pokupka - skidka;\n    }\n    else\n    {\n        skidka = pokupka * 3 / 100;\n        itog = pokupka - skidka;\n    }\n    cout << itog << endl;\n}\n```\n\nЧто выведет программа, если ввести 40000 и «нет»?",
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 150",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "38800 — 1 балл.",
+        "accepted": {
+          "values": [
+            "38800"
+          ],
+          "numeric": true,
+          "tolerance": 0.001
+        },
+        "model_answer": "38800",
+        "explanation": "friday != \"да\": skidka = 40000*3/100 = 1200; itog = 38800."
+      }
+    }
+  ],
+  "topic_exam": {
+    "duration": 25,
+    "title": "Программирование разветвляющегося алгоритма — экзамен",
+    "instructions": "Ответьте на **все** вопросы. Программы пишите на C++. Количество баллов указано у каждого вопроса. Всего: 18 баллов. Время: 25 минут.",
+    "questions": [
+      "if7-exam-1",
+      "if7-exam-2",
+      "if7-exam-3",
+      "if7-exam-4",
+      "if7-exam-5",
+      "if7-exam-6",
+      "if7-exam-7",
+      "if7-exam-8"
+    ]
+  }
+}

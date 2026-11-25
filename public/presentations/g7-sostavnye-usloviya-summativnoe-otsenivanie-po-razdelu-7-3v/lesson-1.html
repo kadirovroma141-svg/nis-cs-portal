@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>7.3В · Урок 3 · Составные условия. СОР 7.3В</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+  <link rel="stylesheet" href="../_engine/lesson.css" />
+  <style>
+    .lesson svg.fc text { font-size: 15px; }
+    .lesson svg.fc text.s { font-size: 14px; font-weight: 800; fill: var(--primary); }
+    .lesson svg.fc .ln { stroke: var(--primary); stroke-width: 2.5; fill: none; }
+    .lesson pre.code-block { white-space: pre; overflow: visible; }
+  </style>
+</head>
+<body class="lesson">
+<script src="../_engine/deck.js"></script>
+<script src="../_engine/lesson.js"></script>
+<script>
+/*
+ * 7.3В «Программирование разветвляющихся алгоритмов (C++)», тема «Составные условия. Суммативное оценивание по разделу 7.3В», урок 1.
+ * Цель обучения (КТП 2026): 7.4.2.2 использовать логические операции в составных условиях.
+ * Ход урока — КСП content/lesson-plans/g7-sostavnye-usloviya-summativnoe-otsenivanie-po-razdelu-7-3v.json
+ * (начало 10 мин, середина 45, конец 25: СОР 20 мин + рефлексия 5 мин).
+ * Содержание — только из материалов: SB 7 кл. стр. 152–161; TG 7 кл. стр. 114–124; презентация учителя «7 ур Составные усл.pptx».
+ * Ошибки учебника исправлены по map.md: корова — k >= 15 (как в условии и в презентации), таблица «Аналогия со сложением», «+, –» в приоритетах.
+ * СОР 7.3В: на слайдах только памятка (критерии, время, командные слова, чек-лист); задания СОР не показываются и не повторяются.
+ */
+const SB = "Учебник 7 кл., ";
+const TG = "Руководство для учителя 7 кл., ";
+const PR = "Презентация «7 ур Составные усл», ";
+const { src, reveal, statements, quiz, matcher } = LESSON;
+const S = () => window.DECK_STATE;
+/* ---------- построитель блок-схем (фигуры — как в учебнике 7 кл.: овал, параллелограмм, прямоугольник, ромб) ----------
+ * items: [{t:"Начало"} | {io:"Ввод a"} | {a:"max = a"} | {if:"a > b ?", yes:[…], no:[…], yesSide:"right"}]
+ * Подпись в несколько строк — через «|». Ветка «Нет» слева, «Да» справа (как чаще в учебнике), если не указано иное. */
+function FC(items, opt = {}) {
+  const W = opt.w || 600, G = opt.gap || 22, out = [];
+  let maxY = 0;
+  const H = { t: 38, io: 42, a: 42 };
+  const tx = (x, y, txt) => {
+    const ls = String(txt).split("|"), lh = 18, y0 = y - ((ls.length - 1) * lh) / 2 + 5;
+    return ls.map((l, i) => `<text x="${x}" y="${y0 + i * lh}" text-anchor="middle">${l}</text>`).join("");
+  };
+  const hOf = (it) => (it.if ? (it.ch || 70) : (it.h || H[it.t !== undefined ? "t" : it.io !== undefined ? "io" : "a"]));
+  function box(it, x, top) {
+    const h = hOf(it), cy = top + h / 2;
+    if (it.t !== undefined) { const w = it.w || 130; out.push(`<g class="nd"><rect class="blk-p" x="${x - w / 2}" y="${top}" width="${w}" height="${h}" rx="${h / 2}"/>${tx(x, cy, it.t)}</g>`); }
+    else if (it.io !== undefined) { const w = it.w || 190, s = 12; out.push(`<g class="nd"><polygon class="blk" points="${x - w / 2 + s},${top} ${x + w / 2 + s},${top} ${x + w / 2 - s},${top + h} ${x - w / 2 - s},${top + h}"/>${tx(x, cy, it.io)}</g>`); }
+    else { const w = it.w || 170; out.push(`<g class="nd"><rect class="blk" x="${x - w / 2}" y="${top}" width="${w}" height="${h}" rx="4"/>${tx(x, cy, it.a)}</g>`); }
+    return top + h;
+  }
+  function ifNode(it, x, top) {
+    const ch = it.ch || 70, cw = it.cw || 200, cy = top + ch / 2, off = it.off || 175;
+    out.push(`<g class="nd"><polygon class="blk-a" points="${x},${top} ${x + cw / 2},${cy} ${x},${top + ch} ${x - cw / 2},${cy}"/>${tx(x, cy, it.if)}</g>`);
+    const yr = it.yesSide !== "left";
+    const sides = [[it.yes || [], yr ? 1 : -1, "Да"], [it.no || [], yr ? -1 : 1, "Нет"]];
+    const btop = top + ch + G;
+    const ends = sides.map(([list, sg, lab]) => {
+      const bx = x + sg * off, vx = x + sg * (cw / 2);
+      out.push(`<text class="s" x="${vx + sg * 18}" y="${cy - 8}" text-anchor="middle">${lab}</text>`);
+      if (!list.length) { out.push(`<path class="ln" d="M${vx} ${cy} H${bx} V${btop}"/>`); return { bx, bottom: btop }; }
+      out.push(`<path class="ar" d="M${vx} ${cy} H${bx} V${btop - 2}"/>`);
+      return { bx, bottom: seq(list, bx, btop) };
+    });
+    const my = Math.max(...ends.map((e) => e.bottom)) + G;
+    ends.forEach((e) => out.push(`<path class="ln" d="M${e.bx} ${e.bottom} V${my} H${x}"/>`));
+    out.push(`<circle cx="${x}" cy="${my}" r="3.5" fill="var(--primary)"/>`);
+    return my;
+  }
+  function seq(list, x, top) {
+    let y = top;
+    list.forEach((it, i) => {
+      if (i > 0) { out.push(`<path class="ar" d="M${x} ${y} V${y + G - 2}"/>`); y += G; }
+      y = it.if ? ifNode(it, x, y) : box(it, x, y);
+      maxY = Math.max(maxY, y);
+    });
+    return y;
+  }
+  seq(items, opt.x || W / 2, 6);
+  const Hh = maxY + 8;
+  return `<svg class="dia fc" viewBox="0 0 ${W} ${Hh}" style="max-height:${opt.max || 430}px" role="img" aria-label="${opt.label || "Блок-схема"}">
+  <defs><marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--primary)"/></marker></defs>
+  ${out.join("\n  ")}
+</svg>`;
+}
+/** Код C++ без подсветки; < и > экранируются. */
+const code = (s, fs = 15) => `<pre class="code-block" style="font-size:${fs}px;line-height:1.45;">${String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>`;
+
+
+const START = { t: "Начало" }, END = { t: "Конец" };
+const COND = `<span class="pill" style="font-size:12px;">условный пример</span>`;
+const TF = [["T", "ИСТИНА"], ["F", "ЛОЖЬ"]];
+
+/* Числовая ось (перерисовано по SB стр. 159): от -5 до 12. */
+function axis(n, kind) {
+  const X = (v) => 30 + (v + 5) * 32;
+  const ticks = { 1: [-1, 7], 2: [-1, 7], 3: [-3, 2, 10] }[kind];
+  let mark = "";
+  if (kind === 1) mark = `<path d="M${X(-5)} 30 H${X(-1)} M${X(7)} 30 H${X(12)}" stroke="var(--accent)" stroke-width="7"/>`;
+  if (kind === 2) mark = `<path d="M${X(-1)} 30 H${X(7)}" stroke="var(--accent)" stroke-width="7"/>`;
+  const dots = ticks.map((v) => `<circle cx="${X(v)}" cy="30" r="6" fill="var(--accent)"/><text class="s" x="${X(v)}" y="62" text-anchor="middle">${v}</text>`).join("");
+  return `<svg class="dia" viewBox="0 0 620 72" style="max-height:70px" role="img" aria-label="Числовая ось ${n}">
+    <defs><marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--primary)"/></marker></defs>
+    <text x="8" y="36" style="font-size:18px">${n}</text>
+    <path class="ar" d="M30 30 H600"/>${mark}${dots}<text class="s" x="604" y="58" text-anchor="end">x</text>
+  </svg>`;
+}
+
+initDeck({
+  badge: "7.3В · Урок 3",
+  title: "Составные условия. Суммативное оценивание по разделу 7.3В",
+  subtitle: "7 класс · 3 четверть · цель 7.4.2.2 · 80 минут",
+  footer: "НИШ ЕМН г. Кызылорда · Информатика · 7 класс · Раздел 7.3В «Программирование разветвляющихся алгоритмов (C++)»",
+  slides: [
+    /* ---------------- НАЧАЛО УРОКА (10 мин) ---------------- */
+    {
+      badge: "Начало урока",
+      shortTitle: "Тема, цель и критерии",
+      timing: "0–2 мин",
+      source: "КТП 2026; " + PR + "слайд 1",
+      notes: "Приветствие. Озвучьте тему, цель и критерий. Предупредите: в конце урока — суммативное оценивание за раздел 7.3В (20 минут).",
+      render() {
+        return `<div class="hero">
+          <div>
+            <div class="hero-kicker">Раздел 7.3В · Программирование разветвляющихся алгоритмов (C++)</div>
+            <h1>Составные условия</h1>
+            <div class="stack"><div class="goal"><b>7.4.2.2</b> — использовать логические операции в составных условиях.</div>
+            <div class="note"><b>В конце урока:</b> суммативное оценивание за раздел 7.3В — 20 минут.</div></div>
+          </div>
+          <div class="stack text-sm">
+            <div class="card"><h3>🎯 Цели урока</h3>
+              <p><b>Все:</b> отличают простое условие от составного; называют операции И (and, &amp;&amp;), ИЛИ (or, ||), НЕ (not, !).<br>
+              <b>Большинство:</b> записывают составные условия на C++; определяют их значение с учётом приоритета.<br>
+              <b>Некоторые:</b> составляют условия из трёх и более простых условий со скобками.</p></div>
+            <div class="card"><h3>✅ Критерий оценивания</h3><p>Использует логические операции в составных условиях.</p></div>
+          </div>
+        </div>${src("КТП 2026 (цель 7.4.2.2); " + PR + "слайд 1; КСП урока")}`;
+      },
+    },
+    {
+      badge: "Начало урока · актуализация",
+      shortTitle: "Простое и составное условие",
+      timing: "2–10 мин",
+      source: SB + "стр. 137, 152; " + PR + "слайд 3",
+      notes: "Вопрос раздела (стр. 137): «Что делать, если простое условие не способно решить проблему?». Задание 1 (стр. 152): как войти в СУШ? Нужно правильно ввести и ИИН, и пароль — если хотя бы одно не выполнено, войти не получится. Введите понятия простого и составного условия.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Как войти в СУШ (Систему управления школы)?</h2>
+          <div class="grid-2" style="gap:18px;">
+            <div class="stack">
+              <div class="def"><b>Простое условие</b> содержит только одно сравнение, например <span class="mono">a &gt; b</span>.</div>
+              <div class="def"><b>Составное (сложное) условие</b> — несколько условий, соединённых логическими операциями, например <span class="mono">(x &lt; y) and (y &lt; z)</span>.</div>
+              <div class="note">Простые и составные условия — <b>логические выражения</b>. Они принимают одно из двух значений: <b>true</b> (ИСТИНА) или <b>false</b> (ЛОЖЬ).</div>
+            </div>
+            <div class="stack">
+              <div class="card mono text-sm">ИИН=="980126472982" and Пароль=="Keta14!"</div>
+              <table class="t text-sm"><tr><th>ИИН верный</th><th>Пароль верный</th><th>РЕЗУЛЬТАТ</th></tr>
+                <tr><td>ИСТИНА</td><td>ИСТИНА</td><td><b>ИСТИНА</b> — вход выполнен</td></tr></table>
+              ${reveal("r-sush", "А если пароль неверный?", "Составное условие с «И» станет ЛОЖЬЮ: войти в систему не получится, даже если ИИН введён правильно.")}
+            </div>
+          </div>
+        </div>${src(SB + "стр. 137 (вопрос раздела), стр. 152 (задание 1, определение); " + PR + "слайд 3")}`;
+      },
+    },
+
+    /* ---------------- СЕРЕДИНА УРОКА (45 мин) ---------------- */
+    {
+      badge: "Новое · логическое И",
+      shortTitle: "Операция И (and)",
+      timing: "10–15 мин",
+      source: SB + "стр. 152",
+      notes: "Фронтально: правило операции И и аналогия с умножением. Затем пары заполняют таблицу задания 2 (стр. 152) — щёлкните значения составного условия.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;">
+          <div class="stack">
+            <div class="def">При логическом <b>И (and)</b> результат <b>истинный, если все условия истинные</b>.</div>
+            <table class="t"><tr><th>A</th><th>B</th><th>A and B</th></tr>
+              <tr><td>1</td><td>1</td><td>1*1 = 1</td></tr><tr><td>0</td><td>1</td><td>0*1 = 0</td></tr>
+              <tr><td>1</td><td>0</td><td>1*0 = 0</td></tr><tr><td>0</td><td>0</td><td>0*0 = 0</td></tr></table>
+            <p class="text-xs text-muted">Аналогия с умножением: 1 — ИСТИНА, 0 — ЛОЖЬ.</p>
+          </div>
+          <div class="stack">
+            <h2 class="slide-h2">Заполни таблицу: <span class="mono">(a&gt;0) and (b&lt;0)</span></h2>
+            ${matcher("and", TF, [
+              { t: "a&gt;0 — ИСТИНА, b&lt;0 — ИСТИНА", ans: "T" },
+              { t: "a&gt;0 — ИСТИНА, b&lt;0 — ЛОЖЬ", ans: "F" },
+              { t: "a&gt;0 — ЛОЖЬ, b&lt;0 — ИСТИНА", ans: "F" },
+              { t: "a&gt;0 — ЛОЖЬ, b&lt;0 — ЛОЖЬ", ans: "F" },
+            ])}
+          </div>
+        </div></div>${src(SB + "стр. 152 (правило «И», таблица «Аналогия с умножением», задание 2)")}`;
+      },
+    },
+    {
+      badge: "Анализ · задание 4",
+      shortTitle: "Всегда ЛОЖЬ",
+      timing: "15–18 мин",
+      source: SB + "стр. 153",
+      notes: "Таблица «Условие — противоположное условие» (стр. 153). Задание 4: объясните, почему составные условия при любых a и b имеют значение ЛОЖЬ.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;align-items:start;">
+          <table class="t"><tr><th>Условие</th><th>Противоположное условие</th></tr>
+            <tr><td class="mono">a &lt; b</td><td class="mono">a &gt;= b</td></tr>
+            <tr><td class="mono">a &gt; b</td><td class="mono">a &lt;= b</td></tr>
+            <tr><td class="mono">a == b</td><td class="mono">a != b</td></tr></table>
+          <div class="stack">
+            <h2 class="slide-h2">Почему при любых a и b — ЛОЖЬ?</h2>
+            <div class="card mono text-sm">(a &lt; b) and (a &gt;= b)<br>(a &gt; b) and (a &lt;= b)<br>(a == b) and (a != b)</div>
+            ${reveal("r-contr", "Ответ", "В каждом выражении условие соединено «И» со своим <b>противоположным</b>. Они не могут быть истинными одновременно: одно из них всегда ЛОЖЬ, а для «И» нужно, чтобы истинными были все условия.")}
+          </div>
+        </div></div>${src(SB + "стр. 153 (таблица противоположных условий, задание 4)")}`;
+      },
+    },
+    {
+      badge: "Программирование с И",
+      shortTitle: "Покупка коровы",
+      timing: "18–22 мин",
+      source: SB + "стр. 152–153; " + PR + "слайды 5–6; " + TG + "стр. 115",
+      notes: "Задание 3 (стр. 152–153), слайды 5–6. Решение о покупке — только если корова даёт не менее 15 литров молока и жирность не менее 3,4 %. Разберите блок-схему и код. В учебнике в коде опечатка k>=14 — по условию задачи k>=15 (так в презентации и ответе TG). Проверьте: 3.6 и 12 → «Не покупаем».",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:20px;align-items:center;">
+          <div>${FC([START, { io: "Ввод pr, k", w: 140 }, { if: "(pr>=3.4) and|(k>=15) ?", cw: 210, ch: 76, off: 165, yes: [{ io: "Покупаем", w: 130 }], no: [{ io: "Не покупаем", w: 150 }] }, END], { w: 540, max: 360, label: "Блок-схема «Покупка коровы»" })}</div>
+          <div class="stack">
+            ${code(`double pr, k;
+//pr - процент жирности;
+//k - количество литров;
+cout<<"Введите процент жирности:";
+cin>>pr;
+cout<<"Введите количество литров:";
+cin>>k;
+if ((pr>=3.4) and (k>=15))
+  { cout<<"Покупаем"; }
+else
+  { cout<<"Не покупаем"; }`, 14)}
+            <div class="card mono text-xs">Введите процент жирности: 3.6<br>Введите количество литров: 12<br>Не покупаем</div>
+          </div>
+        </div></div>${src(SB + "стр. 152–153 (задание 3, блок-схема и код; в коде исправлено k>=15); " + PR + "слайды 5–6; " + TG + "стр. 115 (ответ)")}`;
+      },
+    },
+    {
+      badge: "В парах · проверь себя",
+      shortTitle: "Курьер",
+      timing: "22–26 мин",
+      source: SB + "стр. 153, «Проверь себя» 1; " + PR + "слайд 7",
+      notes: "«Проверь себя» 1 (стр. 153), слайд 7. Фирма набирает курьеров: сотрудник должен иметь машину и быть старше 21 года. Пары выбирают условие, затем пишут программу. Имена переменных m и v — условный пример. Обратите внимание: «старше 21» — это > 21, а не >= 21.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:20px;">
+          <div class="stack">
+            <h2 class="slide-h2">Подходит ли соискатель на должность курьера?</h2>
+            <p class="text-sm">Требования: сотрудник должен <b>иметь машину</b>; сотрудник должен быть <b>старше 21 года</b>.</p>
+            <div class="card mono text-xs">Машина есть? Введите да или нет: да<br>Введите возраст: 34<br>Подходит</div>
+          </div>
+          <div class="stack quizgrid">${quiz("q-cur", "Какое условие подходит (m — ответ про машину, v — возраст)?", ["(m==\"да\") or (v>21)", "(m==\"да\") and (v>21)", "(m==\"да\") and (v>=21)", "(m==\"нет\") and (v<21)"], 1)}
+            ${reveal("r-cur", "Показать программу", `${COND}${code(`string m;  int v;
+//m - есть ли машина; v - возраст
+cout<<"Машина есть? Введите да или нет: ";
+cin>>m;
+cout<<"Введите возраст: ";
+cin>>v;
+if ((m=="да") and (v>21))
+  { cout<<"Подходит"; }
+else
+  { cout<<"Не подходит"; }`, 13)}`)}</div>
+        </div></div>${src(SB + "стр. 153 («Проверь себя» 1, внешний вид программы); " + PR + "слайд 7; программа составлена по образцу задания 3")}`;
+      },
+    },
+    {
+      badge: "Новое · логическое ИЛИ",
+      shortTitle: "Операция ИЛИ (or)",
+      timing: "26–31 мин",
+      source: SB + "стр. 154–155",
+      notes: "Фронтально: правило ИЛИ, аналогия со сложением (сравните с умножением — задание 3). Пример: вход в банк по отпечатку пальца или по коду. Пары заполняют таблицу задания 2. Пример программы (стр. 155): домашнее задание сделано, если выполнен блок А или блок В: if ((a==\"да\") or (b==\"да\")).",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;">
+          <div class="stack">
+            <div class="def">При логическом <b>ИЛИ (or)</b> результат <b>истинный, если хотя бы одно условие истинно</b>.</div>
+            <table class="t"><tr><th>A</th><th>B</th><th>A or B</th></tr>
+              <tr><td>1</td><td>1</td><td>1+1 = 1</td></tr><tr><td>1</td><td>0</td><td>1+0 = 1</td></tr>
+              <tr><td>0</td><td>1</td><td>0+1 = 1</td></tr><tr><td>0</td><td>0</td><td>0+0 = 0</td></tr></table>
+            <div class="card mono text-xs">ОТПЕЧАТОК=="да" or Код=="2101"<br>ЛОЖЬ or ИСТИНА → РЕЗУЛЬТАТ: ИСТИНА</div>
+          </div>
+          <div class="stack">
+            <h2 class="slide-h2">Заполни таблицу: <span class="mono">(a&gt;0) or (b&lt;0)</span></h2>
+            ${matcher("or", TF, [
+              { t: "a&gt;0 — ИСТИНА, b&lt;0 — ИСТИНА", ans: "T" },
+              { t: "a&gt;0 — ИСТИНА, b&lt;0 — ЛОЖЬ", ans: "T" },
+              { t: "a&gt;0 — ЛОЖЬ, b&lt;0 — ИСТИНА", ans: "T" },
+              { t: "a&gt;0 — ЛОЖЬ, b&lt;0 — ЛОЖЬ", ans: "F" },
+            ])}
+          </div>
+        </div></div>${src(SB + "стр. 154 (правило «ИЛИ», вход в банк, задание 2, таблица «Аналогия со сложением» — исправлена строка 1 0), стр. 155 (программа «Домашнее задание»)")}`;
+      },
+    },
+    {
+      badge: "Физминутка",
+      shortTitle: "Физминутка",
+      timing: "31–32 мин",
+      source: "КСП урока",
+      notes: "Короткая разминка: упражнения для глаз и кистей рук.",
+      render() {
+        return `<div class="body" style="align-items:center;justify-content:center;text-align:center;">
+          <div style="font-size:72px;">🙌</div>
+          <h2 class="slide-h2">Физминутка</h2>
+          <p class="lead">Упражнения для глаз и кистей рук</p>
+        </div>${src("КСП урока")}`;
+      },
+    },
+    {
+      badge: "Новое · &&, ||, !",
+      shortTitle: "Символы &&, ||, !",
+      timing: "32–36 мин",
+      source: SB + "стр. 156; " + PR + "слайд 3",
+      notes: "Таблица соответствия видов записи (стр. 156): в C++ обычно используют символы. Игра «Заполни пропуски» (задание 1): пары подбирают условие к описанию, за каждый верный ответ — балл. Формат «Запишите условие на C++» встречается на СОР.",
+      render() {
+        return `<div class="body">
+          <div class="grid-2" style="gap:18px;grid-template-columns:0.8fr 1.2fr;">
+            <table class="t text-sm"><tr><th>Наименование</th><th colspan="3">Вид записи</th></tr>
+              <tr><td>Логическое умножение</td><td>И</td><td class="mono">and</td><td class="mono">&amp;&amp;</td></tr>
+              <tr><td>Логическое сложение</td><td>ИЛИ</td><td class="mono">or</td><td class="mono">||</td></tr>
+              <tr><td>Отрицание</td><td>НЕ</td><td class="mono">not</td><td class="mono">!</td></tr></table>
+            <div class="stack text-sm"><p><b>«!волнуюсь» = «не волнуюсь»</b></p><p class="mono">(a == 2 &amp;&amp; b &gt; 4 || c &gt; 6)<br>(a == 2 and b &gt; 4 or c &gt; 6)</p></div>
+          </div>
+          ${matcher("sym", [["a", "(a == 2 &amp;&amp; b &gt; 5)"], ["b", "(m &lt;= 10 || b &gt;= 4)"], ["c", "(k &gt; 3 &amp;&amp; k &lt; 5)"], ["d", "!(d &gt; 5)"]], [
+            { t: "Истинно, если a равно 2 и b больше 5", ans: "a" },
+            { t: "Истинно, если m меньше либо равно 10 или b больше или равно 4", ans: "b" },
+            { t: "Истинно, если k больше 3, но меньше 5", ans: "c" },
+            { t: "d &gt; 5 ложно, но с отрицанием становится истинным", ans: "d" },
+          ])}
+        </div>${src(SB + "стр. 156 (таблица соответствия, варианты записи, задание 1); " + PR + "слайд 3")}`;
+      },
+    },
+    {
+      badge: "Дополни код · задание 3",
+      shortTitle: "День рождения Анны",
+      timing: "36–40 мин",
+      source: SB + "стр. 157, задание 3; " + PR + "слайд 8",
+      notes: "Задание 3 (стр. 157), слайд 8. Анне нужно разрешение родителей, а потом — праздник дома или в кафе. Пары дополняют код (формат «Дополните код» — как на СОР), затем отвечают на вопрос. Обратите внимание на скобки: ИЛИ внутри скобок выполняется раньше, чем И.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:20px;">
+          ${code(`string r, d, k;
+//r-разрешение, d-дом, k-кафе.
+cout<<"Родители разрешили? (да/нет): ";
+cin>>r;
+cout<<"Праздник будет дома? (да/нет): ";
+cin>>d;
+cout<<"Праздник будет в кафе? (да/нет): ";
+cin>>______;
+if (r=="да" && (d=="да"|| k=="да"))
+  { cout<<"__________________"; }
+else
+  { cout<<"Праздника не будет"; }`, 14)}
+          <div class="stack">
+            ${reveal("r-anna", "Пропуски", "<span class='mono'>cin&gt;&gt;k;</span> и <span class='mono'>cout&lt;&lt;\"Праздник будет\";</span>")}
+            ${quiz("q-anna", "При каком вводе праздник будет?", ["r = нет, d = да, k = да", "r = да, d = нет, k = нет", "r = да, d = нет, k = да", "r = нет, d = нет, k = нет"], 2)}
+          </div>
+        </div></div>${src(SB + "стр. 157 (задание 3, код и внешний вид программы); " + PR + "слайд 8")}`;
+      },
+    },
+    {
+      badge: "Новое · порядок выполнения",
+      shortTitle: "Приоритет операций",
+      timing: "40–44 мин",
+      source: SB + "стр. 158, 160; " + TG + "стр. 122",
+      notes: "Пример из математики (стр. 160): 5+5+5/2 = 12,5 (сначала деление), а (5+5+5)/2 = 7,5 — скобки меняют порядок. Таблица приоритетов. Правило (стр. 158): только «И» или только «ИЛИ» — по порядку слева направо; есть и «И», и «ИЛИ» без скобок — сначала «И». Пример TG: условие Шанырака «Мир» — 100 баллов вместе или по 50 баллов каждым классом.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;">
+          <div class="stack">
+            <table class="t text-sm"><tr><th colspan="4">Приоритет операций в составных условиях</th></tr>
+              <tr><td>1</td><td>скобки</td><td>5</td><td class="mono">&lt;, &gt;, &lt;=, &gt;=</td></tr>
+              <tr><td>2</td><td class="mono">!</td><td>6</td><td class="mono">==, !=</td></tr>
+              <tr><td>3</td><td class="mono">*, /, %</td><td>7</td><td class="mono">&amp;&amp;</td></tr>
+              <tr><td>4</td><td class="mono">+, –</td><td>8</td><td class="mono">||</td></tr></table>
+            <div class="card text-sm"><span class="mono">5+5+5/2 = 12,5</span> &nbsp;·&nbsp; <span class="mono">(5+5+5)/2 = 7,5</span><br><span class="text-xs">Скобки меняют порядок действий.</span></div>
+          </div>
+          <div class="stack">
+            <div class="def">Есть и «И», и «ИЛИ», а скобок нет — <b>сначала выполняется «И»</b>, затем «ИЛИ».</div>
+            <div class="card text-sm"><b>Шанырак «Мир»</b> (7 «А» и 9 «С») побеждает, если набрал вместе 100 баллов или каждый класс по 50:<br><span class="mono">total == 100 || k7 == 50 &amp;&amp; k9 == 50</span></div>
+            ${quiz("q-ord", "Какая логическая операция в этом условии выполнится первой?", ["||", "&amp;&amp;", "по порядку слева направо"], 1)}
+          </div>
+        </div></div>${src(SB + "стр. 158 (правило порядка «И» и «ИЛИ»), стр. 160 (пример 5+5+5/2, таблица приоритетов; «+, –» исправлено), стр. 161 (задание 3); " + TG + "стр. 122 (условие Шанырака)")}`;
+      },
+    },
+    {
+      badge: "Интервалы · спортзал",
+      shortTitle: "Точка на оси. Спортзал",
+      timing: "44–48 мин",
+      source: SB + "стр. 159; " + PR + "слайды 9–10; " + TG + "стр. 122",
+      notes: "Задание 2 (стр. 159): подберите составное условие к каждой оси. Затем задание 3 «Спортзал» (8–12, 14–18, 19–20 ч): лишние скобки можно убрать, потому что and выполняется раньше or.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:20px;grid-template-columns:1.05fr 0.95fr;">
+          <div class="stack">
+            ${axis(1, 1)}${axis(2, 2)}${axis(3, 3)}
+            ${matcher("ax", [["1", "ось 1"], ["2", "ось 2"], ["3", "ось 3"]], [
+              { t: "<span class='mono'>x &gt;= -1 and x &lt;= 7</span>", ans: "2" },
+              { t: "<span class='mono'>x == -3 or x == 2 or x == 10</span>", ans: "3" },
+              { t: "<span class='mono'>x &lt;= -1 or x &gt;= 7</span>", ans: "1" },
+            ])}
+          </div>
+          <div class="stack">
+            <b>Спортзал работает 8–12, 14–18 и 19–20 ч</b>
+            ${code(`if ( (t >=8 and t<=12)
+  or (t >=14 and t<=18)
+  or (t >=19 and t<=20) )
+ { cout<<"Спортзал работает"; }
+else
+ { cout<<"Спортзал не работает"; }`, 13.5)}
+            ${reveal("r-gym", "Наименьшее количество скобок", "<span class='mono'>if (t>=8 and t<=12 or t>=14 and t<=18 or t>=19 and t<=20)</span> — and выполняется раньше or, поэтому внутренние скобки лишние.")}
+          </div>
+        </div></div>${src(SB + "стр. 159 (задание 2: оси перерисованы; задание 3: код «Спортзал»); " + PR + "слайды 9–10; " + TG + "стр. 122 (лишние скобки)")}`;
+      },
+    },
+    {
+      badge: "Устная проверка",
+      shortTitle: "Истина или ложь: a = 2, b = 3, c = 4",
+      timing: "48–53 мин",
+      source: SB + "стр. 157, 161; " + TG + "стр. 124",
+      notes: "Индивидуально, затем ответы вслух с обоснованием («Сначала выполняется …, затем …»). Щёлкните выражение, чтобы показать значение. Затем фрагмент при x = 7 («Проверь себя» 1, стр. 157).",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:20px;grid-template-columns:1.2fr 0.8fr;">
+          <div class="stack">
+            <h2 class="slide-h2">a = 2; b = 3; c = 4. Истинно или ложно?</h2>
+            ${statements("abc", [
+              { t: "<span class='mono'>!(a &gt; b)</span>", ok: true, okLabel: "ИСТИНА", why: "a &gt; b ложно, отрицание — истина" },
+              { t: "<span class='mono'>a &lt; b &amp;&amp; b &lt; c</span>", ok: true, okLabel: "ИСТИНА", why: "оба условия истинны" },
+              { t: "<span class='mono'>!(a &gt;= b) || c == 5</span>", ok: true, okLabel: "ИСТИНА", why: "первое условие истинно" },
+              { t: "<span class='mono'>a &lt; c || b &lt; c &amp;&amp; b &lt; a</span>", ok: true, okLabel: "ИСТИНА", why: "сначала &amp;&amp; (ложь), затем || с a &lt; c (истина)" },
+              { t: "<span class='mono'>a &gt; b || !(b &lt; c)</span>", ok: false, badLabel: "ЛОЖЬ", why: "оба условия ложны" },
+            ])}
+          </div>
+          <div class="stack">
+            ${code(`x=7;
+if (x <= 0 || (x>6 && x <=10))
+  { m=4; }
+else
+  { m=12; }
+cout << m;`, 14)}
+            ${quiz("q-x7", "Что будет выведено на экран?", ["4", "12", "7", "0"], 0)}
+          </div>
+        </div></div>${src(SB + "стр. 157 («Проверь себя» 1), стр. 161 («Проверь себя» 1); " + TG + "стр. 124 (разбор ответов)")}`;
+      },
+    },
+    {
+      badge: "Подготовка к СОР",
+      shortTitle: "Памятка перед СОР",
+      timing: "53–55 мин",
+      source: "СОР 7.3В (критерии, время); Спецификация СОЧ 7 кл., 3 четверть; " + SB + "стр. 138–161",
+      notes: "Памятка — только формат и критерии, без заданий СОР. Напомните: время 20 минут, задания с кратким и развёрнутым ответом; проверяйте себя по чек-листу. Ответьте на вопросы учеников и раздайте листы СОР.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:20px;">
+          <div class="stack">
+            <h2 class="slide-h2">Что проверяет СОР 7.3В</h2>
+            <div class="card text-sm"><p>• использует операторы ветвления (if, else) и записывает логические (составные) выражения;<br>• строит разветвляющийся алгоритм в виде блок-схемы;<br>• создаёт законченную программу с условием для практической задачи.</p></div>
+            <div class="card text-sm"><h3>Командные слова</h3><p><b>Запишите</b> условие на C++ · <b>Дополните</b> код · <b>Составьте</b> блок-схему · <b>Напишите</b> программу</p></div>
+            <div class="note"><b>Время:</b> 20 минут · работа индивидуальная</div>
+          </div>
+          <div class="stack">
+            <h2 class="slide-h2">Чек-лист</h2>
+            <div class="steps text-xs">
+              <div class="step">Программа: #include &lt;iostream&gt;, using namespace std;, int main() { … }, объявлены переменные.</div>
+              <div class="step">Ввод — cin, вывод — cout, сообщения в кавычках.</div>
+              <div class="step">Условие в круглых скобках после if; сравнение — ==, не =.</div>
+              <div class="step">&amp;&amp; — нужны все условия, || — хотя бы одно; без скобок сначала &amp;&amp;.</div>
+              <div class="step">Несколько команд в ветке — в фигурных скобках {…}.</div>
+              <div class="step">Блок-схема: начало и конец, ввод/вывод — параллелограмм, условие — ромб, ветки «Да»/«Нет».</div>
+            </div>
+          </div>
+        </div></div>${src("СОР 7.3В (критерии оценивания, время выполнения; задания не приводятся); Спецификация СОЧ 7 кл., 3 четверть (типы заданий); " + SB + "стр. 139–160 (правила записи)")}`;
+      },
+    },
+
+    /* ---------------- КОНЕЦ УРОКА (25 мин) ---------------- */
+    {
+      badge: "Суммативное оценивание",
+      shortTitle: "СОР 7.3В · 20 минут",
+      timing: "55–75 мин",
+      source: "СОР 7.3В (учитель)",
+      notes: "Ученики индивидуально выполняют СОР по разделу 7.3В на бланках учителя (20 минут). Слайд оставьте на экране; задания на слайде не показываются. За 5 минут до конца предупредите о времени, затем соберите работы.",
+      render() {
+        return `<div class="body" style="align-items:center;justify-content:center;text-align:center;">
+          <div style="font-size:72px;">📝</div>
+          <h2 class="slide-h2">Суммативное оценивание за раздел 7.3В</h2>
+          <p class="lead">«Программирование разветвляющихся алгоритмов» · <b>20 минут</b></p>
+          <div class="cards c3 text-sm" style="max-width:900px;">
+            <div class="card">Подпиши бланк: фамилия, имя, класс, дата.</div>
+            <div class="card">Читай задание полностью; обрати внимание на командное слово.</div>
+            <div class="card">Перед сдачей проверь ответы по чек-листу.</div>
+          </div>
+        </div>${src("СОР 7.3В (время выполнения — 20 минут); КСП урока")}`;
+      },
+    },
+    {
+      badge: "Конец урока · рефлексия",
+      shortTitle: "Рефлексия и домашнее задание",
+      timing: "75–80 мин",
+      source: SB + "стр. 155, 161",
+      notes: "Рефлексия по вопросам КСП (устно или на стикерах). Домашнее задание — на выбор.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;">
+          <div class="stack">
+            <h2 class="slide-h2">Рефлексия</h2>
+            <div class="card"><p>❓ Какое условие было самым сложным и почему?</p></div>
+            <div class="card"><p>⚖ Чем отличается оператор «И» от оператора «ИЛИ»?</p></div>
+            <div class="card"><p>🌍 Приведи пример применения сложного условия в жизни.</p></div>
+          </div>
+          <div class="stack">
+            <h2 class="slide-h2">Домашнее задание (на выбор)</h2>
+            <div class="card"><h3>📅 «Високосный год» (задание 4, стр. 161)</h3><p>Год високосный, если делится на 4 и не делится на 100 или делится на 400. Пользователь вводит год — программа сообщает, високосный ли он.</p></div>
+            <div class="card"><h3>🎖 «Служба в армии» (задание 5, стр. 161)</h3><p>Построй блок-схему и напиши программу: может ли человек служить в срочной армии, если допустимый возраст — от 18 до 27 лет.</p></div>
+          </div>
+        </div></div>${src(SB + "стр. 155 («Проверь себя» 1–2), стр. 161 (задания 4, 5)")}`;
+      },
+    },
+  ],
+});
+</script>
+</body>
+</html>

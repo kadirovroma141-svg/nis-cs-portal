@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>10.2А · Урок 6 · Мультимедиа (img, audio, video) и авторские права</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+</head>
+<body>
+<script src="../_engine/deck.js"></script>
+<script>
+const L6_FORMATS = [
+  { fmt: "JPEG / JPG", use: "Фотографии с плавными переходами цветов (сжатие с потерями, без прозрачности)." },
+  { fmt: "PNG", use: "Логотипы, иконки, схемы с прозрачным фоном (сжатие без потерь)." },
+  { fmt: "GIF", use: "Простая покадровая анимация (до 256 цветов)." },
+  { fmt: "SVG", use: "Масштабируемая векторная графика — не теряет чёткость при любом увеличении." }
+];
+
+const L6_CASES = [
+  { k: "cr1", q: "Ученик скачал фото с логотипом фотобанка из Google Картинок и вставил на свой сайт без указания автора.", ans: "Нарушение авторских прав! Нужно разрешение правообладателя или свободная лицензия." },
+  { k: "cr2", q: "Ученик взял фото с лицензией CC BY и написал под ним: «Фото: И. Иванов, лицензия CC BY 4.0».", ans: "Законно! Условие BY (Attribution — указание автора) выполнено." },
+  { k: "cr3", q: "Изображение опубликовано под лицензией CC0 (общественное достояние).", ans: "Законно! CC0 разрешает свободное использование, хотя указать источник — хороший тон." }
+];
+
+initDeck({
+  badge: "</> 10.2А · Урок 6",
+  title: "Мультимедиа (<img>, <audio>, <video>) и авторские права",
+  subtitle: "10 класс · 2 четверть · Цели 10.1.2.7, 10.1.2.5 · 80 мин · Мини-HTML",
+  initialState: {
+    selected: { imgW: 180, imgBorder: 2, imgAlign: "left" },
+    revealed: { imgBroken: false, audControls: true, audLoop: false }
+  },
+  slides: [
+    {
+      badge: "Этап 1 · Введение",
+      shortTitle: "Титул и три слоя веба",
+      timing: "0–10 мин",
+      source: "КСП 10.2А Урок 6 · Презентация «Мультимедиа», слайды 1–3",
+      notes: "Начните с трёх слоёв веб-разработки (HTML/CSS/JS) и вопроса об авторских правах: можно ли просто скачать любую картинку из интернета?",
+      render() {
+        return `
+          <div class="stack">
+            <div class="text-xs font-bold text-muted" style="text-transform:uppercase;">Информатика · 10 класс · Раздел 10.2А · Урок 6 из 10</div>
+            <h1 class="slide-h1">Мультимедиа на веб-странице и авторские права</h1>
+            <p class="lead">Встроим изображения, аудио и видео средствами HTML5 и разберёмся, как законно использовать медиаконтент (©, Creative Commons).</p>
+            <div class="grid-3 text-xs">
+              <div class="box-accent"><strong style="font-size:14px;">HTML</strong><br>Структура и содержимое (текст, фото, аудио, видео).</div>
+              <div class="box-primary"><strong style="font-size:14px;">CSS</strong><br>Внешний вид, цвета, шрифты, расположение блоков.</div>
+              <div class="box-success"><strong style="font-size:14px;">JavaScript</strong><br>Интерактивное поведение, реакции на клики и события.</div>
+            </div>
+            <div class="grid-2 text-xs">
+              <div class="box"><strong>Цель 10.1.2.7:</strong> вставлять мультимедиа (<span class="mono">&lt;img&gt;, &lt;audio&gt;, &lt;video&gt;</span>) на веб-страницу.</div>
+              <div class="box"><strong>Цель 10.1.2.5:</strong> применять атрибуты <span class="mono">src, alt, width, height, controls, loop, preload</span>.</div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Графика + Симулятор <img>",
+      shortTitle: "Форматы графики и тег <img>",
+      timing: "10–20 мин",
+      source: "SB 10 кл. стр. 80–82 · Презентация слайды 4–6",
+      notes: "Нажмите кнопку «Сломать путь src» — наглядно покажите классу, зачем нужен обязательный атрибут alt!",
+      render(st) {
+        const w = st.selected.imgW || 180;
+        const b = st.selected.imgBorder ?? 2;
+        const broken = !!st.revealed.imgBroken;
+        const src = broken ? "img/missing_file.jpg" : "img/baursak.svg";
+        const tag = `<img src="${src}" alt="Горы Заилийского Алатау" width="${w}" border="${b}">`;
+        return `
+          <h2 class="slide-h2">Одиночный тег <span class="mono">&lt;img&gt;</span> и форматы веб-графики</h2>
+          <div class="grid-12">
+            <div class="col-6 stack">
+              <div class="grid-2 text-xs">
+                ${L6_FORMATS.map(f => `<div class="box"><strong>${f.fmt}</strong><div class="text-muted" style="margin-top:3px;">${f.use}</div></div>`).join("")}
+              </div>
+              <div class="box stack text-xs">
+                <div class="flex-row">
+                  <span>width:</span>
+                  ${[100,150,180,240].map(v => `<button type="button" class="btn mono ${w === v ? "btn-primary" : ""}" onclick="DECK.setSelected('imgW',${v})">${v}px</button>`).join("")}
+                  <button type="button" class="btn ${broken ? "btn-accent" : ""}" onclick="DECK.toggleReveal('imgBroken')">${broken ? "Починить src ✓" : "Сломать путь src ⚡"}</button>
+                </div>
+                <pre class="code-block">${DECK.esc(tag)}</pre>
+              </div>
+            </div>
+            <div class="col-6 browser-frame">
+              <div class="browser-bar"><span class="browser-tab">🌐 gallery.html</span><span class="text-xs text-muted" style="margin-left:auto;">Фон страницы: &lt;body background="..."&gt;</span></div>
+              <div style="padding:20px;background:#fff;color:#111;">
+                ${broken
+                  ? `<div style="display:inline-flex;align-items:center;gap:8px;padding:12px;border:1px dashed #b0173d;color:#b0173d;font-size:13px;">🖼 <strong>alt:</strong> Горы Заилийского Алатау</div>`
+                  : `<svg width="${w}" height="${Math.round(w*0.62)}" viewBox="0 0 200 124" style="border:${b}px solid #1f5f8f;border-radius:6px;display:block;"><rect width="200" height="124" fill="#bae6fd"/><circle cx="160" cy="30" r="14" fill="#facc15"/><polygon points="10,124 72,38 134,124" fill="#334155"/><polygon points="84,124 142,46 198,124" fill="#475569"/><polygon points="72,38 56,60 88,60" fill="#ffffff"/></svg>`
+                }
+                <p style="font-size:12px;color:#475569;margin-top:10px;">Если указать только <span class="mono">width</span>, высота (<span class="mono">height</span>) подстроится пропорционально!</p>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · HTML5 <audio> и <video>",
+      shortTitle: "Теги <audio>, <video> и <source>",
+      timing: "20–30 мин",
+      source: "SB 10 кл. стр. 95–98 · Презентация слайды 7–9",
+      notes: "Нажмите кнопку «controls: ВКЛ / ВЫКЛ» — спросите класс, что произойдёт, если забыть атрибут controls у <audio> (плеер станет невидимым!).",
+      render(st) {
+        const ctrl = !!st.revealed.audControls;
+        const loop = !!st.revealed.audLoop;
+        const audCode = `<audio${ctrl ? " controls" : ""}${loop ? " loop" : ""} preload="metadata">\n  <source src="audio/march.mp3" type="audio/mpeg">\n  Ваш браузер не поддерживает audio.\n</audio>`;
+        const vidCode = `<video width="480" height="320" controls poster="img/preview.jpg">\n  <source src="video/clip.mp4" type="video/mp4">\n  Ваш браузер не поддерживает video.\n</video>`;
+        return `
+          <div class="flex-between">
+            <h2 class="slide-h2">Вставка звука и видео в HTML5</h2>
+            <div class="flex-row">
+              <button type="button" class="btn ${ctrl ? "btn-primary" : "btn-accent"}" onclick="DECK.toggleReveal('audControls')">controls: ${ctrl ? "ВКЛ" : "ВЫКЛ"}</button>
+              <button type="button" class="btn ${loop ? "btn-primary" : ""}" onclick="DECK.toggleReveal('audLoop')">loop: ${loop ? "ВКЛ" : "ВЫКЛ"}</button>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="box stack">
+              <div class="box-title mono">&lt;audio&gt; (MP3, WAV, OGG)</div>
+              <pre class="code-block">${DECK.esc(audCode)}</pre>
+              <div style="padding:12px;border-radius:8px;background:#fff;color:#111;border:1px solid var(--border);font-size:12px;">
+                ${ctrl
+                  ? `▶ ━━━●━━━━━━ 0:42 / 2:15 &nbsp; 🔊 ${loop ? "🔁 Повтор ВКЛ" : ""}`
+                  : `<span style="color:#b0173d;font-weight:700;">⚠ Плеер невидим! Без атрибута controls пользователь не увидит кнопку «Пуск».</span>`
+                }
+              </div>
+            </div>
+            <div class="box stack">
+              <div class="box-title mono">&lt;video&gt; (MP4, WebM)</div>
+              <pre class="code-block">${DECK.esc(vidCode)}</pre>
+              <div class="text-xs text-muted">
+                • <strong>controls</strong> — кнопки Пуск/Пауза, громкость, полный экран<br>
+                • <strong>poster</strong> — картинка-заставка до запуска видео<br>
+                • <strong>preload</strong> — <span class="mono">auto / metadata / none</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Мини-HTML №1 · Практика",
+      pillClass: "pill-accent",
+      shortTitle: "Мини-HTML: Изображение, аудио и видео",
+      timing: "30–50 мин",
+      source: "Мини-HTML (/html?task=g10-html-multimedia)",
+      notes: "Встроенное задание Мини-HTML на вставку <img>, <audio> и <video> с автопроверкой.",
+      render(st, api) {
+        return api.renderMiniHtmlTask({
+          taskId: "g10-html-multimedia",
+          title: "Практика 1: Изображение, аудио и видео на странице",
+          summary: "Встройте на веб-страницу картинку, аудиоплеер и видеоплеер прямо в Мини-HTML.",
+          steps: ["<img> с src и alt", "<audio controls> + <source>", "<video controls> + <source>"],
+          meta: "10 мин · Цель 10.1.2.7"
+        });
+      }
+    },
+    {
+      badge: "Мини-HTML №2 · Авторские права",
+      pillClass: "pill-accent",
+      shortTitle: "Мини-HTML: Подпись и авторские права",
+      timing: "50–68 мин",
+      source: "Мини-HTML (/html?task=g10-html-avtorskie-prava)",
+      notes: "Практическая работа по корректному оформлению атрибуции изображений и лицензий.",
+      render(st, api) {
+        return api.renderMiniHtmlTask({
+          taskId: "g10-html-avtorskie-prava",
+          title: "Практика 2: Подпись к изображению и авторские права",
+          summary: "Оформите изображение, подпись с автором и указание лицензии Creative Commons в Мини-HTML.",
+          steps: ["Атрибут alt", "Указание автора и © / CC BY", "Комментарий к медиаблоку"],
+          meta: "10 мин · Цель 10.1.2.7"
+        });
+      }
+    },
+    {
+      badge: "Этап 3 · Кейсы и ДЗ",
+      shortTitle: "Кейсы «Авторское право» и ДЗ",
+      timing: "68–80 мин",
+      source: "КСП 10.2А Урок 6 · Мини-HTML (g10-html-dz-galereya)",
+      notes: "Разберите 3 правовых кейса (©, CC0, CC BY) по Закону РК «Об авторском праве». Выдайте ДЗ g10-html-dz-galereya.",
+      render(st) {
+        return `
+          <h2 class="slide-h2">Разбор кейсов: нарушено ли авторское право?</h2>
+          <div class="stack">
+            ${L6_CASES.map((c, i) => `
+              <button type="button" class="interactive-card ${st.revealed[c.k] ? "revealed" : ""}" onclick="DECK.toggleReveal('${c.k}')">
+                <div class="font-bold text-sm">Кейс ${i + 1}: ${c.q}</div>
+                <div class="text-xs" style="margin-top:6px;">${st.revealed[c.k] ? "✓ " + c.ans : "Нажмите после обсуждения →"}</div>
+              </button>
+            `).join("")}
+          </div>
+          <div class="box-primary flex-between text-xs">
+            <div><strong>Домашнее задание:</strong> сделать галерею с указанием авторов и свободных лицензий CC0 / CC BY.</div>
+            <a class="btn btn-accent" href="/html?task=g10-html-dz-galereya" target="_blank" rel="noopener noreferrer">ДЗ в Мини-HTML (g10-html-dz-galereya) ↗</a>
+          </div>
+        `;
+      }
+    }
+  ]
+});
+</script>
+</body>
+</html>

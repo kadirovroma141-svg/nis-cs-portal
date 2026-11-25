@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9.3А · Урок 5 · Заполнение и табличный вывод двумерного массива</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+  <link rel="stylesheet" href="../_engine/lesson.css" />
+</head>
+<body class="lesson">
+<script src="../_engine/deck.js"></script>
+<script src="../_engine/lesson.js"></script>
+<script src="cpp.js"></script>
+<script>
+/*
+ * 9.3А «Массивы (C++)», урок 5 (КТП) — «Заполнение и табличный вывод элементов двумерного массива (cin, rand(), setw)».
+ * Цели обучения (КТП 2026): 9.4.3.5 программировать заполнение элементов двумерного массива;
+ *                           9.4.3.6 программировать вывод элементов двумерного массива.
+ * Ход урока — КСП, урок 5 (10 + 60 + 10 мин).
+ * Содержание — презентация «4_2мерный массив», слайды 6, 19–25; «1_Вложенные циклы», слайд 40 (поиск ошибки).
+ * На слайде 22 презентации у setw() не указан аргумент — используем setw(3) со слайда 23.
+ * Генератор на слайде — имитация rand() в браузере (числа каждый раз другие).
+ */
+const P4 = "Презентация «4_2мерный массив», ";
+const P1 = "Презентация «1_Вложенные циклы», ";
+const { src, reveal, statements, quiz, matcher } = LESSON;
+const C = (s, z) => CPP.code(s, z);
+
+const WAY1 = String.raw`int array[2][2] = {{2, 4}, {5, 3}};
+for (int i = 0; i < 2; i++)
+{   cout << endl;
+    for (int j = 0; j < 2; j++)
+        cout << array[i][j] << ", ";
+}`;
+const WAY2 = String.raw`int array[2][2];
+cout << "Введи элементы: " << endl;
+for (int i = 0; i < 2; i++)
+{   for (int j = 0; j < 2; j++)
+        cin >> array[i][j];
+}`;
+const WAY3 = String.raw`#include <iostream>
+#include <iomanip>
+#include <ctime>
+using namespace std;
+int main()
+{   srand(time(NULL));
+    int n, m;
+    cout << "Input n: "; cin >> n;
+    cout << "Input m: "; cin >> m;
+    int array[n][m];
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < m; j++)
+            array[i][j] = -10 + rand() % 91;
+    cout << "Вывод массива: ";
+    for (int i = 0; i < n; i++)
+    {   cout << endl;
+        for (int j = 0; j < m; j++)
+            cout << setw(3) << array[i][j] << ", ";
+    }
+    return 0;
+}`;
+const BUG = String.raw`int mas[2][3];  // объявление массива
+for (int i = 1; i <= 2; i++)
+    for (int j = 1; j <= 3; j++)
+        cin >> mas[i][j];  // заполнение массива
+for (int i = 1; i <= 2; i++)
+{   for (int j = 1; j <= 3; j++)
+        cout << mas[i][j] << " ";  // вывод массива
+    cout << endl;
+}`;
+
+initDeck({
+  badge: "9.3А · Урок 5",
+  title: "Заполнение и табличный вывод двумерного массива",
+  subtitle: "9 класс · 3 четверть · цели 9.4.3.5, 9.4.3.6 · 80 минут",
+  footer: "НИШ ЕМН г. Кызылорда · Информатика · 9 класс · Раздел 9.3А «Массивы (язык программирования C++)»",
+  slides: [
+    /* ---------------- НАЧАЛО УРОКА (10 мин) ---------------- */
+    {
+      badge: "Начало урока",
+      shortTitle: "Тема урока",
+      timing: "0–2 мин",
+      source: "КСП урока 5",
+      notes: "Приветствие, проверка домашнего задания: 2–3 ученика называют элементы своей матрицы 3 × 4 с индексами (правый нижний — a[2][3]).",
+      render() {
+        return `<div class="hero">
+          <div>
+            <div class="hero-kicker">Раздел 9.3А · Массивы (C++) · урок 5 из 8</div>
+            <h1>Заполнение и табличный вывод двумерного массива</h1>
+            <p class="lead"><code>cin</code> · <code>rand()</code> · <code>setw()</code></p>
+          </div>
+          <div class="stack">
+            <div class="card"><h3>🏠 Проверка ДЗ</h3><p>Матрица 3 × 4: назовите индексы левого нижнего и правого нижнего элементов.</p>${reveal("r-hw", "Ответ", "<code>a[2][0]</code> и <code>a[2][3]</code>")}</div>
+          </div>
+        </div>${src("КСП урока 5 (проверка домашнего задания урока 4)")}`;
+      },
+    },
+    {
+      badge: "Начало урока · проблема",
+      shortTitle: "Постановка проблемы",
+      timing: "2–7 мин",
+      source: P4 + "слайды 19, 23",
+      notes: "Проблема: заполнить матрицу n × m вручную в коде долго. Как заполнить её с клавиатуры или случайными числами от -10 до 80 и вывести ровными столбцами? Выслушайте идеи учеников, затем откройте три способа.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Как быстро заполнить матрицу n × m и вывести её ровными столбцами?</h2>
+          <div class="grid-2" style="gap:22px;align-items:center;">
+            ${CPP.out("Вывод массива:\n 57, 12, -3, 80,\n  4, 66, 31, -9,\n 25, -1, 70, 18,")}
+            <div class="stack">
+              ${reveal("r-ways", "Три способа заполнения", "1) в самом коде;<br>2) через ввод с клавиатуры после запуска;<br>3) случайными числами в заданном диапазоне.")}
+            </div>
+          </div>
+          <div class="text-xs text-muted">Вывод — пример для массива 3 × 4 (случайные числа от -10 до 80, setw(3)).</div>
+        </div>${src(P4 + "слайд 19 (способы заполнения), слайд 23 (заполнение случайными числами, вывод)")}`;
+      },
+    },
+    {
+      badge: "Начало урока · цели",
+      shortTitle: "Цели и критерии",
+      timing: "7–10 мин",
+      source: "КТП 2026; КСП урока 5",
+      notes: "Озвучьте цели и дескрипторы.",
+      render() {
+        return `<div class="body">
+          <div class="stack">
+            <div class="goal"><b>9.4.3.5</b> — программировать заполнение элементов двумерного массива.</div>
+            <div class="goal"><b>9.4.3.6</b> — программировать вывод элементов двумерного массива.</div>
+          </div>
+          <div class="cards c2 text-sm">
+            <div class="card"><h3>🎯 Цели урока</h3><p><b>Все:</b> объясняют три способа заполнения; выводят массив таблицей.<br>
+              <b>Большинство:</b> подбирают формулу <code>start + rand() % (end - start + 1)</code>; используют <code>setw()</code>.<br>
+              <b>Некоторые:</b> заполняют массив размера n × m, введённого с клавиатуры.</p></div>
+            <div class="card"><h3>✅ Дескрипторы</h3><p>• два вложенных цикла <code>for</code>: внешний по строкам <code>i</code>, внутренний по столбцам <code>j</code>;<br>• <code>srand(time(NULL))</code> и формула диапазона;<br>• переход <code>cout &lt;&lt; endl;</code> во внешнем цикле, выравнивание <code>setw()</code>.</p></div>
+          </div>
+        </div>${src("КТП 2026; КСП урока 5")}`;
+      },
+    },
+
+    /* ---------------- СЕРЕДИНА УРОКА (60 мин) ---------------- */
+    {
+      badge: "Новое · обработка массива",
+      shortTitle: "Два цикла — строки и столбцы",
+      timing: "10–14 мин",
+      source: P4 + "слайд 6",
+      notes: "Для одномерного массива — один цикл for, для двумерного — соответствующее количество циклов: внешний перебирает строки i, внутренний — столбцы j. Пройдите порядок обхода по шагам.",
+      render() {
+        const rows = [];
+        for (let i = 0; i < 2; i++) for (let j = 0; j < 3; j++) rows.push([String(i), String(j), `a[${i}][${j}]`]);
+        return `<div class="body"><div class="grid-code">
+          <div class="stack">
+            <p>Для обработки одномерного массива обычно используется цикл <code>for</code>:</p>
+            ${C(String.raw`for (i = 0; i < n; i++)
+    <тело цикла>`)}
+            <p>Для обработки <b>двумерного</b> — соответствующее количество циклов:</p>
+            ${C(String.raw`for (i = 0; i < n; i++)        // строки
+    for (j = 0; j < m; j++)    // столбцы
+        <тело цикла>`)}
+          </div>
+          <div class="stack"><div class="text-sm">Порядок обхода массива 2 × 3:</div>${CPP.trace("ord", ["i (строка)", "j (столбец)", "элемент"], rows)}</div>
+        </div></div>${src(P4 + "слайд 6 «Обработка массивов» (во втором цикле на слайде граница n — для матрицы n × m используем m)")}`;
+      },
+    },
+    {
+      badge: "Новое · способы 1 и 2",
+      shortTitle: "В коде и с клавиатуры",
+      timing: "14–22 мин",
+      source: P4 + "слайды 20–21",
+      notes: "Сравните способы 1 и 2. Вопрос: где стоит cout << endl и сколько раз он выполнится? (во внешнем цикле — один раз на строку). Заполнение и вывод — две отдельные пары вложенных циклов.",
+      render() {
+        return `<div class="body">
+          <div class="grid-2" style="gap:18px;">
+            <div class="stack"><h3 style="margin:0;">1 способ — задан в коде</h3>${C(WAY1)}${CPP.out("\n2, 4, \n5, 3, ")}</div>
+            <div class="stack"><h3 style="margin:0;">2 способ — с клавиатуры</h3>${C(WAY2)}<div class="text-xs">Вывод — такой же парой вложенных циклов, как в способе 1.</div>
+            <div class="quizgrid">${quiz("q-endl", "Где записан переход на новую строку при табличном выводе?", ["во внутреннем цикле", "во внешнем цикле — один раз на строку", "после обоих циклов", "перед циклами"], 1)}</div></div>
+          </div>
+        </div>${src(P4 + "слайд 20 (способ 1 и вывод), слайд 21 (способ 2 — ввод с клавиатуры)")}`;
+      },
+    },
+    {
+      badge: "Новое · способ 3",
+      shortTitle: "Случайные числа: формула",
+      timing: "22–30 мин",
+      source: P4 + "слайды 23, 25",
+      notes: "Формула для диапазона от start до end: rand() % (end - start + 1) + start. Сначала посчитайте вместе для -10…80: 80 - (-10) + 1 = 91. Затем ученики выбирают формулу для других диапазонов (-40…40 — задание слайда 23, -5…50 — слайда 25).",
+      render() {
+        return `<div class="body">
+          <div class="grid-2" style="gap:18px;">
+            ${C(String.raw`#include <ctime>   // для time
+...
+srand(time(NULL));
+int start = -10;
+int end = 80;
+int x = rand() % (end - start + 1) + start;`)}
+            <div class="def" style="font-size:20px;">Диапазон <b>-10 … 80</b>:<br><code>80 - (-10) + 1 = 91</code><br><code>array[i][j] = -10 + rand() % 91;</code></div>
+          </div>
+          ${matcher("rng", [["a", "-10 + rand()%91"], ["b", "1 + rand()%100"], ["c", "-40 + rand()%81"], ["d", "-5 + rand()%56"]], [
+            { t: "от 1 до 100", ans: "b" },
+            { t: "от -40 до 40", ans: "c" },
+            { t: "от -10 до 80", ans: "a" },
+            { t: "от -5 до 50", ans: "d" },
+          ])}
+        </div>${src(P4 + "слайд 23 (формула диапазона, задание «от -40 до 40»), слайд 25 (диапазон от -5 до 50)")}`;
+      },
+    },
+    {
+      badge: "Новое · полная программа",
+      shortTitle: "Программа: rand() + setw(3)",
+      timing: "30–37 мин",
+      source: P4 + "слайды 22–23",
+      notes: "Разберите полную программу слайда 23. Нажмите «Запустить» несколько раз: числа другие (srand(time(NULL))), а столбцы ровные — каждое число занимает 3 позиции (setw из библиотеки iomanip).",
+      render() {
+        return `<div class="body"><div class="grid-code">
+          <div>${C(WAY3, "sm")}</div>
+          <div class="stack">
+            <div class="text-sm">Запуск при <code>n = 4</code>, <code>m = 5</code>:</div>
+            ${CPP.randMatrix("gen1", 4, 5, -10, 80, 3)}
+            <div class="card text-xs"><b>setw( )</b> — чтобы получить ровные столбцы по 3 позиции, вызывают <code>setw(3)</code>; нужна библиотека <code>#include &lt;iomanip&gt;</code>.</div>
+          </div>
+        </div></div>${src(P4 + "слайд 22 (setw и библиотека iomanip), слайд 23 (код программы)")}`;
+      },
+    },
+    {
+      badge: "Анализ · найди ошибку",
+      shortTitle: "Найди ошибку в программе",
+      timing: "37–40 мин",
+      source: P1 + "слайд 40; " + P4 + "слайды 3, 20",
+      notes: "Программа со слайда 40 презентации «1_Вложенные циклы». Ученики ищут ошибку, опираясь на правило «индексы меняются от 0». Цель — тренировка анализа кода перед практикой.",
+      render() {
+        return `<div class="body"><div class="grid-code">
+          <div>${C(BUG)}</div>
+          <div class="stack">
+            <h2 class="slide-h2">Ввести вручную значения и вывести таблицу 2 × 3. Что не так?</h2>
+            ${reveal("r-bug", "Ошибка", "Индексы перебираются от 1 до 2 и от 1 до 3, а в массиве <code>mas[2][3]</code> строки имеют номера 0 и 1, столбцы — 0, 1, 2. Элементов <code>mas[2][…]</code> и <code>mas[…][3]</code> нет.<br><b>Исправление:</b> <code>for (int i = 0; i &lt; 2; i++)</code> и <code>for (int j = 0; j &lt; 3; j++)</code>.")}
+          </div>
+        </div></div>${src(P1 + "слайд 40 (код программы); " + P4 + "слайд 3 (индексы от 0), слайд 20 (циклы от 0)")}`;
+      },
+    },
+    {
+      badge: "Практика · уровень A",
+      shortTitle: "Задача 1 (A)",
+      timing: "40–50 мин",
+      source: P4 + "слайды 20–21",
+      notes: "За компьютером. Командная формулировка суммативных работ: «Допишите недостающую часть программного кода». Проверка по дескрипторам: заголовки циклов, ввод элемента, вывод с переходом строки.",
+      render() {
+        return `<div class="body"><div class="grid-code">
+          <div class="stack">
+            <h2 class="slide-h2">Допишите программу: ввод с клавиатуры и вывод таблицей</h2>
+            ${C(String.raw`int t[2][2];
+cout << "Введи элементы: " << endl;
+for (int i = 0; ______; i++)
+    for (________________)
+        _________________;
+for (int i = 0; i < 2; i++)
+{   ____________
+    for (int j = 0; j < 2; j++)
+        cout << t[i][j] << ", ";
+}`)}
+          </div>
+          <div class="stack">
+            <div class="card text-xs"><b>Проверь себя:</b> ☐ внешний цикл по строкам ☐ внутренний по столбцам ☐ <code>cin &gt;&gt; t[i][j]</code> ☐ переход на новую строку во внешнем цикле</div>
+            ${reveal("r-a", "Ответ", "<code>i &lt; 2</code> · <code>int j = 0; j &lt; 2; j++</code> · <code>cin &gt;&gt; t[i][j]</code> · <code>cout &lt;&lt; endl;</code>")}
+          </div>
+        </div></div>${src(P4 + "слайд 21 (ввод с клавиатуры и вывод array[2][2])")}`;
+      },
+    },
+    {
+      badge: "Физминутка",
+      shortTitle: "Физминутка",
+      timing: "50–53 мин",
+      source: "КСП урока 5",
+      notes: "Упражнения для глаз после 20 минут работы за монитором.",
+      render() {
+        return `<div class="body" style="align-items:center;justify-content:center;text-align:center;">
+          <div style="font-size:72px;">👀</div>
+          <h2 class="slide-h2">Физминутка · 3 минуты</h2>
+          <p class="lead">Упражнения для глаз и кистей рук</p>
+        </div>${src("КСП урока 5 (техника безопасности)")}`;
+      },
+    },
+    {
+      badge: "Практика · уровень B",
+      shortTitle: "Задача 2 (B)",
+      timing: "53–62 мин",
+      source: P4 + "слайды 22–23",
+      notes: "Полная программа: ввод n и m, заполнение случайными числами от -10 до 80, вывод с setw(3). Частые ошибки: не подключили iomanip / ctime, забыли srand, endl во внутреннем цикле.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:20px;">
+          <div class="stack">
+            <h2 class="slide-h2">Напишите полную программу</h2>
+            <div class="steps text-sm">
+              <div class="step">Введите <code>n</code> и <code>m</code>.</div>
+              <div class="step">Заполните <code>int array[n][m]</code> случайными числами от -10 до 80.</div>
+              <div class="step">Выведите массив таблицей с <code>setw(3)</code>.</div>
+            </div>
+            <div class="card text-xs"><b>Проверь себя:</b> ☐ <code>#include &lt;iomanip&gt;</code> и <code>&lt;ctime&gt;</code> ☐ <code>srand(time(NULL));</code> ☐ формула диапазона ☐ <code>setw(3)</code> ☐ <code>endl</code> во внешнем цикле</div>
+          </div>
+          <div class="stack">${reveal("r-b", "Решение", C(WAY3.split("\n").slice(5, 19).join("\n").replace(/^\{\s+/, "").replace(/^    /gm, ""), "sm"))}</div>
+        </div></div>${src(P4 + "слайд 23 (решение), слайд 22 (setw)")}`;
+      },
+    },
+    {
+      badge: "Практика · уровень C",
+      shortTitle: "Задача 3 (C)",
+      timing: "62–70 мин",
+      source: P4 + "слайды 22–23",
+      notes: "Матрица 4 × 5, диапазон -25…25, setw(4). Ученик сам выводит формулу: 25 - (-25) + 1 = 51. Нажмите «Запустить» — так должен выглядеть вывод.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:20px;">
+          <div class="stack">
+            <h2 class="slide-h2">Матрица 4 × 5, числа от -25 до 25</h2>
+            <p>Заполните матрицу случайными числами из диапазона от -25 до 25 и выведите её с помощью <code>setw(4)</code>.</p>
+            ${reveal("r-c", "Формула", "<code>25 - (-25) + 1 = 51</code> → <code>a[i][j] = -25 + rand() % 51;</code>")}
+          </div>
+          <div>${CPP.randMatrix("gen2", 4, 5, -25, 25, 4)}</div>
+        </div></div>${src(P4 + "слайд 23 (формула диапазона), слайд 22 (setw)")}`;
+      },
+    },
+
+    /* ---------------- КОНЕЦ УРОКА (10 мин) ---------------- */
+    {
+      badge: "Конец урока · проверка",
+      shortTitle: "Экспресс-проверка формул",
+      timing: "70–76 мин",
+      source: P4 + "слайды 22–23",
+      notes: "Щёлкните вариант, чтобы показать верный ответ.",
+      render() {
+        return `<div class="body"><div class="grid-2 quizgrid" style="gap:14px;">
+          ${quiz("e1", "1. Формула для диапазона от -10 до 80:", ["<code>rand() % 80</code>", "<code>-10 + rand() % 91</code>", "<code>-10 + rand() % 90</code>", "<code>80 + rand() % -10</code>"], 1)}
+          ${quiz("e2", "2. Формула для диапазона от 1 до 100:", ["<code>1 + rand() % 100</code>", "<code>rand() % 100</code>", "<code>1 + rand() % 101</code>", "<code>100 + rand() % 1</code>"], 0)}
+          ${quiz("e3", "3. Какую библиотеку подключают для <code>setw()</code>?", ["<code>&lt;ctime&gt;</code>", "<code>&lt;iostream&gt;</code>", "<code>&lt;iomanip&gt;</code>", "никакую"], 2)}
+          ${quiz("e4", "4. Зачем вызывают <code>srand(time(NULL))</code>?", ["чтобы вывести время", "чтобы при каждом запуске получались другие числа", "чтобы выровнять столбцы", "чтобы ввести n"], 1)}
+        </div></div>${src(P4 + "слайды 22–23; КСП урока 5 (экспресс-проверка)")}`;
+      },
+    },
+    {
+      badge: "Конец урока · рефлексия",
+      shortTitle: "Рефлексия и домашнее задание",
+      timing: "76–80 мин",
+      source: "КСП урока 5",
+      notes: "«Светофор» по дескрипторам. Домашнее задание; формула для учителя: 10 + rand() % 90.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;">
+          <div class="stack">
+            <h2 class="slide-h2">Светофор</h2>
+            <div class="card"><h3>🟢</h3><p>Заполняю массив тремя способами и вывожу его ровной таблицей.</p></div>
+            <div class="card"><h3>🟡</h3><p>Путаюсь в формуле диапазона или в месте <code>endl</code>.</p></div>
+            <div class="card"><h3>🔴</h3><p>Нужна помощь с вложенными циклами для массива.</p></div>
+          </div>
+          <div class="stack">
+            <h2 class="slide-h2">Домашнее задание</h2>
+            <div class="card"><p>Напишите программу заполнения матрицы <b>4 × 6</b> случайными числами от <b>10 до 99</b> и её табличного вывода.</p></div>
+          </div>
+        </div></div>${src("КСП урока 5 (рефлексия, домашнее задание)")}`;
+      },
+    },
+  ],
+});
+</script>
+</body>
+</html>

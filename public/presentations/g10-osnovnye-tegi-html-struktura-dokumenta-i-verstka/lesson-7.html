@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>10.2А · Урок 7 · Таблицы в HTML</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+</head>
+<body>
+<script src="../_engine/deck.js"></script>
+<script>
+const L7_TAGS = [
+  { tag: "<table>...</table>", title: "Контейнер таблицы", desc: "Обозначает начало и конец всей таблицы. По умолчанию граница невидима (border=\"0\")." },
+  { tag: "<caption>...</caption>", title: "Название таблицы", desc: "Подпись таблицы; записывается сразу после открывающего тега <table>." },
+  { tag: "<tr>...</tr>", title: "Строка таблицы (Table Row)", desc: "Задаёт одну горизонтальную строку. В HTML нет отдельного тега для столбца!" },
+  { tag: "<th>...</th>", title: "Ячейка-заголовок (Table Header)", desc: "Текст внутри автоматически становится полужирным и выравнивается по центру." },
+  { tag: "<td>...</td>", title: "Ячейка данных (Table Data)", desc: "Обычная ячейка строки; внутри может быть текст, список, ссылка <a> или фото <img>." }
+];
+
+initDeck({
+  badge: "</> 10.2А · Урок 7",
+  title: "Таблицы в HTML: <table>, <caption>, <tr>, <th>, <td>",
+  subtitle: "10 класс · 2 четверть · Цели 10.1.2.8, 10.1.2.5 · 80 мин · Мини-HTML",
+  initialState: {
+    selected: { tTag: 0, border: 2, pad: 8, space: 4, valign: "middle" }
+  },
+  slides: [
+    {
+      badge: "Этап 1 · Введение",
+      shortTitle: "Титул и цели урока",
+      timing: "0–10 мин",
+      source: "КСП 10.2А Урок 7 · SB 10 кл. стр. 87–90",
+      notes: "Спросите класс: почему нельзя сверстать расписание уроков пробелами и <br>? При смене шрифта или ширины окна все столбцы «съедут».",
+      render() {
+        return `
+          <div class="stack">
+            <div class="text-xs font-bold text-muted" style="text-transform:uppercase;">Информатика · 10 класс · Раздел 10.2А · Урок 7 из 10</div>
+            <h1 class="slide-h1">Таблицы в HTML и атрибуты оформления</h1>
+            <p class="lead">Научимся строить таблицы построчно с помощью <span class="mono">&lt;table&gt;, &lt;caption&gt;, &lt;tr&gt;, &lt;th&gt;, &lt;td&gt;</span> и разберём разницу между <span class="mono">cellpadding</span> и <span class="mono">cellspacing</span>.</p>
+            <div class="grid-2">
+              <div class="box-primary">
+                <div class="box-title mono">Цель 10.1.2.8</div>
+                <div class="text-xs">Использовать HTML-теги для создания таблиц на веб-странице.</div>
+              </div>
+              <div class="box-accent">
+                <div class="box-title mono" style="color:var(--accent);">Цель 10.1.2.5</div>
+                <div class="text-xs">Применять атрибуты <span class="mono">border, bordercolor, bgcolor, width, align, valign, cellpadding, cellspacing</span>.</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Строение таблицы",
+      shortTitle: "5 главных тегов таблицы",
+      timing: "10–20 мин",
+      source: "SB 10 кл. стр. 87–88 · Презентация «Таблицы», слайды 4–5",
+      notes: "Кликайте по 5 тегам слева. Обязательно подчеркните: таблица в HTML заполняется СТРОГО ПОСТРОЧНО, тега для столбца нет!",
+      render(st) {
+        const idx = st.selected.tTag || 0;
+        const cur = L7_TAGS[idx];
+        return `
+          <h2 class="slide-h2">Построчная структура HTML-таблицы</h2>
+          <div class="grid-12">
+            <div class="col-5 stack">
+              ${L7_TAGS.map((t, i) => `
+                <button type="button" class="interactive-card mono text-xs ${idx === i ? "active" : ""}" onclick="DECK.setSelected('tTag',${i})">${DECK.esc(t.tag)}</button>
+              `).join("")}
+            </div>
+            <div class="col-7 stack">
+              <div class="box-primary">
+                <div class="font-bold" style="margin-bottom:4px;">${cur.title}</div>
+                <div class="text-xs">${cur.desc}</div>
+              </div>
+              <pre class="code-block">${DECK.esc(`<table border="1">\n  <caption>Расписание</caption>\n  <tr>\n    <th>№</th><th>Предмет</th><th>Время</th>\n  </tr>\n  <tr>\n    <td>1</td><td>Информатика</td><td>08:30</td>\n  </tr>\n</table>`)}</pre>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Лаборатория атрибутов",
+      shortTitle: "Эксперимент: cellpadding vs cellspacing",
+      timing: "20–34 мин",
+      source: "SB 10 кл. стр. 88–89 · Презентация слайды 6–7",
+      notes: "Двигайте ползунки cellpadding и cellspacing прямо перед классом — дети мгновенно поймут разницу между внутренним отступом и зазором между рамками!",
+      render(st) {
+        const b = st.selected.border ?? 2;
+        const p = st.selected.pad ?? 8;
+        const s = st.selected.space ?? 4;
+        const va = st.selected.valign || "middle";
+        return `
+          <h2 class="slide-h2">Эксперимент: <span class="mono">cellpadding</span> vs <span class="mono">cellspacing</span></h2>
+          <div class="grid-12">
+            <div class="col-5 box stack text-xs">
+              <label class="stack" style="gap:4px;">
+                <div class="flex-between"><strong>border (рамка):</strong><span class="mono">${b}px</span></div>
+                <input type="range" min="0" max="6" value="${b}" oninput="DECK.setSelected('border', Number(this.value))" />
+              </label>
+              <label class="stack" style="gap:4px;">
+                <div class="flex-between"><strong>cellpadding (внутри ячейки):</strong><span class="mono">${p}px</span></div>
+                <input type="range" min="0" max="20" value="${p}" oninput="DECK.setSelected('pad', Number(this.value))" />
+              </label>
+              <label class="stack" style="gap:4px;">
+                <div class="flex-between"><strong>cellspacing (между ячейками):</strong><span class="mono">${s}px</span></div>
+                <input type="range" min="0" max="16" value="${s}" oninput="DECK.setSelected('space', Number(this.value))" />
+              </label>
+              <div class="flex-row">
+                <strong>valign:</strong>
+                ${["top","middle","bottom"].map(v => `<button type="button" class="btn mono ${va === v ? "btn-primary" : ""}" onclick="DECK.setSelected('valign','${v}')">${v}</button>`).join("")}
+              </div>
+              <pre class="code-block" style="font-size:11px;">${DECK.esc(`<table border="${b}" cellpadding="${p}" cellspacing="${s}">`)}</pre>
+            </div>
+            <div class="col-7 browser-frame">
+              <div class="browser-bar"><span class="browser-tab">🌐 schedule.html</span></div>
+              <div style="padding:20px;background:#fff;color:#111;display:flex;justify-content:center;">
+                <table style="border:${b}px solid #1f5f8f;border-spacing:${s}px;border-collapse:separate;width:90%;font-size:13px;">
+                  <caption style="font-weight:700;margin-bottom:8px;">Спортивные секции</caption>
+                  <tr style="background:#1f5f8f;color:#fff;">
+                    <th style="border:${Math.max(1,b?1:0)}px solid #1f5f8f;padding:${p}px;">№</th>
+                    <th style="border:${Math.max(1,b?1:0)}px solid #1f5f8f;padding:${p}px;">Секция</th>
+                    <th style="border:${Math.max(1,b?1:0)}px solid #1f5f8f;padding:${p}px;">День</th>
+                  </tr>
+                  <tr>
+                    <td style="border:${Math.max(1,b?1:0)}px solid #94a3b8;padding:${p}px;height:52px;vertical-align:${va};text-align:center;">1</td>
+                    <td style="border:${Math.max(1,b?1:0)}px solid #94a3b8;padding:${p}px;height:52px;vertical-align:${va};">Робототехника</td>
+                    <td style="border:${Math.max(1,b?1:0)}px solid #94a3b8;padding:${p}px;height:52px;vertical-align:${va};">Вт, Чт</td>
+                  </tr>
+                  <tr style="background:#f1f5f9;">
+                    <td style="border:${Math.max(1,b?1:0)}px solid #94a3b8;padding:${p}px;height:52px;vertical-align:${va};text-align:center;">2</td>
+                    <td style="border:${Math.max(1,b?1:0)}px solid #94a3b8;padding:${p}px;height:52px;vertical-align:${va};">Шахматы</td>
+                    <td style="border:${Math.max(1,b?1:0)}px solid #94a3b8;padding:${p}px;height:52px;vertical-align:${va};">Пн, Ср</td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Мини-HTML · Практика",
+      pillClass: "pill-accent",
+      shortTitle: "Мини-HTML: Таблица «Расписание»",
+      timing: "34–66 мин",
+      source: "Мини-HTML (/html?task=g10-html-raspisanie)",
+      notes: "Живая практическая работа в Мини-HTML: вёрстка таблицы «Расписание на понедельник» с автопроверкой.",
+      render(st, api) {
+        return api.renderMiniHtmlTask({
+          taskId: "g10-html-raspisanie",
+          title: "Практика: Таблица «Расписание на понедельник»",
+          summary: "Соберите таблицу с заголовком, строкой шапки <th> и строками данных <td> прямо в Мини-HTML.",
+          steps: ["<table> и <caption>", "Строки <tr>", "Шапка <th> и ячейки <td>", "Рамка border"],
+          meta: "10 мин · Цель 10.1.2.8"
+        });
+      }
+    },
+    {
+      badge: "Этап 3 · Блиц и ДЗ",
+      shortTitle: "«Посчитай строки и столбцы» и ДЗ",
+      timing: "66–80 мин",
+      source: "КСП 10.2А Урок 7 · Мини-HTML (g10-html-dz-tablitsa-kruzhki)",
+      notes: "Проведите быстрый блиц по подсчёту размерности таблиц и выдайте ДЗ g10-html-dz-tablitsa-kruzhki.",
+      render(st) {
+        const qa = [
+          { k: "t1", q: "В таблице 3 тега <tr>, внутри каждого по 4 тега <td>. Какова размерность таблицы?", a: "3 строки × 4 столбца = всего 12 ячеек." },
+          { k: "t2", q: "Чем <th> отличается от <td> по умолчанию?", a: "В <th> текст автоматически полужирный и выровнен по центру; в <td> — обычный по левому краю." },
+          { k: "t3", q: "Чем отличается cellpadding от cellspacing?", a: "cellpadding — отступ внутри ячейки (от текста до её рамки); cellspacing — расстояние между соседними ячейками." }
+        ];
+        return `
+          <h2 class="slide-h2">Блиц-задачи и домашнее задание</h2>
+          <div class="stack">
+            ${qa.map((item, i) => `
+              <button type="button" class="interactive-card ${st.revealed[item.k] ? "revealed" : ""}" onclick="DECK.toggleReveal('${item.k}')">
+                <div class="font-bold text-sm">${i + 1}. ${DECK.esc(item.q)}</div>
+                <div class="text-xs" style="margin-top:5px;">${st.revealed[item.k] ? "✓ " + DECK.esc(item.a) : "Показать ответ →"}</div>
+              </button>
+            `).join("")}
+          </div>
+          <div class="box-primary flex-between text-xs">
+            <div><strong>Домашнее задание:</strong> сверстать таблицу «Мои кружки» в Мини-HTML.</div>
+            <a class="btn btn-accent" href="/html?task=g10-html-dz-tablitsa-kruzhki" target="_blank" rel="noopener noreferrer">ДЗ в Мини-HTML (g10-html-dz-tablitsa-kruzhki) ↗</a>
+          </div>
+        `;
+      }
+    }
+  ]
+});
+</script>
+</body>
+</html>

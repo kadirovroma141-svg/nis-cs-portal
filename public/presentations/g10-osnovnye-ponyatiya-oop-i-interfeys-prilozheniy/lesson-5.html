@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>10.3А · Урок 5 · Условный оператор if … else в C#. Обобщение раздела 10.3А</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+  <link rel="stylesheet" href="../_engine/lesson.css" />
+</head>
+<body class="lesson">
+<script src="../_engine/deck.js"></script>
+<script src="../_engine/lesson.js"></script>
+<script>
+/*
+ * 10.3А «Введение в ООП (C#)», урок 5 (КТП) — «Разветвляющиеся алгоритмы и условный оператор if … else в ООП C#. Обобщение раздела».
+ * Цели обучения (КТП 2026): 10.4.3.10 использовать условный оператор в ООП; повторение 10.4.3.1, 10.4.3.2, 10.4.3.4, 10.4.3.7.
+ * Ход урока — КСП content/lesson-plans/g10-osnovnye-ponyatiya-oop-i-interfeys-prilozheniy.json, урок 5 (10 + 60 + 10 мин).
+ * В папке 10.3А условного оператора нет (materials/map.md) — содержание из презентации 10.4А «3 ур 10 кл 4 четв Алгоритмизация»
+ * (слайды 4–8), учебника 10 кл. стр. 129, 188–191 и «2 урок Компоненты ИСР» слайд 9.
+ * Приоритет «!» относительно сравнений в материалах противоречив (П1 слайд 11 и ПА слайд 5), поэтому сравнения всегда в скобках.
+ */
+const P1 = "Презентация «1 урок Введение в ООП», ";
+const P2 = "Презентация «2 урок Компоненты ИСР», ";
+const PA = "Презентация 10.4А «3 ур Алгоритмизация», ";
+const SB = "Учебник 10 кл., ";
+const SPEC = "Спецификация СОЧ 10 кл., 3 четверть";
+const { src, reveal, statements, quiz, matcher } = LESSON;
+const S = () => window.DECK_STATE;
+const code = (s, fs = 15) => `<pre class="code-block" style="font-size:${fs}px;line-height:1.45;">${DECK_ESC(s)}</pre>`;
+
+/* ---------- блок-схема ИМТ (по критериям ПА слайд 6) ---------- */
+const DIA_IMT = `
+<svg class="dia" viewBox="0 0 640 330" role="img" aria-label="Блок-схема: проверка ввода, расчёт ИМТ, три вердикта">
+  <defs><marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--primary)"/></marker></defs>
+  <polygon class="blk-p" points="160,8 300,48 160,88 20,48"/><text x="160" y="44" text-anchor="middle" style="font-size:14px;">mas, h</text><text class="s" x="160" y="64" text-anchor="middle">корректны?</text>
+  <text class="s" x="318" y="40">нет</text><path class="ar" d="M300 48 H420"/>
+  <rect class="blk" x="424" y="26" width="210" height="44" rx="8"/><text x="529" y="54" text-anchor="middle" style="font-size:15px;">«Неверный ввод»</text>
+  <text class="s" x="170" y="108">да</text><path class="ar" d="M160 88 V122"/>
+  <rect class="blk" x="40" y="126" width="240" height="44" rx="8"/><text x="160" y="154" text-anchor="middle" style="font-size:15px;">imt = mas / (h * h)</text>
+  <path class="ar" d="M160 170 V190"/>
+  <polygon class="blk-p" points="160,194 300,234 160,274 20,234"/><text x="160" y="230" text-anchor="middle" style="font-size:14px;">imt &lt; 18.5 ?</text>
+  <text class="s" x="318" y="226">да</text><path class="ar" d="M300 234 H420"/>
+  <rect class="blk-a" x="424" y="212" width="210" height="44" rx="8"/><text x="529" y="240" text-anchor="middle" style="font-size:15px;">«Ниже нормы»</text>
+  <text class="s" x="170" y="292">нет</text><path class="ar" d="M160 274 V282 H420"/>
+  <rect class="blk-a" x="424" y="270" width="210" height="44" rx="8"/><text x="529" y="292" text-anchor="middle" style="font-size:13px;">imt &lt;= 25 ? «Норма»</text><text class="s" x="529" y="309" text-anchor="middle">иначе «Выше нормы»</text>
+</svg>`;
+
+const IMT_CODE = `private void button1_Click(object sender, EventArgs e)
+{
+    double mas, h, imt = 0;
+    h = System.Convert.ToDouble(textBox1.Text);
+    mas = System.Convert.ToDouble(textBox2.Text);
+    if ((mas < 0 || mas > 200) || (h < 0 || h > 200))
+        label4.Text = "Неверный ввод данных";
+    else
+    {
+        imt = mas / (h * h);
+        label4.Text = imt.ToString("0.##");
+        if (radioButton3.Checked == true && radioButton4.Checked == false)
+        {
+            if ((imt > 18.4) && (imt < 23.9)) label5.Text = "Норма";
+            else if (imt < 18.5) label5.Text = "Ниже нормы";
+            else label5.Text = "Выше нормы";
+        }
+        ...  // женский пол (radioButton4) — аналогично
+    }
+}`;
+
+initDeck({
+  badge: "10.3А · Урок 5",
+  title: "Условный оператор if … else в C#. Обобщение раздела 10.3А",
+  subtitle: "10 класс · 3 четверть · цели 10.4.3.10, 10.4.3.1, 10.4.3.2, 10.4.3.4, 10.4.3.7 · 80 минут",
+  footer: "НИШ ЕМН г. Кызылорда · Информатика · 10 класс · Раздел 10.3А «Введение в ООП (C#)»",
+  slides: [
+    /* ---------------- НАЧАЛО УРОКА (10 мин) ---------------- */
+    {
+      badge: "Начало урока",
+      shortTitle: "Тема, цели и критерии",
+      timing: "0–3 мин",
+      source: "КТП 2026; КСП урока 5",
+      notes: "Организационный момент. Тема, цели, критерии. Это последний урок раздела: в конце — итоговый блиц по всем целям.",
+      render() {
+        return `<div class="hero">
+          <div>
+            <div class="hero-kicker">Раздел 10.3А · Введение в ООП (C#)</div>
+            <h1>Условный оператор if … else. Обобщение раздела</h1>
+            <div class="stack">
+              <div class="goal"><b>10.4.3.10</b> — использовать условный оператор в ООП.</div>
+              <div class="goal"><b>Повторение:</b> 10.4.3.1 · 10.4.3.2 · 10.4.3.4 · 10.4.3.7.</div>
+            </div>
+          </div>
+          <div class="stack text-sm">
+            <div class="card"><h3>🎯 Цели урока</h3>
+              <p><b>Все:</b> записывают простые условия и полную форму if … else.<br>
+              <b>Большинство:</b> записывают составные условия с <code>&amp;&amp;</code>, <code>||</code>, <code>!</code> и двойные неравенства.<br>
+              <b>Некоторые:</b> создают приложение «Контроль веса» с проверкой ввода и каскадом else if.</p></div>
+            <div class="card"><h3>✅ Критерии оценивания</h3><p>Записывает на C# простые и составные условия; применяет полную, неполную и каскадную форму if … else в обработчиках событий.</p></div>
+          </div>
+        </div>${src("КТП 2026 (цели раздела 10.3А); КСП урока 5")}`;
+      },
+    },
+    {
+      badge: "Начало урока",
+      shortTitle: "А если ввести 0 или −50?",
+      timing: "3–10 мин",
+      source: "КСП урока 5; " + PA + "слайд 4",
+      notes: "Жизненная ситуация: на уроке 4 мы создали калькулятор и программу «Масса». Что будет, если ввести делитель 0 или отрицательную массу −50 кг? Как научить программу принимать решения? Откройте ответ.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Как научить программу принимать решения?</h2>
+          <div class="cards c2">
+            <div class="card"><h3><span class="ico">➗</span>Калькулятор</h3><p>Пользователь ввёл делитель <b>0</b>. Что должна сделать программа?</p></div>
+            <div class="card"><h3><span class="ico">⚖</span>Контроль веса</h3><p>Пользователь ввёл массу <b>−50 кг</b>. Можно ли считать дальше?</p></div>
+          </div>
+          ${reveal("r-why", "Ответ", "Нужен <b>разветвляющийся алгоритм</b>: он содержит логическое условие; в зависимости от его истинности или ложности выполняется одна из ветвей (<code>if … else</code>). Например: если данные неверны — вывести сообщение, иначе — считать.")}
+        </div>${src("КСП урока 5 (ситуация); " + PA + "слайд 4 (разветвляющийся алгоритм)")}`;
+      },
+    },
+
+    /* ---------------- СЕРЕДИНА УРОКА (60 мин) ---------------- */
+    {
+      badge: "Новое · условия",
+      shortTitle: "Сравнения и логические операции",
+      timing: "10–15 мин",
+      source: P2 + "слайд 9; " + PA + "слайд 5",
+      notes: "Простые условия — операции отношения; составные — с &&, ||, !. Обратите внимание: == (равно) — два знака, = — присваивание. Среди логических операций сначала !, затем &&, затем ||. Сравнения записываем в скобках, как в примерах.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:20px;align-items:start;">
+          <div class="stack">
+            <h2 class="slide-h2" style="font-size:24px;">Простые условия</h2>
+            <table class="t" style="font-size:15.5px;">
+              <tr><th>Операция</th><th>Смысл</th></tr>
+              <tr><td><code>a == b</code></td><td>равно</td></tr>
+              <tr><td><code>a != b</code></td><td>не равно</td></tr>
+              <tr><td><code>a &gt; b</code>, <code>a &lt; b</code></td><td>строго больше, строго меньше</td></tr>
+              <tr><td><code>a &gt;= b</code>, <code>a &lt;= b</code></td><td>больше или равно, меньше или равно</td></tr>
+            </table>
+          </div>
+          <div class="stack">
+            <h2 class="slide-h2" style="font-size:24px;">Составные условия</h2>
+            <table class="t" style="font-size:15.5px;">
+              <tr><th>Порядок</th><th>Операция</th><th>Правило</th></tr>
+              <tr><td>1</td><td><code>!</code> НЕ</td><td>меняет true на false и наоборот</td></tr>
+              <tr><td>2</td><td><code>&amp;&amp;</code> И</td><td>истинно, когда <b>оба</b> условия истинны</td></tr>
+              <tr><td>3</td><td><code>||</code> ИЛИ</td><td>истинно, когда <b>хотя бы одно</b> истинно</td></tr>
+            </table>
+          </div>
+        </div></div>${src(P2 + "слайд 9 (сравнения, логические операции); " + PA + "слайд 5 (простые и составные условия, приоритет)")}`;
+      },
+    },
+    {
+      badge: "Практика · двойные неравенства",
+      shortTitle: "Число в промежутке",
+      timing: "15–20 мин",
+      source: PA + "слайд 5; " + SB + "стр. 188",
+      notes: "Правило: двойное неравенство разбиваем на два простых условия, соединённых &&. Задание учебника (стр. 188): запишите условия для трёх промежутков — каждое отдельно. Квадратная скобка — граница входит (>=, <=), круглая — не входит.",
+      render() {
+        return `<div class="body">
+          <div class="def" style="font-size:21px;">Двойное неравенство <code>0 &lt; x &lt;= 8</code> в C# записывается так: <code>(x &gt; 0) &amp;&amp; (x &lt;= 8)</code></div>
+          <h2 class="slide-h2">Запишите условие «X принадлежит промежутку»</h2>
+          <div class="cards c3 text-sm">
+            <div class="card stack"><h3>[−5; 8]</h3>${reveal("p1", "Ответ", "<code>(x &gt;= -5) &amp;&amp; (x &lt;= 8)</code>")}</div>
+            <div class="card stack"><h3>(−4; 5)</h3>${reveal("p2", "Ответ", "<code>(x &gt; -4) &amp;&amp; (x &lt; 5)</code>")}</div>
+            <div class="card stack"><h3>[−6; 7)</h3>${reveal("p3", "Ответ", "<code>(x &gt;= -6) &amp;&amp; (x &lt; 7)</code>")}</div>
+          </div>
+        </div>${src(PA + "слайд 5 (правило двойного неравенства); " + SB + "стр. 188 (задание 1.2)")}`;
+      },
+    },
+    {
+      badge: "Практика · значение условия",
+      shortTitle: "true или false?",
+      timing: "20–24 мин",
+      source: PA + "слайд 5; " + SB + "стр. 188",
+      notes: "Пусть a = 7, b = 3. Ученики показывают true или false; щёлкните строку для проверки. % — остаток от деления (урок 2).",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">a = 7, b = 3. Каково значение условия?</h2>
+          ${statements("tf", [
+            { t: "<code>(a &gt; 5) &amp;&amp; (a &lt;= 10)</code>", ok: true, okLabel: "true", why: "оба условия истинны" },
+            { t: "<code>(a &gt; b) || (a &lt; 0)</code>", ok: true, okLabel: "true", why: "первое истинно" },
+            { t: "<code>!(a &gt; b)</code>", ok: false, badLabel: "false", why: "a > b истинно, НЕ меняет на false" },
+            { t: "<code>(a % 2 == 0) &amp;&amp; (a &gt; 0)</code>", ok: false, badLabel: "false", why: "7 % 2 = 1, первое ложно" },
+            { t: "<code>(b != 3) || (a == 7)</code>", ok: true, okLabel: "true", why: "второе истинно" },
+          ])}
+        </div>${src(PA + "слайд 5 (примеры составных условий); " + SB + "стр. 188 (a[i] % 2 == 0 && a[i] < 0); числа — условные")}`;
+      },
+    },
+    {
+      badge: "Новое · оператор if",
+      shortTitle: "Формы оператора if",
+      timing: "24–30 мин",
+      source: SB + "стр. 129, 190–191; " + PA + "слайд 8",
+      notes: "Три формы условного оператора на примерах из учебника и презентации. Если в ветке больше одного оператора — фигурные скобки { } (как в PA слайд 8).",
+      render() {
+        return `<div class="body">
+          <div class="cards c3 text-sm" style="gap:12px;">
+            <div class="stack"><h3 style="margin:0;">Неполная форма</h3>
+              ${code(`if (checkBox1.Checked)
+    label1.Visible = true;`, 14)}
+              <p class="text-xs" style="margin:0;">Если условие ложно — ничего не делаем.</p></div>
+            <div class="stack"><h3 style="margin:0;">Полная форма</h3>
+              ${code(`if (f_is)
+    label1.Text = "ЕСТЬ";
+else
+    label1.Text = "НЕТ";`, 14)}
+              <p class="text-xs" style="margin:0;">Выполняется одна из двух ветвей.</p></div>
+            <div class="stack"><h3 style="margin:0;">Каскадная форма</h3>
+              ${code(`if (radioButton1.Checked)
+{ ... }
+else if (radioButton2.Checked)
+{ ... }
+else if (radioButton3.Checked)
+{ ... }`, 14)}
+              <p class="text-xs" style="margin:0;">Проверяем условия по очереди.</p></div>
+          </div>
+          <div class="note text-sm"><b>Синтаксис:</b> <code>if (условие) { блок_истина; } else { блок_ложь; }</code> — условие всегда в круглых скобках.</div>
+        </div>${src(SB + "стр. 190 (неполная форма, CheckBox), стр. 129 (полная форма, f_is; текст сокращён), стр. 190–191 (else if, RadioButton); " + PA + "слайд 8 (фигурные скобки)")}`;
+      },
+    },
+    {
+      badge: "Задача · ИМТ",
+      shortTitle: "Блок-схема «Контроль веса»",
+      timing: "30–36 мин",
+      source: PA + "слайд 6",
+      notes: "Задание 1 презентации «Алгоритмизация»: блок-схема расчёта индекса массы тела. Проверка ввода (не отрицательны и не больше 200), формула ИМТ = mas / (h · h), улучшенное условие на 3 вердикта. Посчитайте пример: 72 кг, 1,8 м.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="grid-template-columns:1.35fr 1fr;gap:20px;align-items:center;">
+          <div>${DIA_IMT}</div>
+          <div class="stack text-sm">
+            <div class="card"><b>ИМТ</b> = масса / (рост в квадрате) = <code>mas / (h * h)</code>; масса в кг, рост в м.</div>
+            <div class="card"><b>Норма:</b> <code>(imt &gt;= 18.5) &amp;&amp; (imt &lt;= 25)</code>; улучшение — вложенный ромб для «Ниже нормы».</div>
+            ${reveal("r-72", "Пример: 72 кг, 1,8 м", "imt = 72 / (1,8 · 1,8) = 72 / 3,24 ≈ <b>22,22</b> → 18,5 ≤ 22,22 ≤ 25 → «Норма».")}
+          </div>
+        </div></div>${src(PA + "слайд 6 (критерии блок-схемы ИМТ); схема перерисована; пример — условный")}`;
+      },
+    },
+    {
+      badge: "Задача · ИМТ",
+      shortTitle: "Код «Контроль веса»",
+      timing: "36–44 мин",
+      source: PA + "слайды 7–8",
+      notes: "Разбор кода приложения Жансуйера. Ученики относят каждую строку к её роли. Для женского пола (radioButton4): норма 20 < imt < 25; imt < 20.1 — «Ниже нормы»; иначе — «Выше нормы».",
+      render() {
+        return `<div class="body"><div class="grid-2" style="grid-template-columns:1.1fr 1fr;gap:16px;align-items:start;">
+          ${code(IMT_CODE, 11.5)}
+          <div class="stack">
+            <h2 class="slide-h2" style="font-size:22px;">Какова роль строки?</h2>
+            ${matcher("imt", [["in", "Ввод"], ["chk", "Проверка"], ["calc", "Расчёт"], ["br", "Вердикт"]], [
+              { t: "<code>h = …(textBox1.Text);</code>", ans: "in" },
+              { t: "<code>if ((mas &lt; 0 || …) || …)</code>", ans: "chk" },
+              { t: "<code>imt = mas / (h * h);</code>", ans: "calc" },
+              { t: "<code>else if (imt &lt; 18.5) …</code>", ans: "br" },
+              { t: "<code>if (radioButton3.Checked …)</code>", ans: "br" },
+            ])}
+          </div>
+        </div></div>${src(PA + "слайд 7 (компоненты, критерии по полу), слайд 8 (код, часть 1)")}`;
+      },
+    },
+    {
+      badge: "Практическая работа",
+      shortTitle: "Приложение «Контроль веса»",
+      timing: "44–56 мин",
+      source: "КСП урока 5; " + PA + "слайды 7–8; " + P1 + "слайд 16; " + P2 + "слайд 7",
+      notes: "Базовый уровень — каскад if … else if … else для трёх диапазонов ИМТ по блок-схеме. Повышенный — учёт пола через RadioButton и защитная ветка с MessageBox.Show. Цвет надписи — свойство ForeColor.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:20px;align-items:start;">
+          <div class="stack text-sm">
+            <h2 class="slide-h2" style="font-size:24px;">Задания</h2>
+            <div class="card"><h3>1 · Интерфейс и расчёт</h3><p>Поля роста (м) и массы (кг), переключатели пола RadioButton «муж» / «жен», кнопка «Рассчитать», метки для числа ИМТ и вердикта.</p></div>
+            <div class="card"><h3>2 · Защита ввода и цвет</h3><p>В начало обработчика — ветка проверки ввода с окном сообщения; для вердикта меняйте цвет надписи (свойство <code>ForeColor</code>).</p></div>
+          </div>
+          <div class="stack">
+            <div class="text-xs text-muted">Фрагмент задания 2 (условный)</div>
+            ${code(`if (mas <= 0 || h <= 0)
+    MessageBox.Show("Неверный ввод данных!");
+else
+{
+    imt = mas / (h * h);
+    ...
+}`, 13.5)}
+          </div>
+        </div></div>${src("КСП урока 5 (задания 1–2); " + PA + "слайды 7–8 (интерфейс и код); " + P1 + "слайд 16 (MessageBox.Show); " + P2 + "слайд 7 (ForeColor); фрагмент — условный")}`;
+      },
+    },
+    {
+      badge: "Тестирование",
+      shortTitle: "Тесты для «Контроля веса»",
+      timing: "56–62 мин",
+      source: PA + "слайды 7–8",
+      notes: "Тестирование программы. Ученики вычисляют ИМТ и вердикт по правилам слайда 7 (муж: норма 18.4 < imt < 23.9; жен: норма 20 < imt < 25), затем проверяют в своём приложении. Щёлкните ответ.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Что выведет программа?</h2>
+          ${matcher("tst", [["no", "Неверный ввод"], ["lo", "Ниже нормы"], ["ok", "Норма"], ["hi", "Выше нормы"]], [
+            { t: "муж, 70 кг, 1.75 м (imt ≈ 22,86)", ans: "ok" },
+            { t: "жен, 50 кг, 1.70 м (imt ≈ 17,30)", ans: "lo" },
+            { t: "жен, 80 кг, 1.60 м (imt = 31,25)", ans: "hi" },
+            { t: "муж, −50 кг, 1.80 м", ans: "no" },
+            { t: "муж, 90 кг, 1.80 м (imt ≈ 27,78)", ans: "hi" },
+            { t: "жен, 60 кг, 1.65 м (imt ≈ 22,04)", ans: "ok" },
+          ])}
+        </div>${src(PA + "слайд 7 (критерии по полу), слайд 8 (код); тестовые данные — условные")}`;
+      },
+    },
+    {
+      badge: "Обобщение раздела",
+      shortTitle: "Карта раздела и формат СОЧ",
+      timing: "62–70 мин",
+      source: "КТП 2026; " + SPEC,
+      notes: "Обобщающее повторение раздела по карте: ученики называют пример к каждому блоку. Затем — формат СОЧ 3 четверти (спецификация): что проверяется и каких типов задания. Задания СОЧ не показываются.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="grid-template-columns:1.2fr 1fr;gap:20px;align-items:start;">
+          <div class="stack text-sm">
+            <h2 class="slide-h2" style="font-size:24px;">Раздел 10.3А: что мы умеем</h2>
+            <div class="steps">
+              <div class="step"><b>Понятия ООП:</b>&nbsp;класс, объект, свойство, метод, событие; 3 принципа.</div>
+              <div class="step"><b>Основы C#:</b>&nbsp;идентификаторы, типы, const, операции, ++ / --.</div>
+              <div class="step"><b>ИСР и компоненты:</b>&nbsp;Toolbox, Properties, Button, Label, TextBox.</div>
+              <div class="step"><b>События:</b>&nbsp;обработчик Click, свойства в коде.</div>
+              <div class="step"><b>Преобразование типов:</b>&nbsp;Convert, Parse, ToString().</div>
+              <div class="step"><b>Условия:</b>&nbsp;if … else, &amp;&amp;, ||, !.</div>
+            </div>
+          </div>
+          <div class="stack">
+            <div class="card text-sm"><h3>📋 СОЧ за 3 четверть</h3><p>40 минут, 30 баллов; раздел 10.3А — 20 баллов.<br>Типы заданий: <b>МВО</b> — выбор ответа, <b>КО</b> — краткий ответ (число, слово, предложение), <b>РО</b> — развёрнутый ответ (вся последовательность действий).</p></div>
+            <div class="note text-xs"><b>Проверяются:</b> понятия ООП (знание и понимание); преобразование типов, компоненты интерфейса, программирование событий, изменение свойств программно (применение).</div>
+            <div class="card text-xs"><b>СОР за раздел</b> (формат прошлых лет): 20 минут, 10–12 баллов, 1 балл за каждый дескриптор; командные слова — «опишите», «приведите пример», «укажите», «дополните», «напишите программный код».</div>
+          </div>
+        </div></div>${src("КТП 2026 (цели раздела); " + SPEC + " (продолжительность, баллы, типы заданий, проверяемые цели); «СОР_Информатика_10НИШ_обновленный.docx» (Google Drive) — формат СОР 3 четверти")}`;
+      },
+    },
+
+    /* ---------------- КОНЕЦ УРОКА (10 мин) ---------------- */
+    {
+      badge: "Конец урока · итоговый блиц",
+      shortTitle: "Итоговый блиц (1)",
+      timing: "70–74 мин",
+      source: P1 + "слайды 3, 11; " + P2 + "слайды 4, 9",
+      notes: "Итоговый блиц по целям раздела, часть 1. Ответ — карточкой a/b/c/d.",
+      render() {
+        return `<div class="body"><div class="grid-2 quizgrid" style="gap:14px;">
+          ${quiz("q1", "1. Представитель (экземпляр) класса — это…", ["метод", "объект", "событие", "свойство"], 1)}
+          ${quiz("q2", "2. x = 3; y = x++; Чему равны y и x?", ["y = 3, x = 4", "y = 4, x = 4", "y = 3, x = 3", "y = 4, x = 3"], 0)}
+          ${quiz("q3", "3. Компонент для текста только для чтения:", ["TextBox", "Button", "Label", "CheckBox"], 2)}
+          ${quiz("q4", "4. Прочитать целое число из textBox1:", ["textBox1.Text.ToString()", "Convert.ToInt32(textBox1.Text)", "int textBox1.Text", "Convert.ToString(textBox1.Text)"], 1)}
+        </div></div>${src(P1 + "слайд 3 (объект), слайд 11 (x++); " + P2 + "слайд 4 (Label), слайд 9 (Convert); числа — условные")}`;
+      },
+    },
+    {
+      badge: "Конец урока · итоговый блиц",
+      shortTitle: "Итоговый блиц (2)",
+      timing: "74–77 мин",
+      source: P1 + "слайд 14; " + P2 + "слайды 8–10; " + PA + "слайд 5",
+      notes: "Итоговый блиц, часть 2.",
+      render() {
+        return `<div class="body"><div class="grid-2 quizgrid" style="gap:14px;">
+          ${quiz("q5", "5. Какое событие кнопки обрабатывает щелчок?", ["Click", "Text", "Visible", "Exit"], 0)}
+          ${quiz("q6", "6. Как программно скрыть метку label1?", ["label1.Text = false;", "label1.Visible = false;", "label1.Enabled = true;", "label1.Hide = 0;"], 1)}
+          ${quiz("q7", "7. Условие «x в промежутке (2; 9]» на C#:", ["2 < x <= 9", "(x > 2) || (x <= 9)", "(x > 2) && (x <= 9)", "(x >= 2) && (x < 9)"], 2)}
+          ${quiz("q8", "8. Когда истинно A || B?", ["только если оба истинны", "если хотя бы одно истинно", "только если оба ложны", "никогда"], 1)}
+        </div></div>${src(P1 + "слайд 14 (button1_Click); " + P2 + "слайд 8 (Visible), слайд 9 (||); " + PA + "слайд 5 (двойное неравенство)")}`;
+      },
+    },
+    {
+      badge: "Конец урока · рефлексия",
+      shortTitle: "Лист самооценки",
+      timing: "77–80 мин",
+      source: "КСП урока 5; КТП 2026",
+      notes: "Лист самооценки по разделу: ученики отмечают «могу» или «нужно повторить» по каждой цели. Темы с отметкой «повторить» — план подготовки к СОР и СОЧ.",
+      render() {
+        const r = (c, t) => `<tr><td><b>${c}</b></td><td>${t}</td><td style="text-align:center;">☐</td><td style="text-align:center;">☐</td></tr>`;
+        return `<div class="body">
+          <h2 class="slide-h2">Лист самооценки по разделу 10.3А</h2>
+          <table class="t" style="font-size:16px;">
+            <tr><th>Цель</th><th>Я умею…</th><th>Могу</th><th>Повторить</th></tr>
+            ${r("10.4.3.1", "описывать класс, объект, свойство, метод, событие")}
+            ${r("10.4.3.2", "использовать Button и событие Click")}
+            ${r("10.4.3.4", "преобразовывать типы: Convert, Parse, ToString()")}
+            ${r("10.4.3.7", "программировать событие для элемента управления")}
+            ${r("10.4.3.10", "использовать условный оператор if … else")}
+          </table>
+        </div>${src("КТП 2026 (цели раздела); КСП урока 5 (лист самооценки)")}`;
+      },
+    },
+  ],
+});
+</script>
+</body>
+</html>

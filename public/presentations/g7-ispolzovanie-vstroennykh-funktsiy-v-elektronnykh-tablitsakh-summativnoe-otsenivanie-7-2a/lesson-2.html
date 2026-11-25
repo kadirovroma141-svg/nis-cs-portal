@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>7.2А · Урок 4 · Логические функции И, ИЛИ, НЕ. Смешанные ссылки</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+</head>
+<body>
+<script src="../_engine/deck.js"></script>
+<script>
+const G7FN2_QUIZ = [
+  { id: "q1", q: "1. В ячейке $A2 при копировании ВПРАВО что изменится?", ans: "Ничего ($A2)", opts: ["Ничего ($A2)","Станет $B2"], why: "Столбец A закреплён знаком $, а строка 2 при копировании вправо не меняется!" },
+  { id: "q2", q: "2. =И(10>=10; 8<5) — что вернёт Excel?", ans: "ЛОЖЬ", opts: ["ИСТИНА","ЛОЖЬ"], why: "Для И нужны ВСЕ истинные условия; 8<5 — ЛОЖЬ, значит итог ЛОЖЬ." },
+  { id: "q3", q: "3. =ИЛИ(10>=10; 8<5) — что вернёт Excel?", ans: "ИСТИНА", opts: ["ИСТИНА","ЛОЖЬ"], why: "Для ИЛИ достаточно ХОТЯ БЫ ОДНОГО истинного условия (10>=10 — ИСТИНА)." },
+  { id: "q4", q: "4. =НЕ(5>3) — что вернёт Excel?", ans: "ЛОЖЬ", opts: ["ИСТИНА","ЛОЖЬ"], why: "5>3 — ИСТИНА, а НЕ меняет на противоположное → ЛОЖЬ." },
+  { id: "q5", q: "5. Мороз (< −30) ИЛИ жара (> +30) — какую функцию выбрать для «сиди дома»?", ans: "ИЛИ", opts: ["И","ИЛИ"], why: "Температура не может быть одновременно >30 и <-30! Здесь строго ИЛИ." }
+];
+
+window.G7FN2_TOGGLE = function(k) {
+  window.DECK_STATE.custom[k] = !window.DECK_STATE.custom[k];
+  window.DECK.render();
+};
+
+initDeck({
+  badge: "📊 7.2А · Урок 4",
+  title: "Логические функции И, ИЛИ, НЕ. Смешанные ссылки ($A1, A$1)",
+  subtitle: "7 класс · 2 четверть · Цели 7.1.1.3, 7.4.2.1 · 80 мин · Мини-Таблицы",
+  footer: "НИШ ЕМН г. Кызылорда · 7 класс · 2 четверть · Мини-Таблицы (/excel)",
+  initialState: {
+    tabs: { combo: "and" },
+    custom: { hw: true, room: false }
+  },
+  slides: [
+    {
+      badge: "Этап 1 · Постановка задачи",
+      shortTitle: "Когда одного условия и обычной ссылки недостаточно",
+      timing: "0–6 мин",
+      source: "КСП 7.2А Урок 4 · Теория 7.2А",
+      notes: "Две новые суперсилы Excel: (1) Смешанные ссылки ($A2 * B$1) для заполнения целой таблицы умножения одной формулой; (2) Связка ЕСЛИ с И, ИЛИ, НЕ для проверки 2 и более условий сразу.",
+      render() {
+        return `
+          <div class="stack">
+            <div class="text-xs font-bold text-muted" style="text-transform:uppercase;">Информатика · 7 класс · Раздел 7.2А · Урок 4 из 5</div>
+            <h1 class="slide-h1">Смешанные ссылки и логические функции И, ИЛИ, НЕ</h1>
+            <p class="lead">Научимся закреплять только столбец (<span class="mono">$A2</span>) или только строку (<span class="mono">B$1</span>), а также комбинировать <span class="mono">ЕСЛИ</span> с <span class="mono">И / ИЛИ / НЕ</span>.</p>
+            <div class="box-accent text-xs">
+              <strong>Две задачи урока:</strong><br>
+              1. Как ОДНОЙ формулой заполнить всю таблицу умножения 9×9?<br>
+              2. Как проверить сразу два условия: <em>«Сделана домашка И убрана комната → Играй»</em>?
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Смешанные ссылки",
+      shortTitle: "Таблица умножения одной формулой: =$A2*B$1",
+      timing: "6–17 мин",
+      source: "Теория 7.2А · Смешанные ссылки ($A1 и A$1)",
+      notes: "Покажите живую таблицу умножения 4×4: в ячейке B2 формула =$A2*B$1. Когда тянем вправо — $A остаётся на столбце A, а B$1 переходит в C$1, D$1. Когда тянем вниз — $A2 переходит в $A3, $A4, а строка $1 остаётся на месте!",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Смешанные ссылки: магия формулы <span class="mono">=$A2*B$1</span></h2>
+            <div class="grid-2 text-xs">
+              <div class="box-primary"><strong><span class="mono">$A2</span> — закреплён столбец A:</strong><br>При копировании вправо столбец <span class="mono">$A</span> НЕ меняется, а при копировании вниз строка меняется (<span class="mono">$A2 → $A3 → $A4</span>).</div>
+              <div class="box-accent"><strong><span class="mono">B$1</span> — закреплена строка 1:</strong><br>При копировании вниз строка <span class="mono">$1</span> НЕ меняется, а вправо столбец меняется (<span class="mono">B$1 → C$1 → D$1</span>).</div>
+            </div>
+            <table class="data-table">
+              <thead><tr><th>×</th><th>B (1) = 2</th><th>C (1) = 3</th><th>D (1) = 4</th><th>E (1) = 5</th></tr></thead>
+              <tbody>
+                ${[2,3,4].map((v, r) => `<tr><td class="mono font-bold">A${r+2} = ${v}</td>${[2,3,4,5].map((c, ci) => `<td class="mono text-xs">${"BCDE"[ci]}$1·$A${r+2} = <strong>${v*c}</strong></td>`).join("")}</tr>`).join("")}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · И, ИЛИ, НЕ",
+      shortTitle: "Таблица логических функций И, ИЛИ, НЕ + факт ИСТИНА = 1",
+      timing: "17–26 мин",
+      source: "Теория 7.2А · Таблица «Функции И, ИЛИ, НЕ»",
+      notes: "Обязательно озвучьте интересный факт из теории: в Excel ИСТИНА = 1, а ЛОЖЬ = 0 (ИСТИНА + 1 = 2).",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">3 логические функции Excel: И, ИЛИ, НЕ</h2>
+            <table class="data-table">
+              <thead><tr><th>Функция</th><th>Когда возвращает ИСТИНА</th><th>Пример</th></tr></thead>
+              <tbody>
+                <tr><td class="mono font-bold">И(...)</td><td>Только если <strong>ВСЕ</strong> аргументы истинны</td><td class="mono text-xs">=И(A2&gt;=10; B2&lt;5)</td></tr>
+                <tr><td class="mono font-bold">ИЛИ(...)</td><td>Если <strong>ХОТЯ БЫ ОДИН</strong> аргумент истинен</td><td class="mono text-xs">=ИЛИ(A2="Банан"; A2="Апельсин")</td></tr>
+                <tr><td class="mono font-bold">НЕ(...)</td><td>Переворачивает значение (ИСТИНА ↔ ЛОЖЬ)</td><td class="mono text-xs">=НЕ(A2&gt;=10)</td></tr>
+              </tbody>
+            </table>
+            <div class="box-primary text-xs">
+              <strong>Знаешь ли ты?</strong> В Excel логическое значение <span class="mono font-bold">ИСТИНА = 1</span>, а <span class="mono font-bold">ЛОЖЬ = 0</span>. Поэтому формула <span class="mono">=ИСТИНА+1</span> даст <span class="mono">2</span>, а <span class="mono">=ЛОЖЬ+1</span> даст <span class="mono">1</span>!
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Живой симулятор И vs ИЛИ",
+      shortTitle: "Интерактивный переключатель условий: «Домашка» и «Комната»",
+      timing: "26–36 мин",
+      source: "Теория 7.2А · Пример «Играй / Не играй»",
+      notes: "Нажимайте на 2 переключателя («Домашка сделана» и «Комната убрана») — ученики сразу видят разницу между ЕСЛИ(И(...)) и ЕСЛИ(ИЛИ(...))!",
+      render(st) {
+        const hw = !!st.custom.hw;
+        const rm = !!st.custom.room;
+        const andOk = hw && rm;
+        const orOk = hw || rm;
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Симулятор: как работают <span class="mono">ЕСЛИ(И(...))</span> и <span class="mono">ЕСЛИ(ИЛИ(...))</span></h2>
+            <div class="flex-row">
+              <button type="button" class="btn ${hw ? "btn-primary" : ""}" onclick="G7FN2_TOGGLE('hw')">A2 (Домашка): ${hw ? "Да ✓" : "Нет ✕"}</button>
+              <button type="button" class="btn ${rm ? "btn-primary" : ""}" onclick="G7FN2_TOGGLE('room')">B2 (Комната): ${rm ? "Да ✓" : "Нет ✕"}</button>
+            </div>
+            <div class="grid-2 text-xs">
+              <div class="${andOk ? "box-success" : "box-danger"} stack">
+                <div class="box-title">Строгое правило (И — нужны ОБА «Да»)</div>
+                <div class="code-block" style="font-size:11.5px;">=ЕСЛИ(И(A2="Да";B2="Да");"Играй";"Не играй")</div>
+                <div>Результат: <strong style="font-size:15px;">${andOk ? "🎮 Играй!" : "📚 Не играй"}</strong></div>
+              </div>
+              <div class="${orOk ? "box-success" : "box-danger"} stack">
+                <div class="box-title">Мягкое правило (ИЛИ — хватит ОДНОГО «Да»)</div>
+                <div class="code-block" style="font-size:11.5px;">=ЕСЛИ(ИЛИ(A2="Да";B2="Да");"Допущен";"Нет")</div>
+                <div>Результат: <strong style="font-size:15px;">${orOk ? "✓ Допущен" : "✕ Нет"}</strong></div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Примеры и ловушки",
+      shortTitle: "Интервал значений, статусы заказов и главная ловушка И/ИЛИ",
+      timing: "36–45 мин",
+      source: "Теория 7.2А · Примеры «Заказать», «Заказ завершён», «Мороз/жара»",
+      notes: "Разберите 3 готовых шаблона из учебника и частую ошибку с температурой >30 И <-30!",
+      render(st) {
+        const cur = st.tabs.combo || "and";
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <h2 class="slide-h2">3 практических шаблона <span class="mono">ЕСЛИ + И / ИЛИ</span></h2>
+              <div class="flex-row">
+                <button type="button" class="btn ${cur === "and" ? "btn-primary" : ""}" onclick="DECK.setTab('combo','and')">Интервал (И)</button>
+                <button type="button" class="btn ${cur === "or" ? "btn-accent" : ""}" onclick="DECK.setTab('combo','or')">Статус заказа (ИЛИ)</button>
+                <button type="button" class="btn ${cur === "trap" ? "btn-primary" : ""}" onclick="DECK.setTab('combo','trap')">Ловушка СОР!</button>
+              </div>
+            </div>
+            ${cur === "and" ? `
+              <div class="box-primary stack text-xs">
+                <strong>Интервал значений (остаток от 10 до 30 кг):</strong>
+                <div class="code-block">=ЕСЛИ(И(D2&gt;10;D2&lt;30);"Заказать";"OK")</div>
+                <div><strong>Доставлен И дата не пустая:</strong></div>
+                <div class="code-block">=ЕСЛИ(И(B2="Доставлен";C2&lt;&gt;"");"Завершен";"")</div>
+              </div>
+            ` : cur === "or" ? `
+              <div class="box-accent stack text-xs">
+                <strong>Достаточно одного из двух статусов (Доставлен ИЛИ Отменен):</strong>
+                <div class="code-block">=ЕСЛИ(ИЛИ(B2="Доставлен";B2="Отменен");"Завершен";"Открыт")</div>
+              </div>
+            ` : `
+              <div class="box-danger stack text-xs">
+                <strong>Частая ошибка на СОР:</strong> ученик написал <span class="mono">=ЕСЛИ(И(A2&gt;30;A2&lt;-30);"Сиди дома";"Иди")</span>.<br>
+                Температура <strong>НЕ может</strong> быть одновременно выше +30 и ниже −30! Это условие ВСЕГДА ЛОЖЬ!<br>
+                <strong>Правильно:</strong> <span class="mono font-bold">=ЕСЛИ(ИЛИ(A2&gt;30;A2&lt;-30);"Сиди дома";"Иди")</span>!
+              </div>
+            `}
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Квиз",
+      shortTitle: "Мини-квиз по смешанным ссылкам и И/ИЛИ/НЕ (5 вопросов)",
+      timing: "45–52 мин",
+      source: "КСП 7.2А Урок 4",
+      notes: "Проверяем понимание перед практикой в Мини-Таблицах.",
+      render(st) {
+        let ok = 0;
+        G7FN2_QUIZ.forEach(q => { if (st.quiz[q.id] === q.ans) ok++; });
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <h2 class="slide-h2">Проверь себя: смешанные ссылки и И / ИЛИ / НЕ</h2>
+              <span class="pill pill-success mono">${ok} / ${G7FN2_QUIZ.length}</span>
+            </div>
+            <div class="stack" style="gap:6px;">
+              ${G7FN2_QUIZ.map(q => {
+                const p = st.quiz[q.id];
+                const cls = p ? (p === q.ans ? "ok" : "bad") : "";
+                return `
+                  <div class="quiz-row ${cls}">
+                    <div style="flex:1;"><strong>${q.q}</strong>${p === q.ans ? `<div class="text-xs text-muted">${q.why}</div>` : ""}</div>
+                    <div class="flex-row" style="gap:4px;">
+                      ${q.opts.map(o => `<button type="button" class="btn ${p === o ? "btn-primary" : ""}" style="padding:2px 8px;font-size:11px;" onclick="DECK.pickQuiz('${q.id}','${o}')">${o}</button>`).join("")}
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Мини-Таблицы · Практика",
+      pillClass: "pill-accent",
+      shortTitle: "Мини-Таблицы: ЕСЛИ с И и ИЛИ (остатки и заказы)",
+      timing: "52–70 мин",
+      source: "Мини-Таблицы (/excel?task=g7-fn-l2-zakazy)",
+      notes: "Живая практика: «ЕСЛИ с И и ИЛИ: остатки и заказы» (g7-fn-l2-zakazy). Дополнительно: g7-fn-smeshannaya (таблица умножения) и g7-fn-esli-i.",
+      render(st, api) {
+        return api.renderMiniExcelTask({
+          key: "g7fn2",
+          taskId: "g7-fn-l2-zakazy",
+          title: "Практика в Мини-Таблицах: ЕСЛИ с И и ИЛИ",
+          summary: "Составьте формулы с логическими функциями И / ИЛИ для учёта остатков и статусов заказов.",
+          steps: ["Напишите формулы =ЕСЛИ(И(...)) и =ЕСЛИ(ИЛИ(...))", "Протяните вниз", "Проверьте автопроверкой"],
+          meta: "Цели 7.1.1.3 · 7.4.2.1"
+        });
+      }
+    },
+    {
+      badge: "Этап 3 · Доп. задания",
+      shortTitle: "Таблица умножения ($A2*B$1) и Допуск к походу",
+      timing: "70–75 мин",
+      source: "Мини-Таблицы · g7-fn-smeshannaya, g7-fn-esli-i, g7-fn-ili-ne",
+      notes: "Отдельные задания на смешанные ссылки и вложенные И/ИЛИ/НЕ.",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Дополнительные задания урока 4</h2>
+            <div class="grid-3 text-xs">
+              <div class="box-primary stack"><strong>1. Таблица умножения</strong><div>Смешанные ссылки =$A2*B$1.</div><a class="btn btn-primary" href="/excel?task=g7-fn-smeshannaya" target="_blank" rel="noopener noreferrer">Открыть ↗</a></div>
+              <div class="box-accent stack"><strong>2. Допуск к походу</strong><div>Функция ЕСЛИ + И.</div><a class="btn btn-accent" href="/excel?task=g7-fn-esli-i" target="_blank" rel="noopener noreferrer">Открыть ↗</a></div>
+              <div class="box-success stack"><strong>3. Скидка и наличие</strong><div>Функции ИЛИ и НЕ.</div><a class="btn" href="/excel?task=g7-fn-ili-ne" target="_blank" rel="noopener noreferrer">Открыть ↗</a></div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 3 · ДЗ",
+      shortTitle: "Домашнее задание: Почётная грамота",
+      timing: "75–80 мин",
+      source: "Мини-Таблицы · g7-fn-dz-gramota",
+      notes: "Выдайте ДЗ «Почётная грамота: ЕСЛИ, И, ИЛИ».",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Итоги урока 4 и домашнее задание</h2>
+            <div class="box-primary flex-between text-xs">
+              <div><strong>Домашнее задание в Мини-Таблицах (/excel):</strong> <strong>«ДЗ. Почётная грамота: ЕСЛИ, И, ИЛИ»</strong> (<span class="mono">g7-fn-dz-gramota</span>).</div>
+              <a class="btn btn-accent" href="/excel?task=g7-fn-dz-gramota" target="_blank" rel="noopener noreferrer">Открыть ДЗ ↗</a>
+            </div>
+          </div>
+        `;
+      }
+    }
+  ]
+});
+</script>
+</body>
+</html>

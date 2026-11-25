@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>10.2А · Урок 5 · Гиперссылки в HTML</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+</head>
+<body>
+<script src="../_engine/deck.js"></script>
+<script>
+const L5_URL_PARTS = [
+  { tok: "https://", name: "Протокол доступа", desc: "Правила передачи данных между браузером и сервером (http:// или защищённый https://)." },
+  { tok: "www.math.kz", name: "Доменное имя сервера", desc: "Уникальный адрес сайта в сети Интернет." },
+  { tok: "/lessons/", name: "Путь к папке (каталогу)", desc: "Вложенная директория на сервере, где хранится файл." },
+  { tok: "index.html", name: "Имя файла веб-страницы", desc: "Конкретный HTML-документ, который откроет браузер." },
+  { tok: "#chapter4", name: "Якорь (закладка)", desc: "Переводит браузер сразу к элементу с атрибутом id=\"chapter4\" внутри страницы." }
+];
+
+const L5_PATH_QUIZ = [
+  { q: "Файл page2.html лежит в той же папке", ans: "page2.html", opts: ["page2.html", "pages/page2.html", "../page2.html"] },
+  { q: "Файл news.html лежит во вложенной папке pages/", ans: "pages/news.html", opts: ["news.html", "pages/news.html", "../news.html"] },
+  { q: "Нужно вернуться из pages/news.html в index.html на уровень выше", ans: "../index.html", opts: ["index.html", "/pages/index.html", "../index.html"] },
+  { q: "Перейти к заголовку <h2 id=\"winter\"> на текущей странице", ans: "#winter", opts: ["winter", "#winter", "id=winter"] }
+];
+
+const L5_ANCHOR_INIT = `<h2 id="top">Оглавление</h2>
+<p>
+  <a href="#summer">Летние виды</a> ·
+  <a href="#winter">Зимние виды</a> ·
+  <a href="mailto:info@school.kz">Написать нам</a>
+</p>
+<hr>
+<h3 id="summer">Летние виды спорта</h3>
+<p>Футбол, волейбол, лёгкая атлетика, плавание.</p>
+<div style="height:120px;color:#888;font-size:12px;">(прокрутка страницы...)</div>
+<h3 id="winter">Зимние виды спорта</h3>
+<p>Хоккей, фигурное катание, лыжные гонки.</p>
+<p><a href="#top">Наверх ↑</a></p>`;
+
+DECK_INITIALS = { links: L5_ANCHOR_INIT };
+DECK_PRESETS = {
+  links: [
+    () => DECK.resetEditor("links", L5_ANCHOR_INIT),
+    () => DECK.resetEditor("links", `<p><a href="https://edu.kz" target="_blank">Открыть edu.kz в новой вкладке ↗</a></p>\n<p>Кнопка-изображение:</p>\n<a href="#top"><svg width="110" height="36"><rect width="110" height="36" rx="8" fill="#2b3bb3"/><text x="55" y="23" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif">На главную</text></svg></a>`)
+  ]
+};
+
+initDeck({
+  badge: "</> 10.2А · Урок 5",
+  title: "Гиперссылки: внешние, локальные, закладки-якоря",
+  subtitle: "10 класс · 2 четверть · Цели 10.1.2.6, 10.1.2.5 · 80 мин · Мини-HTML",
+  initialState: {
+    selected: { urlPart: 0, targetVal: "_blank" }
+  },
+  slides: [
+    {
+      badge: "Этап 1 · Введение",
+      shortTitle: "Титул и цели урока",
+      timing: "0–2 мин",
+      source: "КСП 10.2А Урок 5 · SB 10 кл. стр. 83–86",
+      notes: "Озвучьте цели 10.1.2.6 и 10.1.2.5. Напомните, почему текст в интернете называется гипертекстом.",
+      render() {
+        return `
+          <div class="stack">
+            <div class="text-xs font-bold text-muted" style="text-transform:uppercase;">Информатика · 10 класс · Раздел 10.2А · Урок 5 из 10</div>
+            <h1 class="slide-h1">Гиперссылки в HTML-документе</h1>
+            <p class="lead">Научимся связывать страницы сайта, открывать внешние ресурсы в новой вкладке, делать якоря <span class="mono">#id</span>, почтовые ссылки и графические кнопки.</p>
+            <div class="grid-2">
+              <div class="box-primary">
+                <div class="box-title mono">Цель 10.1.2.6</div>
+                <div class="text-xs">Использовать тег <span class="mono">&lt;a href="..."&gt;</span> для создания внешних, локальных, почтовых ссылок и закладок-якорей.</div>
+              </div>
+              <div class="box-accent">
+                <div class="box-title mono" style="color:var(--accent);">Цель 10.1.2.5</div>
+                <div class="text-xs">Применять атрибуты <span class="mono">href, target (_blank, _self, _parent, _top), id</span>.</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 1 · Стартер",
+      shortTitle: "Анатомия URL-адреса",
+      timing: "2–10 мин",
+      source: "Презентация «Гиперссылки», слайды 1–3 · SB стр. 83",
+      notes: "Нажимайте на каждую часть URL-адреса — разберите протокол, домен, путь, имя файла и якорь.",
+      render(st) {
+        const idx = st.selected.urlPart || 0;
+        const cur = L5_URL_PARTS[idx];
+        return `
+          <h2 class="slide-h2">Стартер: из чего состоит URL-адрес?</h2>
+          <p class="lead">Нажмите на любой фрагмент адреса, чтобы увидеть его назначение.</p>
+          <div class="box flex-row" style="padding:18px;">
+            ${L5_URL_PARTS.map((p, i) => `
+              <button type="button" class="btn mono ${idx === i ? "btn-primary" : ""}" style="font-size:15px;padding:8px 10px;" onclick="DECK.setSelected('urlPart',${i})">${DECK.esc(p.tok)}</button>
+            `).join("")}
+          </div>
+          <div class="box-primary stack">
+            <div class="flex-between"><strong>${cur.name}</strong><span class="pill mono">${DECK.esc(cur.tok)}</span></div>
+            <div class="text-sm">${cur.desc}</div>
+          </div>
+          <div class="box text-xs">
+            <strong>Тег гиперссылки:</strong> <span class="mono font-bold">&lt;a href="адрес"&gt;Текст или картинка&lt;/a&gt;</span> (от англ. <em>anchor</em> — якорь, <em>href</em> — hypertext reference).<br>
+            Цвета состояний: непосещённая — <span style="color:#2563eb;text-decoration:underline;">синяя</span> (<span class="mono">link</span>), при клике — <span style="color:#dc2626;text-decoration:underline;">красная</span> (<span class="mono">alink</span>), посещённая — <span style="color:#7c3aed;text-decoration:underline;">фиолетовая</span> (<span class="mono">vlink</span>).
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Виды ссылок и target",
+      shortTitle: "4 вида ссылок и атрибут target",
+      timing: "10–20 мин",
+      source: "SB 10 кл. стр. 84–85 · Презентация слайды 4–7",
+      notes: "Разберите 4 вида ссылок и переключите 4 значения атрибута target (_self, _blank, _parent, _top).",
+      render(st) {
+        const tgt = st.selected.targetVal || "_blank";
+        const tgtDesc = {
+          "_self": "Открывает документ в текущей вкладке (значение по умолчанию).",
+          "_blank": "Открывает ссылку в новой вкладке или новом окне браузера (используют для внешних сайтов).",
+          "_parent": "Открывает документ в родительском фрейме.",
+          "_top": "Открывает документ во всём окне браузера поверх всех фреймов."
+        };
+        return `
+          <h2 class="slide-h2">Четыре вида гиперссылок и атрибут <span class="mono">target</span></h2>
+          <table class="data-table">
+            <thead><tr><th>Вид ссылки</th><th>Пример кода</th><th>Когда используется</th></tr></thead>
+            <tbody>
+              <tr><td><strong>1. Внешняя (абсолютная)</strong></td><td class="mono">&lt;a href="https://edu.kz" target="_blank"&gt;</td><td>Переход на другой сайт в Интернете</td></tr>
+              <tr><td><strong>2. Локальная (относительная)</strong></td><td class="mono">&lt;a href="pages/about.html"&gt;</td><td>Переход между файлами своего сайта</td></tr>
+              <tr><td><strong>3. Закладка-якорь</strong></td><td class="mono">&lt;h2 id="C4"&gt; → &lt;a href="#C4"&gt;</td><td>Быстрый переход внутри длинной страницы</td></tr>
+              <tr><td><strong>4. Почтовая (mailto:)</strong></td><td class="mono">&lt;a href="mailto:info@school.kz"&gt;</td><td>Открыть почтовый клиент с адресом</td></tr>
+            </tbody>
+          </table>
+          <div class="box stack text-xs">
+            <div class="flex-row">
+              <strong>Атрибут <span class="mono">target</span>:</strong>
+              ${["_self","_blank","_parent","_top"].map(v => `<button type="button" class="btn mono ${tgt === v ? "btn-primary" : ""}" onclick="DECK.setSelected('targetVal','${v}')">${v}</button>`).join("")}
+            </div>
+            <div class="box-primary">
+              <span class="mono font-bold">&lt;a href="https://edu.kz" target="${tgt}"&gt;Портал&lt;/a&gt;</span> — ${tgtDesc[tgt]}
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Живое демо",
+      shortTitle: "Якоря #id, mailto и ссылка-картинка",
+      timing: "20–30 мин",
+      source: "SB 10 кл. стр. 85–86",
+      notes: "Кликните по ссылкам «Летние виды» / «Зимние виды» / «Наверх ↑» прямо в правом окне предпросмотра!",
+      render(st, api) {
+        return `
+          <div>
+            <h2 class="slide-h2">Живое демо: якоря <span class="mono">#id</span> и ссылка-кнопка</h2>
+            <p class="lead">Попробуйте кликнуть по ссылкам-якорям в окне предпросмотра справа!</p>
+          </div>
+          ${api.renderPlayground({
+            key: "links",
+            initial: L5_ANCHOR_INIT,
+            tabTitle: "sports.html",
+            presets: [
+              { label: "Оглавление с якорями (#id)" },
+              { label: "target=\"_blank\" и ссылка-кнопка" }
+            ]
+          })}
+        `;
+      }
+    },
+    {
+      badge: "Мини-HTML №1 · Практика",
+      pillClass: "pill-accent",
+      shortTitle: "Мини-HTML: Ссылки между страницами",
+      timing: "30–50 мин",
+      source: "Мини-HTML (/html?task=g10-html-uchebnyy-sayt)",
+      notes: "В Мини-HTML есть многофайловый проводник слева! Покажите переключение между файлами проекта и проверку ссылок.",
+      render(st, api) {
+        return api.renderMiniHtmlTask({
+          taskId: "g10-html-uchebnyy-sayt",
+          title: "Практика 1: Мой учебный сайт — ссылки между страницами",
+          summary: "Свяжите несколько HTML-страниц единым меню локальных ссылок прямо в Мини-HTML.",
+          steps: ["Локальные ссылки href=\"...\"", "Внешняя ссылка target=\"_blank\"", "Проверка переходов"],
+          meta: "12 мин · Цель 10.1.2.6"
+        });
+      }
+    },
+    {
+      badge: "Мини-HTML №2 · Практика",
+      pillClass: "pill-accent",
+      shortTitle: "Мини-HTML: Меню из закладок и mailto",
+      timing: "50–68 мин",
+      source: "Мини-HTML (/html?task=g10-html-menyu-zakladki)",
+      notes: "Задание на внутристраничные якоря (id + href=\"#...\") и почтовую ссылку mailto:.",
+      render(st, api) {
+        return api.renderMiniHtmlTask({
+          taskId: "g10-html-menyu-zakladki",
+          title: "Практика 2: Меню из закладок и ссылка на почту",
+          summary: "Настройте якоря id и переходы href=\"#...\", а также почтовую ссылку mailto:.",
+          steps: ["Задать id у заголовков", "Ссылки href=\"#...\"", "Ссылка mailto:"],
+          meta: "10 мин · Цель 10.1.2.6"
+        });
+      }
+    },
+    {
+      badge: "Этап 3 · Блиц-игра и ДЗ",
+      shortTitle: "Игра «Какой путь выбрать?» и ДЗ",
+      timing: "68–80 мин",
+      source: "КСП 10.2А Урок 5 · Мини-HTML (g10-html-dz-sayt-4-stranitsy)",
+      notes: "Пройдите 4 вопроса блиц-игры по относительным путям и выдайте ДЗ g10-html-dz-sayt-4-stranitsy.",
+      render(st) {
+        let ok = 0;
+        L5_PATH_QUIZ.forEach((item, i) => { if (st.quiz["p" + i] === item.ans) ok++; });
+        return `
+          <div class="flex-between">
+            <h2 class="slide-h2">Блиц-игра «Какой путь выбрать в <span class="mono">href</span>?»</h2>
+            <span class="pill pill-success mono">${ok} / ${L5_PATH_QUIZ.length}</span>
+          </div>
+          <div class="stack">
+            ${L5_PATH_QUIZ.map((item, i) => {
+              const p = st.quiz["p" + i];
+              const cls = p ? (p === item.ans ? "ok" : "bad") : "";
+              return `
+                <div class="quiz-row ${cls}">
+                  <div><strong>${i + 1}.</strong> ${item.q}</div>
+                  <div class="flex-row" style="gap:4px;">
+                    ${item.opts.map(o => `<button type="button" class="btn mono ${p === o ? "btn-primary" : ""}" style="padding:3px 8px;" onclick="DECK.pickQuiz('p${i}','${o}')">${o}</button>`).join("")}
+                  </div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+          <div class="box-primary flex-between text-xs">
+            <div><strong>Домашнее задание:</strong> сделать навигацию сайта из 4 связанных страниц в Мини-HTML.</div>
+            <a class="btn btn-accent" href="/html?task=g10-html-dz-sayt-4-stranitsy" target="_blank" rel="noopener noreferrer">ДЗ в Мини-HTML (g10-html-dz-sayt-4-stranitsy) ↗</a>
+          </div>
+        `;
+      }
+    }
+  ]
+});
+</script>
+</body>
+</html>

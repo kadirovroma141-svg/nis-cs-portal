@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9.2А · Урок 2 · Интерфейс Access. Создание однотабличной БД и ввод данных</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+</head>
+<body>
+<script src="../_engine/deck.js"></script>
+<script>
+const L2_OBJECTS = {
+  tbl: {
+    name: "1. Таблица",
+    role: "Главный объект хранения данных",
+    desc: "Хранит все записи предметной области в виде строк (записей) и столбцов (полей). Без хотя бы одной таблицы остальные объекты не имеют смысла.",
+    ex: "Например: «Ученики», «Реки Казахстана», «Погода»."
+  },
+  qry: {
+    name: "2. Запрос",
+    role: "Поиск, фильтрация и вычисления",
+    desc: "Выбирает нужные записи по заданным критериям, сортирует, объединяет поля и выполняет расчёты — сохраняется как объект БД.",
+    ex: "Например: «Реки длиннее 1500 км, впадающие в Карское море»."
+  },
+  frm: {
+    name: "3. Форма",
+    role: "Удобный пользовательский экран ввода",
+    desc: "Отображает одну запись как красивую анкету-карточку с кнопками навигации, защищает от случайных ошибок при заполнении.",
+    ex: "Например: карточка регистрации ученика или гостя отеля."
+  },
+  rpt: {
+    name: "4. Отчёт",
+    role: "Печатный документ с группировкой и итогами",
+    desc: "Готовит данные к печати или экспорту в PDF: добавляет шапку, колонтитулы, группировку, промежуточные и общие итоги (Sum, Count, Avg).",
+    ex: "Например: «Ведомость успеваемости 9А» или прайс по магазинам."
+  },
+  mac: {
+    name: "5. Макрос",
+    role: "Автоматизация цепочки действий без кода",
+    desc: "Последовательность готовых команд (открыть форму, применить фильтр, вывести сообщение), привязанная к кнопке или событию.",
+    ex: "Например: при нажатии кнопки закрыть форму и открыть отчёт."
+  },
+  mod: {
+    name: "6. Модуль",
+    role: "Программирование на языке VBA",
+    desc: "Текстовый код программных процедур на языке Visual Basic for Applications для сложной логики и нестандартных проверок.",
+    ex: "Например: собственная функция расчёта рейтинга или проверка ИИН."
+  }
+};
+
+const L2_ERRORS = [
+  { id: "e1", title: "1. Буквы в Числовом поле", err: "В поле «Длина_реки» (Числовой) оператор пытается ввести «около 500».", fix: "Access выведет предупреждение «Значение не соответствует типу поля». Вводите только цифры (500)." },
+  { id: "e2", title: "2. Несуществующая дата", err: "В поле «Дата_рождения» (Дата/время) ввели «31.02.2011» или «25.15.2010».", fix: "СУБД проверяет календарь и отклонит некорректную дату до исправления." },
+  { id: "e3", title: "3. Дубликат первичного ключа 🔑", err: "В таблице с ключом «ИИН» добавили новую строку с уже существующим ИИН.", fix: "Ошибка «Повторяющиеся значения в индексе или первичном ключе» — запись не сохранится!" },
+  { id: "e4", title: "4. Превышение размера поля", err: "Размер Текстового поля = 10, а фамилия «Султангазиева» (13 символов).", fix: "Access не даст ввести 11-й символ. Размер текста задавайте с запасом (30–50)." },
+  { id: "e5", title: "5. Редактирование без завершения строки", err: "Напротив строки висит маркер «✎», а ученик сразу закрывает Access без сохранения.", fix: "Нажмите Enter/Tab или кликните другую строку — «✎» исчезнет, запись сохранится на диск!" }
+];
+
+const L2_BAD_STRUCT = [
+  { id: "bs1", q: "Поле 1: «Фамилия_имя_отчество_ученика_и_полный_домашний_адрес_проживания_в_городе_Кызылорда» (86 символов).", a: "ОШИБКА: максимальная длина имени поля в Access — 64 символа! Сократите имя (напр. «Адрес»), а длинный текст задайте в свойстве «Подпись»." },
+  { id: "bs2", q: "В таблице «Секции» созданы два столбца с одинаковым именем «Дата» (дата открытия и дата закрытия).", a: "ОШИБКА: в одной таблице запрещены поля с одинаковыми именами! Назовите «Дата_начала» и «Дата_конца»." },
+  { id: "bs3", q: "Для поля «Код_заказа» задан тип «Счётчик», и ученик пытается вручную исправить 104 на 100.", a: "ОШИБКА: поля типа «Счётчик» формируются СУБД автоматически — вручную вводить или менять их нельзя." },
+  { id: "bs4", q: "Таблица «Реки» сохранена вообще без ключевого поля 🔑 (отказались от ключа в диалоге Access).", a: "ОШИБКА: без первичного ключа нельзя гарантировать уникальность записей и связывать таблицы в будущем!" }
+];
+
+window.L2_AUTO_ACT = function(action) {
+  const st = window.DECK_STATE;
+  if (!st.custom) st.custom = { nextId: 4, rows: [
+    { id: 1, name: "Ахметов Д.", cls: "9A" },
+    { id: 2, name: "Бекова А.", cls: "9B" },
+    { id: 3, name: "Сериков Н.", cls: "9A" }
+  ], msg: "Нажмите кнопку, чтобы увидеть работу поля Счётчик." };
+  const c = st.custom;
+  if (action === "add") {
+    const names = ["Омарова Л.", "Жакупов Р.", "Ким В.", "Талгатов С."];
+    const name = names[(c.nextId - 4) % names.length];
+    const id = c.nextId++;
+    c.rows.push({ id, name, cls: id % 2 === 0 ? "9B" : "9C" });
+    c.msg = `Добавлена запись #${id}. Счётчик выдал следующий номер (+1).`;
+  } else if (action === "del3") {
+    const has3 = c.rows.some(r => r.id === 3);
+    if (has3) {
+      c.rows = c.rows.filter(r => r.id !== 3);
+      c.msg = "Запись #3 удалена! Обратите внимание: следующий добавленный ученик получит №" + c.nextId + ", а №3 больше НИКОГДА не появится.";
+    } else {
+      c.msg = "Запись #3 уже удалена. Добавьте новую запись и проверьте, какой номер она получит!";
+    }
+  } else if (action === "editFail") {
+    c.msg = "⛔ Запрещено! Поле типа «Счётчик» (Код_ученика) доступно только для чтения — вручную изменить номер нельзя.";
+  } else if (action === "reset") {
+    c.nextId = 4;
+    c.rows = [
+      { id: 1, name: "Ахметов Д.", cls: "9A" },
+      { id: 2, name: "Бекова А.", cls: "9B" },
+      { id: 3, name: "Сериков Н.", cls: "9A" }
+    ];
+    c.msg = "Таблица возвращена к исходным 3 записям (следующий ID = 4).";
+  }
+  window.DECK.render();
+};
+
+initDeck({
+  badge: "🗄 9.2А · Урок 2",
+  title: "Интерфейс MS Access. Создание однотабличной БД и ввод данных",
+  subtitle: "9 класс · 2 четверть · Цели 9.1.2.3, 9.1.2.2, 9.1.2.4 · 80 мин · Мини-СУБД",
+  footer: "НИШ ЕМН г. Кызылорда · 9 класс · 2 четверть · Мини-СУБД (/subd)",
+  initialState: {
+    tabs: { obj: "tbl", view: "design" },
+    custom: {
+      nextId: 4,
+      rows: [
+        { id: 1, name: "Ахметов Д.", cls: "9A" },
+        { id: 2, name: "Бекова А.", cls: "9B" },
+        { id: 3, name: "Сериков Н.", cls: "9A" }
+      ],
+      msg: "Нажмите кнопку, чтобы проверить поведение поля «Счётчик»."
+    }
+  },
+  slides: [
+    {
+      badge: "Этап 1 · Актуализация и цели",
+      shortTitle: "Особенность запуска Access (.accdb)",
+      timing: "0–6 мин",
+      source: "КСП 9.2А Урок 2 · SB 9 кл. стр. 58–61",
+      notes: "Подчеркните отличие MS Access от Word и Excel: в Access вы НЕ работаете «в воздухе» — программа сначала просит задать имя и папку для файла .accdb. И в одном окне открывается ровно ОДНА база данных.",
+      render() {
+        return `
+          <div class="stack">
+            <div class="text-xs font-bold text-muted" style="text-transform:uppercase;">Информатика · 9 класс · Раздел 9.2А «Однотабличные БД» · Урок 2 из 6</div>
+            <h1 class="slide-h1">Интерфейс MS Access. Создание таблицы и ввод записей</h1>
+            <p class="lead">Изучим 6 объектов Access, пройдём 6-шаговый алгоритм проектирования структуры таблицы в Режиме конструктора и разберёмся, как работает ввод данных.</p>
+            <div class="grid-3 text-xs">
+              <div class="box-primary"><div class="box-title mono">9.1.2.3</div>Создавать однотабличную базу данных в среде СУБД, настраивать структуру в Конструкторе и заполнять её.</div>
+              <div class="box-accent"><div class="box-title mono" style="color:var(--accent);">9.1.2.2 &amp; 9.1.2.4</div>Применять типы данных (в т.ч. Счётчик) и назначать первичный ключ 🔑.</div>
+              <div class="box-success"><div class="box-title">Главное отличие от Excel</div>Файл <span class="mono">.accdb</span> сохраняется <strong>ДО</strong> создания таблиц, а изменения строк сохраняются автоматически!</div>
+            </div>
+            <div class="box-warning text-xs">
+              <strong>Две важные особенности MS Access:</strong><br>
+              1. В отличие от Word/Excel, при запуске Access первым делом задают имя файла (<span class="mono">Пустая база данных → Создать</span>, расширение <span class="mono">.accdb</span>).<br>
+              2. В одном окне Access может быть открыта <strong>только ОДНА база данных</strong>, но внутри неё хранятся десятки таблиц, запросов, форм и отчётов.
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · 6 объектов Access",
+      shortTitle: "Все 6 объектов базы данных Access",
+      timing: "6–15 мин",
+      source: "SB 9 кл. стр. 58 · Область навигации MS Access",
+      notes: "Попросите учеников прокликать все 6 объектов. В 9 классе обязательно знать все 6: Таблица, Запрос, Форма, Отчёт, Макрос, Модуль (VBA).",
+      render(st) {
+        const cur = st.tabs.obj || "tbl";
+        const item = L2_OBJECTS[cur];
+        const btns = [
+          ["tbl", "📊 Таблица"], ["qry", "🔎 Запрос"], ["frm", "📝 Форма"],
+          ["rpt", "🖨 Отчёт"], ["mac", "⚙ Макрос"], ["mod", "💻 Модуль (VBA)"]
+        ];
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Область навигации: все 6 объектов MS Access</h2>
+            <p class="lead">Нажмите на любой объект, чтобы увидеть его назначение в БД.</p>
+            <div class="grid-3">
+              ${btns.map(([k, lbl]) => `
+                <button type="button" class="interactive-card ${cur === k ? "active" : ""}" style="padding:10px 12px;" onclick="DECK.setTab('obj','${k}')">
+                  <div class="font-bold text-sm">${lbl}</div>
+                </button>
+              `).join("")}
+            </div>
+            <div class="box-primary">
+              <div class="flex-between">
+                <strong class="text-sm">${item.name}</strong>
+                <span class="pill">${item.role}</span>
+              </div>
+              <p class="text-xs" style="margin:8px 0;">${item.desc}</p>
+              <div class="box-white text-xs"><strong>Пример:</strong> ${item.ex}</div>
+            </div>
+            <div class="box text-xs">
+              <strong>Запомните связь:</strong> основа любой БД — <strong>Таблицы</strong>. На их базе строятся <strong>Запросы</strong>, <strong>Формы</strong> и <strong>Отчёты</strong>, а <strong>Макросы</strong> и <strong>Модули</strong> автоматизируют работу пользователя.
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Структура и алгоритм",
+      shortTitle: "Проектирование, структура и 6 шагов",
+      timing: "15–24 мин",
+      source: "SB 9 кл. стр. 59 · Алгоритм создания таблицы «Ученики»",
+      notes: "Разведите понятия «Проектирование БД» (на бумаге) и «Структура таблицы» (в Конструкторе). Пройдите 6 шагов создания таблицы «Ученики».",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Проектирование vs Структура + 6 шагов создания таблицы</h2>
+            <div class="grid-2 text-xs">
+              <div class="box-primary">
+                <div class="box-title">Проектирование vs Структура таблицы</div>
+                <p style="margin:0 0 6px;"><strong>Проектирование БД</strong> — мысленное (на бумаге) выделение объектов, свойств, ключей и связей до запуска компьютера.</p>
+                <p style="margin:0;"><strong>Структура таблицы</strong> — формальное описание в Режиме конструктора: перечень имён полей, их типов данных, размеров, свойств и первичного ключа 🔑.</p>
+              </div>
+              <div class="box-warning">
+                <div class="box-title" style="color:var(--warning);">Правила именования полей Access</div>
+                <ul style="margin:0;padding-left:16px;">
+                  <li>Все имена полей в одной таблице должны быть <strong>уникальными</strong>.</li>
+                  <li>Максимальная длина имени поля — <strong>64 символа</strong>.</li>
+                  <li>Нельзя использовать точку <span class="mono">.</span>, восклицательный знак <span class="mono">!</span> и квадратные скобки <span class="mono">[ ]</span>.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="box-white text-xs">
+              <div class="box-title">6-шаговый алгоритм создания таблицы «Ученики»</div>
+              <div class="grid-3" style="gap:8px;">
+                <div class="box"><strong>1.</strong> Создать БД <span class="mono">.accdb</span> → «Создание → Конструктор таблиц».</div>
+                <div class="box"><strong>2.</strong> Задать имена полей (<span class="mono">Код_ученика</span>, <span class="mono">Фамилия</span>, <span class="mono">Имя</span>, <span class="mono">Класс</span>, <span class="mono">Дата_рождения</span>, <span class="mono">Отличник</span>).</div>
+                <div class="box"><strong>3.</strong> Выбрать правильный тип данных и размер каждого поля.</div>
+                <div class="box"><strong>4.</strong> Настроить свойства полей (обязательность, формат, маска).</div>
+                <div class="box"><strong>5.</strong> Выделить строку <span class="mono">Код_ученика</span> → кнопка <strong>🔑 Ключевое поле</strong>.</div>
+                <div class="box"><strong>6.</strong> Сохранить (<span class="mono">Ctrl+S</span>) как «Ученики» → перейти в <strong>Режим таблицы</strong> и ввести записи.</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Два режима работы",
+      shortTitle: "Конструктор ⇄ Режим таблицы",
+      timing: "24–33 мин",
+      source: "SB 9 кл. стр. 60 · Таблица «Реки Казахстана»",
+      notes: "Переключайте кнопку между Конструктором (где настраивается скелет — поля и типы) и Режимом таблицы (где вводятся реальные строки). Это один и тот же объект, только два разных вида.",
+      render(st) {
+        const v = st.tabs.view || "design";
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <div>
+                <h2 class="slide-h2">Два режима одной таблицы: «Реки Казахстана»</h2>
+                <p class="lead">Переключайте виды таблицы, как кнопкой «Режим» на ленте MS Access.</p>
+              </div>
+              <div class="flex-row">
+                <button type="button" class="btn ${v === "design" ? "btn-primary" : ""}" onclick="DECK.setTab('view','design')">🛠 Режим конструктора (структура)</button>
+                <button type="button" class="btn ${v === "data" ? "btn-accent" : ""}" onclick="DECK.setTab('view','data')">📋 Режим таблицы (данные)</button>
+              </div>
+            </div>
+            ${v === "design" ? `
+              <table class="data-table">
+                <thead><tr><th style="width:32px;"></th><th>Имя поля</th><th>Тип данных</th><th>Описание / Свойства поля</th></tr></thead>
+                <tbody>
+                  <tr><td class="mono">🔑</td><td><strong>Код_реки</strong></td><td class="mono">Счётчик</td><td class="text-xs">Первичный ключ (Длинное целое, Новые значения: Последовательные)</td></tr>
+                  <tr><td></td><td><strong>Название</strong></td><td class="mono">Текстовый</td><td class="text-xs">Размер поля: 30 · Обязательное: Да</td></tr>
+                  <tr><td></td><td><strong>Длина</strong></td><td class="mono">Числовой</td><td class="text-xs">Размер поля: Целое (км)</td></tr>
+                  <tr><td></td><td><strong>Длина_в_РК</strong></td><td class="mono">Числовой</td><td class="text-xs">Размер поля: Целое (км)</td></tr>
+                  <tr><td></td><td><strong>Куда_впадает</strong></td><td class="mono">Текстовый</td><td class="text-xs">Размер поля: 30</td></tr>
+                  <tr><td></td><td><strong>Водохранилища</strong></td><td class="mono">Логический</td><td class="text-xs">Формат: Да/Нет</td></tr>
+                </tbody>
+              </table>
+              <div class="box-primary text-xs">В <strong>Режиме конструктора</strong> данных ещё НЕТ (или они скрыты) — здесь мы проектируем столбцы, задаём типы, размеры и ставим 🔑 Ключевое поле.</div>
+            ` : `
+              <table class="data-table">
+                <thead><tr><th style="width:28px;"></th><th>Код_реки</th><th>Название</th><th>Длина</th><th>Длина_в_РК</th><th>Куда_впадает</th><th>Водохранилища</th></tr></thead>
+                <tbody>
+                  <tr><td class="mono">▶</td><td class="mono">1</td><td>Иртыш</td><td class="mono">4248</td><td class="mono">1835</td><td>Карское море</td><td>☑ Да</td></tr>
+                  <tr><td></td><td class="mono">2</td><td>Тобол</td><td class="mono">1591</td><td class="mono">800</td><td>Карское море</td><td>☑ Да</td></tr>
+                  <tr><td></td><td class="mono">3</td><td>Есиль</td><td class="mono">2450</td><td class="mono">1400</td><td>Карское море</td><td>☑ Да</td></tr>
+                  <tr><td></td><td class="mono">4</td><td>Шидерты</td><td class="mono">502</td><td class="mono">502</td><td>оз. Шаганак</td><td>☐ Нет</td></tr>
+                  <tr style="opacity:0.75;"><td class="mono">*</td><td class="mono text-muted">(Отсутствует)</td><td class="text-muted">новая запись…</td><td></td><td></td><td></td><td>☐</td></tr>
+                </tbody>
+              </table>
+              <div class="box-accent text-xs">В <strong>Режиме таблицы</strong> мы видим строки записей. Обратите внимание на маркеры слева (<span class="mono">▶</span> и <span class="mono">*</span>) и автозаполнение Счётчика!</div>
+            `}
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Ввод и маркеры",
+      shortTitle: "Маркеры записей (*, ✎) и 5 ошибок ввода",
+      timing: "33–42 мин",
+      source: "SB 9 кл. стр. 60–61 · Типовые ошибки ввода в Access",
+      notes: "Объясните разницу между Excel и Access при добавлении строк: в Access новую запись нельзя вставить в середину таблицы — только в строку со звёздочкой (*) в самом конце! А карандаш (✎) означает несохранённые изменения.",
+      render(st) {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Маркеры записей (▶, ✎, *) и 5 типовых ошибок ввода</h2>
+            <div class="grid-3 text-xs">
+              <div class="box-primary"><strong class="mono">▶</strong> <strong>Треугольник</strong> — текущая выделенная запись, уже сохранённая в БД.</div>
+              <div class="box-warning"><strong class="mono">✎</strong> <strong>Карандаш</strong> — запись сейчас редактируется и <strong>ещё НЕ сохранена</strong> на диск!</div>
+              <div class="box-accent"><strong class="mono">*</strong> <strong>Звёздочка</strong> — пустая строка в конце. <strong>Важно:</strong> новые записи добавляются ТОЛЬКО в конец (не в середину, как в Excel)!</div>
+            </div>
+            <div class="font-bold text-xs text-muted">5 ошибок при вводе данных (кликните для решения):</div>
+            <div class="grid-2" style="gap:8px;">
+              ${L2_ERRORS.map(e => {
+                const open = !!st.revealed[e.id];
+                return `
+                  <button type="button" class="interactive-card ${open ? "revealed" : ""}" style="padding:10px 12px;" onclick="DECK.toggleReveal('${e.id}')">
+                    <div class="font-bold text-xs">${e.title}</div>
+                    <div class="text-xs text-muted" style="margin-top:3px;">${e.err}</div>
+                    <div class="text-xs" style="margin-top:5px;">${open ? "✓ " + e.fix : "Нажмите →"}</div>
+                  </button>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Симулятор Счётчика",
+      shortTitle: "Как на самом деле работает «Счётчик»",
+      timing: "42–50 мин",
+      source: "SB 9 кл. стр. 60 · Особенность типа «Счётчик»",
+      notes: "Очень важно показать это живым симулятором! Ученики всегда удивляются, почему после удаления записи #3 новая запись получает #4, а не #3. Объясните: это гарантирует ссылочную целостность (чтобы старые ссылки не перепутались с новым человеком).",
+      render(st) {
+        const c = st.custom;
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <div>
+                <h2 class="slide-h2">Интерактивный симулятор поля «Счётчик»</h2>
+                <p class="lead">Попробуйте добавить запись, удалить #3 и снова добавить ученика.</p>
+              </div>
+              <div class="flex-row">
+                <button type="button" class="btn btn-primary" onclick="L2_AUTO_ACT('add')">+ Добавить ученика</button>
+                <button type="button" class="btn btn-accent" onclick="L2_AUTO_ACT('del3')">✕ Удалить запись #3</button>
+                <button type="button" class="btn" onclick="L2_AUTO_ACT('editFail')">✎ Попробовать изменить ID</button>
+                <button type="button" class="btn" onclick="L2_AUTO_ACT('reset')">↺ Сброс</button>
+              </div>
+            </div>
+            <table class="data-table">
+              <thead><tr><th>🔑 Код_ученика (Счётчик)</th><th>Фамилия и инициалы</th><th>Класс</th></tr></thead>
+              <tbody>
+                ${c.rows.map(r => `<tr><td class="mono font-bold">${r.id}</td><td>${r.name}</td><td class="mono">${r.cls}</td></tr>`).join("")}
+                <tr style="opacity:0.7;"><td class="mono text-muted">* (следующий: ${c.nextId})</td><td class="text-muted">новая строка…</td><td></td></tr>
+              </tbody>
+            </table>
+            <div class="box-primary text-xs"><strong>Журнал СУБД:</strong> ${c.msg}</div>
+            <div class="box-warning text-xs">
+              <strong>Золотое правило Счётчика:</strong> удалённый номер (например, #3) <strong>никогда не выдаётся повторно</strong>, и вручную редактировать это поле запрещено.
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Мини-СУБД · Практика",
+      pillClass: "pill-accent",
+      shortTitle: "Мини-СУБД: Конструктор и «Реки Казахстана»",
+      timing: "50–67 мин",
+      source: "Мини-СУБД (/subd) · t1, g9a-hw2-reki",
+      notes: "Ученики открывают в Мини-СУБД задание «Таблица в режиме Конструктора» (t1), затем — «База данных „Реки Казахстана“» (g9a-hw2-reki). Следите, чтобы правильно выбрали типы и поставили первичный ключ.",
+      render(st, api) {
+        return api.renderMiniSubdTask({
+          key: "g9a2",
+          title: "Практика в Мини-СУБД: Конструктор таблиц",
+          summary: "Создайте структуру таблицы в Режиме конструктора, назначьте первичный ключ 🔑 и заполните строки данных в Режиме таблицы.",
+          taskName: "1) Таблица в режиме Конструктора (t1) · 2) База данных «Реки Казахстана» (g9a-hw2-reki)",
+          steps: ["Нажмите «✓ Задания»", "Выполните «Таблица в режиме Конструктора»", "Доп. в классе: «База данных „Реки Казахстана“»"],
+          meta: "Цели 9.1.2.3 · 9.1.2.2 · 9.1.2.4"
+        });
+      }
+    },
+    {
+      badge: "Этап 3 · Диагностика",
+      shortTitle: "Найди ошибку в структуре таблицы",
+      timing: "67–74 мин",
+      source: "КСП 9.2А Урок 2 · Работа в парах",
+      notes: "Обсудите 4 ошибки проектирования таблицы, которые чаще всего встречаются на практике у 9-классников.",
+      render(st) {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Практикум «Доктор БД»: найди ошибку в структуре таблицы</h2>
+            <p class="lead">Обсудите кейс в паре, затем кликните карточку для проверки.</p>
+            <div class="grid-2">
+              ${L2_BAD_STRUCT.map(item => {
+                const open = !!st.revealed[item.id];
+                return `
+                  <button type="button" class="interactive-card ${open ? "revealed" : ""}" onclick="DECK.toggleReveal('${item.id}')">
+                    <div class="font-bold text-xs">${item.q}</div>
+                    <div class="text-xs" style="margin-top:6px;">${open ? item.a : "Нажмите, чтобы увидеть диагноз →"}</div>
+                  </button>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 3 · Блиц и ДЗ",
+      shortTitle: "Итоги урока и домашнее задание",
+      timing: "74–80 мин",
+      source: "КСП 9.2А Урок 2 · ДЗ g9a-p2-pyat-tipov, g9a-p2-pogoda",
+      notes: "Закрепите 5 ключевыми вопросами урока и задайте два задания в Мини-СУБД: базовое «Пять типов полей» и повышенного уровня «Таблица „Погода“ на весь год».",
+      render(st) {
+        const qa = [
+          { k: "q1", q: "Сколько баз данных может быть одновременно открыто в одном окне Access?", a: "Только ОДНА (.accdb), но в ней можно создать множество таблиц и других объектов." },
+          { k: "q2", q: "Какие 6 объектов существуют в MS Access?", a: "Таблица, Запрос, Форма, Отчёт, Макрос, Модуль (VBA)." },
+          { k: "q3", q: "Что означают маркеры «*» и «✎» в области выделения записей?", a: "«*» — пустая строка для новой записи в конце таблицы; «✎» — запись редактируется и ещё не сохранена." },
+          { k: "q4", q: "Удалили запись #3 с типом «Счётчик». Какой номер получит следующая новая запись?", a: "#4 (удалённый номер никогда не используется повторно)." }
+        ];
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Блиц-итоги урока 2 и домашнее задание</h2>
+            <div class="grid-2">
+              ${qa.map((x, i) => `
+                <button type="button" class="interactive-card ${st.revealed[x.k] ? "revealed" : ""}" onclick="DECK.toggleReveal('${x.k}')">
+                  <div class="font-bold text-xs">${i + 1}. ${x.q}</div>
+                  <div class="text-xs" style="margin-top:5px;">${st.revealed[x.k] ? x.a : "Нажмите для ответа →"}</div>
+                </button>
+              `).join("")}
+            </div>
+            <div class="box-primary flex-between text-xs">
+              <div>
+                <strong>Домашнее задание в Мини-СУБД (/subd):</strong><br>
+                • Базовый уровень: <strong>«Пять типов полей»</strong> (g9a-p2-pyat-tipov)<br>
+                • Повышенный уровень: <strong>«Таблица „Погода“ на весь год»</strong> (g9a-p2-pogoda)
+              </div>
+              <a class="btn btn-accent" href="/subd" target="_blank" rel="noopener noreferrer">Открыть Мини-СУБД ↗</a>
+            </div>
+          </div>
+        `;
+      }
+    }
+  ]
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,650 @@
+@import "tailwindcss";
+@import "katex/dist/katex.min.css";
+
+/* Design tokens — "Lab Notebook": warm paper on a dot grid, ultramarine ink as
+   the primary, a vermilion pencil for accents and focus. Square-ish corners and
+   flat offset shadows (a sheet lying on a sheet) instead of soft blur.
+   Components use the semantic names (bg-surface, text-muted, border-border,
+   bg-primary, text-accent ...) so themes only change variables.
+   Contrast: text tokens >= 4.5:1 on surfaces (>= 7:1 in high contrast).
+   *-fg tokens are the text colour to put on a solid bg-* of the same name.
+   --ink: hard outlines/button shadows; --shadow-ink: card offset; --grid: dots. */
+:root {
+  --background: #f3efe6;
+  --surface: #fffcf5;
+  --surface-2: #ebe5d8;
+  --foreground: #16161d;
+  --muted: #5b5750;
+  --border: #d8d0bf;
+  --border-strong: #9a917f;
+  --primary: #2b3bb3;
+  --primary-hover: #1f2c8c;
+  --primary-soft: #e4e6f7;
+  --primary-fg: #ffffff;
+  --accent: #b83a0b;
+  --accent-soft: #fbe6da;
+  --accent-fg: #ffffff;
+  --success: #1d6b34;
+  --success-soft: #e1f0e2;
+  --success-fg: #ffffff;
+  --warning: #8f5300;
+  --warning-soft: #f8ecd4;
+  --danger: #b0173d;
+  --danger-soft: #f9e1e6;
+  --danger-fg: #ffffff;
+  --info: #1f5f8f;
+  --info-soft: #e0ecf5;
+  --ring: #b83a0b;
+  --ink: #16161d;
+  --shadow-ink: #d6cdb9;
+  --grid: #dcd4c3;
+  --cover: #16161d;
+  --cover-fg: #f3efe6;
+  --cover-accent: #ff8f5e;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --background: #111216;
+    --surface: #191a20;
+    --surface-2: #22232b;
+    --foreground: #ede9df;
+    --muted: #a7a296;
+    --border: #31323c;
+    --border-strong: #5a5b68;
+    --primary: #9aa5ff;
+    --primary-hover: #bcc3ff;
+    --primary-soft: #1f2350;
+    --primary-fg: #0a0d33;
+    --accent: #ff8f5e;
+    --accent-soft: #3a1d10;
+    --accent-fg: #2a0c00;
+    --success: #7bd893;
+    --success-soft: #11301b;
+    --success-fg: #05200d;
+    --warning: #f3b850;
+    --warning-soft: #33260b;
+    --danger: #ff8fa6;
+    --danger-soft: #3d1220;
+    --danger-fg: #2a0510;
+    --info: #8cc4ef;
+    --info-soft: #13263a;
+    --ring: #ff8f5e;
+    --ink: #ede9df;
+    --shadow-ink: #050507;
+    --grid: #23242c;
+    --cover: #08090c;
+    --cover-fg: #ede9df;
+    --cover-accent: #ff8f5e;
+    color-scheme: dark;
+  }
+}
+
+/* Explicit choice from the theme switcher (cookie "theme" → <html data-theme>). */
+:root[data-theme="dark"] {
+  --background: #111216;
+  --surface: #191a20;
+  --surface-2: #22232b;
+  --foreground: #ede9df;
+  --muted: #a7a296;
+  --border: #31323c;
+  --border-strong: #5a5b68;
+  --primary: #9aa5ff;
+  --primary-hover: #bcc3ff;
+  --primary-soft: #1f2350;
+  --primary-fg: #0a0d33;
+  --accent: #ff8f5e;
+  --accent-soft: #3a1d10;
+  --accent-fg: #2a0c00;
+  --success: #7bd893;
+  --success-soft: #11301b;
+  --success-fg: #05200d;
+  --warning: #f3b850;
+  --warning-soft: #33260b;
+  --danger: #ff8fa6;
+  --danger-soft: #3d1220;
+  --danger-fg: #2a0510;
+  --info: #8cc4ef;
+  --info-soft: #13263a;
+  --ring: #ff8f5e;
+  --ink: #ede9df;
+  --shadow-ink: #050507;
+  --grid: #23242c;
+  --cover: #08090c;
+  --cover-fg: #ede9df;
+  --cover-accent: #ff8f5e;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-fg: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-fg: var(--primary-fg);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-fg: var(--accent-fg);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-success-fg: var(--success-fg);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-fg: var(--danger-fg);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-ink: var(--ink);
+  --color-cover: var(--cover);
+  --color-cover-fg: var(--cover-fg);
+  --color-cover-accent: var(--cover-accent);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-code);
+  --font-display: var(--font-heading);
+
+  --radius-xs: 1px;
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 4px;
+  --radius-xl: 5px;
+  --radius-2xl: 6px;
+  --radius-3xl: 8px;
+
+  --shadow-2xs: 1px 1px 0 0 var(--shadow-ink);
+  --shadow-xs: 2px 2px 0 0 var(--shadow-ink);
+  --shadow-sm: 3px 3px 0 0 var(--shadow-ink);
+  --shadow: 3px 3px 0 0 var(--shadow-ink);
+  --shadow-md: 4px 4px 0 0 var(--shadow-ink);
+  --shadow-lg: 6px 6px 0 0 var(--shadow-ink);
+  --shadow-xl: 8px 8px 0 0 var(--shadow-ink);
+  --shadow-2xl: 10px 10px 0 0 var(--shadow-ink);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ISO 9241-210 & ISO 9241-171 Human-Centred Ergonomics & Accessibility */
+/* 1. Font Scaling */
+html[data-font-scale="medium"] {
+  font-size: 112.5%;
+}
+html[data-font-scale="large"] {
+  font-size: 125%;
+}
+
+/* 2. High Contrast Mode (WCAG AAA contrast ratios > 7:1)
+   Selectors carry one more attribute than the theme rules above so high
+   contrast always wins, including when the theme follows the OS. */
+:root[data-high-contrast="true"] {
+  --background: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f1eee6;
+  --foreground: #000000;
+  --muted: #2a2720;
+  --border: #4a463d;
+  --border-strong: #000000;
+  --primary: #1a2580;
+  --primary-hover: #10195c;
+  --primary-soft: #dfe2f7;
+  --primary-fg: #ffffff;
+  --accent: #8f2c05;
+  --accent-soft: #f9e0d2;
+  --accent-fg: #ffffff;
+  --success: #0b4a1e;
+  --success-soft: #d9efdc;
+  --success-fg: #ffffff;
+  --warning: #6b3a00;
+  --warning-soft: #f6e7c8;
+  --danger: #7f0f2a;
+  --danger-soft: #f7dce2;
+  --danger-fg: #ffffff;
+  --info: #123f63;
+  --info-soft: #dbe8f3;
+  --ring: #000000;
+  --ink: #000000;
+  --shadow-ink: #000000;
+  --grid: #e4dfd2;
+  --cover: #000000;
+  --cover-fg: #ffffff;
+  --cover-accent: #ffb08a;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"])[data-high-contrast="true"] {
+    --background: #000000;
+    --surface: #0b0b0f;
+    --surface-2: #16161c;
+    --foreground: #ffffff;
+    --muted: #dcd8ce;
+    --border: #8d8c99;
+    --border-strong: #d0cfdb;
+    --primary: #c3c9ff;
+    --primary-hover: #dde0ff;
+    --primary-soft: #181c45;
+    --primary-fg: #000000;
+    --accent: #ffb08a;
+    --accent-soft: #3a1a0b;
+    --accent-fg: #000000;
+    --success: #9af0b0;
+    --success-soft: #073318;
+    --success-fg: #000000;
+    --warning: #ffd36b;
+    --warning-soft: #3a2c05;
+    --danger: #ffb3c3;
+    --danger-soft: #46101f;
+    --danger-fg: #000000;
+    --info: #b5dcff;
+    --info-soft: #10243a;
+    --ring: #ffffff;
+    --ink: #ffffff;
+    --shadow-ink: #8d8c99;
+    --grid: #1a1a20;
+    --cover: #000000;
+    --cover-fg: #ffffff;
+    --cover-accent: #ffb08a;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"][data-high-contrast="true"] {
+  --background: #000000;
+  --surface: #0b0b0f;
+  --surface-2: #16161c;
+  --foreground: #ffffff;
+  --muted: #dcd8ce;
+  --border: #8d8c99;
+  --border-strong: #d0cfdb;
+  --primary: #c3c9ff;
+  --primary-hover: #dde0ff;
+  --primary-soft: #181c45;
+  --primary-fg: #000000;
+  --accent: #ffb08a;
+  --accent-soft: #3a1a0b;
+  --accent-fg: #000000;
+  --success: #9af0b0;
+  --success-soft: #073318;
+  --success-fg: #000000;
+  --warning: #ffd36b;
+  --warning-soft: #3a2c05;
+  --danger: #ffb3c3;
+  --danger-soft: #46101f;
+  --danger-fg: #000000;
+  --info: #b5dcff;
+  --info-soft: #10243a;
+  --ring: #ffffff;
+  --ink: #ffffff;
+  --shadow-ink: #8d8c99;
+  --grid: #1a1a20;
+  --cover: #000000;
+  --cover-fg: #ffffff;
+  --cover-accent: #ffb08a;
+  color-scheme: dark;
+}
+
+/* Printable "paper" (summative prep sheets): always the light palette so the
+   on-screen preview matches the printout, whatever the app theme. */
+.paper-sheet {
+  --background: #f3efe6;
+  --surface: #fffcf5;
+  --surface-2: #ebe5d8;
+  --foreground: #16161d;
+  --muted: #5b5750;
+  --border: #d8d0bf;
+  --border-strong: #9a917f;
+  --primary: #2b3bb3;
+  --primary-hover: #1f2c8c;
+  --primary-soft: #e4e6f7;
+  --primary-fg: #ffffff;
+  --accent: #b83a0b;
+  --accent-soft: #fbe6da;
+  --accent-fg: #ffffff;
+  --success: #1d6b34;
+  --success-soft: #e1f0e2;
+  --success-fg: #ffffff;
+  --warning: #8f5300;
+  --warning-soft: #f8ecd4;
+  --danger: #b0173d;
+  --danger-soft: #f9e1e6;
+  --danger-fg: #ffffff;
+  --info: #1f5f8f;
+  --info-soft: #e0ecf5;
+  --ring: #b83a0b;
+  --ink: #16161d;
+  --shadow-ink: #d6cdb9;
+  --grid: #dcd4c3;
+  --cover: #16161d;
+  --cover-fg: #f3efe6;
+  --cover-accent: #ff8f5e;
+  color-scheme: light;
+  color: var(--foreground);
+  background-image: none;
+}
+:root[data-high-contrast="true"] .paper-sheet {
+  --background: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f1eee6;
+  --foreground: #000000;
+  --muted: #2a2720;
+  --border: #4a463d;
+  --border-strong: #000000;
+  --primary: #1a2580;
+  --primary-hover: #10195c;
+  --primary-soft: #dfe2f7;
+  --primary-fg: #ffffff;
+  --accent: #8f2c05;
+  --accent-soft: #f9e0d2;
+  --accent-fg: #ffffff;
+  --success: #0b4a1e;
+  --success-soft: #d9efdc;
+  --success-fg: #ffffff;
+  --warning: #6b3a00;
+  --warning-soft: #f6e7c8;
+  --danger: #7f0f2a;
+  --danger-soft: #f7dce2;
+  --danger-fg: #ffffff;
+  --info: #123f63;
+  --info-soft: #dbe8f3;
+  --ring: #000000;
+  --ink: #000000;
+  --shadow-ink: #000000;
+  --grid: #e4dfd2;
+  --cover: #000000;
+  --cover-fg: #ffffff;
+  --cover-accent: #ffb08a;
+  color-scheme: light;
+  color: var(--foreground);
+}
+
+/* 3. Reduced Motion (ISO 9241-171 §8.3 / WCAG 2.3.3) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+html[data-reduced-motion="true"] *,
+html[data-reduced-motion="true"] *::before,
+html[data-reduced-motion="true"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* 4. Dyslexia / High Legibility typography */
+html[data-dyslexic-font="true"] {
+  letter-spacing: 0.04em;
+  word-spacing: 0.08em;
+}
+html[data-dyslexic-font="true"] p,
+html[data-dyslexic-font="true"] li,
+html[data-dyslexic-font="true"] span {
+  line-height: 1.8;
+}
+
+body {
+  background-color: var(--background);
+  background-image: radial-gradient(var(--grid) 1px, transparent 1.2px);
+  background-size: 22px 22px;
+  background-attachment: fixed;
+  color: var(--foreground);
+}
+:root[data-high-contrast="true"] body {
+  background-image: none;
+}
+
+h1,
+.font-display {
+  font-family: var(--font-display), var(--font-body), system-ui, sans-serif;
+  letter-spacing: -0.01em;
+}
+.prose-content h1 {
+  font-family: inherit;
+}
+
+/* Small monospace caps label: section kickers, table heads, meta. */
+.label-mono {
+  font-family: var(--font-code), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Marker-pen highlight behind a word. */
+.mark-hl {
+  background-image: linear-gradient(transparent 58%, var(--accent-soft) 58%, var(--accent-soft) 92%, transparent 92%);
+}
+
+:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Navigation progress bar (components/shell/top-progress.tsx). Hidden for the
+   first 150ms so instant transitions do not flash it. */
+@keyframes top-progress-run {
+  0% { transform: scaleX(0); opacity: 0; }
+  2% { transform: scaleX(0.05); opacity: 0; }
+  3% { opacity: 1; }
+  15% { transform: scaleX(0.4); }
+  50% { transform: scaleX(0.7); }
+  100% { transform: scaleX(0.9); opacity: 1; }
+}
+@keyframes top-progress-done {
+  0% { transform: scaleX(0.9); opacity: 1; }
+  60% { transform: scaleX(1); opacity: 1; }
+  100% { transform: scaleX(1); opacity: 0; }
+}
+.top-progress-run {
+  animation: top-progress-run 8s cubic-bezier(0.1, 0.7, 0.3, 1) forwards;
+}
+.top-progress-done {
+  animation: top-progress-done 0.35s ease-out forwards;
+}
+
+/* Markdown rendered from theory packs and questions */
+.prose-content {
+  line-height: 1.65;
+}
+.prose-content > * + * {
+  margin-top: 0.75em;
+}
+.prose-content h2 {
+  font-size: 1.25rem;
+  font-weight: 650;
+  margin-top: 1.25em;
+}
+.prose-content h3 {
+  font-size: 1.075rem;
+  font-weight: 650;
+  margin-top: 1em;
+}
+.prose-content ul {
+  list-style: disc;
+  padding-left: 1.4em;
+}
+.prose-content ol {
+  list-style: decimal;
+  padding-left: 1.4em;
+}
+.prose-content li + li {
+  margin-top: 0.25em;
+}
+.prose-content a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.prose-content code {
+  font-family: var(--font-code), ui-monospace, monospace;
+  font-size: 0.9em;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.05em 0.3em;
+}
+.prose-content pre {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--primary);
+  border-radius: 2px;
+  padding: 0.85em 1em;
+  overflow-x: auto;
+}
+.prose-content pre code {
+  border: 0;
+  background: transparent;
+  padding: 0;
+}
+.prose-content table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95em;
+}
+.prose-content th,
+.prose-content td {
+  border: 1px solid var(--border);
+  padding: 0.4em 0.6em;
+  text-align: left;
+  vertical-align: top;
+}
+.prose-content th {
+  background: var(--surface-2);
+  font-weight: 600;
+}
+.prose-content blockquote {
+  border-left: 3px solid var(--accent);
+  padding-left: 0.9em;
+  color: var(--muted);
+}
+.prose-content .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* Print styles for Summative Preparation and Worksheets */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm 12mm;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 11pt !important;
+  }
+
+  /* Hide app shell and navigation elements */
+  nav,
+  header,
+  aside,
+  footer:not(.print-footer),
+  button:not(.print-keep) {
+    display: none !important;
+  }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  /* Avoid breaking tasks or rubric tables across pages */
+  .break-inside-avoid {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Ensure high contrast and sharp borders */
+  table {
+    border-collapse: collapse !important;
+  }
+
+  th, td {
+    border-color: #737373 !important;
+  }
+}
+
+
+/* Repeat site (repeat.<domain>): its own calm palette — mint paper, deep teal
+   ink, a warm amber for "due today" — so students can tell it from the main
+   site at a glance. The same semantic tokens, re-pointed inside .repeat-theme. */
+.repeat-theme {
+  --background: #eef5f1;
+  --surface: #fbfefc;
+  --surface-2: #dfece5;
+  --foreground: #10241d;
+  --muted: #4c615a;
+  --border: #c9dcd2;
+  --border-strong: #8aa69a;
+  --primary: #0f6b5a;
+  --primary-hover: #0a5245;
+  --primary-soft: #d5ece5;
+  --primary-fg: #ffffff;
+  --accent: #a4520a;
+  --accent-soft: #fbe8d2;
+  --accent-fg: #ffffff;
+  --ring: #0f6b5a;
+  --ink: #10241d;
+  --shadow-ink: #c3d8cd;
+  --grid: #d3e3da;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .repeat-theme {
+    --background: #0d1714;
+    --surface: #13201c;
+    --surface-2: #1b2b26;
+    --foreground: #e3efe9;
+    --muted: #9db3aa;
+    --border: #263a33;
+    --border-strong: #4d6b60;
+    --primary: #6fd3bb;
+    --primary-hover: #9be4d2;
+    --primary-soft: #133a31;
+    --primary-fg: #04201a;
+    --accent: #f2b266;
+    --accent-soft: #3a2810;
+    --accent-fg: #2a1600;
+    --ring: #6fd3bb;
+    --ink: #e3efe9;
+    --shadow-ink: #050a08;
+    --grid: #1a2823;
+  }
+}
+:root[data-theme="dark"] .repeat-theme {
+  --background: #0d1714;
+  --surface: #13201c;
+  --surface-2: #1b2b26;
+  --foreground: #e3efe9;
+  --muted: #9db3aa;
+  --border: #263a33;
+  --border-strong: #4d6b60;
+  --primary: #6fd3bb;
+  --primary-hover: #9be4d2;
+  --primary-soft: #133a31;
+  --primary-fg: #04201a;
+  --accent: #f2b266;
+  --accent-soft: #3a2810;
+  --accent-fg: #2a1600;
+  --ring: #6fd3bb;
+  --ink: #e3efe9;
+  --shadow-ink: #050a08;
+  --grid: #1a2823;
+}

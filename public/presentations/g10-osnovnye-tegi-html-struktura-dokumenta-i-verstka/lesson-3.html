@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>10.2А · Урок 3 · Физическое и логическое форматирование текста</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+</head>
+<body>
+<script src="../_engine/deck.js"></script>
+<script>
+const L3_QUIZ = [
+  { tag: "<b>", kind: "phys", hint: "просто жирный внешний вид" },
+  { tag: "<strong>", kind: "log", hint: "особая смысловая важность" },
+  { tag: "<i>", kind: "phys", hint: "просто наклонный шрифт" },
+  { tag: "<em>", kind: "log", hint: "смысловое ударение (emphasis)" },
+  { tag: "<del>", kind: "log", hint: "удалённый текст (старая цена)" },
+  { tag: "<ins>", kind: "log", hint: "добавленный текст" },
+  { tag: "<u>", kind: "phys", hint: "подчёркивание" },
+  { tag: "<mark>", kind: "log", hint: "выделение маркером" }
+];
+
+const L3_FORMULAS_INIT = `<p><strong>Математика:</strong> a<sup>2</sup> − b<sup>2</sup> = (a − b)(a + b)</p>
+<p><strong>Физика:</strong> E = mc<sup>2</sup>, v<sub>ср</sub> = S / t</p>
+<p><strong>Химия:</strong> 2H<sub>2</sub> + O<sub>2</sub> = 2H<sub>2</sub>O, <mark>H<sub>2</sub>SO<sub>4</sub></mark></p>`;
+
+DECK_INITIALS = { formulas: L3_FORMULAS_INIT };
+DECK_PRESETS = {
+  formulas: [
+    () => DECK.resetEditor("formulas", L3_FORMULAS_INIT),
+    () => DECK.resetEditor("formulas", `<p><font face="Arial" size="5" color="green"><strong>Спецпредложение!</strong></font></p>\n<p>Старая цена: <del>4500 тг</del> → Новая: <ins><mark>3200 тг</mark></ins></p>`)
+  ]
+};
+
+initDeck({
+  badge: "</> 10.2А · Урок 3",
+  title: "Теги форматирования текста: физическое и логическое",
+  subtitle: "10 класс · 2 четверть · Цели 10.1.2.3, 10.1.2.5 · 80 мин · Мини-HTML",
+  initialState: {
+    selected: { fFace: "Arial", fSize: 5, fColor: "green" }
+  },
+  slides: [
+    {
+      badge: "Этап 1 · Введение",
+      shortTitle: "Титул и цели урока",
+      timing: "0–2 мин",
+      source: "КСП 10.2А Урок 3 · SB 10 кл. стр. 75–77",
+      notes: "Озвучьте тему, цели 10.1.2.3 и 10.1.2.5. Подчеркните межпредметную связь с математикой, физикой и химией (формулы).",
+      render() {
+        return `
+          <div class="stack">
+            <div class="text-xs font-bold text-muted" style="text-transform:uppercase;">Информатика · 10 класс · Раздел 10.2А · Урок 3 из 10</div>
+            <h1 class="slide-h1">Форматирование текста и шрифта</h1>
+            <p class="lead">Сравним физическое и логическое (семантическое) форматирование, сверстаем научные формулы с <span class="mono">&lt;sup&gt;</span> и <span class="mono">&lt;sub&gt;</span> и настроим <span class="mono">&lt;font&gt;</span>.</p>
+            <div class="grid-2">
+              <div class="box-primary">
+                <div class="box-title mono">Цель 10.1.2.3</div>
+                <div class="text-xs">Применять теги форматирования текста (<span class="mono">&lt;b&gt;, &lt;strong&gt;, &lt;i&gt;, &lt;em&gt;, &lt;del&gt;, &lt;ins&gt;, &lt;mark&gt;, &lt;sup&gt;, &lt;sub&gt;</span>).</div>
+              </div>
+              <div class="box-accent">
+                <div class="box-title mono" style="color:var(--accent);">Цель 10.1.2.5</div>
+                <div class="text-xs">Использовать атрибуты тега <span class="mono">&lt;font&gt;</span> (<span class="mono">face, size 1–7, color</span>) и соблюдать принцип «матрёшки».</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 1 · Стартер",
+      shortTitle: "Приём «Два близнеца»: <b> vs <strong>",
+      timing: "2–10 мин",
+      source: "КСП 10.2А Урок 3 · SB стр. 75",
+      notes: "Спросите класс: зачем в HTML два разных тега для жирного шрифта? Нажмите кнопку «Раскрыть секрет» после обсуждения.",
+      render(st) {
+        return `
+          <h2 class="slide-h2">Стартер «Два близнеца»</h2>
+          <div class="grid-2">
+            <div class="box stack">
+              <pre class="code-block">&lt;b&gt;Внимание!&lt;/b&gt;</pre>
+              <div style="padding:14px;background:#fff;color:#111;border-radius:8px;border:1px solid var(--border);font-size:18px;"><b>Внимание!</b></div>
+            </div>
+            <div class="box stack">
+              <pre class="code-block">&lt;strong&gt;Внимание!&lt;/strong&gt;</pre>
+              <div style="padding:14px;background:#fff;color:#111;border-radius:8px;border:1px solid var(--border);font-size:18px;"><strong>Внимание!</strong></div>
+            </div>
+          </div>
+          <button type="button" class="interactive-card ${st.revealed.twins ? "revealed" : ""}" onclick="DECK.toggleReveal('twins')">
+            <div class="font-bold">Вопрос: выглядят абсолютно одинаково! Зачем создатели HTML придумали оба тега?</div>
+            <div class="text-xs" style="margin-top:6px;">
+              ${st.revealed.twins
+                ? "✓ <strong>&lt;b&gt;</strong> — физическое форматирование (только внешний вид). <strong>&lt;strong&gt;</strong> — логическое (семантическое): сообщает поисковым системам и экранным дикторам для слабовидящих, что слово особо важно по смыслу!"
+                : "Нажмите после обсуждения в классе →"}
+            </div>
+          </button>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Теория + Тренажёр",
+      shortTitle: "Физическое vs Логическое форматирование",
+      timing: "10–20 мин",
+      source: "SB 10 кл. стр. 75–76",
+      notes: "Разберите таблицу пар и закрепите на интерактивном классификаторе справа.",
+      render(st) {
+        let ok = 0;
+        L3_QUIZ.forEach(t => { if (st.quiz[t.tag] === t.kind) ok++; });
+        return `
+          <h2 class="slide-h2">Физические и логические (семантические) теги</h2>
+          <div class="grid-12">
+            <div class="col-6">
+              <table class="data-table">
+                <thead><tr><th>Оформление</th><th>Физический</th><th>Логический</th></tr></thead>
+                <tbody>
+                  <tr><td><strong>Полужирный</strong></td><td class="mono">&lt;b&gt;</td><td class="mono">&lt;strong&gt;</td></tr>
+                  <tr><td><em>Курсив</em></td><td class="mono">&lt;i&gt;</td><td class="mono">&lt;em&gt;</td></tr>
+                  <tr><td><u>Подчёркнутый</u></td><td class="mono">&lt;u&gt;</td><td class="mono">&lt;ins&gt;</td></tr>
+                  <tr><td><s>Зачёркнутый</s></td><td class="mono">&lt;s&gt;</td><td class="mono">&lt;del&gt;</td></tr>
+                  <tr><td>Маркер / мелкий</td><td class="mono">&lt;small&gt;</td><td class="mono">&lt;mark&gt;</td></tr>
+                  <tr><td>Индексы</td><td class="mono" colspan="2">&lt;sup&gt; (верхний: x²) · &lt;sub&gt; (нижний: H₂O)</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="col-6 box stack">
+              <div class="flex-between">
+                <strong class="text-xs" style="color:var(--primary);">Классификатор тегов</strong>
+                <span class="pill pill-success mono">${ok} / ${L3_QUIZ.length}</span>
+              </div>
+              ${L3_QUIZ.map(t => {
+                const p = st.quiz[t.tag];
+                const cls = p ? (p === t.kind ? "ok" : "bad") : "";
+                return `
+                  <div class="quiz-row ${cls}">
+                    <div><strong class="mono">${DECK.esc(t.tag)}</strong> <span class="text-xs text-muted">${t.hint}</span></div>
+                    <div class="flex-row" style="gap:4px;">
+                      <button type="button" class="btn ${p === "phys" ? "btn-primary" : ""}" style="padding:2px 7px;" onclick="DECK.pickQuiz('${DECK.esc(t.tag)}','phys')">Физ.</button>
+                      <button type="button" class="btn ${p === "log" ? "btn-primary" : ""}" style="padding:2px 7px;" onclick="DECK.pickQuiz('${DECK.esc(t.tag)}','log')">Лог.</button>
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Живая песочница",
+      shortTitle: "Формулы <sup>, <sub> и тег <font>",
+      timing: "20–32 мин",
+      source: "SB 10 кл. стр. 76–77",
+      notes: "Попробуйте редактировать формулы прямо в окне слева и переключите на пресет «Акционный буклет» с <del>, <ins> и <font>.",
+      render(st, api) {
+        return `
+          <div>
+            <h2 class="slide-h2">Индексы <span class="mono">&lt;sup&gt;/&lt;sub&gt;</span> и шрифт <span class="mono">&lt;font&gt;</span></h2>
+            <p class="lead">Переключайте пресеты или допишите свою химическую/математическую формулу прямо на слайде.</p>
+          </div>
+          ${api.renderPlayground({
+            key: "formulas",
+            initial: L3_FORMULAS_INIT,
+            tabTitle: "formulas.html",
+            presets: [
+              { label: "Справочник формул" },
+              { label: "Акционный буклет (<font>, <del>, <ins>)" }
+            ]
+          })}
+          <div class="box-danger text-xs">
+            <strong>Принцип «матрёшки» (вложенность):</strong> кто открылся последним — закрывается первым! Верно: <span class="mono font-bold">&lt;b&gt;&lt;i&gt;Текст&lt;/i&gt;&lt;/b&gt;</span> · Неверно: <span class="mono">&lt;b&gt;&lt;i&gt;Текст&lt;/b&gt;&lt;/i&gt;</span>.
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Мини-HTML №1 · Практика",
+      pillClass: "pill-accent",
+      shortTitle: "Мини-HTML: Объявление о конкурсе",
+      timing: "32–52 мин",
+      source: "Мини-HTML (/html?task=g10-html-obyavlenie)",
+      notes: "Реальное задание сайта на все теги урока: strong, em, mark, sub, sup, del и br.",
+      render(st, api) {
+        return api.renderMiniHtmlTask({
+          taskId: "g10-html-obyavlenie",
+          title: "Практика 1: Объявление — теги форматирования текста",
+          summary: "Оформите объявление в index.html с помощью <strong>, <em>, <mark>, <sub>, <sup>, <del> и <br>.",
+          steps: ["<strong>Внимание!</strong>", "<em>конкурс</em>", "<mark>Мир науки</mark>", "H<sub>2</sub>O и a<sup>2</sup>", "<del>10:00</del>"],
+          meta: "10 мин · Цель 10.1.2.3"
+        });
+      }
+    },
+    {
+      badge: "Мини-HTML №2 · Практика",
+      pillClass: "pill-accent",
+      shortTitle: "Мини-HTML: Правка цены (del, ins, mark)",
+      timing: "52–70 мин",
+      source: "Мини-HTML (/html?task=g10-html-pr-pravka-ceny)",
+      notes: "Второе задание в Мини-HTML на акционное объявление со скидкой.",
+      render(st, api) {
+        return api.renderMiniHtmlTask({
+          taskId: "g10-html-pr-pravka-ceny",
+          title: "Практика 2: Объявление о скидке (del, ins, mark, small)",
+          summary: "Оформите старую и новую цены, акцент и сноску прямо в редакторе Мини-HTML.",
+          steps: ["<del> старая цена", "<ins> новая цена", "<mark> выделение", "<small> примечание"],
+          meta: "8 мин · Цель 10.1.2.3"
+        });
+      }
+    },
+    {
+      badge: "Этап 3 · Мини-тест и ДЗ",
+      shortTitle: "Проверка вложенности и ДЗ «Формулы»",
+      timing: "70–80 мин",
+      source: "КСП 10.2А Урок 3 · Мини-HTML (g10-html-dz-formuly)",
+      notes: "Разберите 3 вопроса мини-теста и выдайте ДЗ «Справочник формул» (g10-html-dz-formuly).",
+      render(st) {
+        const qa = [
+          { k: "l3q1", q: "Какой код записан БЕЗ ошибки вложенности: <b><i>Hi</b></i> или <b><i>Hi</i></b>?", a: "<b><i>Hi</i></b> — теги закрываются в обратном порядке." },
+          { k: "l3q2", q: "Как записать формулу серной кислоты H₂SO₄ в HTML?", a: "H<sub>2</sub>SO<sub>4</sub> (нижний индекс — <sub>)." },
+          { k: "l3q3", q: "Какой диапазон значений имеет атрибут size у тега <font>?", a: "От 1 (самый мелкий) до 7 (самый крупный), по умолчанию 3." }
+        ];
+        return `
+          <h2 class="slide-h2">Итоги урока и домашнее задание</h2>
+          <div class="stack">
+            ${qa.map((item, i) => `
+              <button type="button" class="interactive-card ${st.revealed[item.k] ? "revealed" : ""}" onclick="DECK.toggleReveal('${item.k}')">
+                <div class="font-bold text-sm">${i + 1}. ${DECK.esc(item.q)}</div>
+                <div class="text-xs" style="margin-top:4px;">${st.revealed[item.k] ? "✓ " + DECK.esc(item.a) : "Показать ответ →"}</div>
+              </button>
+            `).join("")}
+          </div>
+          <div class="box-primary flex-between text-xs">
+            <div><strong>Домашнее задание:</strong> оформить страницу «Справочник формул» (верхние/нижние индексы + полужирные названия).</div>
+            <a class="btn btn-accent" href="/html?task=g10-html-dz-formuly" target="_blank" rel="noopener noreferrer">ДЗ в Мини-HTML (g10-html-dz-formuly) ↗</a>
+          </div>
+        `;
+      }
+    }
+  ]
+});
+</script>
+</body>
+</html>

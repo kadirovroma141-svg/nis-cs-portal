@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>8.3А · Урок 1 · Классификация типов данных в C++</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+  <link rel="stylesheet" href="../_engine/lesson.css" />
+</head>
+<body class="lesson">
+<script src="../_engine/deck.js"></script>
+<script src="../_engine/lesson.js"></script>
+<script>
+/*
+ * 8.3А «Циклические алгоритмы (язык программирования C++)», тема «Типы алгоритмов», урок 1 —
+ * «Классификация типов данных. Числовые, символьные, строковые и логические типы».
+ * Цель обучения (КТП 2026): 8.4.3.1 классифицировать типы данных в программировании.
+ * Ход урока — КСП content/lesson-plans/g8-tipy-algoritmov.json, урок 1 (начало 10 мин, середина 60, конец 10).
+ * Содержание — только из материалов: SB 8 кл. стр. 100–108; презентация «Типы алгоритмов и логика C++» стр. 1–4;
+ * рабочий лист «Типы алгоритмов и логика в C++» стр. 1. Подготовка к СОР 8.3А и СОЧ 3 четверти (задание на тип
+ * данных — КО, 2 балла): задания СОР/СОЧ не повторяются. Диапазон int — 32-битный (в SB стр. 101 опечатка для 64 бит).
+ */
+
+/* ---------- общие помощники раздела 8.3А: код C++, трассировка по шагам, блок-схемы ---------- */
+const { src, reveal, statements, quiz, matcher, orderGame, errorTable } = LESSON;
+const S = () => window.DECK_STATE;
+const SB = "Учебник 8 кл., ";
+const TA = "Презентация «Типы алгоритмов и логика C++», ";
+const CA = "Презентация «Циклические алгоритмы в C++», ";
+const PF = "Презентация «Циклы for while», ";
+const RL = "Рабочий лист «Типы алгоритмов и логика в C++», ";
+const H = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+/* Код C++: num — нумерация строк, hl — подсвеченные строки, size — кегль. */
+function code(txt, o = {}) {
+  const lines = txt.replace(/^\n/, "").replace(/\n\s*$/, "").split("\n");
+  const size = o.size || 15;
+  const body = lines
+    .map((l, i) => {
+      const n = o.num ? `<span style="opacity:.45;display:inline-block;width:2.1em;user-select:none">${i + 1}</span>` : "";
+      const on = (o.hl || []).includes(i + 1);
+      return `<span style="display:block;${on ? "background:rgba(255,196,0,.22);" : ""}">${n}${H(l) || " "}</span>`;
+    })
+    .join("");
+  return `<pre class="code-block" style="font-size:${size}px;line-height:1.42;margin:0;${o.style || ""}">${body}</pre>`;
+}
+
+/* Пошаговая трассировка: строки таблицы открываются по одной; пустые строки — бланк для учеников. */
+function stepper(key, head, rows, o = {}) {
+  const n = Math.min(Number(S().selected[key] || 0), rows.length);
+  const fs = o.size || 16;
+  const th = head.map((h) => `<th style="padding:5px 8px;">${h}</th>`).join("");
+  const tr = rows
+    .map((r, i) => {
+      const on = i < n;
+      const cur = i === n - 1;
+      return `<tr style="${cur ? "background:var(--primary-soft);" : ""}">${r
+        .map((c) => `<td style="padding:4px 8px;">${on ? c : "&nbsp;"}</td>`)
+        .join("")}</tr>`;
+    })
+    .join("");
+  const btn = (t, v, p = "") => `<button type="button" class="btn ${p}" onclick="DECK.setSelected('${key}','${v}')">${t}</button>`;
+  return `<table class="t" style="font-size:${fs}px;"><tr>${th}</tr>${tr}</table>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      ${btn("Следующий шаг ▶", n + 1 > rows.length ? rows.length : n + 1, "btn-primary")}${btn("Показать всё", rows.length)}${btn("Сначала", 0)}
+      <span class="score">Шаг ${n} из ${rows.length}</span>
+    </div>`;
+}
+
+/* Блок-схемы: T — начало/конец, P — действие, IO — ввод/вывод, D — условие, HX — блок «цикл», A — стрелка. */
+function tx(x, y, t, fs = 15) {
+  const L = String(t).split("|");
+  const lh = fs + 3;
+  const y0 = y - ((L.length - 1) * lh) / 2 + fs * 0.36;
+  return `<text x="${x}" y="${y0}" text-anchor="middle" style="font-size:${fs}px">${L.map((s, i) => `<tspan x="${x}" dy="${i ? lh : 0}">${H(s)}</tspan>`).join("")}</text>`;
+}
+const fc = {
+  T: (x, y, w, h, t, fs) => `<rect class="blk-a" x="${x - w / 2}" y="${y - h / 2}" width="${w}" height="${h}" rx="${h / 2}"/>${tx(x, y, t, fs)}`,
+  P: (x, y, w, h, t, fs) => `<rect class="blk" x="${x - w / 2}" y="${y - h / 2}" width="${w}" height="${h}" rx="5"/>${tx(x, y, t, fs)}`,
+  IO: (x, y, w, h, t, fs) => `<polygon class="blk" points="${x - w / 2 + 14},${y - h / 2} ${x + w / 2},${y - h / 2} ${x + w / 2 - 14},${y + h / 2} ${x - w / 2},${y + h / 2}"/>${tx(x, y, t, fs)}`,
+  D: (x, y, w, h, t, fs) => `<polygon class="blk-p" points="${x},${y - h / 2} ${x + w / 2},${y} ${x},${y + h / 2} ${x - w / 2},${y}"/>${tx(x, y, t, fs)}`,
+  HX: (x, y, w, h, t, fs) => `<polygon class="blk-p" points="${x - w / 2 + 16},${y - h / 2} ${x + w / 2 - 16},${y - h / 2} ${x + w / 2},${y} ${x + w / 2 - 16},${y + h / 2} ${x - w / 2 + 16},${y + h / 2} ${x - w / 2},${y}"/>${tx(x, y, t, fs)}`,
+  A: (d) => `<path class="ar" d="${d}"/>`,
+  L: (x, y, t, a = "middle") => `<text class="s" x="${x}" y="${y}" text-anchor="${a}">${H(t)}</text>`,
+};
+function svg(w, h, inner, label, maxH) {
+  return `<svg class="dia" viewBox="0 0 ${w} ${h}" role="img" aria-label="${label}" style="${maxH ? `max-height:${maxH}px;` : ""}"><defs><marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--primary)"/></marker></defs>${inner}</svg>`;
+}
+const fizminutka = (src0) => ({
+  badge: "Физминутка",
+  shortTitle: "Физминутка",
+  timing: src0.timing,
+  source: src0.source,
+  notes: "Упражнения для глаз, шеи и кистей рук после работы за компьютером — 3 минуты. Проверьте посадку и расстояние до монитора.",
+  render() {
+    return `<div class="body" style="align-items:center;justify-content:center;text-align:center;">
+      <div style="font-size:72px;">🧘</div>
+      <h2 class="slide-h2">Физминутка · 3 минуты</h2>
+      <p class="lead">Упражнения для глаз, шеи и кистей рук</p>
+    </div>${src(src0.source)}`;
+  },
+});
+
+
+initDeck({
+  badge: "8.3А · Урок 1",
+  title: "Классификация типов данных",
+  subtitle: "8 класс · 3 четверть · цель 8.4.3.1 · 80 минут",
+  footer: "НИШ ЕМН г. Кызылорда · Информатика · 8 класс · Раздел 8.3А «Циклические алгоритмы (C++)»",
+  slides: [
+    /* ---------------- НАЧАЛО УРОКА (10 мин) ---------------- */
+    {
+      badge: "Начало урока",
+      shortTitle: "Тема, цели и критерии",
+      timing: "0–2 мин",
+      source: "КТП 2026; КСП урока 1",
+      notes: "Приветствие, инструктаж по ТБ: не трогать провода, не есть и не пить за компьютером, работать сухими руками. Тема, цели и критерии — по ним ученики проверят себя в конце урока.",
+      render() {
+        return `<div class="hero">
+          <div>
+            <div class="hero-kicker">Раздел 8.3А · Циклические алгоритмы (C++) · Типы алгоритмов</div>
+            <h1>Классификация типов данных</h1>
+            <p class="lead">Числовые, символьные, строковые и логические типы</p>
+            <div class="goal"><b>8.4.3.1</b> — классифицировать типы данных в программировании.</div>
+          </div>
+          <div class="stack text-sm">
+            <div class="card"><h3>🎯 Цели урока</h3>
+              <p><b>Все:</b> называют типы данных C++ и приводят пример значения для каждого.<br>
+              <b>Большинство:</b> выбирают тип с учётом диапазона (short, int, long, unsigned, float, double, long double); объясняют разницу ' и ", cin и getline.<br>
+              <b>Некоторые:</b> находят и исправляют ошибку несоответствия типа в коде.</p></div>
+            <div class="card"><h3>✅ Критерий оценивания</h3><p>Классифицирует типы данных в программировании.</p></div>
+          </div>
+        </div>${src("КТП 2026 (цель 8.4.3.1); КСП урока 1; " + TA + "стр. 1")}`;
+      },
+    },
+    {
+      badge: "Начало урока · мотивация",
+      shortTitle: "Какую коробку выбрать?",
+      timing: "2–6 мин",
+      source: SB + "стр. 100",
+      notes: "Беседа: как вы выбираете коробку для обуви или упаковку для подарка? Соберите 3–4 ответа, затем откройте факторы из учебника и подведите к выводу: так же выбирают тип данных.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">От чего зависит выбор коробки для обуви или упаковки для подарка?</h2>
+          ${reveal("r-box", "Факторы выбора", `<div class="cards c3 text-xs" style="gap:10px;">
+            <div class="card"><b>Размер</b> — для большого объекта берут более объёмную тару.</div>
+            <div class="card"><b>Форма</b> — длинным и узким предметам нужна упаковка по форме.</div>
+            <div class="card"><b>Количество</b> — несколько мелких подарков в пакет, много товаров — в коробку.</div>
+            <div class="card"><b>Хрупкость</b> — хрупкому нужна прочная упаковка.</div>
+            <div class="card"><b>Назначение</b> — хранение, перевозка, подарок, продажа.</div>
+            <div class="card"><b>Предпочтения</b> — стиль, экологичные материалы.</div>
+          </div>`)}
+          <div class="def">Точно так же в программировании выбирают <b>тип данных</b>: он зависит от характеристик данных и от того, как они будут использоваться в программе.</div>
+        </div>${src(SB + "стр. 100")}`;
+      },
+    },
+    {
+      badge: "Начало урока · актуализация",
+      shortTitle: "Что мы уже знаем",
+      timing: "6–10 мин",
+      source: SB + "стр. 100–101; " + TA + "стр. 3",
+      notes: "Стимулирующие вопросы. Ученики вспоминают типы из 7 класса (int, float, double). Откройте ответ после 2–3 мнений.",
+      render() {
+        return `<div class="body">
+          <div class="cards c2">
+            <div class="card"><h3><span class="ico">❓</span>Какие типы данных в программировании ты знаешь?</h3><p>В 7 классе вы использовали int, float и double.</p></div>
+            <div class="card"><h3><span class="ico">⚖</span>От чего зависит выбор типа данных при объявлении переменной?</h3><p>Вспомни пример с коробкой.</p></div>
+          </div>
+          ${reveal("r-act", "Ответ", "Типы данных бывают <b>целочисленные, вещественные, символьные, строки и логические</b>. Выбор конкретного типа зависит от требований задачи и <b>диапазона значений</b>, которые нужно хранить. Тип данных определяет <b>размер памяти</b> и <b>возможные операции</b>.")}
+        </div>${src(SB + "стр. 100–101; " + TA + "стр. 3")}`;
+      },
+    },
+
+    /* ---------------- СЕРЕДИНА УРОКА (60 мин) ---------------- */
+    {
+      badge: "Новое · классификация",
+      shortTitle: "Классификация типов данных",
+      timing: "10–15 мин",
+      source: SB + "стр. 101; " + TA + "стр. 3",
+      notes: "Фронтально по схеме учебника: тип — пример значения — объявление переменной. Обратите внимание: символ — в апострофах, строка — в кавычках.",
+      render() {
+        const row = (t, kw, ex, decl) => `<tr><td><b>${t}</b></td><td><code>${kw}</code></td><td>${ex}</td><td><code>${H(decl)}</code></td></tr>`;
+        return `<div class="body">
+          <h2 class="slide-h2">Классификация типов данных в C++</h2>
+          <table class="t" style="font-size:18px;">
+            <tr><th>Тип данных</th><th>Ключевое слово</th><th>Пример значения</th><th>Объявление переменной</th></tr>
+            ${row("Целые числа", "int", "возраст: 41; 5, −10, 2025", "int age;")}
+            ${row("Вещественные числа", "float, double", "температура тела: 36.6; 3.14", "float temperature;")}
+            ${row("Символ", "char", "литер класса: 'D'", "char letter;")}
+            ${row("Строка", "string", "имя: \"Жан\"", "string name;")}
+            ${row("Логический тип", "bool", "свет горит: true; false", "bool light;")}
+          </table>
+          <div class="note"><b>Знаешь ли ты?</b> Самым первым типом данных был целочисленный (integer) — в языке Fortran, 1950-е годы.</div>
+        </div>${src(SB + "стр. 100 («Знаешь ли ты?»), стр. 101 (схема «Классификация типов данных»); " + TA + "стр. 3")}`;
+      },
+    },
+    {
+      badge: "Джигсо · группа 1",
+      shortTitle: "Целочисленные типы",
+      timing: "15–21 мин",
+      source: SB + "стр. 101–102",
+      notes: "Группа 1 изучает целочисленные типы (диапазон, память, примеры), затем объясняет их в парах ученику из группы 2. Задание 1 (стр. 102): дополнить таблицу — пример из жизни и объявление переменной.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:20px;grid-template-columns:1.35fr 1fr;">
+          <div class="stack">
+            <h2 class="slide-h2">Целочисленные типы (Integer Types)</h2>
+            <p class="text-sm">Целые числа без десятичных дробей — положительные и отрицательные.</p>
+            <table class="t">
+              <tr><th>Тип</th><th>Диапазон значений</th><th>Память</th></tr>
+              <tr><td><b>short</b></td><td>от −32 768 до 32 767</td><td>2 байта</td></tr>
+              <tr><td><b>int</b></td><td>от −2 147 483 648 до 2 147 483 647 (32-битные системы)</td><td>4 байта</td></tr>
+              <tr><td><b>long</b></td><td>32 бит: как int; 64 бит: от −9 223 372 036 854 775 808 до 9 223 372 036 854 775 807</td><td>4 или 8 байтов</td></tr>
+              <tr><td><b>unsigned short</b></td><td>от 0 до 65 535</td><td>—</td></tr>
+            </table>
+            <div class="note"><b>unsigned</b> пишут перед типом: переменная хранит только неотрицательные числа, диапазон сдвигается в сторону положительных.</div>
+          </div>
+          <div class="stack text-sm">
+            <div class="card"><h3>Примеры из жизни</h3><p>возраст человека; количество детей в семье; игровые очки; год выпуска автомобиля; число пассажиров; число страниц книги; население страны.</p></div>
+            <div class="card"><h3>Задание 1 (стр. 102)</h3><p>Образец строки: <code>unsigned short marks;</code> — баллы за СОЧ (от 0 до 65 535). Допиши строки для short, int, long.</p></div>
+          </div>
+        </div></div>${src(SB + "стр. 101 (таблица целочисленных типов, unsigned, примеры), стр. 102 (задание 1)")}`;
+      },
+    },
+    {
+      badge: "Джигсо · группа 2",
+      shortTitle: "Вещественные типы",
+      timing: "21–26 мин",
+      source: SB + "стр. 102–103",
+      notes: "Группа 2 изучает вещественные типы и объясняет их ученику из группы 1. Акцент: дробную часть отделяет точка; float — 7–8 значащих цифр; для высокой точности — double.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:20px;grid-template-columns:1.35fr 1fr;">
+          <div class="stack">
+            <h2 class="slide-h2">Вещественные типы (Real data types)</h2>
+            <table class="t">
+              <tr><th>Тип</th><th>Описание</th><th>Диапазон</th><th>Память</th></tr>
+              <tr><td><b>float</b></td><td>одинарная точность</td><td>от 3,4·10<sup>−38</sup> до 3,4·10<sup>38</sup></td><td>4 байта</td></tr>
+              <tr><td><b>double</b></td><td>двойная точность</td><td>от 1,7·10<sup>−308</sup> до 1,7·10<sup>308</sup></td><td>8 байт</td></tr>
+              <tr><td><b>long double</b></td><td>повышенная точность</td><td>от 3,4·10<sup>−4932</sup> до 3,4·10<sup>4932</sup></td><td>10 байт</td></tr>
+            </table>
+            <div class="card text-sm"><p><b>float</b> — точность 7–8 значащих цифр: графика, обработка звука. При многократном округлении возможна потеря точности. <b>double</b> (64 бита) — больший диапазон и точность. <b>long double</b> — научные и инженерные расчёты.</p></div>
+          </div>
+          <div class="stack text-sm">
+            <div class="card"><h3>Плавающая точка</h3><p>Число разбивается на мантиссу и экспоненту: 3,14 = 0,314·10<sup>1</sup>. В коде дробную часть отделяют <b>точкой</b>: <code>36.6</code>.</p></div>
+            <div class="card"><h3>Примеры из жизни</h3><p>27,5 °C; 15,3 л; широта 53,2144°; очень малые и очень большие значения (микросекунды, мегавольты, расстояния между галактиками).</p></div>
+          </div>
+        </div></div>${src(SB + "стр. 102 (таблица вещественных типов, мантисса и экспонента), стр. 103 (long double, примеры)")}`;
+      },
+    },
+    {
+      badge: "Практика в парах",
+      shortTitle: "Подбери тип данных",
+      timing: "26–30 мин",
+      source: SB + "стр. 103, задание 3 (рис. 1)",
+      notes: "Задание 3 (стр. 103) в парах из разных групп. Щёлкните тип в строке; требуйте объяснение: есть ли дробная часть, какой диапазон.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Подбери тип данных для каждой переменной и объясни выбор</h2>
+          ${matcher("num", [["int", "int"], ["fl", "float / double"]], [
+            { t: "Возраст: <code>age = 25;</code>", ans: "int" },
+            { t: "Температура воздуха: <code>temperature = -20.5;</code>", ans: "fl" },
+            { t: "Население страны: <code>population = 7500000;</code>", ans: "int" },
+            { t: "Рост: <code>height = 1.75;</code>", ans: "fl" },
+            { t: "Расстояние: <code>distance = 42.0;</code>", ans: "fl" },
+            { t: "Счёт игры: <code>score = 95;</code>", ans: "int" },
+          ])}
+          <div class="note"><b>Обоснуй:</b> <code>42.0</code> записано с точкой — это вещественное значение, хотя дробная часть равна нулю.</div>
+        </div>${src(SB + "стр. 103 (задание 3, рис. 1)")}`;
+      },
+    },
+    {
+      badge: "Группы по три",
+      shortTitle: "bool, char, string",
+      timing: "30–37 мин",
+      source: SB + "стр. 104–105",
+      notes: "Мини-группы: каждый изучает один тип и объясняет остальным. Акцент: апостроф — char, двойные кавычки — string.",
+      render() {
+        return `<div class="body">
+          <div class="cards c3 text-sm" style="gap:12px;">
+            <div class="card"><h3><span class="ico">⚡</span>bool</h3><p>Логические значения <b>true</b> (истина) или <b>false</b> (ложь). Используется в условиях и циклах.</p>${code("bool x;\nx = true;\nbool y = false;", { size: 15 })}</div>
+            <div class="card"><h3><span class="ico">🔤</span>char</h3><p>Один символ: буква, цифра, знак. <b>1 байт</b>, значения от 0 до 255 (256 комбинаций). Примеры: 'M'/'F'; 'P', 'R', 'N', 'D' на коробке передач.</p>${code("char s;\ns = 'a';\nchar p = 'n';", { size: 15 })}</div>
+            <div class="card"><h3><span class="ico">📝</span>string</h3><p><b>Строка</b> — набор символов: слова, фразы, текст.</p>${code('string w;\nw = "people";\nstring pr = "kind";', { size: 15 })}</div>
+          </div>
+          <div class="def" style="font-size:20px;"><b>'A'</b> — апостроф: компилятор создаёт символ (<b>char</b>). <b>"A"</b> — двойные кавычки: компилятор создаёт строку (<b>string</b>).</div>
+        </div>${src(SB + "стр. 104 (bool, char), стр. 105 (string, апостроф и двойные кавычки)")}`;
+      },
+    },
+    {
+      badge: "Новое · ввод строки",
+      shortTitle: "cin >> или getline?",
+      timing: "37–42 мин",
+      source: SB + "стр. 105–106",
+      notes: "Покажите, что cin >> читает одно слово до пробела, а getline — всю строку. Затем задание 3 (стр. 106): почему программа выводит «ТОМ» и «СОЙЕР» на разных строках? Ученики предлагают исправление, потом откройте ответ.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:20px;">
+          <div class="stack">
+            <h2 class="slide-h2">Как считать строку с пробелами?</h2>
+            ${code('string singleWord;\ncin >> singleWord;          // одно слово до пробела\n\nstring multipleWords;\ngetline(cin, multipleWords); // вся строка', { size: 15 })}
+            <div class="note">Для <b>getline</b> подключают библиотеку <code>&lt;string&gt;</code>.</div>
+          </div>
+          <div class="stack">
+            <h3 style="margin:0;">Задание 3: «Любимые книги» работает неверно</h3>
+            ${code('string first, second, third;\ncout << "Напиши название первой любимой книги" << endl;\ncin >> first;\n...\ncout << first << endl;', { size: 14 })}
+            <div class="card text-xs"><p>Ввод: <b>ТОМ СОЙЕР</b>, <b>СНЕЖНАЯ КОРОЛЕВА</b>… Вывод: ТОМ / СОЙЕР / СНЕЖНАЯ</p></div>
+            ${reveal("r-books", "Исправление", "Названия из двух слов: <code>cin &gt;&gt;</code> читает только до пробела, второе слово попадает в следующую переменную. Нужно <code>getline(cin, first);</code> (и так же для second, third) и <code>#include &lt;string&gt;</code>.")}
+          </div>
+        </div></div>${src(SB + "стр. 105 (cin и getline), стр. 106 (задание 3)")}`;
+      },
+    },
+    fizminutka({ timing: "42–45 мин", source: "КСП урока 1" }),
+    {
+      badge: "Индивидуально · «Найди пару»",
+      shortTitle: "Распредели значения по типам",
+      timing: "45–53 мин",
+      source: RL + "задание 1; " + TA + "стр. 4",
+      notes: "Рабочий лист, задание 1: ученики распределяют значения в тетради, затем вызывайте к доске по одному. Самооценка и взаимооценка по листу оценки. В конце — вопрос про int number = \"Twenty\".",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">К какому типу относится значение?</h2>
+          <div class="grid-2" style="gap:18px;grid-template-columns:1.5fr 1fr;align-items:start;"><div class="stack">${matcher("val", [["int", "int"], ["dbl", "double / float"], ["ch", "char"], ["str", "string"], ["b", "bool"]], [
+            { t: "<code>'A'</code>", ans: "ch" },
+            { t: "<code>3.14</code>", ans: "dbl" },
+            { t: "<code>true</code>", ans: "b" },
+            { t: "<code>2025</code>", ans: "int" },
+            { t: "<code>\"Almaty\"</code>", ans: "str" },
+            { t: "<code>-15</code>", ans: "int" },
+            { t: "<code>'!'</code>", ans: "ch" },
+            { t: "<code>0.001</code>", ans: "dbl" },
+          ])}</div>
+          <div class="stack text-sm"><div class="card"><h3>⚠ Найди ошибку</h3>${code('int number = "Twenty";', { size: 15 })}</div>
+          ${reveal("r-twenty", "Почему это ошибка?", "Переменная целого типа <b>int</b> хранит целые числа, а <code>\"Twenty\"</code> в кавычках — строка (<b>string</b>). Типы не совпадают — ошибка. Верно: <code>int number = 20;</code> или <code>string number = \"Twenty\";</code>")}</div></div>
+        </div>${src(RL + "стр. 1 (задание 1); " + TA + "стр. 4")}`;
+      },
+    },
+    {
+      badge: "Практикум",
+      shortTitle: "Программа-диалог",
+      timing: "53–65 мин",
+      source: SB + "стр. 103, 105–107",
+      notes: "Ученики набирают и запускают программу-диалог (onlinegdb.com, cpp.sh), затем пишут программу «Средняя оценка» (задание 4, стр. 103) и объясняют выбор типов. Сильным — задание 1 (стр. 106): своя версия диалога.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:20px;grid-template-columns:1.25fr 1fr;">
+          <div class="stack">
+            ${code('#include <iostream>\n#include <string>\nusing namespace std;\nint main() {\n  string name;\n  int age, grade;\n  char liter;\n  cout << "Привет! Как тебя зовут? " << endl;\n  getline(cin, name);\n  cout << "Приятно познакомиться, " << name << "!" << endl;\n  cout << "Сколько тебе лет?" << endl;\n  cin >> age;\n  cout << "В каком ты классе?" << endl;\n  cin >> grade;\n  cout << "Литер твоего класса?" << endl;\n  cin >> liter;\n  cout << "Ты учишься в " << grade << liter << " классе.";\n  return 0;\n}', { size: 13.5 })}
+          </div>
+          <div class="stack text-sm">
+            <div class="card"><h3>1. Набери и запусти</h3><p>Какие типы использованы и для чего? string — имя, char — литер класса.</p></div>
+            <div class="card"><h3>2. Задание 4 (стр. 103)</h3><p>Программа «Средняя оценка по информатике»: ввести оценки за 4 четверти, вывести среднюю. Объясни выбор типов.</p></div>
+            ${reveal("r-avg", "Подсказка", "Оценки — целые (<b>int</b>), средняя может быть дробной (<b>float</b>). При делении двух целых дробная часть отбрасывается: хотя бы один операнд приводят к float, например <code>float(sum) / 4</code>.")}
+          </div>
+        </div></div>${src(SB + "стр. 103 (задание 4), стр. 105–106 (программа-диалог), стр. 107–108 (деление целых чисел)")}`;
+      },
+    },
+    {
+      badge: "Обсуждение · формат СОЧ",
+      shortTitle: "Определи тип данных",
+      timing: "65–70 мин",
+      source: SB + "стр. 101–105; спецификация СОЧ 8 кл., 3 четверть",
+      notes: "Обсуждение: что будет, если использовать один целочисленный тип для всех целых чисел? Затем задание в формате суммативного (краткий ответ, 2 балла): ученики пишут ответ в тетради, взаимопроверка по дескрипторам.",
+      render() {
+        return `<div class="body">
+          <div class="card text-sm"><h3>💬 Что будет, если использовать один целочисленный тип для всех целых чисел?</h3>
+            ${reveal("r-one", "Вывод", "Тип выбирают по <b>диапазону значений</b> и <b>объёму памяти</b>: для баллов СОЧ хватит unsigned short (2 байта), для населения страны short мал — нужен int. Правильный выбор нужен для эффективной обработки информации и избегания ошибок.")}</div>
+          <div class="grid-2" style="gap:18px;grid-template-columns:1.3fr 1fr;">
+            <div class="stack">
+              <h3 style="margin:0;">Определите тип данных для хранения <span class="text-muted">[2]</span></h3>
+              <table class="t"><tr><th>Данные для хранения</th><th>Тип данных</th></tr>
+                <tr><td>Число учеников в школе</td><td>${S().revealed["r-soch"] ? "int" : ""}</td></tr>
+                <tr><td>Средняя температура за месяц, °C</td><td>${S().revealed["r-soch"] ? "float / double" : ""}</td></tr>
+                <tr><td>Буква варианта ответа теста</td><td>${S().revealed["r-soch"] ? "char" : ""}</td></tr>
+                <tr><td>Ответ «зачёт / не зачёт»</td><td>${S().revealed["r-soch"] ? "bool" : ""}</td></tr>
+              </table>
+              ${reveal("r-soch", "Показать ответы", "Каждый верный тип — по 0,5 балла.")}
+            </div>
+            <div class="card text-xs"><h3>Дескрипторы</h3><p>— определяет целочисленный тип для целых значений;<br>— определяет вещественный тип для дробных значений;<br>— различает char (один символ) и string (текст);<br>— определяет логический тип для значений «да/нет».</p></div>
+          </div>
+        </div>${src(SB + "стр. 101–105; спецификация СОЧ 8 кл. (3 четверть, задание 1: формат КО)")}`;
+      },
+    },
+
+    /* ---------------- КОНЕЦ УРОКА (10 мин) ---------------- */
+    {
+      badge: "Конец урока · проверь себя",
+      shortTitle: "Проверь себя",
+      timing: "70–75 мин",
+      source: SB + "стр. 101–106",
+      notes: "Формативное оценивание: ученики отвечают карточками a–d; щёлкните вариант. После вопроса 4 попросите объяснить, почему нужны и символьный, и строковый типы (Проверь себя 2, стр. 106).",
+      render() {
+        return `<div class="body"><div class="grid-2 quizgrid" style="gap:14px;">
+          ${quiz("q1", "1. Сколько памяти занимает тип char?", ["1 байт", "2 байта", "4 байта", "8 байт"], 0)}
+          ${quiz("q2", "2. Для чего пишут unsigned перед типом?", ["чтобы хранить дробные числа", "чтобы хранить только неотрицательные целые числа", "чтобы хранить текст", "чтобы хранить true и false"], 1)}
+          ${quiz("q3", "3. Какая команда считывает строку вместе с пробелами?", ["cin >> text;", "cout << text;", "getline(cin, text);", "char text;"], 2)}
+          ${quiz("q4", "4. Что хранит переменная bool?", ["один символ", "целое число до 255", "текст в кавычках", "true или false"], 3)}
+        </div></div>${src(SB + "стр. 101 (unsigned), стр. 104 (bool, char), стр. 105 (getline)")}`;
+      },
+    },
+    {
+      badge: "Конец урока · рефлексия",
+      shortTitle: "Рефлексия и домашнее задание",
+      timing: "75–80 мин",
+      source: "КСП урока 1; " + SB + "стр. 103, 106",
+      notes: "Рефлексия: ученики называют, что узнали. Сверьтесь с критерием на первом слайде. Домашнее задание — своя программа с разными типами (взаимопроверка на следующем уроке).",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;">
+          <div class="stack">
+            <h2 class="slide-h2">Что я узнал?</h2>
+            <div class="card"><p>У каждого типа есть <b>название</b>, <b>диапазон значений</b> и <b>размер в памяти</b>.</p></div>
+            <div class="card"><p>Тип нужен, чтобы компьютер «понимал», <b>какие действия</b> можно совершать с переменной.</p></div>
+            <div class="card"><p>Я могу объяснить, зачем нужны разные типы для чисел (Проверь себя 3, стр. 103).</p></div>
+          </div>
+          <div class="stack">
+            <h2 class="slide-h2">Домашнее задание</h2>
+            <div class="card"><h3>📝 Своя программа</h3><p>Напиши программу с разными типами данных; запиши условие и код в тетрадь — взаимопроверка на следующем уроке.</p></div>
+            <div class="card"><h3>💻 Тест</h3><p>Тестовые задания на App.online.nis.edu.kz.</p></div>
+          </div>
+        </div></div>${src("КСП урока 1; " + SB + "стр. 103 и 106 («Проверь себя»)")}`;
+      },
+    },
+  ],
+});
+
+</script>
+</body>
+</html>

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9.2А · Урок 5 · Поиск, сортировка и фильтрация данных в БД</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+</head>
+<body>
+<script src="../_engine/deck.js"></script>
+<script>
+const L5_CARS = [
+  { model: "Toyota Camry", color: "белый", eng: 2.0, body: "седан", year: 2019, price: 8124300 },
+  { model: "Kia Rio", color: "белый", eng: 1.4, body: "седан", year: 2018, price: 4188410 },
+  { model: "BMW 3", color: "красный", eng: 1.6, body: "седан", year: 2020, price: 11800136 },
+  { model: "Audi S5", color: "красный", eng: 3.0, body: "купе", year: 2021, price: 24968800 },
+  { model: "Toyota Corolla", color: "серый", eng: 1.8, body: "седан", year: 2019, price: 6849900 }
+];
+
+const L5_SORT_TRAPS = [
+  { id: "st1", title: "1. Порядок на экране vs порядок на диске", desc: "Меняет ли сортировка физическое расположение строк в файле БД?", ans: "НЕТ! Сортировка меняет только порядок отображения на экране. Кнопка «Удалить сортировку» мгновенно вернёт исходный порядок." },
+  { id: "st2", title: "2. Куда попадают пустые ячейки (NULL)?", desc: "В таблице у одного ученика не заполнено поле «Рост». Где окажется эта строка при сортировке по возрастанию?", ans: "В САМОМ НАЧАЛЕ списка! В Access пустые значения при сортировке по возрастанию идут первыми." },
+  { id: "st3", title: "3. Коварная сортировка «текстовых» чисел", desc: "Поле «Номер» имеет тип Текстовый, значения: 1, 2, 10, 25, 100. Как Access отсортирует по возрастанию?", ans: "ПОСИМВОЛЬНО по первой цифре: 1, 10, 100, 2, 25! Потому что текст сравнивается как слова в словаре." },
+  { id: "st4", title: "4. Запрещённые для сортировки типы данных", desc: "По каким полям таблиц MS Access НЕЛЬЗЯ выполнить сортировку?", ans: "По полям типов «Поле MEMO» (в некоторых режимах длинный текст), «Гиперссылка» и «Поле объекта OLE»!" }
+];
+
+const L5_BLITZ = [
+  { k: "q1", q: "Поле «Кабинет» создано с типом Текстовый. Как отсортируются значения 10, 2, 100, 3?", a: "10, 100, 2, 3 — потому что текстовые строки сортируются по коду первого символа («1» меньше «2»)." },
+  { k: "q2", q: "Удаляет ли применённый фильтр те записи, которые исчезли с экрана?", a: "НЕТ! Скрытые записи остаются в таблице. Они вернутся, если нажать «Удалить фильтр»." },
+  { k: "q3", q: "Какие 3 типа данных Access нельзя отсортировать?", a: "Поле MEMO, Гиперссылка и Поле объекта OLE." },
+  { k: "q4", q: "В чём разница между маской поиска «А*а» и «А?а»?", a: "«А*а» — любое число символов между А и а (Астана, Анна, Алияа); «А?а» — ровно 1 символ между А и а (Ала, Ата, Ага)." },
+  { k: "q5", q: "Где окажется пустая ячейка при сортировке по возрастанию?", a: "В самом верху списка (перед числами и буквами А)." }
+];
+
+function wildcardToRegex(pattern) {
+  const esc = pattern.replace(/[.+^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*").replace(/\?/g, ".");
+  return new RegExp("^" + esc + "$", "i");
+}
+
+window.L5_UPDATE = function(patch) {
+  Object.assign(window.DECK_STATE.custom, patch);
+  window.DECK.render();
+};
+
+window.L5_SET_SEARCH = function(val) {
+  window.DECK_STATE.custom.search = val;
+  window.DECK.render();
+};
+
+initDeck({
+  badge: "🗄 9.2А · Урок 5",
+  title: "Поиск, сортировка и фильтрация данных в БД",
+  subtitle: "9 класс · 2 четверть · Цель 9.1.2.6 · 80 мин · Мини-СУБД",
+  footer: "НИШ ЕМН г. Кызылорда · 9 класс · 2 четверть · Мини-СУБД (/subd)",
+  initialState: {
+    tabs: { searchMode: "any", sortKind: "single", filterKind: "sel" },
+    custom: { sortCol: "none", sortDir: "asc", filter: "all", search: "" }
+  },
+  slides: [
+    {
+      badge: "Этап 1 · Постановка задачи",
+      shortTitle: "3 способа быстро найти нужное в БД",
+      timing: "0–6 мин",
+      source: "КСП 9.2А Урок 5 · SB 9 кл. стр. 70–73",
+      notes: "Сравните задачи: «быстро перейти к слову Camry» (Поиск), «выстроить от дешёвой к дорогой» (Сортировка), «скрыть всё, кроме красных седанов» (Фильтрация). Цель 9.1.2.6.",
+      render() {
+        return `
+          <div class="stack">
+            <div class="text-xs font-bold text-muted" style="text-transform:uppercase;">Информатика · 9 класс · Раздел 9.2А «Однотабличные БД» · Урок 5 из 6</div>
+            <h1 class="slide-h1">Поиск, сортировка и фильтрация данных</h1>
+            <p class="lead">Научимся использовать подстановочные знаки <span class="mono">*</span> и <span class="mono">?</span> при поиске, выполнять многоуровневую сортировку, избегать ловушек СОР и строить фильтры.</p>
+            <div class="box-accent text-xs">
+              <strong>Ситуация в автосалоне (5 000 машин):</strong> покупатель просит: <em>«Найдите модели на T…, оставьте машины дешевле 10 млн ₸ и покажите их от самой недорогой к самой дорогой»</em>. Как сделать это за 5 секунд?
+            </div>
+            <div class="grid-3 text-xs">
+              <div class="box-primary"><div class="box-title">1. Поиск (Ctrl+F)</div>Находит конкретное слово или шаблон с <span class="mono">*</span> и <span class="mono">?</span>, переходя по строкам без скрытия таблицы.</div>
+              <div class="box-accent"><div class="box-title" style="color:var(--accent);">2. Сортировка</div>Упорядочивает все записи (А→Я, Я→А, по возрастанию/убыванию чисел и дат).</div>
+              <div class="box-success"><div class="box-title">3. Фильтрация</div>Временно скрывает неподходящие строки, показывая <strong>результирующий набор</strong>.</div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Поиск и шаблоны",
+      shortTitle: "Поиск (Ctrl+F) и знаки * и ?",
+      timing: "6–15 мин",
+      source: "SB 9 кл. стр. 70 · Диалог «Поиск и замена»",
+      notes: "Нажимайте на 4 шаблона поиска справа — в списке городов и марок подсвечиваются точные совпадения для * и ?.",
+      render(st) {
+        const words = ["Астана", "Алматы", "Актобе", "Кот", "Кит", "Крот", "Toyota Camry", "Toyota Corolla"];
+        const pat = st.tabs.pat || "А*";
+        const rx = wildcardToRegex(pat);
+        const sm = st.tabs.searchMode || "any";
+        const smText = {
+          any: "С любой частью поля — найдёт «Camry» в строке «Toyota Camry» (даже в середине слова).",
+          whole: "С полем целиком — сработает ТОЛЬКО при 100% совпадении всей ячейки.",
+          start: "С начала поля — найдёт «Toyota*», но пропустит «Camry» внутри фразы."
+        }[sm];
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Поиск (<span class="mono">Ctrl+F</span>) и символы подстановки <span class="mono">*</span> и <span class="mono">?</span></h2>
+            <div class="grid-2">
+              <div class="stack text-xs">
+                <div class="box-primary">
+                  <div class="box-title">3 режима совпадения в диалоге «Поиск и замена»</div>
+                  <div class="flex-row" style="margin-bottom:6px;">
+                    <button type="button" class="btn ${sm === "any" ? "btn-primary" : ""}" onclick="DECK.setTab('searchMode','any')">С любой частью</button>
+                    <button type="button" class="btn ${sm === "whole" ? "btn-primary" : ""}" onclick="DECK.setTab('searchMode','whole')">С полем целиком</button>
+                    <button type="button" class="btn ${sm === "start" ? "btn-primary" : ""}" onclick="DECK.setTab('searchMode','start')">С начала поля</button>
+                  </div>
+                  <div class="box-white">${smText}</div>
+                </div>
+                <table class="data-table">
+                  <thead><tr><th>Знак</th><th>Что заменяет</th><th>Пример</th></tr></thead>
+                  <tbody>
+                    <tr><td class="mono font-bold">*</td><td><strong>Любое количество</strong> любых символов (0 и более)</td><td class="mono text-xs">А* (начинается на А), *ов</td></tr>
+                    <tr><td class="mono font-bold">?</td><td><strong>Ровно ОДИН</strong> любой символ на этой позиции</td><td class="mono text-xs">К?т → Кот, Кит (НЕ Крот!)</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="box stack">
+                <div class="font-bold text-xs">Проверьте шаблон (кликните по кнопке):</div>
+                <div class="flex-row">
+                  ${["А*", "К?т", "*Camry*", "Toyota *"].map(p => `<button type="button" class="btn mono ${pat === p ? "btn-accent" : ""}" onclick="DECK.setTab('pat','${p}')">${p}</button>`).join("")}
+                </div>
+                <div class="grid-2" style="gap:6px;">
+                  ${words.map(w => {
+                    const m = rx.test(w);
+                    return `<div class="${m ? "box-success" : "box-white"} text-xs mono" style="padding:6px 8px;${m ? "font-weight:700;" : "opacity:0.55;"}">${m ? "✓ " : "· "}${w}</div>`;
+                  }).join("")}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Сортировка",
+      shortTitle: "Виды сортировки и цельность записи",
+      timing: "15–25 мин",
+      source: "SB 9 кл. стр. 71 · Пример «Иванов, Петров, Сидоров»",
+      notes: "Напомните ученикам пример из учебника: при сортировке по Фамилии номер и телефон перемещаются вместе с фамилией — вся запись едет целиком! Разберите многоуровневую сортировку через Shift и кнопку «Удалить сортировку».",
+      render(st) {
+        const sk = st.tabs.sortKind || "single";
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <h2 class="slide-h2">Сортировка данных в таблице БД</h2>
+              <div class="flex-row">
+                <button type="button" class="btn ${sk === "single" ? "btn-primary" : ""}" onclick="DECK.setTab('sortKind','single')">Простая (1 столбец)</button>
+                <button type="button" class="btn ${sk === "multi" ? "btn-accent" : ""}" onclick="DECK.setTab('sortKind','multi')">Многоуровневая (Shift)</button>
+              </div>
+            </div>
+            <div class="grid-2">
+              <div class="stack text-xs">
+                <div class="box-primary">
+                  <div class="box-title">Как упорядочиваются разные типы данных</div>
+                  • <strong>Текстовое:</strong> А→Я (возрастание) / Я→А (убывание)<br>
+                  • <strong>Числовое и Денежное:</strong> от меньшего к большему и наоборот<br>
+                  • <strong>Дата/время:</strong> хронологически (от старых к новым и наоборот)
+                </div>
+                <div class="box-success">
+                  <strong>Правило целостности строки (SB):</strong> при сортировке столбца «Фамилия» перемещается <strong>вся запись целиком</strong> (и №, и телефон «едут» вместе с человеком, данные не отрываются!).
+                </div>
+              </div>
+              <div class="box-white text-xs stack">
+                ${sk === "single" ? `
+                  <div class="font-bold">Пример из учебника SB: сортировка по «Фамилия» (А→Я)</div>
+                  <table class="data-table">
+                    <thead><tr><th>№</th><th>Фамилия ↑</th><th>Телефон</th></tr></thead>
+                    <tbody>
+                      <tr><td class="mono">2</td><td><strong>Иванов</strong></td><td class="mono">222-22-22</td></tr>
+                      <tr><td class="mono">3</td><td><strong>Петров</strong></td><td class="mono">333-33-33</td></tr>
+                      <tr><td class="mono">1</td><td><strong>Сидоров</strong></td><td class="mono">111-11-11</td></tr>
+                    </tbody>
+                  </table>
+                  <div class="text-muted">Стрелка рядом с именем поля показывает направление. Отмена — <strong>«Главная → Удалить сортировку»</strong>.</div>
+                ` : `
+                  <div class="font-bold">Многоуровневая сортировка (по 2–3 полям сразу)</div>
+                  <p style="margin:0;">1. Выделите несколько смежных столбцов (удерживая <kbd>Shift</kbd>) или отсортируйте сначала по вторичному, затем по главному критерию.<br>
+                  2. Access сортирует сначала по крайнему левому столбцу (напр. <strong>Цвет</strong>: белый, красный), а внутри одинакового цвета — по <strong>Цене ↑</strong>.<br>
+                  3. В Конструкторе запросов / Расширенном фильтре можно задавать любые несмежные столбцы!</p>
+                `}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Ловушки сортировки",
+      shortTitle: "4 экзаменационные ловушки сортировки",
+      timing: "25–34 мин",
+      source: "SB 9 кл. стр. 71 · Исключения при сортировке",
+      notes: "Все 4 карточки — классические вопросы с подвохом на СОР/СОЧ! Обязательно раскройте каждую с обсуждением в классе.",
+      render(st) {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">4 коварные ловушки сортировки (SB 9 кл.)</h2>
+            <p class="lead">Сначала предположите ответ, затем кликните на карточку.</p>
+            <div class="grid-2">
+              ${L5_SORT_TRAPS.map(t => {
+                const open = !!st.revealed[t.id];
+                return `
+                  <button type="button" class="interactive-card ${open ? "revealed" : ""}" onclick="DECK.toggleReveal('${t.id}')">
+                    <div class="font-bold text-sm">${t.title}</div>
+                    <div class="text-xs text-muted" style="margin-top:4px;">${t.desc}</div>
+                    <div class="text-xs" style="margin-top:7px;padding-top:6px;border-top:1px dashed var(--border);">
+                      ${open ? "✓ " + t.ans : "Нажмите, чтобы узнать ловушку →"}
+                    </div>
+                  </button>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Фильтрация",
+      shortTitle: "3 способа фильтрации + база «Библиотека»",
+      timing: "34–43 мин",
+      source: "SB 9 кл. стр. 72–73 · 3 метода фильтрации и база «Библиотека»",
+      notes: "Переключайте 3 способа фильтрации и пройдите 4-шаговый алгоритм «Изменить фильтр» на примере базы из учебника «Библиотека» (поле «Выдан» = Да).",
+      render(st) {
+        const fk = st.tabs.filterKind || "sel";
+        const fDesc = {
+          sel: { t: "1. Фильтр по выделенному фрагменту (1 клик)", d: "Кликните на нужное значение (напр. «седан») и нажмите «Главная → Выделение → Равно седан». Самый быстрый фильтр по одному точному значению или «Не равно»." },
+          ord: { t: "2. Обычный фильтр (стрелка у заголовка столбца)", d: "Нажмите стрелку ▼ в шапке поля: можно отметить сразу несколько галочек (напр. Toyota и BMW) или задать условие «Числовые фильтры → Меньше 10 000 000»." },
+          adv: { t: "3. Расширенный фильтр (Дополнительно → Расширенный фильтр)", d: "Открывает бланк в стиле Конструктора запросов: позволяет задавать сложные условия сразу по нескольким столбцам с логикой И / ИЛИ и одновременной сортировкой." }
+        }[fk];
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Фильтрация: 3 способа в Access + алгоритм «Библиотека»</h2>
+            <div class="box-primary text-xs">
+              <strong>Фильтр</strong> — инструмент отбора записей, удовлетворяющих заданному условию. Отобранные строки образуют <strong>результирующий набор</strong>. Скрытые записи <strong>не удаляются</strong> — кнопка «Удалить фильтр» возвращает всю таблицу!
+            </div>
+            <div class="grid-2">
+              <div class="stack text-xs">
+                <div class="flex-row">
+                  <button type="button" class="btn ${fk === "sel" ? "btn-primary" : ""}" onclick="DECK.setTab('filterKind','sel')">1. По выделению</button>
+                  <button type="button" class="btn ${fk === "ord" ? "btn-accent" : ""}" onclick="DECK.setTab('filterKind','ord')">2. Обычный фильтр</button>
+                  <button type="button" class="btn ${fk === "adv" ? "btn-primary" : ""}" onclick="DECK.setTab('filterKind','adv')">3. Расширенный</button>
+                </div>
+                <div class="box-white">
+                  <div class="font-bold text-sm" style="margin-bottom:4px;">${fDesc.t}</div>
+                  <p style="margin:0;">${fDesc.d}</p>
+                </div>
+              </div>
+              <div class="box-white text-xs">
+                <div class="box-title">Алгоритм «Изменить фильтр» (база SB «Библиотека»)</div>
+                <strong>1.</strong> Главная → <strong>Дополнительно → Изменить фильтр</strong>.<br>
+                <strong>2.</strong> В пустой строке в столбце «Выдан» отметьте галочку ☑ (книги на руках у читателей).<br>
+                <strong>3.</strong> Нажмите <strong>Фильтр</strong> — на экране останутся только выданные книги.<br>
+                <strong>4.</strong> Нажмите <strong>Удалить фильтр</strong> — вся библиотека снова видна.
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Живой симулятор",
+      shortTitle: "Симулятор: Поиск (*, ?) + Сортировка + Фильтр «Автомобили»",
+      timing: "43–53 мин",
+      source: "SB 9 кл. стр. 72 · Точная таблица «Автомобили»",
+      notes: "На живой таблице «Автомобили» из учебника проверьте пример SB: красный седан -> BMW 3; цена < 10 млн -> Toyota Camry, Kia Rio, Toyota Corolla; поиск с * и ?.",
+      render(st) {
+        const c = st.custom;
+        let list = L5_CARS.slice();
+        if (c.filter === "red_sedan") list = list.filter(x => x.color === "красный" && x.body === "седан");
+        else if (c.filter === "lt10m") list = list.filter(x => x.price < 10000000);
+        else if (c.filter === "toyota") list = list.filter(x => x.model.startsWith("Toyota"));
+
+        if (c.search && c.search.trim()) {
+          const rx = wildcardToRegex(c.search.trim().includes("*") || c.search.trim().includes("?") ? c.search.trim() : "*" + c.search.trim() + "*");
+          list = list.filter(x => rx.test(x.model) || rx.test(x.color) || rx.test(x.body));
+        }
+
+        if (c.sortCol !== "none") {
+          list.sort((a, b) => {
+            const va = a[c.sortCol], vb = b[c.sortCol];
+            const cmp = typeof va === "number" ? va - vb : String(va).localeCompare(String(vb), "ru");
+            return c.sortDir === "asc" ? cmp : -cmp;
+          });
+        }
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <h2 class="slide-h2">Симулятор на таблице SB «Автомобили»</h2>
+              <span class="pill pill-success mono">Показано: ${list.length} из ${L5_CARS.length}</span>
+            </div>
+            <div class="grid-2 text-xs">
+              <div class="box flex-row">
+                <strong>Фильтр:</strong>
+                <button type="button" class="btn ${c.filter === "all" ? "btn-primary" : ""}" onclick="L5_UPDATE({filter:'all'})">Все</button>
+                <button type="button" class="btn ${c.filter === "red_sedan" ? "btn-accent" : ""}" onclick="L5_UPDATE({filter:'red_sedan'})">Красный И Седан</button>
+                <button type="button" class="btn ${c.filter === "lt10m" ? "btn-primary" : ""}" onclick="L5_UPDATE({filter:'lt10m'})">Цена &lt; 10 млн</button>
+                <button type="button" class="btn ${c.filter === "toyota" ? "btn-primary" : ""}" onclick="L5_UPDATE({filter:'toyota'})">Только Toyota</button>
+              </div>
+              <div class="box flex-row">
+                <strong>Поиск (* / ?):</strong>
+                <input type="text" value="${DECK_ESC(c.search || "")}" placeholder="Напр. T* или *a* или BMW ?" oninput="L5_SET_SEARCH(this.value)" class="mono" style="flex:1;min-width:120px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--fg);" />
+                <button type="button" class="btn" onclick="L5_UPDATE({sortCol:'none',sortDir:'asc',filter:'all',search:''})">Сброс</button>
+              </div>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Модель <button type="button" class="btn" style="padding:1px 5px;" onclick="L5_UPDATE({sortCol:'model',sortDir:'asc'})">↑</button><button type="button" class="btn" style="padding:1px 5px;" onclick="L5_UPDATE({sortCol:'model',sortDir:'desc'})">↓</button></th>
+                  <th>Цвет</th>
+                  <th>Объём</th>
+                  <th>Кузов</th>
+                  <th>Год <button type="button" class="btn" style="padding:1px 5px;" onclick="L5_UPDATE({sortCol:'year',sortDir:'asc'})">↑</button><button type="button" class="btn" style="padding:1px 5px;" onclick="L5_UPDATE({sortCol:'year',sortDir:'desc'})">↓</button></th>
+                  <th>Цена (тенге) <button type="button" class="btn" style="padding:1px 5px;" onclick="L5_UPDATE({sortCol:'price',sortDir:'asc'})">↑</button><button type="button" class="btn" style="padding:1px 5px;" onclick="L5_UPDATE({sortCol:'price',sortDir:'desc'})">↓</button></th>
+                </tr>
+              </thead>
+              <tbody>
+                ${list.length ? list.map(x => `<tr><td><strong>${x.model}</strong></td><td>${x.color}</td><td class="mono">${x.eng}</td><td>${x.body}</td><td class="mono">${x.year}</td><td class="mono">${x.price.toLocaleString("ru-RU")}</td></tr>`).join("") : `<tr><td colspan="6" class="text-muted">Нет записей под заданный фильтр/поиск. Нажмите «Сброс».</td></tr>`}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Мини-СУБД · Практика",
+      pillClass: "pill-accent",
+      shortTitle: "Мини-СУБД: Сортировка и Фильтр",
+      timing: "53–69 мин",
+      source: "Мини-СУБД (/subd) · t5, t4, g9a-l5-avto-sort, g9a-p5-sport-filtr",
+      notes: "Ученики последовательно решают «Сортировка» (t5) и «Фильтр» (t4), а сильные ученики — «Сортировка в автосалоне» (g9a-l5-avto-sort) и «Фильтры в спортклубе» (g9a-p5-sport-filtr).",
+      render(st, api) {
+        return api.renderMiniSubdTask({
+          key: "g9a5",
+          title: "Практика в Мини-СУБД: Сортировка и фильтрация",
+          summary: "Отработайте простую/многоуровневую сортировку и фильтрацию по условию в Мини-СУБД.",
+          taskName: "1) Сортировка (t5) · 2) Фильтр (t4) · Доп.: g9a-l5-avto-sort, g9a-p5-sport-filtr",
+          steps: ["Откройте «✓ Задания»", "Выполните «Сортировка» и «Фильтр»", "Быстрым: «Сортировка в автосалоне»"],
+          meta: "Цель 9.1.2.6 · Практика"
+        });
+      }
+    },
+    {
+      badge: "Этап 3 · Блиц по ловушкам",
+      shortTitle: "Блиц-тренажёр по подвохам СОР (5 вопросов)",
+      timing: "69–75 мин",
+      source: "КСП 9.2А Урок 5 · Проверка СОР/СОЧ",
+      notes: "Опрос по самым коварным вопросам темы 9.1.2.6.",
+      render(st) {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Блиц-тренажёр: проверь знание ловушек (5 вопросов)</h2>
+            <div class="stack" style="gap:8px;">
+              ${L5_BLITZ.map((b, i) => `
+                <button type="button" class="interactive-card ${st.revealed[b.k] ? "revealed" : ""}" style="padding:10px 12px;" onclick="DECK.toggleReveal('${b.k}')">
+                  <div class="font-bold text-xs">${i + 1}. ${b.q}</div>
+                  <div class="text-xs" style="margin-top:4px;">${st.revealed[b.k] ? b.a : "Нажмите для проверки →"}</div>
+                </button>
+              `).join("")}
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 3 · Итоги и ДЗ",
+      shortTitle: "Сравнение: Поиск vs Сортировка vs Фильтр + ДЗ",
+      timing: "75–80 мин",
+      source: "КСП 9.2А Урок 5 · ДЗ g9a-hw5-avto-filtr, g9a-p5-reki-sort",
+      notes: "Закрепите таблицу различий трёх инструментов и задайте домашние задачи в Мини-СУБД.",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Сводная таблица: Поиск vs Сортировка vs Фильтр</h2>
+            <table class="data-table">
+              <thead><tr><th>Инструмент</th><th>Скрывает лишние строки?</th><th>Меняет порядок строк?</th><th>Где пригодится на следующем уроке?</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Поиск (Ctrl+F)</strong></td><td>Нет</td><td>Нет</td><td>Быстрый переход к ячейке по <span class="mono">*</span> и <span class="mono">?</span></td></tr>
+                <tr><td><strong>Сортировка</strong></td><td>Нет</td><td><strong>Да</strong> (только на экране)</td><td>Упорядочивание результатов в Запросе</td></tr>
+                <tr><td><strong>Фильтр</strong></td><td><strong>Да</strong> (временно)</td><td>Нет (кроме расшир.)</td><td>Критерии отбора <span class="mono">Условие отбора</span> в QBE</td></tr>
+              </tbody>
+            </table>
+            <div class="box-primary flex-between text-xs">
+              <div>
+                <strong>Домашнее задание в Мини-СУБД (/subd):</strong><br>
+                • Основное: <strong>«Заказы менеджера автосалона»</strong> (g9a-hw5-avto-filtr)<br>
+                • Дополнительно: <strong>«Сортировка рек»</strong> (g9a-p5-reki-sort)
+              </div>
+              <a class="btn btn-accent" href="/subd" target="_blank" rel="noopener noreferrer">Открыть Мини-СУБД ↗</a>
+            </div>
+          </div>
+        `;
+      }
+    }
+  ]
+});
+</script>
+</body>
+</html>

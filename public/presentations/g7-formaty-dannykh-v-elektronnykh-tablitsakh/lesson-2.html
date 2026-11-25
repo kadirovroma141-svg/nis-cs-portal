@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>7.2А · Урок 2 · Формулы, маркер заполнения и функции СУММ, СРЗНАЧ, МИН, МАКС</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+</head>
+<body>
+<script src="../_engine/deck.js"></script>
+<script>
+const G7F2_SCORES = [
+  { name: "Алихан", val: 85 },
+  { name: "Диана", val: 92 },
+  { name: "Тимур", val: 74 },
+  { name: "Аружан", val: 100 },
+  { name: "Санжар", val: 89 }
+];
+
+const G7F2_ERR_QUIZ = [
+  { id: "e1", err: "=СУМ(B2:B6) — опечатка в названии функции", ans: "#ИМЯ?", why: "#ИМЯ? возникает при опечатке в имени функции или тексте без кавычек." },
+  { id: "e2", err: "=A2/B2, когда в ячейке B2 стоит 0 или она пуста", ans: "#ДЕЛ/0!", why: "#ДЕЛ/0! — попытка деления на ноль." },
+  { id: "e3", err: "=A2+B2, когда в B2 написано слово «десять»", ans: "#ЗНАЧ!", why: "#ЗНАЧ! — арифметическая операция над текстом вместо числа." },
+  { id: "e4", err: "Столбец с формулой удалили из таблицы", ans: "#ССЫЛКА!", why: "#ССЫЛКА! — ячейка, на которую ссылалась формула, удалена." },
+  { id: "e5", err: "Большое число 12 450 000 ₸ в узком столбце", ans: "#####", why: "##### — не ошибка формулы, а нехватка ширины столбца." }
+];
+
+window.G7F2_FILL = function(n) {
+  window.DECK_STATE.custom.filled = n;
+  window.DECK.render();
+};
+
+initDeck({
+  badge: "📊 7.2А · Урок 2",
+  title: "Формулы, маркер заполнения и функции СУММ, СРЗНАЧ, МИН, МАКС",
+  subtitle: "7 класс · 2 четверть · Цели 7.1.1.1, 7.1.1.2 · 80 мин · Мини-Таблицы",
+  footer: "НИШ ЕМН г. Кызылорда · 7 класс · 2 четверть · Мини-Таблицы (/excel)",
+  initialState: {
+    tabs: { fn: "sum" },
+    custom: { filled: 1 }
+  },
+  slides: [
+    {
+      badge: "Этап 1 · Правила формул",
+      shortTitle: "Как устроена формула в Excel",
+      timing: "0–8 мин",
+      source: "КСП 7.2А Урок 2 · Теория g7-formaty-dannykh-v-elektronnykh-tablitsakh",
+      notes: "Напомните: формула ВСЕГДА начинается со знака =. В формуле используют АДРЕСА ячеек (=A1+B1), а не готовые числа (=5+10), чтобы при изменении цены итог пересчитался сам!",
+      render() {
+        return `
+          <div class="stack">
+            <div class="text-xs font-bold text-muted" style="text-transform:uppercase;">Информатика · 7 класс · Раздел 7.2А · Урок 2 из 5</div>
+            <h1 class="slide-h1">Формулы, маркер заполнения и функции СУММ, СРЗНАЧ, МИН, МАКС</h1>
+            <p class="lead">Научимся писать формулы, быстро протягивать расчёты маркером заполнения, применять 4 базовые функции и расшифровывать 5 ошибок Excel.</p>
+            <div class="grid-2 text-xs">
+              <div class="box-primary stack">
+                <div class="box-title">3 железных правила формулы</div>
+                <div><strong>1.</strong> Всегда начинается со знака <span class="mono font-bold">=</span> (без него — просто текст!).</div>
+                <div><strong>2.</strong> Пишите <strong>адреса ячеек</strong> (<span class="mono">=B2*C2</span>), а не числа (<span class="mono">=250*4</span>) — для автопересчёта!</div>
+                <div><strong>3.</strong> Операторы: <span class="mono">+</span> (сложить), <span class="mono">-</span> (вычесть), <span class="mono">*</span> (умножить), <span class="mono">/</span> (делить), <span class="mono">^</span> (степень).</div>
+              </div>
+              <div class="box-success stack">
+                <div class="box-title">Порядок действий — как в математике!</div>
+                <div>1) Скобки <span class="mono">( ... )</span></div>
+                <div>2) Степень <span class="mono">^</span></div>
+                <div>3) Умножение <span class="mono">*</span> и деление <span class="mono">/</span></div>
+                <div>4) Сложение <span class="mono">+</span> и вычитание <span class="mono">-</span></div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Маркер заполнения",
+      shortTitle: "Интерактивный симулятор: Маркер заполнения (Fill Handle)",
+      timing: "8–18 мин",
+      source: "Теория 7.2А · Пример «Создание таблицы умножения»",
+      notes: "Нажимайте «Протянуть на 3 строки» и «Протянуть до 5-й строки» — ученики видят, как квадратик в правом нижнем углу ячейки сам продолжает числа (1, 2, 3…), дни недели (Пн, Вт…) и смещает формулу =A1*2 → =A2*2!",
+      render(st) {
+        const n = st.custom.filled || 1;
+        const days = ["Пн", "Вт", "Ср", "Чт", "Пт"];
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <h2 class="slide-h2">Маркер заполнения (чёрный крестик <span class="mono">+</span> в правом нижнем углу)</h2>
+              <div class="flex-row">
+                <button type="button" class="btn ${n === 1 ? "btn-primary" : ""}" onclick="G7F2_FILL(1)">Исходная строка (1)</button>
+                <button type="button" class="btn ${n === 3 ? "btn-accent" : ""}" onclick="G7F2_FILL(3)">⬇ Протянуть до 3</button>
+                <button type="button" class="btn ${n === 5 ? "btn-primary" : ""}" onclick="G7F2_FILL(5)">⬇ Протянуть до 5</button>
+              </div>
+            </div>
+            <table class="data-table">
+              <thead><tr><th>Строка</th><th>A (прогрессия)</th><th>B (формула =A*2)</th><th>C (значение B)</th><th>D (дни недели)</th></tr></thead>
+              <tbody>
+                ${[1,2,3,4,5].map(r => {
+                  const vis = r <= n;
+                  return `<tr style="${vis ? "" : "opacity:0.28;"}"><td class="mono">${r}</td><td class="mono">${vis ? r : ""}</td><td class="mono">${vis ? "=A" + r + "*2" : ""}</td><td class="mono font-bold">${vis ? r * 2 : ""}</td><td>${vis ? days[r-1] : ""}</td></tr>`;
+                }).join("")}
+              </tbody>
+            </table>
+            <div class="box-primary text-xs">
+              <strong>Запомни:</strong> чтобы протянуть последовательность чисел (<span class="mono">1, 2, 3…</span>), выделите <strong>две первые ячейки</strong> (1 и 2) и потяните за маркер заполнения — Excel поймёт шаг (+1)!
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · 4 базовые функции",
+      shortTitle: "Интерактивный калькулятор: СУММ, СРЗНАЧ, МИН, МАКС",
+      timing: "18–30 мин",
+      source: "КСП 7.2А Урок 2 · Цель 7.1.1.2",
+      notes: "Переключайте 4 функции на реальной таблице баллов класса (B2:B6) — подсвечиваются используемые ячейки, точный синтаксис функции и результат!",
+      render(st) {
+        const fn = st.tabs.fn || "sum";
+        const vals = G7F2_SCORES.map(x => x.val);
+        const info = {
+          sum: { f: "=СУММ(B2:B6)", res: vals.reduce((a,b) => a+b, 0), desc: "Складывает ВСЕ числа в диапазоне B2:B6 (85 + 92 + 74 + 100 + 89)." },
+          avg: { f: "=СРЗНАЧ(B2:B6)", res: (vals.reduce((a,b) => a+b, 0) / vals.length).toFixed(1), desc: "Находит среднее арифметическое чисел в диапазоне (440 / 5 = 88)." },
+          min: { f: "=МИН(B2:B6)", res: Math.min(...vals), desc: "Возвращает наименьшее число из диапазона (74 — Тимур)." },
+          max: { f: "=МАКС(B2:B6)", res: Math.max(...vals), desc: "Возвращает наибольшее число из диапазона (100 — Аружан)." }
+        }[fn];
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <h2 class="slide-h2">4 главные встроенные функции Excel</h2>
+              <div class="flex-row">
+                <button type="button" class="btn mono ${fn === "sum" ? "btn-primary" : ""}" onclick="DECK.setTab('fn','sum')">СУММ</button>
+                <button type="button" class="btn mono ${fn === "avg" ? "btn-accent" : ""}" onclick="DECK.setTab('fn','avg')">СРЗНАЧ</button>
+                <button type="button" class="btn mono ${fn === "min" ? "btn-primary" : ""}" onclick="DECK.setTab('fn','min')">МИН</button>
+                <button type="button" class="btn mono ${fn === "max" ? "btn-accent" : ""}" onclick="DECK.setTab('fn','max')">МАКС</button>
+              </div>
+            </div>
+            <div class="grid-2">
+              <table class="data-table">
+                <thead><tr><th>Строка</th><th>A (Ученик)</th><th>B (Балл)</th></tr></thead>
+                <tbody>
+                  ${G7F2_SCORES.map((x, idx) => {
+                    const hl = (fn === "min" && x.val === 74) || (fn === "max" && x.val === 100) || fn === "sum" || fn === "avg";
+                    return `<tr style="${hl ? "background:var(--primary-soft);" : ""}"><td class="mono">${idx + 2}</td><td>${x.name}</td><td class="mono font-bold">${x.val}</td></tr>`;
+                  }).join("")}
+                </tbody>
+              </table>
+              <div class="box-primary stack text-xs">
+                <div class="box-title">Формула в ячейке B7</div>
+                <div class="code-block" style="font-size:15px;">${info.f}</div>
+                <div class="box-success" style="font-size:15px;">Результат: <strong class="mono">${info.res}</strong></div>
+                <p style="margin:0;">${info.desc}</p>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Синтаксис диапазонов",
+      shortTitle: "Разница между двоеточием (:) и точкой с запятой (;)",
+      timing: "30–37 мин",
+      source: "Теория 7.2А · Правила записи аргументов",
+      notes: "Очень важная деталь, в которой путаются 7-классники: СУММ(B2:B6) — это ВСЕ 5 ячеек подряд, а СУММ(B2;B6) — только ДВЕ ячейки (B2 и B6)!",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Двоеточие <span class="mono">:</span> vs Точка с запятой <span class="mono">;</span></h2>
+            <div class="grid-2 text-xs">
+              <div class="box-primary">
+                <div class="box-title mono">=СУММ(B2:B6)</div>
+                <strong>Двоеточие (:)</strong> задаёт <strong>непрерывный диапазон</strong> — сложатся все 5 ячеек подряд: <span class="mono">B2 + B3 + B4 + B5 + B6</span>.
+              </div>
+              <div class="box-accent">
+                <div class="box-title mono" style="color:var(--accent);">=СУММ(B2;B6)</div>
+                <strong>Точка с запятой (;)</strong> перечисляет <strong>отдельные аргументы</strong> — сложатся ТОЛЬКО 2 ячейки: <span class="mono">B2 + B6</span>!
+              </div>
+            </div>
+            <div class="box-warning text-xs">
+              <strong>В русскоязычном Excel</strong> разделитель аргументов — <strong>точка с запятой (;)</strong>, а десятичная часть числа пишется через <strong>запятую (,)</strong>!
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · 5 ошибок Excel",
+      shortTitle: "Справочник и тренажёр 5 ошибок в формулах",
+      timing: "37–48 мин",
+      source: "Теория 7.2А · Таблица «Частые ошибки Excel»",
+      notes: "Пройдите с классом тренажёр 5 ошибок: ученики учатся мгновенно диагностировать #####, #ИМЯ?, #ЗНАЧ!, #ДЕЛ/0! и #ССЫЛКА!.",
+      render(st) {
+        let ok = 0;
+        G7F2_ERR_QUIZ.forEach(e => { if (st.quiz[e.id] === e.ans) ok++; });
+        const opts = ["#####","#ИМЯ?","#ЗНАЧ!","#ДЕЛ/0!","#ССЫЛКА!"];
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <h2 class="slide-h2">Тренажёр: какая ошибка появится в ячейке?</h2>
+              <span class="pill pill-success mono">${ok} / ${G7F2_ERR_QUIZ.length}</span>
+            </div>
+            <div class="stack" style="gap:6px;">
+              ${G7F2_ERR_QUIZ.map((e, i) => {
+                const p = st.quiz[e.id];
+                const cls = p ? (p === e.ans ? "ok" : "bad") : "";
+                return `
+                  <div class="quiz-row ${cls}">
+                    <div style="flex:1;"><strong>${i + 1}. ${e.err}</strong>${p === e.ans ? `<div class="text-xs text-muted">${e.why}</div>` : ""}</div>
+                    <div class="flex-row" style="gap:4px;">
+                      ${opts.map(o => `<button type="button" class="btn mono ${p === o ? "btn-primary" : ""}" style="padding:2px 6px;font-size:11px;" onclick="DECK.pickQuiz('${e.id}','${o}')">${o}</button>`).join("")}
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Мини-Таблицы · Практика 1",
+      pillClass: "pill-accent",
+      shortTitle: "Мини-Таблицы: СУММ, СРЗНАЧ, МАКС, МИН (зарплата)",
+      timing: "48–66 мин",
+      source: "Мини-Таблицы (/excel?task=g7-fmt-funktsii)",
+      notes: "Основное задание в Мини-Таблицах — «СУММ, СРЗНАЧ, МАКС, МИН: зарплата сотрудников» (g7-fmt-funktsii). Быстрым ученикам также доступны g7-fmt-stoimost, g7-fmt-marker и g7-fmt-l2-oshibki-formul.",
+      render(st, api) {
+        return api.renderMiniExcelTask({
+          key: "g7fmt2",
+          taskId: "g7-fmt-funktsii",
+          title: "Практика в Мини-Таблицах: СУММ, СРЗНАЧ, МАКС, МИН",
+          summary: "Рассчитайте итоговую, среднюю, максимальную и минимальную зарплату с помощью встроенных функций.",
+          steps: ["Введите формулы СУММ, СРЗНАЧ, МАКС, МИН", "Используйте диапазоны через двоеточие (:)", "Проверьте автопроверкой"],
+          meta: "Цели 7.1.1.1 · 7.1.1.2"
+        });
+      }
+    },
+    {
+      badge: "Этап 3 · Доп. задания в классе",
+      shortTitle: "Ещё 3 быстрые практики в Мини-Таблицах",
+      timing: "66–72 мин",
+      source: "Мини-Таблицы · g7-fmt-stoimost, g7-fmt-marker, g7-fmt-l2-oshibki-formul",
+      notes: "Дифференциация для быстрых учеников — 3 прямые ссылки на задания урока.",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Дополнительные задания урока 2 (для закрепления)</h2>
+            <div class="grid-3 text-xs">
+              <div class="box-primary stack">
+                <strong>1. Стоимость покупки</strong>
+                <div>Написание арифметических формул и автопересчёт.</div>
+                <a class="btn btn-primary" href="/excel?task=g7-fmt-stoimost" target="_blank" rel="noopener noreferrer">Открыть ↗</a>
+              </div>
+              <div class="box-accent stack">
+                <strong>2. Маркер заполнения</strong>
+                <div>Дни недели, нумерация и таблица умножения.</div>
+                <a class="btn btn-accent" href="/excel?task=g7-fmt-marker" target="_blank" rel="noopener noreferrer">Открыть ↗</a>
+              </div>
+              <div class="box-success stack">
+                <strong>3. Найди ошибки в формулах</strong>
+                <div>Исправление #ИМЯ?, #ЗНАЧ! и пропущенного =.</div>
+                <a class="btn" href="/excel?task=g7-fmt-l2-oshibki-formul" target="_blank" rel="noopener noreferrer">Открыть ↗</a>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 3 · Блиц",
+      shortTitle: "Блиц-проверка (4 вопроса)",
+      timing: "72–76 мин",
+      source: "КСП 7.2А Урок 2",
+      notes: "Быстрое устное закрепление.",
+      render(st) {
+        const qa = [
+          { k: "q1", q: "1. Чем отличается =СУММ(A1:A5) от =СУММ(A1;A5)?", a: "A1:A5 — все 5 ячеек подряд; A1;A5 — только две ячейки (A1 и A5)." },
+          { k: "q2", q: "2. Почему вместо =100+200 в Excel пишут =A1+B1?", a: "Чтобы при изменении чисел в A1 или B1 сумма пересчиталась автоматически!" },
+          { k: "q3", q: "3. Какая функция найдёт средний балл ученика по 6 предметам в C2:H2?", a: "=СРЗНАЧ(C2:H2)." },
+          { k: "q4", q: "4. В ячейке появилось #ИМЯ? после ввода =МАКСИМУМ(B2:B8). В чём ошибка?", a: "В Excel функция называется МАКС (а не МАКСИМУМ): =МАКС(B2:B8)." }
+        ];
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Блиц-итоги урока 2</h2>
+            <div class="grid-2">
+              ${qa.map(x => `
+                <button type="button" class="interactive-card ${st.revealed[x.k] ? "revealed" : ""}" onclick="DECK.toggleReveal('${x.k}')">
+                  <div class="font-bold text-xs">${x.q}</div>
+                  <div class="text-xs" style="margin-top:6px;">${st.revealed[x.k] ? "✓ " + x.a : "Нажмите →"}</div>
+                </button>
+              `).join("")}
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 3 · ДЗ",
+      shortTitle: "Домашнее задание в Мини-Таблицах",
+      timing: "76–80 мин",
+      source: "Мини-Таблицы · g7-fmt-dz-strany",
+      notes: "Выдайте ДЗ «Баллы по странам: СУММ, СРЗНАЧ, МИН, МАКС».",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Домашнее задание урока 2</h2>
+            <div class="box-primary flex-between text-xs">
+              <div><strong>В Мини-Таблицах (/excel) выполнить:</strong> <strong>«ДЗ. Баллы по странам: СУММ, СРЗНАЧ, МИН, МАКС»</strong> (<span class="mono">g7-fmt-dz-strany</span>).</div>
+              <a class="btn btn-accent" href="/excel?task=g7-fmt-dz-strany" target="_blank" rel="noopener noreferrer">Открыть ДЗ ↗</a>
+            </div>
+          </div>
+        `;
+      }
+    }
+  ]
+});
+</script>
+</body>
+</html>

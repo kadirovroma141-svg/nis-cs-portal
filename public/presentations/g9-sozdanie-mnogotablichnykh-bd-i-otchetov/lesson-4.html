@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9.2B · Урок 4 · Создание и оформление отчётов. Итоги 9.2B</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+</head>
+<body>
+<script src="../_engine/deck.js"></script>
+<script>
+const L4B_BANDS = {
+  rh: { title: "1. Заголовок отчёта", freq: "Печатается 1 раз в начале отчёта (на 1-й стр.)", desc: "Размещают главное название документа («Ведомость цен по магазинам»), дату отчёта, логотип. Обычно используются свободные надписи." },
+  ph: { title: "2. Верхний колонтитул", freq: "Повторяется вверху КАЖДОЙ страницы", desc: "Удобен для шапки таблицы (Надписи: «Товар», «Характеристика», «Цена»), чтобы на 2-й и 3-й странице читатель не забыл названия столбцов." },
+  gh: { title: "3. Заголовок группы", freq: "Повторяется перед КАЖДОЙ новой группой", desc: "Показывает ключ группировки — например, крупный заголовок магазина «Sulpak», затем «Fora», затем «Technodom»." },
+  dt: { title: "4. Область данных", freq: "Повторяется для КАЖДОЙ записи внутри группы", desc: "Содержит связанные элементы (поля таблицы/запроса): конкретные товары и их цены." },
+  gf: { title: "5. Примечание группы", freq: "Печатается сразу ПОСЛЕ каждой группы", desc: "Идеальное место для промежуточных итогов по группе! Например: =Sum([Цена]) даст 202 270 ₸ для Sulpak, 33 790 ₸ для Fora." },
+  pf: { title: "6. Нижний колонтитул", freq: "Повторяется внизу КАЖДОЙ страницы", desc: "Служит для нумерации страниц: =\"Стр. \" & [Page] & \" из \" & [Pages] и текущей даты =Date()." },
+  rf: { title: "7. Примечание отчёта", freq: "Печатается 1 раз в самом КОНЦЕ (на посл. стр.)", desc: "Идеальное место для ОБЩЕГО итога по всей базе! Та же формула =Sum([Цена]), стоящая здесь, посчитает 310 869 ₸ по всем магазинам сразу." }
+};
+
+const L4B_GROUPS = [
+  { shop: "Sulpak", city: "Алматы", items: [
+    { name: "Материнская плата", spec: "Gigabyte Z370P D3", price: 42490 },
+    { name: "Материнская плата", spec: "ASRock Z370 Extreme 4", price: 69990 },
+    { name: "Видеокарта", spec: "MSI GeForce GTX 1050 Ti", price: 89790 }
+  ]},
+  { shop: "Fora", city: "Петропавловск", items: [
+    { name: "Видеокарта", spec: "Asus PH-GT1030-O2G", price: 33790 }
+  ]},
+  { shop: "Technodom", city: "Нур-Султан", items: [
+    { name: "Материнская плата", spec: "Gigabyte Z370P D3", price: 39810 },
+    { name: "Видеокарта", spec: "Asus PH-GT1030-O2G", price: 34999 }
+  ]}
+];
+
+const L4B_TRAPS = [
+  { id: "tr1", q: "1. Вставили =Sum([Цена]) в «Примечание отчёта» вместо «Примечания группы».", a: "Посчитается только общий итог (310 869 ₸) в конце документа, а промежуточных сумм по Sulpak / Fora / Technodom НЕ будет!" },
+  { id: "tr2", q: "2. Забыли знак равенства «=» и написали в поле просто Sum([Цена]).", a: "Access воспримет это как обычный текст (или выдаст ошибку), а не как формулу! Итоговые выражения ВСЕГДА начинаются с «=»." },
+  { id: "tr3", q: "3. Пытаются исправить опечатку в фамилии или цене прямо внутри открытого Отчёта.", a: "Отчёт предназначен ТОЛЬКО для просмотра и печати — редактировать данные в отчёте нельзя! Исправляют в Таблице или Форме." },
+  { id: "tr4", q: "4. В Схеме данных таблицы не закрыты перед связыванием, или PK и FK разного типа.", a: "Access выдаст ошибку блокировки или несовпадения типов — закрывайте таблицы и делайте PK/FK строго одного типа и размера." },
+  { id: "tr5", q: "5. Написали параметр [Магазин], когда в таблице уже есть поле с именем «Магазин».", a: "Запрещено! Подсказка параметра в [...] не должна совпадать с именем поля/таблицы (правильно: [Введите магазин]) и не может содержать «.» и «!»." },
+  { id: "tr6", q: "6. Нажали «! Выполнить» в Запросе на удаление без предварительного просмотра.", a: "Запросы на изменение (обновление и удаление) НЕЛЬЗЯ отменить! Сначала проверяйте записи в Режиме таблицы." }
+];
+
+const L4B_CHECKLIST = [
+  "Умею отличать PK (уникальный идентификатор) и FK (повторяющаяся ссылка на чужой PK).",
+  "Умею определять типы связей 1:1, 1:N и M:N (через промежуточную таблицу с двумя 1:N).",
+  "Знаю 8 шагов Схемы данных: закрываю таблицы, связываю PK → FK, включаю 3 флажка целостности.",
+  "Понимаю разницу между Главной+Подчинённой формой и Связанными формами.",
+  "Строю запросы к 2–3 таблицам (QBE / INNER JOIN), параметры [...] и итоги Σ (Sum, Count, Avg).",
+  "Умею применять запросы на обновление ([цена]/2), добавление («Только структура») и удаление.",
+  "Различаю 7 разделов Отчёта и правильно ставлю =Sum([поле]) / =Count(*) в Примечание группы vs отчёта."
+];
+
+function calcAgg(arr, fn) {
+  const prices = arr.map(x => x.price);
+  if (fn === "Sum") return prices.reduce((a,b) => a + b, 0).toLocaleString("ru-RU") + " ₸";
+  if (fn === "Count") return prices.length + " шт.";
+  if (fn === "Avg") return Math.round(prices.reduce((a,b) => a + b, 0) / prices.length).toLocaleString("ru-RU") + " ₸";
+  if (fn === "Min") return Math.min(...prices).toLocaleString("ru-RU") + " ₸";
+  return Math.max(...prices).toLocaleString("ru-RU") + " ₸";
+}
+
+initDeck({
+  badge: "🗄 9.2B · Урок 4",
+  title: "Создание и оформление отчётов. Итоговое повторение 9.2B",
+  subtitle: "9 класс · 2 четверть · Цели 9.1.2.12, 9.1.2.8, 9.1.2.11 · 80 мин · Мини-СУБД",
+  footer: "НИШ ЕМН г. Кызылорда · 9 класс · 2 четверть · Мини-СУБД (/subd)",
+  initialState: {
+    tabs: { band: "gf", rptMode: "preview", rptFn: "Sum" }
+  },
+  slides: [
+    {
+      badge: "Этап 1 · Постановка проблемы",
+      shortTitle: "Почему «Файл → Печать» таблицы не подходит",
+      timing: "0–6 мин",
+      source: "КСП 9.2B Урок 4 · SB 9 кл. стр. 90–93",
+      notes: "Начните с вопроса: «Директор просит напечатать ведомость по магазинам Sulpak, Fora, Technodom с суммой по каждому магазину и общим итогом. Если просто распечатать таблицу — получится сырой список без сумм!»",
+      render() {
+        return `
+          <div class="stack">
+            <div class="text-xs font-bold text-muted" style="text-transform:uppercase;">Информатика · 9 класс · Раздел 9.2B «Многотабличные БД и отчёты» · Урок 4 из 4</div>
+            <h1 class="slide-h1">Создание, группировка и оформление отчётов. Итоги 9.2B</h1>
+            <p class="lead">Изучим 5 способов создания отчётов, все 7 разделов Конструктора, 5 итоговых функций (Count, Sum, Avg, Min, Max) и подготовимся к СОР/СОЧ за 2 четверть.</p>
+            <div class="box-accent text-xs">
+              <strong>Проблема:</strong> обычная печать таблицы (<span class="mono">Файл → Печать</span>) режет столбцы по листам, не умеет группировать строки по магазинам и не подсчитывает промежуточные и общие суммы. Для красивого документа нужен объект <strong>«Отчёт»</strong>!
+            </div>
+            <div class="grid-3 text-xs">
+              <div class="box-primary"><div class="box-title mono">9.1.2.12</div>Создавать отчёты с помощью Мастера и Конструктора, настраивать группировку и итоги.</div>
+              <div class="box-accent"><div class="box-title">Разделы и формулы</div>Размещать элементы <span class="mono">Надпись</span> / <span class="mono">Поле</span> и формулы <span class="mono">=Sum([Цена])</span> в нужных разделах.</div>
+              <div class="box-success"><div class="box-title">Итоги 9.2B</div>Проверить знания по всем ловушкам многотабличных БД перед СОР/СОЧ.</div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Форма vs Отчёт",
+      shortTitle: "Сравнение: Форма vs Отчёт (4 критерия)",
+      timing: "6–14 мин",
+      source: "SB 9 кл. стр. 90 · Таблица сравнения Формы и Отчёта",
+      notes: "Очень часто на экзамене сравнивают два похожих объекта — Форму и Отчёт. Закрепите ключевое отличие: в Форме редактируют данные, в Отчёте — только читают/печатают и считают групповые итоги.",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Сравнение объектов Access: Форма vs Отчёт</h2>
+            <table class="data-table">
+              <thead><tr><th>Критерий</th><th>📝 Форма</th><th>🖨 Отчёт</th></tr></thead>
+              <tbody>
+                <tr><td><strong>1. Главная цель</strong></td><td>Удобный <strong>ввод, просмотр и поиск</strong> записей на экране монитора</td><td>Подготовка сводного документа для <strong>печати на бумаге</strong> или экспорта в PDF</td></tr>
+                <tr><td><strong>2. Редактирование данных</strong></td><td><strong>Да!</strong> Любая правка в форме меняет таблицу БД</td><td><strong>Нет!</strong> Режим только для чтения (данные нельзя менять)</td></tr>
+                <tr><td><strong>3. Группировка и итоги</strong></td><td>Как правило, 1 запись-карточка без многоуровневой сводки</td><td><strong>Да</strong> — группировка по категориям, промежуточные итоги группы и общий итог</td></tr>
+                <tr><td><strong>4. Оформление страниц</strong></td><td>3 раздела (Заголовок, Область данных, Примечание)</td><td>До <strong>7 разделов</strong>: постраничные колонтитулы, Заголовок/Примечание группы, отчёта</td></tr>
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Способы создания отчёта",
+      shortTitle: "5 команд «Отчёты» и 6 шагов Мастера отчётов",
+      timing: "14–23 мин",
+      source: "SB 9 кл. стр. 90–91 · Вкладка «Создание → Отчёты»",
+      notes: "Перечислите 5 инструментов вкладки «Создание → Отчёты» и подробно разберите 6 шагов «Мастера отчётов» (выбор таблицы/запроса, уровни группировки, сортировка и кнопка «Итоги…», макет и ориентация).",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">5 способов создания и 6 шагов «Мастера отчётов»</h2>
+            <div class="grid-2 text-xs">
+              <div class="box-primary stack">
+                <div class="box-title">Вкладка «Создание → Отчёты» (5 инструментов)</div>
+                <div><strong>1. Отчёт:</strong> автоотчёт в 1 клик по выделенной таблице или запросу.</div>
+                <div><strong>2. Мастер отчётов:</strong> главный инструмент — настраивает группировку, сортировку, итоги и макет по шагам.</div>
+                <div><strong>3. Конструктор отчётов:</strong> чистый бланк для точной настройки разделов и формул с нуля.</div>
+                <div><strong>4. Пустой отчёт:</strong> сборка в Режиме макета перетаскиванием полей.</div>
+                <div><strong>5. Наклейки:</strong> печать почтовых конвертов, бейджей и инвентарных этикеток.</div>
+              </div>
+              <div class="box-white stack">
+                <div class="box-title" style="color:var(--accent);">6 шагов «Мастера отчётов» (SB стр. 91)</div>
+                <div><strong>Шаг 1.</strong> Выбрать таблицу/запрос (источник) и нужные поля.</div>
+                <div><strong>Шаг 2.</strong> Добавить <strong>уровни группировки</strong> (например, по полю «Магазин»).</div>
+                <div><strong>Шаг 3.</strong> Выбрать сортировку внутри групп и нажать кнопку <strong>«Итоги…»</strong> (<span class="mono">Sum, Avg, Min, Max</span>).</div>
+                <div><strong>Шаг 4.</strong> Выбрать вид макета (<em>Ступенчатый / Блок / Структура</em>) и ориентацию (<em>Книжная / Альбомная</em>).</div>
+                <div><strong>Шаг 5.</strong> Задать заголовок отчёта → «Готово».</div>
+                <div><strong>Шаг 6.</strong> Доработать шрифты, ширину и цвета в <strong>Режиме макета</strong> или <strong>Конструкторе</strong>.</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Разделы Конструктора",
+      shortTitle: "Интерактивный инспектор: 7 разделов отчёта",
+      timing: "23–33 мин",
+      source: "SB 9 кл. стр. 92 · Строение отчёта в Конструкторе",
+      notes: "Нажимайте на разделы бланк-схемы слева — справа показывается, где и сколько раз печатается этот раздел! Особый акцент на паре «Примечание группы» vs «Примечание отчёта» и на элементах «Надпись» (статичный текст) и «Поле» (данные/формулы).",
+      render(st) {
+        const cur = st.tabs.band || "gf";
+        const info = L4B_BANDS[cur];
+        const order = ["rh", "ph", "gh", "dt", "gf", "pf", "rf"];
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Устройство отчёта в Конструкторе (кликните по разделу)</h2>
+            <div class="grid-2">
+              <div class="stack" style="gap:5px;">
+                ${order.map(k => `
+                  <button type="button" class="interactive-card ${cur === k ? "active" : ""}" style="padding:7px 11px;display:flex;justify-content:space-between;" onclick="DECK.setTab('band','${k}')">
+                    <strong class="text-xs">${L4B_BANDS[k].title}</strong>
+                    <span class="text-xs mono" style="opacity:0.85;">${k === "dt" ? "каждая запись" : k.startsWith("g") ? "на группу" : k.startsWith("p") ? "каждая стр." : "1 раз"}</span>
+                  </button>
+                `).join("")}
+              </div>
+              <div class="stack text-xs">
+                <div class="box-primary">
+                  <div class="font-bold text-sm">${info.title}</div>
+                  <div class="pill pill-accent" style="margin:6px 0;">${info.freq}</div>
+                  <p style="margin:0;">${info.desc}</p>
+                </div>
+                <div class="box-white">
+                  <div class="box-title">2 главных элемента управления в отчёте</div>
+                  • <strong>Надпись</strong> — неизменяемый поясняющий текст (заголовок «ИТОГО:», шапка столбца).<br>
+                  • <strong>Поле</strong> — отображает значения поля из БД (<span class="mono">[Цена]</span>) или результат формулы (<span class="mono">=Sum([Цена])</span>).
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Итоговые формулы",
+      shortTitle: "Все 5 итоговых функций отчёта (Count, Sum, Avg, Min, Max)",
+      timing: "33–42 мин",
+      source: "SB 9 кл. стр. 92–93 · Вычисляемые поля в отчётах",
+      notes: "Зафиксируйте точный синтаксис в квадратных скобках со знаком «=». Покажите, что одна и та же формула =Sum([Цена]) считает разные числа в зависимости от того, в какой раздел её поместили!",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">5 итоговых функций отчёта MS Access</h2>
+            <table class="data-table">
+              <thead><tr><th>Формула в элементе «Поле»</th><th>Что вычисляет</th><th>Пример результата (для Sulpak)</th></tr></thead>
+              <tbody>
+                <tr><td class="mono font-bold">=Count(*)</td><td>Количество записей в группе (или во всём отчёте)</td><td class="mono">3 товара</td></tr>
+                <tr><td class="mono font-bold">=Sum([Цена])</td><td>Сумму значений числового/денежного поля</td><td class="mono">202 270 ₸</td></tr>
+                <tr><td class="mono font-bold">=Avg([Цена])</td><td>Среднее арифметическое значение</td><td class="mono">67 423 ₸</td></tr>
+                <tr><td class="mono font-bold">=Min([Цена])</td><td>Минимальное значение</td><td class="mono">42 490 ₸</td></tr>
+                <tr><td class="mono font-bold">=Max([Цена])</td><td>Максимальное значение</td><td class="mono">89 790 ₸</td></tr>
+              </tbody>
+            </table>
+            <div class="grid-2 text-xs">
+              <div class="box-warning">
+                <strong>2 железных правила синтаксиса:</strong><br>
+                1. Любая формула в свойстве «Данные» начинается со знака <span class="mono font-bold">=</span>.<br>
+                2. Имя поля обязательно берётся в квадратные скобки: <span class="mono font-bold">[Цена]</span>.
+              </div>
+              <div class="box-primary">
+                <strong>Магия размещения формулы:</strong><br>
+                Поместили <span class="mono">=Sum([Цена])</span> в <strong>Примечание группы</strong> → итог по магазину; поместили её же в <strong>Примечание отчёта</strong> → общий итог!
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Живой печатный отчёт SB",
+      shortTitle: "Интерактивный отчёт «Компьютеры и комплектующие» (SB)",
+      timing: "42–52 мин",
+      source: "SB 9 кл. · Точные расчёты: 202 270 + 33 790 + 74 809 = 310 869 ₸",
+      notes: "Переключите режим «Предпросмотр (числа) ⇄ Режим конструктора (формулы)» и переключите функцию Sum / Count / Avg / Min / Max. В учебнике SB числа ровно 202 270, 33 790, 74 809 и общий итог 310 869!",
+      render(st) {
+        const mode = st.tabs.rptMode || "preview";
+        const fn = st.tabs.rptFn || "Sum";
+        const allItems = L4B_GROUPS.flatMap(g => g.items);
+        const formulaMap = { Sum: "=Sum([Цена])", Count: "=Count(*)", Avg: "=Avg([Цена])", Min: "=Min([Цена])", Max: "=Max([Цена])" };
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <h2 class="slide-h2">Живой отчёт SB: «Компьютеры и комплектующие»</h2>
+              <div class="flex-row">
+                <button type="button" class="btn ${mode === "preview" ? "btn-primary" : ""}" onclick="DECK.setTab('rptMode','preview')">🖨 Предпросмотр (числа)</button>
+                <button type="button" class="btn ${mode === "design" ? "btn-accent" : ""}" onclick="DECK.setTab('rptMode','design')">🛠 Конструктор (формулы)</button>
+              </div>
+            </div>
+            <div class="flex-row text-xs">
+              <strong>Итоговая функция:</strong>
+              ${["Sum","Count","Avg","Min","Max"].map(k => `<button type="button" class="btn mono ${fn === k ? "btn-primary" : ""}" style="padding:2px 8px;" onclick="DECK.setTab('rptFn','${k}')">${k}</button>`).join("")}
+            </div>
+            <div class="box-white stack" style="border:2px solid var(--border-strong);gap:8px;">
+              <div class="flex-between" style="border-bottom:2px solid var(--fg);padding-bottom:4px;">
+                <strong>📄 Прайс-отчёт по магазинам</strong>
+                <span class="mono text-xs text-muted">${mode === "design" ? "Заголовок отчёта" : "Стр. 1 из 1"}</span>
+              </div>
+              ${L4B_GROUPS.map(g => `
+                <div style="border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+                  <div style="background:var(--primary-soft);padding:4px 10px;font-weight:700;" class="flex-between text-xs">
+                    <span>${mode === "design" ? "[Магазин] (Заголовок группы): " : "🏪 "}${g.shop} (${g.city})</span>
+                    <span class="mono">${g.items.length} поз.</span>
+                  </div>
+                  <div style="padding:4px 10px;" class="text-xs">
+                    ${mode === "design"
+                      ? `<div class="mono text-muted">Область данных: [Наименование] | [Характеристика] | [Цена]</div>`
+                      : g.items.map(it => `<div class="flex-between" style="padding:2px 0;"><span>${it.name} — ${it.spec}</span><span class="mono">${it.price.toLocaleString("ru-RU")} ₸</span></div>`).join("")
+                    }
+                  </div>
+                  <div style="background:var(--surface-2);padding:4px 10px;" class="flex-between text-xs font-bold">
+                    <span>Примечание группы (${g.shop}) — ${fn}:</span>
+                    <span class="mono">${mode === "design" ? formulaMap[fn] : calcAgg(g.items, fn)}</span>
+                  </div>
+                </div>
+              `).join("")}
+              <div class="box-success flex-between text-xs font-bold">
+                <span>Примечание отчёта — ОБЩИЙ ИТОГ (${fn}):</span>
+                <span class="mono" style="font-size:14px;">${mode === "design" ? formulaMap[fn] : calcAgg(allItems, fn)}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Мини-СУБД · Практика",
+      pillClass: "pill-accent",
+      shortTitle: "Мини-СУБД: Отчёт с группировкой и итогами",
+      timing: "52–67 мин",
+      source: "Мини-СУБД (/subd) · t12, t13, g9b-p4-magaziny, g9b-p4-count",
+      notes: "Ученики открывают в Мини-СУБД задания «Отчёт с группировкой и итогами» (t12) и «Оформление отчёта» (t13). Дополнительно для быстрых: «Отчёт по магазинам» (g9b-p4-magaziny) и «Сколько изданий у подписчика» (g9b-p4-count).",
+      render(st, api) {
+        return api.renderMiniSubdTask({
+          key: "g9b4",
+          title: "Практика в Мини-СУБД: Отчёты с группировкой и итогами",
+          summary: "Соберите отчёт с группировкой, добавьте формулу подсчёта в Примечание группы/отчёта и настройте оформление.",
+          taskName: "1) Отчёт с группировкой и итогами (t12) · 2) Оформление отчёта (t13) · Доп.: g9b-p4-magaziny, g9b-p4-count",
+          steps: ["Нажмите «✓ Задания»", "Выполните t12 и t13", "Доп.: «Отчёт по магазинам»"],
+          meta: "Цели 9.1.2.12 · 9.1.2.8 · 9.1.2.11"
+        });
+      }
+    },
+    {
+      badge: "Этап 3 · Ловушки СОР/СОЧ",
+      shortTitle: "6 главных ловушек СОР/СОЧ по разделу 9.2B",
+      timing: "67–74 мин",
+      source: "КСП 9.2B Урок 4 · Разбор типичных ошибок СОР и СОЧ",
+      notes: "Пройдите 6 карточек-подвохов по всему разделу 9.2B — это спасёт учеников от самых обидных потерь баллов на суммативной работе.",
+      render(st) {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Стоп-лист: 6 коварных ошибок на СОР/СОЧ (9.2B)</h2>
+            <p class="lead">Обсудите каждую ситуацию и раскройте правильное решение.</p>
+            <div class="grid-2" style="gap:8px;">
+              ${L4B_TRAPS.map(t => {
+                const open = !!st.revealed[t.id];
+                return `
+                  <button type="button" class="interactive-card ${open ? "revealed" : ""}" style="padding:10px 12px;" onclick="DECK.toggleReveal('${t.id}')">
+                    <div class="font-bold text-xs">${t.q}</div>
+                    <div class="text-xs" style="margin-top:5px;">${open ? "✓ " + t.a : "Нажмите для проверки →"}</div>
+                  </button>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 3 · Итоговый чеклист и ДЗ",
+      shortTitle: "Чеклист готовности к СОР/СОЧ (7/7) + ДЗ",
+      timing: "74–80 мин",
+      source: "КСП 9.2B Урок 4 · ДЗ g9b-hw4-vedomost, g9b-p4-count",
+      notes: "Ученики отмечают, какие навыки уже усвоены уверенно, а какие нужно повторить дома перед СОР. Выдайте ДЗ в Мини-СУБД: «Отчёт „Ведомость подписки“» и «Сколько изданий у подписчика».",
+      render(st) {
+        let checked = 0;
+        L4B_CHECKLIST.forEach((_, i) => { if (st.revealed["chk" + i]) checked++; });
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <h2 class="slide-h2">Чеклист готовности к СОР/СОЧ за 2 четверть</h2>
+              <span class="pill pill-success mono">${checked} / ${L4B_CHECKLIST.length}</span>
+            </div>
+            <div class="stack" style="gap:5px;">
+              ${L4B_CHECKLIST.map((txt, i) => {
+                const ok = !!st.revealed["chk" + i];
+                return `
+                  <button type="button" class="interactive-card ${ok ? "revealed" : ""}" style="padding:7px 12px;" onclick="DECK.toggleReveal('chk${i}')">
+                    <div class="text-xs font-bold">${ok ? "☑" : "☐"} ${i + 1}. ${txt}</div>
+                  </button>
+                `;
+              }).join("")}
+            </div>
+            <div class="box-primary flex-between text-xs">
+              <div>
+                <strong>Домашнее задание в Мини-СУБД (/subd):</strong><br>
+                • Основное: <strong>«Отчёт „Ведомость подписки“»</strong> (g9b-hw4-vedomost)<br>
+                • На повторение: <strong>«Сколько изданий у подписчика»</strong> (g9b-p4-count)
+              </div>
+              <a class="btn btn-accent" href="/subd" target="_blank" rel="noopener noreferrer">Открыть Мини-СУБД ↗</a>
+            </div>
+          </div>
+        `;
+      }
+    }
+  ]
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9.2B · Урок 1 · Однотабличные и многотабличные БД. Ключи и связи</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+</head>
+<body>
+<script src="../_engine/deck.js"></script>
+<script>
+const L1_CITIES = [
+  { id: 1, name: "Нур-Султан" },
+  { id: 2, name: "Алматы" },
+  { id: 3, name: "Атырау" },
+  { id: 4, name: "Павлодар" }
+];
+
+const L1_CLIENTS = [
+  { id: 1, fio: "Кожахметова Г.К.", cityId: 2 },
+  { id: 2, fio: "Темиргалиева М.Т.", cityId: 1 },
+  { id: 3, fio: "Сулейменов В.Г.", cityId: 3 },
+  { id: 4, fio: "Евлоев А.А.", cityId: 1 },
+  { id: 5, fio: "Иванов Б.А.", cityId: 4 },
+  { id: 6, fio: "Смагулов С.Т.", cityId: 2 }
+];
+
+const L1_REL_PAIRS = [
+  { id: "r1", pair: "Гражданин ↔ Паспорт (в стране)", ans: "1:1", why: "У одного гражданина один действующий паспорт, и у паспорта один владелец." },
+  { id: "r2", pair: "Писатель ↔ Произведения", ans: "1:N", why: "Один автор может написать много книг (но у книги из списка один автор)." },
+  { id: "r3", pair: "Отдел ↔ Сотрудники", ans: "1:N", why: "В одном отделе работают много сотрудников, каждый числится в одном отделе." },
+  { id: "r4", pair: "Учителя ↔ Предметы (через Расписание)", ans: "M:N", why: "Один учитель ведёт несколько предметов, и один предмет ведут разные учителя." },
+  { id: "r5", pair: "Клиенты ↔ Блюда (через Заказ)", ans: "M:N", why: "Клиент заказывает разные блюда, и одно блюдо заказывают разные клиенты." },
+  { id: "r6", pair: "Город ↔ Клиенты (база SB)", ans: "1:N", why: "В одном городе может жить много клиентов, у клиента указан 1 Код города." }
+];
+
+const L1_ERRORS = [
+  { id: "e1", q: "1. В таблице «Города» Код_города имеет тип Счётчик (Длинное целое), а в «Клиентах» — Текстовый.", a: "ОШИБКА: типы и размеры связываемых полей PK и FK обязаны совпадать (для Счётчика внешний ключ делают Числовым → Длинное целое)!" },
+  { id: "e2", q: "2. Попытка напрямую соединить «Подписчики» и «Подписные издания» связью M:N без третьей таблицы.", a: "ОШИБКА: в Access связь Многие-ко-многим (M:N) ВСЕГДА разбивается на две связи 1:N через связующую таблицу (например, «Подписка»)." },
+  { id: "e3", q: "3. Удалили город Атырау (Код=3) из «Города», а Сулейменов в «Клиентах» остался с Код_города=3.", a: "ОШИБКА: нарушена ссылочная целостность — появилась «запись-сирота» с несуществующим внешним ключом!" },
+  { id: "e4", q: "4. В главной таблице «Отделы» забыли назначить первичный ключ (🔑).", a: "ОШИБКА: без первичного ключа Access не сможет определить сторону «Один» (1) и создать связь с целостностью данных!" }
+];
+
+initDeck({
+  badge: "🗄 9.2B · Урок 1",
+  title: "Однотабличные и многотабличные БД. Ключи и типы связей",
+  subtitle: "9 класс · 2 четверть · Цели 9.1.2.8, 9.1.2.9 · 80 мин · Мини-СУБД",
+  footer: "НИШ ЕМН г. Кызылорда · 9 класс · 2 четверть · Мини-СУБД (/subd)",
+  initialState: {
+    tabs: { model: "bad", relType: "1N" },
+    selected: { cityId: 1 }
+  },
+  slides: [
+    {
+      badge: "Этап 1 · Постановка проблемы",
+      shortTitle: "Почему одной таблицы становится мало",
+      timing: "0–6 мин",
+      source: "КСП 9.2B Урок 1 · SB 9 кл. стр. 78–80",
+      notes: "Переход от раздела 9.2А к 9.2B. Спросите класс: «Если писатель написал 50 произведений, сколько раз в одной таблице придётся перепечатывать его ФИО, годы жизни и страну?» Озвучьте цели 9.1.2.8 и 9.1.2.9.",
+      render() {
+        return `
+          <div class="stack">
+            <div class="text-xs font-bold text-muted" style="text-transform:uppercase;">Информатика · 9 класс · Раздел 9.2B «Многотабличные БД и отчёты» · Урок 1 из 4</div>
+            <h1 class="slide-h1">Многотабличные БД. Первичный/внешний ключи и типы связей</h1>
+            <p class="lead">Сравним однотабличную и многотабличную модели, изучим внешний ключ (FK) и научимся определять связи 1:1, 1:N и M:N.</p>
+            <div class="box-accent text-xs">
+              <strong>Проблема:</strong> в библиотечной таблице в каждой строке записаны ФИО автора, его годы жизни, название книги, жанр и год. У Абая Кунанбаева 50 произведений — его данные повторяются 50 раз! А если в 19-й строке допустили опечатку «Абай Кунанбаев.»?
+            </div>
+            <div class="grid-2 text-xs">
+              <div class="box-primary"><div class="box-title mono">9.1.2.8</div>Сравнивать однотабличную и многотабличную БД; объяснять назначение первичного и внешнего ключей.</div>
+              <div class="box-success"><div class="box-title mono" style="color:var(--success);">9.1.2.9</div>Определять типы связей между таблицами (<span class="mono">1:1</span>, <span class="mono">1:N</span>, <span class="mono">M:N</span>) на реальных примерах.</div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · 1 таблица vs 2 таблицы",
+      shortTitle: "Пример SB «Писатели и произведения»",
+      timing: "6–15 мин",
+      source: "SB 9 кл. стр. 78 · Недостатки однотабличной БД",
+      notes: "Переключитесь между ❌ 1 таблицей (покажите дубли Абая Кунанбаева) и ✓ 2 связанными таблицами. Чётко проговорите 4 недостатка однотабличной модели из учебника.",
+      render(st) {
+        const m = st.tabs.model || "bad";
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <h2 class="slide-h2">Сравнение на примере SB «Писатели и произведения»</h2>
+              <div class="flex-row">
+                <button type="button" class="btn ${m === "bad" ? "btn-accent" : ""}" onclick="DECK.setTab('model','bad')">❌ Одна таблица (дубли)</button>
+                <button type="button" class="btn ${m === "good" ? "btn-primary" : ""}" onclick="DECK.setTab('model','good')">✓ Две связанные таблицы</button>
+              </div>
+            </div>
+            ${m === "bad" ? `
+              <table class="data-table">
+                <thead><tr><th>Автор</th><th>Годы жизни</th><th>Название произведения</th><th>Год</th><th>Жанр</th></tr></thead>
+                <tbody>
+                  <tr><td style="background:var(--danger-soft);">Абай Кунанбаев</td><td style="background:var(--danger-soft);">1845–1904</td><td>Слова назидания</td><td class="mono">1890</td><td>проза</td></tr>
+                  <tr><td style="background:var(--danger-soft);">Абай Кунанбаев</td><td style="background:var(--danger-soft);">1845–1904</td><td>Искандер</td><td class="mono">1900</td><td>поэма</td></tr>
+                  <tr><td style="background:var(--danger-soft);">Мухтар Ауэзов</td><td style="background:var(--danger-soft);">1897–1961</td><td>Путь Абая</td><td class="mono">1942</td><td>роман</td></tr>
+                  <tr><td style="background:var(--danger-soft);">Мухтар Ауэзов</td><td style="background:var(--danger-soft);">1897–1961</td><td>Коксерек</td><td class="mono">1929</td><td>повесть</td></tr>
+                </tbody>
+              </table>
+              <div class="grid-2 text-xs">
+                <div class="box-danger"><strong>1. Дублирование данных и лишняя память:</strong> сведения о писателе копируются в каждой книге.<br><strong>2. Ошибки и опечатки при вводе:</strong> «Абай» vs «А. Кунанбаев».</div>
+                <div class="box-warning"><strong>3. Трудность обновления:</strong> исправляя годы жизни, нужно менять десятки строк.<br><strong>4. Риск потери данных:</strong> удалили единственную книгу автора — потеряли и самого автора!</div>
+              </div>
+            ` : `
+              <div class="grid-2">
+                <div class="stack">
+                  <div class="box-title">Таблица 1: Писатели (главная)</div>
+                  <table class="data-table">
+                    <thead><tr><th>🔑 Код_автора (PK)</th><th>Автор</th><th>Годы жизни</th></tr></thead>
+                    <tbody>
+                      <tr><td class="mono font-bold">1</td><td>Абай Кунанбаев</td><td>1845–1904</td></tr>
+                      <tr><td class="mono font-bold">2</td><td>Мухтар Ауэзов</td><td>1897–1961</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="stack">
+                  <div class="box-title" style="color:var(--accent);">Таблица 2: Произведения (подчинённая)</div>
+                  <table class="data-table">
+                    <thead><tr><th>🔑 Код_произв</th><th>Название</th><th>Год</th><th>🔗 Код_автора (FK)</th></tr></thead>
+                    <tbody>
+                      <tr><td class="mono">101</td><td>Слова назидания</td><td class="mono">1890</td><td class="mono font-bold">1</td></tr>
+                      <tr><td class="mono">102</td><td>Искандер</td><td class="mono">1900</td><td class="mono font-bold">1</td></tr>
+                      <tr><td class="mono">103</td><td>Путь Абая</td><td class="mono">1942</td><td class="mono font-bold">2</td></tr>
+                      <tr><td class="mono">104</td><td>Коксерек</td><td class="mono">1929</td><td class="mono font-bold">2</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="box-success text-xs"><strong>Результат декомпозиции:</strong> имя писателя и годы жизни хранятся <strong>1 раз</strong>. В таблице произведений стоит компактный числовой код <span class="mono">1</span> или <span class="mono">2</span>!</div>
+            `}
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Составной ключ и проектирование",
+      shortTitle: "Составной ключ и 3 шага разделения БД",
+      timing: "15–24 мин",
+      source: "SB 9 кл. стр. 78–79 · Декомпозиция сущностей",
+      notes: "Объясните понятие «Составной ключ» (Автор + Название) и почему проще ввести суррогатный Код и разбить таблицы по классам объектов («Комплектующие» и «Поставщики»). Дайте правило СОР: когда выбирать многотабличную БД.",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Составной ключ и алгоритм разделения на таблицы</h2>
+            <div class="grid-2 text-xs">
+              <div class="box-warning">
+                <div class="box-title" style="color:var(--warning);">Составной ключ — что это?</div>
+                Когда ни один столбец по отдельности не уникален (один автор — много книг, но бывают книги с одинаковым названием у разных авторов), приходится брать ключ сразу из <strong>нескольких полей</strong>: <span class="mono">(Автор + Название)</span>.<br>
+                <strong>Минус:</strong> длинный, неудобный для связей. Поэтому проще разбить базу на сущности и задать числовой код!
+              </div>
+              <div class="box-primary">
+                <div class="box-title">Принцип «1 сущность = 1 таблица» (SB)</div>
+                Разделяйте разные классы объектов в отдельные таблицы:<br>
+                • В базе оргтехники — <strong>«Комплектующие»</strong> отдельно, <strong>«Поставщики» (Магазины)</strong> отдельно, <strong>«Цена»</strong> связывает их.<br>
+                • В школе — <strong>«Классы»</strong> отдельно, <strong>«Ученики»</strong> отдельно.
+              </div>
+            </div>
+            <div class="grid-3 text-xs">
+              <div class="box-white"><strong>Шаг 1. Сущности</strong><br>Выделить главные классы объектов предметной области и их свойства.</div>
+              <div class="box-white"><strong>Шаг 2. Таблицы и PK</strong><br>Создать отдельную таблицу на каждый класс и назначить 🔑 первичный ключ.</div>
+              <div class="box-white"><strong>Шаг 3. Внешние ключи и связи</strong><br>Добавить неключевой внешний ключ (FK) и соединить таблицы.</div>
+            </div>
+            <div class="box-success text-xs">
+              <strong>Когда на СОР/СОЧ выбирать многотабличную БД?</strong> Когда (1) в одной таблице значения начинают повторяться, (2) описываются разные группы объектов (клиенты и города, товары и магазины), (3) важна целостность без дублирования.
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · PK vs FK",
+      shortTitle: "Первичный ключ (PK) vs Внешний ключ (FK)",
+      timing: "24–33 мин",
+      source: "SB 9 кл. стр. 80 · Таблица сравнения ключей",
+      notes: "Прочитайте с классом всю 5-строчную таблицу сравнения PK и FK из учебника и обязательно акцентируйте предупреждение о том, что поле с одним именем (Код автора) является PK в одной таблице и FK в другой.",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Сравнение: Первичный ключ (PK) vs Внешний ключ (FK)</h2>
+            <table class="data-table">
+              <thead><tr><th>Критерий</th><th>🔑 Первичный ключ (Primary Key, PK)</th><th>🔗 Внешний ключ (Foreign Key, FK)</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Какое это поле</strong></td><td>Ключевое поле <strong>своей</strong> таблицы</td><td><strong>Неключевое</strong> (или часть составного) поле таблицы</td></tr>
+                <tr><td><strong>Главное назначение</strong></td><td>Однозначно идентифицирует каждую запись своей таблицы</td><td>Связывает запись с первичным ключом <strong>другой</strong> таблицы</td></tr>
+                <tr><td><strong>Повторы значений</strong></td><td><strong>Запрещены</strong> (всегда уникальны!)</td><td><strong>Разрешены</strong> (в «Произведениях» Код_автора = 1 может быть 50 раз)</td></tr>
+                <tr><td><strong>Сторона в связи 1:N</strong></td><td>Сторона «Один» (<strong>1</strong>) — главная (родительская) таблица</td><td>Сторона «Многие» (<strong>∞</strong>) — подчинённая (дочерняя) таблица</td></tr>
+                <tr><td><strong>Тип данных</strong></td><td>Часто <span class="mono">Счётчик</span> или текстовый код</td><td>Тот же тип/размер! (Для Счётчика — Числовой → Длинное целое)</td></tr>
+              </tbody>
+            </table>
+            <div class="box-warning text-xs">
+              <strong>Ловушка SB 9 кл.:</strong> одно и то же по имени поле может иметь <strong>разные роли</strong> в разных таблицах! Например, поле <span class="mono">Код автора</span> — это <strong>PK</strong> в таблице «Писатели», и оно же — <strong>FK</strong> в таблице «Произведения».
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Задача SB «Клиенты и Города»",
+      shortTitle: "Практикум: таблица «Клиенты и Города» (SB)",
+      timing: "33–43 мин",
+      source: "SB 9 кл. стр. 79 · Экзаменационная задача «Клиенты и Города»",
+      notes: "Нажимайте на любой город слева — ученики видят, как внешний ключ связывает строки «Клиентов» с таблицей «Города» и сразу считается количество клиентов. В примере SB вопрос: «Сколько заказчиков из Нур-Султана?» -> 2.",
+      render(st) {
+        const cid = Number(st.selected.cityId || 1);
+        const city = L1_CITIES.find(c => c.id === cid) || L1_CITIES[0];
+        const matched = L1_CLIENTS.filter(x => x.cityId === cid);
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <h2 class="slide-h2">Разбор задачи SB: «Клиенты» и «Города»</h2>
+              <span class="pill pill-accent mono">${city.name} (PK=${city.id}) → ${matched.length} клиент(а/ов)</span>
+            </div>
+            <p class="lead">Кликните на город слева, чтобы отследить связь <span class="mono">🔑 Код города → 🔗 Код города</span>.</p>
+            <div class="grid-2">
+              <div class="stack">
+                <div class="box-title">Таблица «Города» (🔑 PK = Код города)</div>
+                <div class="stack" style="gap:6px;">
+                  ${L1_CITIES.map(c => `
+                    <button type="button" class="interactive-card ${c.id === cid ? "active" : ""}" style="padding:8px 12px;display:flex;justify-content:space-between;" onclick="DECK.setSelected('cityId',${c.id})">
+                      <span><strong class="mono">🔑 ${c.id}</strong> — ${c.name}</span>
+                      <span class="text-xs">${L1_CLIENTS.filter(x => x.cityId === c.id).length} чел.</span>
+                    </button>
+                  `).join("")}
+                </div>
+              </div>
+              <div class="stack">
+                <div class="box-title" style="color:var(--accent);">Таблица «Клиенты» (🔗 FK = Код города)</div>
+                <table class="data-table">
+                  <thead><tr><th>🔑 Код</th><th>Фамилия</th><th>🔗 Код города (FK)</th></tr></thead>
+                  <tbody>
+                    ${L1_CLIENTS.map(cl => {
+                      const hit = cl.cityId === cid;
+                      return `<tr style="${hit ? "background:var(--success-soft);font-weight:700;" : "opacity:0.6;"}"><td class="mono">${cl.id}</td><td>${cl.fio}</td><td class="mono">${cl.cityId} ${hit ? "✓ (" + city.name + ")" : ""}</td></tr>`;
+                    }).join("")}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="box-primary text-xs">
+              <strong>Вопрос учебника SB:</strong> <em>«Сколько заказчиков из Нур-Султана?»</em> Код Нур-Султана = <span class="mono">1</span>; в таблице «Клиенты» значение <span class="mono">1</span> у <strong>Темиргалиевой М.Т.</strong> и <strong>Евлоева А.А.</strong> → ответ: <strong>2 заказчика</strong>.
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Типы связей",
+      shortTitle: "1:1, 1:N, M:N + классификатор 6 пар",
+      timing: "43–53 мин",
+      source: "SB 9 кл. стр. 80–81 · Классификация связей в Access",
+      notes: "Переключитесь по 3 вкладкам связей, объясните правило автоопределения Access (PK↔PK -> 1:1; PK↔FK -> 1:N) и вместе с классом классифицируйте все 6 пар сущностей.",
+      render(st) {
+        const rt = st.tabs.relType || "1N";
+        const rInfo = {
+          "11": "1 : 1 (Один-к-одному): 1 запись 1-й таблицы ↔ ровно 1 запись 2-й. В Access связывают PK ↔ PK (примеры: Гражданин ↔ Паспорт, Страна ↔ Столица).",
+          "1N": "1 : N (Один-ко-многим, самая частая!): 1 запись главной таблицы → много записей подчинённой. Связывают PK ↔ неключевой FK (Писатель → Произведения, Отдел → Сотрудники).",
+          "MN": "M : N (Многие-ко-многим): напрямую в Access НЕ строится — добавляют 3-ю (промежуточную) таблицу с двумя связями 1:N! Примеры: Учителя → Расписание ← Предметы; Клиент → Заказ ← Блюда."
+        }[rt];
+        let ok = 0;
+        L1_REL_PAIRS.forEach(p => { if (st.quiz[p.id] === p.ans) ok++; });
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <h2 class="slide-h2">3 типа связей между таблицами и тренажёр</h2>
+              <span class="pill pill-success mono">${ok} / ${L1_REL_PAIRS.length}</span>
+            </div>
+            <div class="flex-row">
+              <button type="button" class="btn ${rt === "11" ? "btn-primary" : ""}" onclick="DECK.setTab('relType','11')">1 : 1 Один-к-одному</button>
+              <button type="button" class="btn ${rt === "1N" ? "btn-accent" : ""}" onclick="DECK.setTab('relType','1N')">1 : N Один-ко-многим</button>
+              <button type="button" class="btn ${rt === "MN" ? "btn-primary" : ""}" onclick="DECK.setTab('relType','MN')">M : N Многие-ко-многим</button>
+            </div>
+            <div class="box-primary text-xs">${rInfo}</div>
+            <div class="stack" style="gap:5px;">
+              ${L1_REL_PAIRS.map(p => {
+                const picked = st.quiz[p.id];
+                const cls = picked ? (picked === p.ans ? "ok" : "bad") : "";
+                return `
+                  <div class="quiz-row ${cls}">
+                    <div style="flex:1;"><strong>${p.pair}</strong>${picked === p.ans ? ` <span class="text-xs text-muted">— ${p.why}</span>` : ""}</div>
+                    <div class="flex-row" style="gap:4px;">
+                      ${["1:1", "1:N", "M:N"].map(k => `<button type="button" class="btn mono ${picked === k ? "btn-primary" : ""}" style="padding:2px 8px;font-size:11px;" onclick="DECK.pickQuiz('${p.id}','${k}')">${k}</button>`).join("")}
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Мини-СУБД · Практика",
+      pillClass: "pill-accent",
+      shortTitle: "Мини-СУБД: Ключи и связи базы «Подписка»",
+      timing: "53–68 мин",
+      source: "Мини-СУБД (/subd) · g9b-l1-klyuchi, g9b-p1-sport, g9b-p1-komplekt",
+      notes: "Ученики открывают в Мини-СУБД задание «Ключи и связи базы „Подписка“» (g9b-l1-klyuchi), затем для практики поиска по внешнему ключу — «Данные по внешнему ключу» (g9b-p1-sport) и «Цены в разных магазинах» (g9b-p1-komplekt).",
+      render(st, api) {
+        return api.renderMiniSubdTask({
+          key: "g9b1",
+          title: "Практика в Мини-СУБД: Ключи и связи базы «Подписка»",
+          summary: "Определите первичные и внешние ключи, отследите связи между 3 таблицами и найдите данные по внешнему ключу.",
+          taskName: "1) Ключи и связи базы «Подписка» (g9b-l1-klyuchi) · Доп.: g9b-p1-sport, g9b-p1-komplekt",
+          steps: ["Нажмите «✓ Задания»", "Выберите «Ключи и связи базы „Подписка“»", "Доп.: «Данные по внешнему ключу»"],
+          meta: "Цели 9.1.2.8 · 9.1.2.9"
+        });
+      }
+    },
+    {
+      badge: "Этап 3 · Разбор ошибок",
+      shortTitle: "4 частые ошибки проектирования связей",
+      timing: "68–75 мин",
+      source: "КСП 9.2B Урок 1 · Ошибки на СОР",
+      notes: "Разберите 4 ошибки, из-за которых Access отказывается создавать связи.",
+      render(st) {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Практикум: найди ошибку в проектировании связей</h2>
+            <div class="grid-2">
+              ${L1_ERRORS.map(e => {
+                const open = !!st.revealed[e.id];
+                return `
+                  <button type="button" class="interactive-card ${open ? "revealed" : ""}" onclick="DECK.toggleReveal('${e.id}')">
+                    <div class="font-bold text-xs">${e.q}</div>
+                    <div class="text-xs" style="margin-top:6px;">${open ? e.a : "Нажмите, чтобы узнать причину →"}</div>
+                  </button>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 3 · Итоги и ДЗ",
+      shortTitle: "Памятка ключей и домашнее задание",
+      timing: "75–80 мин",
+      source: "КСП 9.2B Урок 1 · ДЗ g9b-hw1-tipy-svyazey",
+      notes: "Подведите итоги: PK → уникальный идентификатор своей таблицы; FK → ссылка на чужой PK; 1:1 / 1:N / M:N (через связующую таблицу). Выдайте ДЗ в Мини-СУБД.",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Главное за урок 1 (раздел 9.2B) и домашнее задание</h2>
+            <div class="grid-3 text-xs">
+              <div class="box-primary"><div class="box-title">🔑 Первичный ключ</div>Уникален, без дублей и пустот. Стоит на стороне <strong>1</strong>.</div>
+              <div class="box-accent"><div class="box-title" style="color:var(--accent);">🔗 Внешний ключ</div>Повторяется и ссылается на чужой PK. Стоит на стороне <strong>∞</strong>. Тот же тип данных!</div>
+              <div class="box-success"><div class="box-title">Связь M:N</div>Строится только через <strong>промежуточную таблицу</strong> с двумя связями <span class="mono">1:N</span>.</div>
+            </div>
+            <div class="box-primary flex-between text-xs">
+              <div><strong>Домашнее задание в Мини-СУБД (/subd):</strong> выполнить <strong>«Типы связей»</strong> (g9b-hw1-tipy-svyazey) — определить ключи и виды связей по описанию предметной области.</div>
+              <a class="btn btn-accent" href="/subd" target="_blank" rel="noopener noreferrer">Открыть Мини-СУБД ↗</a>
+            </div>
+          </div>
+        `;
+      }
+    }
+  ]
+});
+</script>
+</body>
+</html>

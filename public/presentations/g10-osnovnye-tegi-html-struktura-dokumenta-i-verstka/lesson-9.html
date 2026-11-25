@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>10.2А · Урок 9 · Каскадные таблицы стилей CSS</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+</head>
+<body>
+<script src="../_engine/deck.js"></script>
+<script>
+const L9_SEL_QUIZ = [
+  { sel: "table { ... }", kind: "tag", hint: "все таблицы на странице" },
+  { sel: ".menu { ... }", kind: "cls", hint: "элементы с class=\"menu\"" },
+  { sel: "#header { ... }", kind: "id", hint: "уникальный элемент с id=\"header\"" },
+  { sel: "p { ... }", kind: "tag", hint: "все абзацы" },
+  { sel: ".highlight { ... }", kind: "cls", hint: "повторяемый класс выделения" },
+  { sel: "#main-title { ... }", kind: "id", hint: "уникальный главный заголовок" }
+];
+
+const L9_TBL_CSS_INIT = `<style>
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-family: Arial, sans-serif;
+  }
+  th, td {
+    border: 1px solid #336699;
+    padding: 8px;
+  }
+  th { background-color: #2b3bb3; color: white; }
+  .highlight { background-color: #fef3c7; font-weight: bold; }
+</style>
+<table>
+  <tr><th>Предмет</th><th>Кабинет</th></tr>
+  <tr class="highlight"><td>Информатика</td><td>305</td></tr>
+  <tr><td>Математика</td><td>210</td></tr>
+</table>`;
+
+DECK_INITIALS = { cssTbl: L9_TBL_CSS_INIT };
+DECK_PRESETS = {
+  cssTbl: [
+    () => DECK.resetEditor("cssTbl", L9_TBL_CSS_INIT),
+    () => DECK.resetEditor("cssTbl", L9_TBL_CSS_INIT.replace("border-collapse: collapse;", "border-collapse: separate; border-spacing: 6px;"))
+  ]
+};
+
+initDeck({
+  badge: "</> 10.2А · Урок 9",
+  title: "Каскадные таблицы стилей CSS: подключение, селекторы и свойства",
+  subtitle: "10 класс · 2 четверть · Цели 10.1.2.10, 10.1.2.11 · 80 мин · Мини-HTML",
+  initialState: {
+    selected: { cssWay: 0 },
+    revealed: { extOn: true, intOn: false, inlOn: false }
+  },
+  slides: [
+    {
+      badge: "Этап 1 · Проблемная ситуация",
+      shortTitle: "Стартер «Ребрендинг 100 страниц»",
+      timing: "0–10 мин",
+      source: "КСП 10.2А Урок 9 · SB 10 кл. стр. 91–93",
+      notes: "Обсудите ситуацию: 100 страниц с тегом <font color=\"blue\">, нужно поменять на зелёный. Как решить за 5 секунд? Подведите к внешнему CSS!",
+      render(st) {
+        return `
+          <div class="stack">
+            <div class="text-xs font-bold text-muted" style="text-transform:uppercase;">Информатика · 10 класс · Раздел 10.2А · Урок 9 из 10</div>
+            <h1 class="slide-h1">Каскадные таблицы стилей (CSS)</h1>
+            <div class="box-warning text-sm">
+              <strong>Проблема:</strong> на вашем сайте <strong>100 HTML-страниц</strong>, и в каждом абзаце написано <span class="mono">&lt;font color="blue"&gt;</span>. Заказчик попросил заменить синий цвет на зелёный везде. Как сделать это за <strong>5 секунд</strong>?
+            </div>
+            <button type="button" class="interactive-card ${st.revealed.rebrand ? "revealed" : ""}" onclick="DECK.toggleReveal('rebrand')">
+              <div class="font-bold">Ответ: отделить структуру (HTML) от оформления (CSS)!</div>
+              <div class="text-xs" style="margin-top:5px;">
+                ${st.revealed.rebrand
+                  ? "✓ Выносим стили в один файл style.css и подключаем его к 100 страницам тегом <link rel=\"stylesheet\" href=\"style.css\">. Меняем одну строку p { color: green; } — обновляется весь сайт!"
+                  : "Нажмите, чтобы раскрыть решение →"}
+              </div>
+            </button>
+            <pre class="code-block">селектор { свойство1: значение1; свойство2: значение2; }
+h1 { color: blue; font-size: 24px; text-align: center; }</pre>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Каскад и приоритет",
+      shortTitle: "Три способа подключения CSS + Приоритет",
+      timing: "10–20 мин",
+      source: "SB 10 кл. стр. 91–92 · Презентация «CSS», слайды 4–6",
+      notes: "Включайте и выключайте 3 уровня стилей справа — наглядно покажите каскадность: встроенный style=\"...\" всегда побеждает внутренний и внешний!",
+      render(st) {
+        const ext = !!st.revealed.extOn;
+        const int = !!st.revealed.intOn;
+        const inl = !!st.revealed.inlOn;
+        const winColor = inl ? "#b0173d" : int ? "#1d6b34" : ext ? "#2b3bb3" : "#111111";
+        const winLabel = inl ? "Встроенный style=\"...\" (высший приоритет!)" : int ? "Внутренний <style> в <head>" : ext ? "Внешний файл style.css (<link>)" : "Стандартный цвет браузера";
+        return `
+          <h2 class="slide-h2">Три способа подключения CSS и каскадность</h2>
+          <div class="grid-12">
+            <div class="col-7 stack text-xs">
+              <div class="box"><strong>1. Внешний файл (универсальный):</strong> в <span class="mono">&lt;head&gt;</span> пишем<br><span class="mono">&lt;link rel="stylesheet" href="style.css"&gt;</span></div>
+              <div class="box"><strong>2. Внутренний (для одной страницы):</strong> в <span class="mono">&lt;head&gt;</span> пишем<br><span class="mono">&lt;style&gt; p { color: green; } &lt;/style&gt;</span></div>
+              <div class="box"><strong>3. Встроенный (локальный / inline):</strong> прямо в теге<br><span class="mono">&lt;p style="color: crimson;"&gt;Текст&lt;/p&gt;</span></div>
+            </div>
+            <div class="col-5 box stack text-xs">
+              <div class="box-title">Симулятор приоритета CSS</div>
+              <button type="button" class="btn ${ext ? "btn-primary" : ""}" onclick="DECK.toggleReveal('extOn')">1. Внешний style.css → синий (${ext ? "ВКЛ" : "ВЫКЛ"})</button>
+              <button type="button" class="btn ${int ? "btn-primary" : ""}" onclick="DECK.toggleReveal('intOn')">2. Внутренний &lt;style&gt; → зелёный (${int ? "ВКЛ" : "ВЫКЛ"})</button>
+              <button type="button" class="btn ${inl ? "btn-accent" : ""}" onclick="DECK.toggleReveal('inlOn')">3. Встроенный style="" → красный (${inl ? "ВКЛ" : "ВЫКЛ"})</button>
+              <div style="padding:14px;background:#fff;border-radius:8px;border:1px solid var(--border);text-align:center;">
+                <div style="font-size:18px;font-weight:700;color:${winColor};">Пример абзаца &lt;p&gt;</div>
+                <div style="font-size:11px;color:#555;margin-top:4px;">Победил: ${winLabel}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Селекторы + Тренажёр",
+      shortTitle: "Селекторы: тег, .класс, #id",
+      timing: "20–30 мин",
+      source: "SB 10 кл. стр. 92–93 · Презентация слайды 7–8",
+      notes: "Закрепите правило «Точка, решётка или без знака?» прямо на интерактивном тренажёре справа.",
+      render(st) {
+        let ok = 0;
+        L9_SEL_QUIZ.forEach(s => { if (st.quiz[s.sel] === s.kind) ok++; });
+        return `
+          <h2 class="slide-h2">Три вида селекторов: тег, <span class="mono">.class</span>, <span class="mono">#id</span></h2>
+          <div class="grid-12">
+            <div class="col-5 stack text-xs">
+              <div class="box-primary"><strong>Без знака — селектор тега:</strong><br><span class="mono">p { color: navy; }</span> → ко всем <span class="mono">&lt;p&gt;</span>.</div>
+              <div class="box-success"><strong>Точка (.) — селектор класса:</strong><br><span class="mono">.st1 { color: green; }</span> → к элементам с <span class="mono">class="st1"</span> (можно много раз!).</div>
+              <div class="box-accent"><strong>Решётка (#) — селектор id:</strong><br><span class="mono">#st2 { background: yellow; }</span> → к одному уникальному <span class="mono">id="st2"</span>.</div>
+            </div>
+            <div class="col-7 box stack">
+              <div class="flex-between">
+                <strong class="text-xs" style="color:var(--primary);">Блиц: определи тип селектора</strong>
+                <span class="pill pill-success mono">${ok} / ${L9_SEL_QUIZ.length}</span>
+              </div>
+              ${L9_SEL_QUIZ.map(s => {
+                const p = st.quiz[s.sel];
+                const cls = p ? (p === s.kind ? "ok" : "bad") : "";
+                return `
+                  <div class="quiz-row ${cls}">
+                    <div><strong class="mono">${s.sel}</strong> <span class="text-xs text-muted">${s.hint}</span></div>
+                    <div class="flex-row" style="gap:4px;">
+                      <button type="button" class="btn ${p === "tag" ? "btn-primary" : ""}" style="padding:2px 7px;" onclick="DECK.pickQuiz('${s.sel}','tag')">Тег</button>
+                      <button type="button" class="btn ${p === "cls" ? "btn-primary" : ""}" style="padding:2px 7px;" onclick="DECK.pickQuiz('${s.sel}','cls')">Класс</button>
+                      <button type="button" class="btn ${p === "id" ? "btn-primary" : ""}" style="padding:2px 7px;" onclick="DECK.pickQuiz('${s.sel}','id')">ID</button>
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Живая песочница CSS",
+      shortTitle: "Оформление таблиц в CSS (border-collapse)",
+      timing: "30–38 мин",
+      source: "SB 10 кл. стр. 93–94",
+      notes: "Переключайте кнопки «collapse (одна линия)» и «separate (двойная рамка)» — частый вопрос СОР/СОЧ!",
+      render(st, api) {
+        return `
+          <div>
+            <h2 class="slide-h2">Свойство <span class="mono">border-collapse</span> и стили таблиц</h2>
+            <p class="lead">Сравните <span class="mono">border-collapse: collapse</span> (одна тонкая линия) и <span class="mono">separate</span> (двойные рамки).</p>
+          </div>
+          ${api.renderPlayground({
+            key: "cssTbl",
+            initial: L9_TBL_CSS_INIT,
+            tabTitle: "table-css.html",
+            presets: [
+              { label: "border-collapse: collapse" },
+              { label: "border-collapse: separate" }
+            ]
+          })}
+        `;
+      }
+    },
+    {
+      badge: "Мини-HTML №1 · Три способа CSS",
+      pillClass: "pill-accent",
+      shortTitle: "Мини-HTML: Три способа подключения CSS",
+      timing: "38–54 мин",
+      source: "Мини-HTML (/html?task=g10-html-tri-sposoba-css)",
+      notes: "Практика в живом Мини-HTML: внешний style.css, внутренний <style> и встроенный style=\"...\".",
+      render(st, api) {
+        return api.renderMiniHtmlTask({
+          taskId: "g10-html-tri-sposoba-css",
+          title: "Практика 1: Три способа подключения CSS",
+          summary: "Подключите внешний файл CSS через <link>, задайте внутренний <style> и встроенный style прямо в Мини-HTML.",
+          steps: ["<link rel=\"stylesheet\" href=\"...\">", "<style> в <head>", "style=\"...\" в теге"],
+          meta: "12 мин · Цель 10.1.2.10"
+        });
+      }
+    },
+    {
+      badge: "Мини-HTML №2 · Селекторы",
+      pillClass: "pill-accent",
+      shortTitle: "Мини-HTML: Селекторы тега, класса и id",
+      timing: "54–70 мин",
+      source: "Мини-HTML (/html?task=g10-html-selektory)",
+      notes: "Практическая работа на селекторы тега, .class и #id в Мини-HTML.",
+      render(st, api) {
+        return api.renderMiniHtmlTask({
+          taskId: "g10-html-selektory",
+          title: "Практика 2: Селекторы тега, класса и id",
+          summary: "Опишите правила CSS для тегов, классов (.class) и идентификаторов (#id) и проверьте критерии.",
+          steps: ["Селектор тега", "Селектор .класса", "Селектор #id"],
+          meta: "12 мин · Цели 10.1.2.10, 10.1.2.11"
+        });
+      }
+    },
+    {
+      badge: "Этап 3 · Итоги и доп. практика",
+      shortTitle: "Итоги CSS и задание «Таблица в CSS»",
+      timing: "70–80 мин",
+      source: "КСП 10.2А Урок 9 · Мини-HTML (g10-html-tablitsa-css)",
+      notes: "Повторите 3 вопроса и выдайте задание «Оформление таблицы стилями CSS» (g10-html-tablitsa-css).",
+      render() {
+        return `
+          <h2 class="slide-h2">Итоги урока CSS и домашнее задание</h2>
+          <div class="grid-3 text-xs">
+            <div class="box-primary"><strong>Синтаксис:</strong><br><span class="mono">селектор { свойство: значение; }</span></div>
+            <div class="box-accent"><strong>Приоритет:</strong><br>Встроенный &gt; Внутренний &gt; Внешний</div>
+            <div class="box-success"><strong>Таблица без двойных рамок:</strong><br><span class="mono">border-collapse: collapse;</span></div>
+          </div>
+          <div class="box-primary flex-between text-xs">
+            <div><strong>Практика / ДЗ в Мини-HTML:</strong> оформить таблицу стилями CSS (<span class="mono">border, border-collapse, padding</span>) и повторить свойства текста (<span class="mono">g10-html-svoystva-teksta</span>).</div>
+            <div class="flex-row">
+              <a class="btn btn-accent" href="/html?task=g10-html-tablitsa-css" target="_blank" rel="noopener noreferrer">Таблица в CSS ↗</a>
+              <a class="btn" href="/html?task=g10-html-svoystva-teksta" target="_blank" rel="noopener noreferrer">Свойства текста ↗</a>
+            </div>
+          </div>
+        `;
+      }
+    }
+  ]
+});
+</script>
+</body>
+</html>

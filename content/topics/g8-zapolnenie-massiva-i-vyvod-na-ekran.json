@@ -1,0 +1,1230 @@
+{
+  "topic": "g8-zapolnenie-massiva-i-vyvod-na-ekran",
+  "summary": "Заполнение одномерного массива в C++ (ввод с клавиатуры, случайные числа rand(), формулы) в цикле for и вывод элементов на экран: в столбец, в строку, с комментарием, в обратном порядке; трассировочные таблицы.",
+  "theory": [
+    {
+      "title": "Способы заполнения массива",
+      "objectives": [
+        "8.4.3.7"
+      ],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "content": "После объявления массив нужно заполнить данными. Кроме инициализации (`int a[3] = {10, 20, 30};`) используют три способа:"
+        },
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**случайные числа** из определённого диапазона;",
+            "**ввод данных** пользователем с клавиатуры;",
+            "**формулы**."
+          ]
+        },
+        {
+          "type": "exam_tip",
+          "content": "Для заполнения массива рекомендуется использовать цикл с параметром `for`, в котором индекс увеличивается на 1: `for (int i = 0; i < n; i++)`. Индекс меняется от 0 до n − 1."
+        },
+        {
+          "type": "diagram",
+          "format": "mermaid",
+          "caption": "Блок-схема заполнения массива в цикле",
+          "content": "flowchart TD\n  A([Начало]) --> B{{\"i = 0; i < n; i++\"}}\n  B -- \"тело цикла\" --> C[/\"Ввод a[i]\"/]\n  C --> B\n  B -- \"цикл завершён\" --> D([Конец])"
+        },
+        {
+          "type": "heading",
+          "text": "1. Ввод с клавиатуры",
+          "level": 3
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "Ввод пяти элементов",
+          "content": "#include <iostream>\nusing namespace std;\nint main(){\n    //Объявляем массив\n    float sale[5];\n    //Заполняем элементы массива с клавиатуры\n    cout << \"Введите элементы массива\" << endl;\n    for(int i = 0; i < 5; i++)\n        cin >> sale[i];\n    return 0;}"
+        },
+        {
+          "type": "example",
+          "title": "Трассировочная таблица (введены -8.9, -6.7, 5.5, -5.6, 7.8)",
+          "content": "| i | sale[i] |\n|---|---|\n| 0 | -8.9 |\n| 1 | -6.7 |\n| 2 | 5.5 |\n| 3 | -5.6 |\n| 4 | 7.8 |"
+        },
+        {
+          "type": "heading",
+          "text": "2. Случайные числа",
+          "level": 3
+        },
+        {
+          "type": "paragraph",
+          "content": "`rand() % k` даёт целое число от 0 до k − 1. Прибавляя число, сдвигаем диапазон."
+        },
+        {
+          "type": "comparison",
+          "title": "Формула → диапазон",
+          "columns": [
+            "Код",
+            "Диапазон"
+          ],
+          "rows": [
+            [
+              "`rand() % 5`",
+              "от 0 до 4"
+            ],
+            [
+              "`1 + rand() % 5`",
+              "от 1 до 5"
+            ],
+            [
+              "`100 + rand() % 101`",
+              "от 100 до 200"
+            ],
+            [
+              "`rand() % 41 - 20`",
+              "от −20 до 20"
+            ],
+            [
+              "`rand() % 100`",
+              "от 0 до 99"
+            ]
+          ]
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "Оценки от 1 до 5 в массиве из 10 элементов",
+          "content": "int grades[10];\nsrand(time(0)); // инициализация генератора\nfor (int i = 0; i < 10; i++) {\n    grades[i] = 1 + rand() % 5;   // rand() % 5 дает 0..4, +1 → 1..5\n}"
+        },
+        {
+          "type": "heading",
+          "text": "3. Формулы",
+          "level": 3
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "Заполнение по формуле",
+          "content": "float sale[5];\nfor(int i = 0; i < 5; i++)\n    sale[i] = 5*i - 4.5;"
+        },
+        {
+          "type": "example",
+          "title": "Трассировочная таблица",
+          "content": "| i | sale[i] |\n|---|---|\n| 0 | 5·0 − 4.5 = −4.5 |\n| 1 | 5·1 − 4.5 = 0.5 |\n| 2 | 5·2 − 4.5 = 5.5 |\n| 3 | 5·3 − 4.5 = 10.5 |\n| 4 | 5·4 − 4.5 = 15.5 |\n\nsale = {−4.5, 0.5, 5.5, 10.5, 15.5}"
+        },
+        {
+          "type": "example",
+          "title": "Одно значение во все ячейки",
+          "content": "Заменить все имена в массиве `students` из 6 элементов на «Алишер»:\n```cpp\nfor (int i = 0; i < 6; i++) {\n    students[i] = \"Алишер\";\n}\n```"
+        }
+      ]
+    },
+    {
+      "title": "Вывод элементов массива на экран",
+      "objectives": [
+        "8.4.3.8"
+      ],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "content": "Для вывода массива также используют цикл `for`, но вместо оператора ввода `cin` — оператор вывода `cout`. Обращение к элементу — через переменную цикла в квадратных скобках: `a[i]`. Отдельный элемент выводят по индексу: `cout << A[0];`."
+        },
+        {
+          "type": "diagram",
+          "format": "mermaid",
+          "caption": "Блок-схема вывода массива",
+          "content": "flowchart TD\n  A([Начало]) --> B{{\"i = 0; i < n; i++\"}}\n  B -- \"тело цикла\" --> C[/\"Вывод a[i]\"/]\n  C --> B\n  B -- \"цикл завершён\" --> D([Конец])"
+        },
+        {
+          "type": "comparison",
+          "title": "Формат вывода",
+          "columns": [
+            "Код в теле цикла",
+            "Результат"
+          ],
+          "rows": [
+            [
+              "`cout << a[i] << endl;`",
+              "каждый элемент с новой строки — **в столбец**"
+            ],
+            [
+              "`cout << a[i] << \"\\t\";`",
+              "в одну строку через табуляцию"
+            ],
+            [
+              "`cout << a[i] << \" \";`",
+              "в одну строку через пробел"
+            ],
+            [
+              "`cout << \"sale[\" << i << \"]=\" << sale[i] << endl;`",
+              "с комментарием: sale[0]=7, sale[1]=7.5 …"
+            ]
+          ]
+        },
+        {
+          "type": "example",
+          "title": "Нумерация с 1 при выводе",
+          "content": "```cpp\nstring students[6] = {\"Адиль\", \"Артур\", \"Эльдар\", \"Нурбек\", \"Назерке\", \"Нуртуган\"};\nfor (int i = 0; i < 6; i++) {\n    cout << i + 1 << \". \" << students[i] << endl;\n}\n```\nВывод: «1. Адиль», «2. Артур», … «6. Нуртуган». Индексы начинаются с 0, поэтому для номера пишем `i + 1`."
+        },
+        {
+          "type": "example",
+          "title": "Обратный порядок",
+          "content": "```cpp\nfor (int i = n - 1; i >= 0; i--) {\n    cout << arr[i] << \" \";\n}\n```\nИндекс последнего элемента всегда на 1 меньше размера массива, поэтому начинаем с `i = n - 1`."
+        },
+        {
+          "type": "example",
+          "title": "Формула при выводе",
+          "content": "Вывести элементы, заменив их на противоположные: умножение на (−1) можно выполнить прямо в операторе вывода.\n```cpp\nint sale[] = {14, 15, 67, -90, -45, -34, 38};\nint n = sizeof(sale) / sizeof(sale[0]);\nfor (int i = 0; i < n; i++)\n    cout << sale[i] * (-1) << \"\\t\";\n```\nВывод: -14 -15 -67 90 45 34 -38"
+        }
+      ]
+    },
+    {
+      "title": "Заполнение и вывод в одной программе",
+      "objectives": [
+        "8.4.3.7",
+        "8.4.3.8"
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "Заполнение по формуле и вывод",
+          "content": "#include <iostream>\nusing namespace std;\nint main(){\n    //Объявляем массив\n    float sale[6] = {};\n    //Заполняем элементы массива с помощью формулы\n    for(int i = 0; i < 6; i++)\n        sale[i] = 7 + 0.5*i;\n    //Вывод массива на экран\n    for(int i = 0; i < 6; i++)\n        cout << sale[i] << endl;\n    return 0;}"
+        },
+        {
+          "type": "paragraph",
+          "content": "Программа выведет в столбец: 7, 7.5, 8, 8.5, 9, 9.5."
+        },
+        {
+          "type": "warning",
+          "content": "**Типичные ошибки:**\n- выход за границы: в условии `i <= n` вместо `i < n` — обращение к несуществующему `a[n]`;\n- массив объявлен без длины и без значений: `float sale[];`;\n- в условии `if` нужно `==` (сравнение), а не `=` (присваивание)."
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "key": "g8-arrf-ways",
+      "title": "Способы заполнения",
+      "type": "multiple_response",
+      "marks": 3,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.7"
+      ],
+      "text": "Выберите способы заполнения массива данными, которые изучались на уроке.",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 160–162; G8_Информатика_TG_RU_07.02.25_ФИНАЛ 1.pdf, стр. 131",
+      "practice": true,
+      "options": [
+        {
+          "key": "A",
+          "content": "Случайные числа из диапазона"
+        },
+        {
+          "key": "B",
+          "content": "Оператор вывода `cout`"
+        },
+        {
+          "key": "C",
+          "content": "Ввод с клавиатуры"
+        },
+        {
+          "key": "D",
+          "content": "Функция `sizeof()`"
+        },
+        {
+          "key": "E",
+          "content": "Формулы"
+        }
+      ],
+      "scheme": {
+        "mark_scheme": "A, C, E (по 1 баллу; −1 за неверный)",
+        "accepted": {
+          "correct": [
+            "A",
+            "C",
+            "E"
+          ]
+        },
+        "explanation": "cout выводит данные, sizeof() определяет размер — они массив не заполняют."
+      }
+    },
+    {
+      "key": "g8-arrf-rand-range",
+      "title": "Диапазон rand",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.7"
+      ],
+      "text": "Какие значения может получить элемент массива при `a[i] = 1 + rand() % 6;`?",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 161; массив задачи 2.pdf, стр. 5",
+      "practice": true,
+      "options": [
+        {
+          "key": "A",
+          "content": "от 0 до 6"
+        },
+        {
+          "key": "B",
+          "content": "от 1 до 6"
+        },
+        {
+          "key": "C",
+          "content": "от 0 до 5"
+        },
+        {
+          "key": "D",
+          "content": "от 1 до 7"
+        }
+      ],
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "explanation": "rand() % 6 даёт 0…5, +1 → 1…6."
+      }
+    },
+    {
+      "key": "g8-arrf-rand-match",
+      "title": "Формула и диапазон",
+      "type": "matching",
+      "marks": 4,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.7"
+      ],
+      "text": "Сопоставьте выражение с диапазоном случайных чисел.",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 161",
+      "practice": true,
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "rand() % 10"
+          },
+          {
+            "key": "L2",
+            "text": "1 + rand() % 10"
+          },
+          {
+            "key": "L3",
+            "text": "50 + rand() % 51"
+          },
+          {
+            "key": "L4",
+            "text": "rand() % 21 - 10"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "от 0 до 9"
+          },
+          {
+            "key": "R2",
+            "text": "от 1 до 10"
+          },
+          {
+            "key": "R3",
+            "text": "от 50 до 100"
+          },
+          {
+            "key": "R4",
+            "text": "от −10 до 10"
+          }
+        ]
+      },
+      "scheme": {
+        "mark_scheme": "По 1 баллу за пару.",
+        "accepted": {
+          "pairs": {
+            "L1": "R1",
+            "L2": "R2",
+            "L3": "R3",
+            "L4": "R4"
+          }
+        },
+        "explanation": "rand() % k даёт 0…k−1; слагаемое сдвигает диапазон: 50 + (0…50) = 50…100; (0…20) − 10 = −10…10."
+      }
+    },
+    {
+      "key": "g8-arrf-input-blanks",
+      "title": "Цикл ввода",
+      "type": "fill_blank",
+      "marks": 3,
+      "difficulty": "easy",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.7"
+      ],
+      "text": "Допишите цикл ввода 6 элементов массива `b` с клавиатуры.\n\n```cpp\nint b[6];\nfor (int i = [[1]]; i [[2]] 6; i++)\n    cin >> b[ [[3]] ];\n```",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 161; массив задачи 1.pdf, стр. 5–6",
+      "practice": true,
+      "content": {
+        "blank_count": 3
+      },
+      "scheme": {
+        "mark_scheme": "[[1]] 0 (1); [[2]] < (1); [[3]] i (1).",
+        "accepted": {
+          "blanks": [
+            [
+              "0"
+            ],
+            [
+              "<"
+            ],
+            [
+              "i"
+            ]
+          ],
+          "ignore_spaces": true
+        },
+        "explanation": "Индексы от 0 до 5: i начинается с 0, условие i < 6, элемент b[i]."
+      }
+    },
+    {
+      "key": "g8-arrf-trace-formula",
+      "title": "Трассировка: формула",
+      "type": "trace_table",
+      "marks": 5,
+      "difficulty": "medium",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.7"
+      ],
+      "text": "Заполните трассировочную таблицу для фрагмента.\n\n```cpp\nint a[5];\nfor (int i = 0; i < 5; i++)\n    a[i] = 3*i + 2;\n```",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 162; G8_Информатика_TG_RU_07.02.25_ФИНАЛ 1.pdf, стр. 132",
+      "practice": true,
+      "content": {
+        "columns": [
+          "i",
+          "a[i]"
+        ],
+        "rows": 5,
+        "prefill": [
+          [
+            "0",
+            null
+          ],
+          [
+            "1",
+            null
+          ],
+          [
+            "2",
+            null
+          ],
+          [
+            "3",
+            null
+          ],
+          [
+            "4",
+            null
+          ]
+        ]
+      },
+      "scheme": {
+        "mark_scheme": "По 1 баллу за строку.",
+        "accepted": {
+          "rows": [
+            [
+              null,
+              "2"
+            ],
+            [
+              null,
+              "5"
+            ],
+            [
+              null,
+              "8"
+            ],
+            [
+              null,
+              "11"
+            ],
+            [
+              null,
+              "14"
+            ]
+          ]
+        },
+        "explanation": "3·0+2 = 2, 3·1+2 = 5, 3·2+2 = 8, 3·3+2 = 11, 3·4+2 = 14."
+      }
+    },
+    {
+      "key": "g8-arrf-formula-calc",
+      "title": "Значение элемента",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.7"
+      ],
+      "text": "Чему равен `s[3]` после выполнения фрагмента?\n\n```cpp\nfloat s[4];\nfor (int i = 0; i < 4; i++)\n    s[i] = 10 - 2.5*i;\n```",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 162",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "2.5 — 1 балл.",
+        "accepted": {
+          "values": [
+            "2.5",
+            "2,5"
+          ],
+          "numeric": true
+        },
+        "explanation": "s[3] = 10 − 2.5·3 = 2.5."
+      }
+    },
+    {
+      "key": "g8-arrf-squares",
+      "title": "Квадраты индексов",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.7"
+      ],
+      "text": "Чему равен `a[4]` после выполнения фрагмента?\n\n```cpp\nint a[5];\nfor (int i = 0; i < 5; i++)\n    a[i] = i * i;\n```",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 162",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "16 — 1 балл.",
+        "accepted": {
+          "values": [
+            "16"
+          ],
+          "numeric": true
+        },
+        "explanation": "a[4] = 4 · 4 = 16."
+      }
+    },
+    {
+      "key": "g8-arrf-same-value",
+      "title": "Одно значение во все ячейки",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.7"
+      ],
+      "text": "Какой код заменит **все** элементы массива `string team[5]` на «Алишер»?",
+      "source": "teacher",
+      "source_reference": "массив задачи 2.pdf, стр. 4–5",
+      "practice": true,
+      "options": [
+        {
+          "key": "A",
+          "content": "`team = \"Алишер\";`"
+        },
+        {
+          "key": "B",
+          "content": "`for (int i = 0; i < 5; i++) team[i] = \"Алишер\";`"
+        },
+        {
+          "key": "C",
+          "content": "`team[5] = \"Алишер\";`"
+        },
+        {
+          "key": "D",
+          "content": "`for (int i = 1; i <= 5; i++) team[i] = \"Алишер\";`"
+        }
+      ],
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "explanation": "Нужно пройти все индексы 0…4. Вариант D пропускает team[0] и выходит за границы (team[5])."
+      }
+    },
+    {
+      "key": "g8-arrf-endl-tab",
+      "title": "endl и \\t",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.8"
+      ],
+      "text": "В цикле вывода `cout << a[i] << endl;` заменили `endl` на `\"\\t\"`. Как изменится вывод?",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 162; G8_Информатика_TG_RU_07.02.25_ФИНАЛ 1.pdf, стр. 131",
+      "practice": true,
+      "options": [
+        {
+          "key": "A",
+          "content": "Элементы будут выведены в одну строку через табуляцию"
+        },
+        {
+          "key": "B",
+          "content": "Элементы будут выведены в столбец"
+        },
+        {
+          "key": "C",
+          "content": "Будут выведены только индексы"
+        },
+        {
+          "key": "D",
+          "content": "Программа не скомпилируется"
+        }
+      ],
+      "scheme": {
+        "mark_scheme": "A — 1 балл.",
+        "accepted": {
+          "correct": "A"
+        },
+        "explanation": "endl переводит курсор на новую строку (вывод в столбец); \\t — табуляция, элементы остаются в одной строке."
+      }
+    },
+    {
+      "key": "g8-arrf-reverse",
+      "title": "Обратный вывод",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.8"
+      ],
+      "text": "Что выведет фрагмент?\n\n```cpp\nint a[4] = {3, 6, 9, 12};\nfor (int i = 3; i >= 0; i--)\n    cout << a[i] << \" \";\n```",
+      "source": "teacher",
+      "source_reference": "массив задачи 1.pdf, стр. 7–8",
+      "practice": true,
+      "options": [
+        {
+          "key": "A",
+          "content": "3 6 9 12"
+        },
+        {
+          "key": "B",
+          "content": "12 9 6 3"
+        },
+        {
+          "key": "C",
+          "content": "9 6 3"
+        },
+        {
+          "key": "D",
+          "content": "12 9 6"
+        }
+      ],
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "explanation": "i = 3, 2, 1, 0 — элементы выводятся от последнего к первому."
+      }
+    },
+    {
+      "key": "g8-arrf-numbering",
+      "title": "Номер при выводе",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.8"
+      ],
+      "text": "Что будет в первой строке вывода?\n\n```cpp\nstring names[3] = {\"Аян\", \"Дана\", \"Ерлан\"};\nfor (int i = 0; i < 3; i++)\n    cout << i + 1 << \". \" << names[i] << endl;\n```",
+      "source": "teacher",
+      "source_reference": "массив задачи 2.pdf, стр. 2–3",
+      "practice": true,
+      "options": [
+        {
+          "key": "A",
+          "content": "0. Аян"
+        },
+        {
+          "key": "B",
+          "content": "1. Аян"
+        },
+        {
+          "key": "C",
+          "content": "1. Дана"
+        },
+        {
+          "key": "D",
+          "content": "0. Дана"
+        }
+      ],
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "explanation": "При i = 0 выводится номер i + 1 = 1 и элемент names[0] = «Аян»."
+      }
+    },
+    {
+      "key": "g8-arrf-loop-range-tf",
+      "title": "Индексы в цикле вывода",
+      "type": "true_false",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "state",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.8"
+      ],
+      "text": "В цикле `for (int i = 0; i < n; i++) cout << a[i];` выводятся все n элементов массива: индекс меняется от 0 до n − 1.",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 162; массив задачи 1.pdf, стр. 8",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "Верно (1)",
+        "accepted": {
+          "correct": true
+        },
+        "explanation": "При i = n условие i < n ложно — цикл завершается, выхода за границы нет."
+      }
+    },
+    {
+      "key": "g8-arrf-trace-neg",
+      "title": "Трассировка: противоположные значения",
+      "type": "trace_table",
+      "marks": 4,
+      "difficulty": "medium",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.8"
+      ],
+      "text": "Заполните таблицу: что выводится на каждом шаге цикла?\n\n```cpp\nint t[] = {5, -3, 8, 0};\nfor (int i = 0; i < 4; i++)\n    cout << t[i] * (-1) << \"\\t\";\n```",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 163; G8_Информатика_TG_RU_07.02.25_ФИНАЛ 1.pdf, стр. 132",
+      "practice": true,
+      "content": {
+        "columns": [
+          "i",
+          "t[i]",
+          "Вывод"
+        ],
+        "rows": 4,
+        "prefill": [
+          [
+            "0",
+            null,
+            null
+          ],
+          [
+            "1",
+            null,
+            null
+          ],
+          [
+            "2",
+            null,
+            null
+          ],
+          [
+            "3",
+            null,
+            null
+          ]
+        ]
+      },
+      "scheme": {
+        "mark_scheme": "По 1 баллу за строку (t[i] и вывод).",
+        "accepted": {
+          "rows": [
+            [
+              null,
+              "5",
+              "-5"
+            ],
+            [
+              null,
+              "-3",
+              "3"
+            ],
+            [
+              null,
+              "8",
+              "-8"
+            ],
+            [
+              null,
+              "0",
+              "0"
+            ]
+          ]
+        },
+        "explanation": "Каждый элемент умножается на (−1) прямо в операторе вывода; 0 · (−1) = 0."
+      }
+    },
+    {
+      "key": "g8-arrf-rand-code",
+      "title": "Программа: случайные оценки",
+      "type": "code_completion",
+      "marks": 3,
+      "difficulty": "medium",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "8.4.3.7"
+      ],
+      "text": "Напишите программу: объявите массив из 8 целых чисел, заполните его случайными числами от 1 до 5 и выведите элементы в одну строку через пробел.",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 161–162; массив задачи 2.pdf, стр. 4–5",
+      "practice": true,
+      "content": {
+        "starter_code": "#include <iostream>\nusing namespace std;\nint main() {\n\n    return 0;\n}"
+      },
+      "scheme": {
+        "mark_scheme": "- объявление int a[8]; (1)\n- цикл for (i от 0 до 7) с a[i] = 1 + rand() % 5; (1)\n- цикл вывода cout << a[i] << \" \"; (1)",
+        "points": [
+          {
+            "criterion": "Объявление массива из 8 int",
+            "marks": 1
+          },
+          {
+            "criterion": "Заполнение 1 + rand() % 5 в цикле for",
+            "marks": 1
+          },
+          {
+            "criterion": "Вывод в одну строку через пробел в цикле",
+            "marks": 1
+          }
+        ],
+        "model_answer": "```cpp\n#include <iostream>\nusing namespace std;\nint main() {\n    int a[8];\n    for (int i = 0; i < 8; i++)\n        a[i] = 1 + rand() % 5;\n    for (int i = 0; i < 8; i++)\n        cout << a[i] << \" \";\n    return 0;\n}\n```"
+      }
+    },
+    {
+      "key": "g8-arrf-input-code",
+      "title": "Программа: ввод и вывод с комментарием",
+      "type": "code_completion",
+      "marks": 3,
+      "difficulty": "medium",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "8.4.3.8"
+      ],
+      "text": "Напишите программу: пользователь вводит 5 вещественных чисел в массив `price`, затем программа выводит каждый элемент с новой строки в формате `price[0]=…`.",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 161–162; G8_Информатика_TG_RU_07.02.25_ФИНАЛ 1.pdf, стр. 131",
+      "practice": true,
+      "content": {
+        "starter_code": "#include <iostream>\nusing namespace std;\nint main() {\n\n    return 0;\n}"
+      },
+      "scheme": {
+        "mark_scheme": "- объявление float price[5]; (1)\n- ввод в цикле cin >> price[i]; (1)\n- вывод в цикле cout << \"price[\" << i << \"]=\" << price[i] << endl; (1)",
+        "points": [
+          {
+            "criterion": "Объявление вещественного массива из 5 элементов",
+            "marks": 1
+          },
+          {
+            "criterion": "Ввод элементов в цикле for",
+            "marks": 1
+          },
+          {
+            "criterion": "Вывод в формате price[i]=значение, каждый с новой строки",
+            "marks": 1
+          }
+        ],
+        "model_answer": "```cpp\n#include <iostream>\nusing namespace std;\nint main() {\n    float price[5];\n    cout << \"Введите элементы массива\" << endl;\n    for (int i = 0; i < 5; i++)\n        cin >> price[i];\n    for (int i = 0; i < 5; i++)\n        cout << \"price[\" << i << \"]=\" << price[i] << endl;\n    return 0;\n}\n```"
+      }
+    },
+    {
+      "key": "g8-arrf-errors",
+      "title": "Найди ошибки",
+      "type": "code_analysis",
+      "marks": 2,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AI",
+      "objectives": [
+        "8.4.3.7"
+      ],
+      "text": "Найдите две ошибки в фрагменте заполнения массива и объясните, как их исправить.",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 163 (задание 4); G8_Информатика_TG_RU_07.02.25_ФИНАЛ 1.pdf, стр. 132; массив.pdf, стр. 11",
+      "practice": true,
+      "content": {
+        "starter_code": "1  int m[];\n2  for (int i = 1; i <= 5; i++)\n3      cin >> m[i];",
+        "answer_lines": 4
+      },
+      "scheme": {
+        "mark_scheme": "- строка 1: не указана длина массива — int m[5]; (1)\n- строка 2: индексы должны быть 0…4: for (int i = 0; i < 5; i++) — иначе m[0] не заполняется, а m[5] — выход за границы (1)",
+        "points": [
+          {
+            "criterion": "Строка 1: нет длины массива",
+            "marks": 1
+          },
+          {
+            "criterion": "Строка 2: цикл от 0 до 4 (выход за границы m[5])",
+            "marks": 1
+          }
+        ],
+        "model_answer": "1) Нужно указать длину: int m[5]; 2) Индексы начинаются с 0, последний — 4: for (int i = 0; i < 5; i++)."
+      }
+    },
+    {
+      "key": "g8-arrf-exam-1",
+      "title": "Диапазон случайных чисел",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "exam",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.7"
+      ],
+      "text": "Какие значения могут получить элементы массива при `a[i] = 20 + rand() % 31;`?",
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 161",
+      "practice": false,
+      "options": [
+        {
+          "key": "A",
+          "content": "от 20 до 31"
+        },
+        {
+          "key": "B",
+          "content": "от 20 до 50"
+        },
+        {
+          "key": "C",
+          "content": "от 0 до 30"
+        },
+        {
+          "key": "D",
+          "content": "от 20 до 51"
+        }
+      ],
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "explanation": "rand() % 31 даёт 0…30; 20 + (0…30) = 20…50."
+      }
+    },
+    {
+      "key": "g8-arrf-exam-2",
+      "title": "Заполнение случайными",
+      "type": "fill_blank",
+      "marks": 2,
+      "difficulty": "exam",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.7"
+      ],
+      "text": "Допишите код, чтобы заполнить массив `data` из 10 элементов случайными числами от 0 до 99.\n\n```cpp\nint data[10];\nfor (int i = 0; i < [[1]]; i++)\n    data[i] = rand() % [[2]];\n```",
+      "source": "nis_style",
+      "source_reference": "массив задачи 1.pdf, стр. 5–6; G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 161",
+      "practice": false,
+      "content": {
+        "blank_count": 2
+      },
+      "scheme": {
+        "mark_scheme": "[[1]] 10 (1); [[2]] 100 (1).",
+        "accepted": {
+          "blanks": [
+            [
+              "10"
+            ],
+            [
+              "100"
+            ]
+          ],
+          "ignore_spaces": true
+        },
+        "explanation": "Индексы 0…9 (i < 10); rand() % 100 даёт 0…99."
+      }
+    },
+    {
+      "key": "g8-arrf-exam-3",
+      "title": "Трассировка заполнения",
+      "type": "trace_table",
+      "marks": 5,
+      "difficulty": "exam",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.7"
+      ],
+      "text": "Заполните трассировочную таблицу.\n\n```cpp\nint x[5];\nfor (int i = 0; i < 5; i++)\n    x[i] = 4*i - 3;\n```",
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 162–163; G8_Информатика_TG_RU_07.02.25_ФИНАЛ 1.pdf, стр. 132",
+      "practice": false,
+      "content": {
+        "columns": [
+          "i",
+          "x[i]"
+        ],
+        "rows": 5,
+        "prefill": [
+          [
+            "0",
+            null
+          ],
+          [
+            "1",
+            null
+          ],
+          [
+            "2",
+            null
+          ],
+          [
+            "3",
+            null
+          ],
+          [
+            "4",
+            null
+          ]
+        ]
+      },
+      "scheme": {
+        "mark_scheme": "По 1 баллу за строку.",
+        "accepted": {
+          "rows": [
+            [
+              null,
+              "-3"
+            ],
+            [
+              null,
+              "1"
+            ],
+            [
+              null,
+              "5"
+            ],
+            [
+              null,
+              "9"
+            ],
+            [
+              null,
+              "13"
+            ]
+          ]
+        },
+        "explanation": "4·0−3 = −3, 4·1−3 = 1, 4·2−3 = 5, 4·3−3 = 9, 4·4−3 = 13."
+      }
+    },
+    {
+      "key": "g8-arrf-exam-4",
+      "title": "Вывод от последнего",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "exam",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.8"
+      ],
+      "text": "Какой цикл выводит все элементы массива `a` из n элементов в **обратном** порядке?",
+      "source": "nis_style",
+      "source_reference": "массив задачи 1.pdf, стр. 7–8",
+      "practice": false,
+      "options": [
+        {
+          "key": "A",
+          "content": "`for (int i = n; i >= 0; i--) cout << a[i];`"
+        },
+        {
+          "key": "B",
+          "content": "`for (int i = n - 1; i >= 0; i--) cout << a[i];`"
+        },
+        {
+          "key": "C",
+          "content": "`for (int i = n - 1; i > 0; i--) cout << a[i];`"
+        },
+        {
+          "key": "D",
+          "content": "`for (int i = 0; i < n; i++) cout << a[i];`"
+        }
+      ],
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "explanation": "Последний индекс n − 1, первый 0. A — выход за границы (a[n]); C — не выводит a[0]; D — прямой порядок."
+      }
+    },
+    {
+      "key": "g8-arrf-exam-5",
+      "title": "Вывод в столбец",
+      "type": "true_false",
+      "marks": 1,
+      "difficulty": "exam",
+      "command_word": "state",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.8"
+      ],
+      "text": "Если в цикле вывода после элемента стоит `endl` (`cout << a[i] << endl;`), массив выводится в столбец.",
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 162",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "Верно (1)",
+        "accepted": {
+          "correct": true
+        },
+        "explanation": "endl переводит курсор на новую строку после каждого элемента."
+      }
+    },
+    {
+      "key": "g8-arrf-exam-6",
+      "title": "Ввод и вывод массива",
+      "type": "code_completion",
+      "marks": 4,
+      "difficulty": "exam",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "8.4.3.7"
+      ],
+      "text": "Напишите программу на C++: объявите массив из 6 целых чисел, заполните его с клавиатуры и выведите элементы на экран в одну строку через пробел.",
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 161–162; G8_Информатика_TG_RU_07.02.25_ФИНАЛ 1.pdf, стр. 131",
+      "practice": false,
+      "content": {
+        "starter_code": "#include <iostream>\nusing namespace std;\nint main() {\n\n    return 0;\n}"
+      },
+      "scheme": {
+        "mark_scheme": "- объявление int a[6]; (1)\n- цикл for с индексом от 0 до 5 (1)\n- cin >> a[i]; в цикле (1)\n- вывод cout << a[i] << \" \"; в цикле (1)",
+        "points": [
+          {
+            "criterion": "Объявление массива из 6 int",
+            "marks": 1
+          },
+          {
+            "criterion": "Цикл for от 0 до 5 (i < 6)",
+            "marks": 1
+          },
+          {
+            "criterion": "Ввод cin >> a[i]",
+            "marks": 1
+          },
+          {
+            "criterion": "Вывод элементов в строку через пробел",
+            "marks": 1
+          }
+        ],
+        "model_answer": "```cpp\n#include <iostream>\nusing namespace std;\nint main() {\n    int a[6];\n    for (int i = 0; i < 6; i++)\n        cin >> a[i];\n    for (int i = 0; i < 6; i++)\n        cout << a[i] << \" \";\n    return 0;\n}\n```"
+      }
+    },
+    {
+      "key": "g8-arrf-exam-7",
+      "title": "Вывод отдельных элементов",
+      "type": "code_completion",
+      "marks": 3,
+      "difficulty": "exam",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "8.4.3.8"
+      ],
+      "text": "Дан массив `int A[] = {4, -2, 7, 0, 9, 1, -5, 3};`. Напишите операторы вывода первого, четвёртого и последнего элементов массива (каждый с новой строки).",
+      "source": "nis_style",
+      "source_reference": "массив.pdf, стр. 10–11, 13; G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 161",
+      "practice": false,
+      "content": {
+        "starter_code": "int A[] = {4, -2, 7, 0, 9, 1, -5, 3};\n// ваш код\n"
+      },
+      "scheme": {
+        "mark_scheme": "- cout << A[0] << endl; (1)\n- cout << A[3] << endl; (1)\n- cout << A[7] << endl; (1)",
+        "points": [
+          {
+            "criterion": "Первый элемент — A[0]",
+            "marks": 1
+          },
+          {
+            "criterion": "Четвёртый элемент — A[3]",
+            "marks": 1
+          },
+          {
+            "criterion": "Последний элемент — A[7]",
+            "marks": 1
+          }
+        ],
+        "model_answer": "```cpp\ncout << A[0] << endl;  // 4\ncout << A[3] << endl;  // 0\ncout << A[7] << endl;  // 3\n```"
+      }
+    },
+    {
+      "key": "g8-arrf-exam-8",
+      "title": "Ошибки заполнения и вывода",
+      "type": "code_analysis",
+      "marks": 2,
+      "difficulty": "exam",
+      "command_word": "identify",
+      "grading": "AI",
+      "objectives": [
+        "8.4.3.8"
+      ],
+      "text": "Программа должна заполнить массив `k` числами 0, 2, 4, 6 и вывести их в столбец. Найдите две ошибки и объясните, как их исправить.",
+      "source": "nis_style",
+      "source_reference": "массив.pdf, стр. 11; G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 162; массив задачи 1.pdf, стр. 11",
+      "practice": false,
+      "content": {
+        "starter_code": "1  int k[4];\n2  for (int i = 0; i <= 4; i++)\n3      k[i] = 2 * i;\n4  for (int i = 0; i < 4; i++)\n5      cout << k[4] << endl;",
+        "answer_lines": 4
+      },
+      "scheme": {
+        "mark_scheme": "- строка 2: условие i <= 4 даёт обращение к k[4] — выход за границы; нужно i < 4 (1)\n- строка 5: выводится k[4] вместо k[i]; нужно cout << k[i] << endl; (1)",
+        "points": [
+          {
+            "criterion": "Строка 2: i <= 4 → i < 4 (выход за границы)",
+            "marks": 1
+          },
+          {
+            "criterion": "Строка 5: k[4] → k[i]",
+            "marks": 1
+          }
+        ],
+        "model_answer": "Строка 2: допустимые индексы 0…3, поэтому условие i < 4. Строка 5: обращаться к элементу через переменную цикла — cout << k[i] << endl;"
+      }
+    }
+  ],
+  "topic_exam": {
+    "duration": 25,
+    "title": "Заполнение массива и вывод на экран — экзамен",
+    "instructions": "Ответьте на **все** вопросы. Код записан на C++; индексы массива начинаются с 0. Всего: 19 баллов. Время: 25 минут.",
+    "questions": [
+      "g8-arrf-exam-1",
+      "g8-arrf-exam-2",
+      "g8-arrf-exam-3",
+      "g8-arrf-exam-4",
+      "g8-arrf-exam-5",
+      "g8-arrf-exam-6",
+      "g8-arrf-exam-7",
+      "g8-arrf-exam-8"
+    ]
+  }
+}

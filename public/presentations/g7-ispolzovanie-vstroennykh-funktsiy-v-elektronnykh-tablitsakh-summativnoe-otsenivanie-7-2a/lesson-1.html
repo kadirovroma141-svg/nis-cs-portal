@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>7.2А · Урок 3 · Функция ЕСЛИ. Относительные и абсолютные ссылки</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+</head>
+<body>
+<script src="../_engine/deck.js"></script>
+<script>
+const G7FN1_CALC = [
+  { row: 3, usd: 100 },
+  { row: 4, usd: 250 },
+  { row: 5, usd: 400 },
+  { row: 6, usd: 50 }
+];
+
+const G7FN1_IF_QUIZ = [
+  { id: "q1", q: "1. =ЕСЛИ(C4>80;\"Прошел\";\"Не прошел\"), если C4 = 80.", ans: "Не прошел", opts: ["Прошел","Не прошел"], why: "80 > 80 — ЛОЖЬ (знак строгий >), поэтому «Не прошел»!" },
+  { id: "q2", q: "2. =ЕСЛИ(C2=\"сдал\";\"ОК\";\"Проверить\"), если в C2 слово «сдал».", ans: "ОК", opts: ["ОК","Проверить"], why: "Условие ИСТИНА → возвращается 2-й аргумент «ОК»." },
+  { id: "q3", q: "3. =ЕСЛИ(C4>80;\"Прошел\";\"\"), если C4 = 75.", ans: "Пустая ячейка", opts: ["Пустая ячейка","0"], why: "Пустые кавычки \"\" оставляют ячейку визуально пустой." },
+  { id: "q4", q: "4. Какую клавишу нажать на адресе D3, чтобы быстро получить $D$3?", ans: "F4", opts: ["F2","F4","Ctrl+D"], why: "Функциональная клавиша F4 переключает режимы закрепления ($)." },
+  { id: "q5", q: "5. В формуле =ЕСЛИ(\"возраст\">6;\"Школа\";\"Сад\") допущена ошибка. Какая?", ans: "Текст вместо ячейки", opts: ["Нет знака =","Текст вместо ячейки"], why: "Нельзя брать имя столбца в кавычки — нужно указывать адрес ячейки (напр. B2>6)!" }
+];
+
+initDeck({
+  badge: "📊 7.2А · Урок 3",
+  title: "Функция ЕСЛИ. Относительные и абсолютные ссылки ($A$1)",
+  subtitle: "7 класс · 2 четверть · Цели 7.1.1.3, 7.4.2.1 · 80 мин · Мини-Таблицы",
+  footer: "НИШ ЕМН г. Кызылорда · 7 класс · 2 четверть · Мини-Таблицы (/excel)",
+  initialState: {
+    tabs: { refMode: "bad", ifEx: "num" }
+  },
+  slides: [
+    {
+      badge: "Этап 1 · Проблема и цели",
+      shortTitle: "Зачем закреплять ячейку знаком $ и проверять условия",
+      timing: "0–6 мин",
+      source: "КСП 7.2А Урок 3 · Теория g7-ispolzovanie-vstroennykh-funktsiy",
+      notes: "Две ключевые темы урока: (1) как закрепить постоянную ячейку (курс валюты / порог скидки) знаком $, (2) как заставить Excel принимать решения функцией ЕСЛИ.",
+      render() {
+        return `
+          <div class="stack">
+            <div class="text-xs font-bold text-muted" style="text-transform:uppercase;">Информатика · 7 класс · Раздел 7.2А · Урок 3 из 5</div>
+            <h1 class="slide-h1">Относительные/абсолютные ссылки и функция ЕСЛИ</h1>
+            <p class="lead">Разберём, почему формула «съезжает» при копировании, научимся закреплять ячейку клавишей <kbd>F4</kbd> (<span class="mono">$D$3</span>) и писать условия в <span class="mono">ЕСЛИ</span>.</p>
+            <div class="grid-2 text-xs">
+              <div class="box-primary"><div class="box-title mono">7.1.1.3</div>Использовать относительные и абсолютные ссылки при копировании формул.</div>
+              <div class="box-accent"><div class="box-title mono" style="color:var(--accent);">7.4.2.1</div>Применять встроенную логическую функцию <span class="mono">ЕСЛИ</span> для числовых и текстовых условий.</div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Виды ссылок",
+      shortTitle: "Относительная (A1) vs Абсолютная ($A$1) + клавиша F4",
+      timing: "6–14 мин",
+      source: "Теория 7.2А · Таблица «Виды ссылок»",
+      notes: "Объясните символ $ как «замочек» (якорь): $ перед буквой замораживает столбец, $ перед цифрой — строку. Клавиша F4 ставит $ автоматически!",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Относительные и абсолютные ссылки в Excel</h2>
+            <table class="data-table">
+              <thead><tr><th>Вид ссылки</th><th>Запись</th><th>Что происходит при копировании вниз/вправо</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Относительная</strong> (по умолчанию)</td><td class="mono font-bold">A3, D3</td><td>Меняются <strong>и столбец, и строка</strong> (A3 → A4 → A5).</td></tr>
+                <tr><td><strong>Абсолютная</strong> (замороженная 🔒)</td><td class="mono font-bold">$D$3, $E$1</td><td><strong>Адрес НЕ меняется</strong> ни при каком копировании!</td></tr>
+              </tbody>
+            </table>
+            <div class="box-primary text-xs">
+              <strong>Лайфхак — клавиша <kbd>F4</kbd>:</strong> поставьте курсор на адрес <span class="mono">D3</span> в формуле и нажмите <kbd>F4</kbd> — Excel сам превратит её в <span class="mono font-bold">$D$3</span>! Повторные нажатия <kbd>F4</kbd> переключают: <span class="mono">$D$3 → D$3 → $D3 → D3</span>.
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Симулятор «Калькулятор бизнесмена»",
+      shortTitle: "Живой пример SB: =A3*D3 (❌) vs =A3*$D$3 (✓)",
+      timing: "14–24 мин",
+      source: "Теория 7.2А · Пример «Калькулятор бизнесмена»",
+      notes: "Переключайте кнопку ❌ Относительная vs ✓ Абсолютная! Ученики сразу видят, почему без $ в строках 4–6 умножается на пустые D4, D5, D6 и получаются нули!",
+      render(st) {
+        const mode = st.tabs.refMode || "bad";
+        const rate = 490;
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <h2 class="slide-h2">Пример учебника: «Калькулятор бизнесмена» (Курс D3 = 490 ₸)</h2>
+              <div class="flex-row">
+                <button type="button" class="btn ${mode === "bad" ? "btn-accent" : ""}" onclick="DECK.setTab('refMode','bad')">❌ Без $ (=A3*D3)</button>
+                <button type="button" class="btn ${mode === "good" ? "btn-primary" : ""}" onclick="DECK.setTab('refMode','good')">✓ С абсолютной (=A3*$D$3)</button>
+              </div>
+            </div>
+            <table class="data-table">
+              <thead><tr><th>Строка</th><th>A (Сумма $)</th><th>B (Формула при протягивании)</th><th>B (Результат ₸)</th><th>D (Курс)</th></tr></thead>
+              <tbody>
+                ${G7FN1_CALC.map((r, i) => {
+                  const f = mode === "bad" ? `=A${r.row}*D${r.row}` : `=A${r.row}*$D$3`;
+                  const res = (mode === "bad" && i > 0) ? 0 : r.usd * rate;
+                  const badCell = mode === "bad" && i > 0;
+                  return `<tr><td class="mono">${r.row}</td><td class="mono">${r.usd} $</td><td class="mono font-bold" style="${badCell ? "background:var(--danger-soft);" : "background:var(--success-soft);"}">${f}</td><td class="mono font-bold">${res.toLocaleString("ru-RU")} ₸</td><td class="mono">${i === 0 ? "490 (D3)" : "(пусто)"}</td></tr>`;
+                }).join("")}
+              </tbody>
+            </table>
+            <div class="${mode === "bad" ? "box-danger" : "box-success"} text-xs">
+              ${mode === "bad"
+                ? "❌ Ссылка D3 «съехала» вниз в пустые ячейки D4, D5, D6 — поэтому калькулятор выдал 0 ₸!"
+                : "✓ Знак $ закрепил ячейку $D$3 намертво, а A3 свободно меняется (A4, A5, A6) — все расчёты точны!"}
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Функция ЕСЛИ",
+      shortTitle: "Устройство ЕСЛИ и 6 операторов сравнения",
+      timing: "24–33 мин",
+      source: "Теория 7.2А · Функция ЕСЛИ и операторы сравнения",
+      notes: "Разберите 3 обязательных блока функции ЕСЛИ и все 6 операторов сравнения (особенно «не равно» <>).",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Логическая функция <span class="mono">ЕСЛИ</span> (IF)</h2>
+            <div class="code-block" style="font-size:14px;">=ЕСЛИ( логическое_выражение ; значение_если_истина ; значение_если_ложь )</div>
+            <div class="grid-3 text-xs">
+              <div class="box-primary"><strong>1. Условие</strong><br>Проверка, дающая <span class="mono">ИСТИНА</span> или <span class="mono">ЛОЖЬ</span> (напр. <span class="mono">C4&gt;80</span>).</div>
+              <div class="box-success"><strong>2. Если ИСТИНА</strong><br>Что вывести в ячейку, если условие выполнилось (<span class="mono">"Прошел"</span>).</div>
+              <div class="box-accent"><strong>3. Если ЛОЖЬ</strong><br>Что вывести, если условие НЕ выполнилось (<span class="mono">"Не прошел"</span>).</div>
+            </div>
+            <table class="data-table">
+              <thead><tr><th>Оператор</th><th>=</th><th>&lt;&gt;</th><th>&gt;</th><th>&gt;=</th><th>&lt;</th><th>&lt;=</th></tr></thead>
+              <tbody><tr><td><strong>Значение</strong></td><td>равно</td><td><strong>не равно</strong></td><td>больше</td><td>больше или равно</td><td>меньше</td><td>меньше или равно</td></tr></tbody>
+            </table>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Примеры ЕСЛИ и задача «Скидка»",
+      shortTitle: "Числовой, текстовый, пустой результат и задача «Скидка»",
+      timing: "33–43 мин",
+      source: "Теория 7.2А · Примеры ЕСЛИ и задача «Скидка» ($E$1)",
+      notes: "Покажите 3 вида примеров ЕСЛИ из теории и объединение двух тем урока в задаче «Скидка» (ЕСЛИ + абсолютная ссылка $E$1).",
+      render(st) {
+        const cur = st.tabs.ifEx || "num";
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <h2 class="slide-h2">4 важных шаблона функции <span class="mono">ЕСЛИ</span></h2>
+              <div class="flex-row">
+                <button type="button" class="btn ${cur === "num" ? "btn-primary" : ""}" onclick="DECK.setTab('ifEx','num')">Числовое условие</button>
+                <button type="button" class="btn ${cur === "txt" ? "btn-accent" : ""}" onclick="DECK.setTab('ifEx','txt')">Текстовое условие</button>
+                <button type="button" class="btn ${cur === "emp" ? "btn-primary" : ""}" onclick="DECK.setTab('ifEx','emp')">Пустой вывод ""</button>
+                <button type="button" class="btn ${cur === "disc" ? "btn-accent" : ""}" onclick="DECK.setTab('ifEx','disc')">Задача «Скидка» ($E$1)</button>
+              </div>
+            </div>
+            ${cur === "num" ? `
+              <div class="box-primary stack text-xs">
+                <div class="code-block">=ЕСЛИ(C4&gt;80;"Прошел";"Не прошел")</div>
+                <div>Если в C4 число строго больше 80 → выведет «Прошел», иначе (включая ровно 80!) → «Не прошел».</div>
+                <div class="code-block">=ЕСЛИ(C4&lt;0;"Недопустимое значение";"Верно")</div>
+              </div>
+            ` : cur === "txt" ? `
+              <div class="box-accent stack text-xs">
+                <div class="code-block">=ЕСЛИ(C2="сдал";"ОК";"Проверить")</div>
+                <div>Для текста используют <span class="mono">=</span> или <span class="mono">&lt;&gt;</span>, а сам текст <strong>обязательно берут в двойные кавычки "..."</strong>!</div>
+                <div class="box-danger"><strong>Ловушка:</strong> нельзя писать <span class="mono">=ЕСЛИ("возраст"&gt;6;...)</span> — сравнивайте адрес ячейки (<span class="mono">B2&gt;6</span>), а не слово в кавычках!</div>
+              </div>
+            ` : cur === "emp" ? `
+              <div class="box-primary stack text-xs">
+                <div class="code-block">=ЕСЛИ(C4&gt;80;"Прошел";"")</div>
+                <div>Две кавычки подряд <span class="mono">""</span> означают <strong>пустую строку</strong> — если C4 ≤ 80, ячейка останется чистой.</div>
+              </div>
+            ` : `
+              <div class="box-success stack text-xs">
+                <strong>Задача «Скидка» (ЕСЛИ + абсолютная ссылка):</strong> порог скидки <span class="mono">1000 ₸</span> записан в одной ячейке <span class="mono font-bold">$E$1</span>.
+                <div class="code-block">=ЕСЛИ(B2&gt;$E$1;"Скидка есть";"Скидки нет")</div>
+                <div>При копировании вниз <span class="mono">B2 → B3 → B4</span> меняется, а порог <span class="mono">$E$1</span> остаётся закреплённым!</div>
+              </div>
+            `}
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Мини-квиз",
+      shortTitle: "Проверь себя: 5 вопросов по ЕСЛИ и ссылкам",
+      timing: "43–51 мин",
+      source: "КСП 7.2А Урок 3 · Проверка понимания",
+      notes: "Быстрая проверка до начала практики в Мини-Таблицах.",
+      render(st) {
+        let ok = 0;
+        G7FN1_IF_QUIZ.forEach(q => { if (st.quiz[q.id] === q.ans) ok++; });
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <h2 class="slide-h2">Проверь себя: ссылки и функция ЕСЛИ</h2>
+              <span class="pill pill-success mono">${ok} / ${G7FN1_IF_QUIZ.length}</span>
+            </div>
+            <div class="stack" style="gap:6px;">
+              ${G7FN1_IF_QUIZ.map(q => {
+                const p = st.quiz[q.id];
+                const cls = p ? (p === q.ans ? "ok" : "bad") : "";
+                return `
+                  <div class="quiz-row ${cls}">
+                    <div style="flex:1;"><strong>${q.q}</strong>${p === q.ans ? `<div class="text-xs text-muted">${q.why}</div>` : ""}</div>
+                    <div class="flex-row" style="gap:4px;">
+                      ${q.opts.map(o => `<button type="button" class="btn ${p === o ? "btn-primary" : ""}" style="padding:2px 8px;font-size:11px;" onclick="DECK.pickQuiz('${q.id}','${o}')">${o}</button>`).join("")}
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Мини-Таблицы · Практика",
+      pillClass: "pill-accent",
+      shortTitle: "Мини-Таблицы: Задача «Скидка» (ЕСЛИ + $)",
+      timing: "51–70 мин",
+      source: "Мини-Таблицы (/excel?task=g7-fn-l1-skidka)",
+      notes: "Живая практика в Мини-Таблицах: «Задача „Скидка“: ЕСЛИ и абсолютная ссылка» (g7-fn-l1-skidka). Дополнительно: g7-fn-absolyutnaya (калькулятор валют) и g7-fn-esli (зачёт по нормативу).",
+      render(st, api) {
+        return api.renderMiniExcelTask({
+          key: "g7fn1",
+          taskId: "g7-fn-l1-skidka",
+          title: "Практика в Мини-Таблицах: ЕСЛИ + абсолютная ссылка",
+          summary: "Решите задачу «Скидка», закрепив порог знаком $ и протянув формулу ЕСЛИ вниз.",
+          steps: ["Напишите =ЕСЛИ(...) с абсолютной ссылкой на порог", "Протяните маркером заполнения вниз", "Проверьте кнопкой «Проверить»"],
+          meta: "Цели 7.1.1.3 · 7.4.2.1"
+        });
+      }
+    },
+    {
+      badge: "Этап 3 · Доп. задания",
+      shortTitle: "Доп. тренажёры: Калькулятор валют и Зачёт по нормативу",
+      timing: "70–75 мин",
+      source: "Мини-Таблицы · g7-fn-absolyutnaya, g7-fn-esli",
+      notes: "Для отработки каждого навыка отдельно.",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Дополнительная тренировка в Мини-Таблицах</h2>
+            <div class="grid-2 text-xs">
+              <div class="box-primary stack">
+                <strong>1. Абсолютная ссылка: калькулятор валют</strong>
+                <div>Пересчёт цен по закреплённому курсу валют ($).</div>
+                <a class="btn btn-primary" href="/excel?task=g7-fn-absolyutnaya" target="_blank" rel="noopener noreferrer">Открыть задание ↗</a>
+              </div>
+              <div class="box-accent stack">
+                <strong>2. ЕСЛИ: зачёт по нормативу</strong>
+                <div>Выставление «Зачёт / Незачёт» по результатам бега.</div>
+                <a class="btn btn-accent" href="/excel?task=g7-fn-esli" target="_blank" rel="noopener noreferrer">Открыть задание ↗</a>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 3 · ДЗ",
+      shortTitle: "Домашнее задание в Мини-Таблицах",
+      timing: "75–80 мин",
+      source: "Мини-Таблицы · g7-fn-dz-test",
+      notes: "Выдайте ДЗ «ЕСЛИ: проверка теста и итог» (g7-fn-dz-test).",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Итоги урока 3 и домашнее задание</h2>
+            <div class="box-primary flex-between text-xs">
+              <div><strong>Домашнее задание в Мини-Таблицах (/excel):</strong> <strong>«ДЗ. ЕСЛИ: проверка теста и итог»</strong> (<span class="mono">g7-fn-dz-test</span>).</div>
+              <a class="btn btn-accent" href="/excel?task=g7-fn-dz-test" target="_blank" rel="noopener noreferrer">Открыть ДЗ ↗</a>
+            </div>
+          </div>
+        `;
+      }
+    }
+  ]
+});
+</script>
+</body>
+</html>

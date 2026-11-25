@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>10.3А · Урок 3 · Visual Studio (Windows Forms): компоненты, свойства и события</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+  <link rel="stylesheet" href="../_engine/lesson.css" />
+</head>
+<body class="lesson">
+<script src="../_engine/deck.js"></script>
+<script src="../_engine/lesson.js"></script>
+<script>
+/*
+ * 10.3А «Введение в ООП (C#)», урок 3 (КТП) — «ИСР Visual Studio (Windows Forms): компоненты, свойства и обработка событий».
+ * Цели обучения (КТП 2026): 10.4.3.2 использовать компонент Button для обработки событий Click;
+ *                           10.4.3.7 программировать событие для элемента управления.
+ * Ход урока — КСП content/lesson-plans/g10-osnovnye-ponyatiya-oop-i-interfeys-prilozheniy.json, урок 3 (10 + 60 + 10 мин).
+ * Содержание — только из материалов: «2 урок Компоненты ИСР» (слайды 2–8, 10, 12), «1 урок Введение в ООП» (слайды 13–17);
+ * учебник 10 кл. стр. 189–190 (Checked, Enabled, Visible, обработчики CheckedChanged/Click).
+ * Схема окна Visual Studio — условная (в материалах только перечень 7 зон).
+ */
+const P1 = "Презентация «1 урок Введение в ООП», ";
+const P2 = "Презентация «2 урок Компоненты ИСР», ";
+const SB = "Учебник 10 кл., ";
+const SPEC = "Спецификация СОЧ 10 кл., 3 четверть";
+const { src, reveal, statements, quiz, matcher, orderGame } = LESSON;
+const S = () => window.DECK_STATE;
+const code = (s, fs = 15) => `<pre class="code-block" style="font-size:${fs}px;line-height:1.45;">${DECK_ESC(s)}</pre>`;
+
+/* ---------- условная схема окна Visual Studio по перечню зон П1 слайд 14 ---------- */
+function diaIDE(filled) {
+  const z = (n, t) => (filled ? `${n}. ${t}` : `${n}. ?`);
+  return `
+<svg class="dia" viewBox="0 0 640 330" role="img" aria-label="Условная схема окна Visual Studio: 7 зон">
+  <rect class="blk" x="4" y="4" width="632" height="34" rx="6"/><text x="320" y="27" text-anchor="middle">${z(1, "Меню")}</text>
+  <rect class="blk" x="4" y="44" width="632" height="34" rx="6"/><text x="320" y="67" text-anchor="middle">${z(2, "Стандартная панель (Пуск)")}</text>
+  <rect class="blk-a" x="4" y="84" width="140" height="242" rx="8"/>
+  <text x="74" y="196" text-anchor="middle">${filled ? "3. Панель" : "3. ?"}</text>${filled ? `<text x="74" y="220" text-anchor="middle">элементов</text><text class="s" x="74" y="244" text-anchor="middle">Toolbox</text>` : ""}
+  <rect class="blk" x="150" y="84" width="300" height="242" rx="8"/>
+  <text x="300" y="108" text-anchor="middle">${z(4, "Конструктор форм")}</text>
+  <rect class="blk-p" x="180" y="122" width="240" height="190" rx="8"/>
+  <text x="300" y="222" text-anchor="middle">${z(5, "Форма Form1")}</text>
+  <rect class="blk-a" x="456" y="84" width="180" height="104" rx="8"/>
+  <text x="546" y="128" text-anchor="middle">${filled ? "6. Обозреватель" : "6. ?"}</text>${filled ? `<text x="546" y="152" text-anchor="middle">решений</text>` : ""}
+  <rect class="blk-a" x="456" y="194" width="180" height="132" rx="8"/>
+  <text x="546" y="250" text-anchor="middle">${filled ? "7. Окно свойств" : "7. ?"}</text>${filled ? `<text class="s" x="546" y="274" text-anchor="middle">Properties</text>` : ""}
+</svg>`;
+}
+
+/* ---------- условный макет окна программы ---------- */
+const MOCK = `
+<svg class="dia" viewBox="0 0 420 260" role="img" aria-label="Окно программы: надпись, поле ввода, кнопка">
+  <rect class="blk" x="4" y="4" width="412" height="252" rx="10"/>
+  <rect class="blk-p" x="4" y="4" width="412" height="34" rx="10"/><text x="20" y="27">Form1</text>
+  <text x="30" y="84">Введите имя:</text>
+  <rect class="blk-a" x="30" y="100" width="240" height="40" rx="6"/><text class="s" x="42" y="126">Айдана</text>
+  <rect class="blk-p" x="290" y="100" width="100" height="40" rx="8"/><text x="340" y="126" text-anchor="middle">OK</text>
+  <text x="30" y="196">Привет, Айдана!</text>
+</svg>`;
+
+initDeck({
+  badge: "10.3А · Урок 3",
+  title: "Visual Studio (Windows Forms): компоненты, свойства и события",
+  subtitle: "10 класс · 3 четверть · цели 10.4.3.2, 10.4.3.7 · 80 минут",
+  footer: "НИШ ЕМН г. Кызылорда · Информатика · 10 класс · Раздел 10.3А «Введение в ООП (C#)»",
+  slides: [
+    /* ---------------- НАЧАЛО УРОКА (10 мин) ---------------- */
+    {
+      badge: "Начало урока",
+      shortTitle: "Тема, цели и критерии",
+      timing: "0–2 мин",
+      source: "КТП 2026; КСП урока 3; " + P1 + "слайд 2",
+      notes: "Организационный момент. Тема, цели, критерии.",
+      render() {
+        return `<div class="hero">
+          <div>
+            <div class="hero-kicker">Раздел 10.3А · Введение в ООП (C#)</div>
+            <h1>Компоненты Visual Studio, свойства и обработка событий</h1>
+            <div class="stack">
+              <div class="goal"><b>10.4.3.2</b> — использовать компонент Button для обработки событий Click.</div>
+              <div class="goal"><b>10.4.3.7</b> — программировать событие для элемента управления.</div>
+            </div>
+          </div>
+          <div class="stack text-sm">
+            <div class="card"><h3>🎯 Цели урока</h3>
+              <p><b>Все:</b> называют окна Visual Studio и компоненты Button, Label, TextBox.<br>
+              <b>Большинство:</b> задают свойства в окне Properties и в коде; пишут обработчик Click.<br>
+              <b>Некоторые:</b> создают приложение «Радуга» с несколькими обработчиками.</p></div>
+            <div class="card"><h3>✅ Критерии оценивания</h3><p>Указывает окна среды, их назначение; демонстрирует создание проекта с базовыми компонентами; приводит примеры свойств и событий компонентов.</p></div>
+          </div>
+        </div>${src("КТП 2026 (цели 10.4.3.2, 10.4.3.7); КСП урока 3; " + P1 + "слайд 2 (дескрипторы)")}`;
+      },
+    },
+    {
+      badge: "Начало урока",
+      shortTitle: "Из каких «кирпичиков» окно?",
+      timing: "2–6 мин",
+      source: "КСП урока 3; " + P1 + "слайд 17",
+      notes: "Покажите калькулятор и блокнот Windows. Вопрос: из каких «кирпичиков» состоят окна программ? Как программист связывает кнопку с действием? Откройте ответ. Макет окна — условный.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:24px;align-items:center;">
+          <div>${MOCK}</div>
+          <div class="stack">
+            <h2 class="slide-h2">Из каких элементов состоит это окно?</h2>
+            <p class="text-sm">Как связать нажатие на кнопку OK с появлением приветствия?</p>
+            ${reveal("r-mock", "Ответ", "Окно — форма <code>Form</code>; «Введите имя:» и приветствие — метки <code>Label</code>; поле — <code>TextBox</code> (ввод строки); OK — <code>Button</code>. Действие при нажатии записывают в обработчик события <code>Click</code>.")}
+          </div>
+        </div></div>${src("КСП урока 3; " + P1 + "слайд 17 (назначение компонентов); макет — условный")}`;
+      },
+    },
+    {
+      badge: "Начало урока",
+      shortTitle: "Формативный опрос",
+      timing: "6–10 мин",
+      source: P2 + "слайд 2; " + P1 + "слайды 3, 6",
+      notes: "Повторение урока 1. Ученики отвечают устно, затем откройте ключ.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Повторение: основные элементы ООП</h2>
+          <div class="steps text-sm">
+            <div class="step">Какие элементы ООП являются основными? Перечислите все 5.</div>
+            <div class="step">Дайте определение каждому: класс, объект, свойство, метод, событие.</div>
+            <div class="step">Назовите три принципа ООП и кратко поясните их суть.</div>
+          </div>
+          ${reveal("r-rep", "Ключ", "1) Класс, объект, свойство, метод, событие. 2) Класс — каркас для создания объектов; объект — экземпляр класса; свойство — характеристика объекта; метод — действие объекта; событие — отклик объекта на действие. 3) Инкапсуляция — скрытие полей; наследование — подклассы получают свойства и методы предков; полиморфизм — объекты с общим родителем решают схожие задачи по-разному.")}
+        </div>${src(P2 + "слайд 2 (вопросы); " + P1 + "слайды 3, 6 (ключ)")}`;
+      },
+    },
+
+    /* ---------------- СЕРЕДИНА УРОКА (60 мин) ---------------- */
+    {
+      badge: "Новое · ИСР",
+      shortTitle: "Что такое ИСР",
+      timing: "10–14 мин",
+      source: P2 + "слайд 3",
+      notes: "Определение ИСР и 4 её части. Visual Studio — среда визуальной разработки: интерфейс редактируют перетаскиванием компонентов.",
+      render() {
+        return `<div class="body">
+          <div class="def"><b>Интегрированная среда разработки (ИСР, IDE)</b> — система программных средств для разработки программного обеспечения.</div>
+          <div class="cards text-sm" style="grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;">
+            <div class="card"><h3>Редактор</h3><p>Написание и редактирование кода с подсветкой синтаксиса и автодополнением.</p></div>
+            <div class="card"><h3>Компилятор</h3><p>Перевод исходного текста в машинный код или байт-код платформы .NET.</p></div>
+            <div class="card"><h3>Сборка</h3><p>Автоматическая компоновка модулей, ресурсов и библиотек в готовый .exe файл.</p></div>
+            <div class="card"><h3>Отладчик</h3><p>Пошаговый поиск ошибок, проверка значений переменных.</p></div>
+          </div>
+          <div class="note"><b>Visual Studio</b> — среда визуальной разработки: интерфейс программы редактируют перетаскиванием компонентов.</div>
+        </div>${src(P2 + "слайд 3 (определение ИСР, части ИСР)")}`;
+      },
+    },
+    {
+      badge: "Новое · окно Visual Studio",
+      shortTitle: "7 зон окна Visual Studio",
+      timing: "14–19 мин",
+      source: P1 + "слайды 13–14",
+      notes: "Покажите окно VS на проекторе. Ученики называют зоны 1–7 по описаниям, затем откройте подписи. Схема — условная, расположение панелей в VS можно менять.",
+      render() {
+        const on = S().revealed["ide"];
+        return `<div class="body"><div class="grid-2" style="grid-template-columns:1.25fr 1fr;gap:20px;align-items:center;">
+          <div>${diaIDE(on)}</div>
+          <div class="stack text-xs">
+            <div class="card"><b>Меню</b> — управление проектом и отладкой. <b>Стандартная панель</b> — «Пуск», сохранение, отмена.</div>
+            <div class="card"><b>Toolbox</b> — библиотека компонентов. <b>Конструктор</b> — область визуального проектирования. <b>Form1</b> — будущее окно приложения.</div>
+            <div class="card"><b>Обозреватель решений</b> — дерево файлов проекта. <b>Properties</b> — настройка выбранного объекта.</div>
+            <button type="button" class="btn btn-primary reveal-btn" onclick="DECK.toggleReveal('ide')">${on ? "Скрыть подписи" : "Показать подписи"}</button>
+          </div>
+        </div></div>${src(P1 + "слайд 14 (7 зон окна IDE), слайд 13 (создание проекта Windows Forms); схема — условная")}`;
+      },
+    },
+    {
+      badge: "Новое · код формы",
+      shortTitle: "Структура файла Form1.cs",
+      timing: "19–23 мин",
+      source: P1 + "слайд 15",
+      notes: "Разбор секций файла кода. Щёлкните назначение для каждой строки. Повторите: Form1 : Form — наследование.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="grid-template-columns:0.9fr 1.3fr;gap:18px;align-items:start;">
+          ${code(`using System;
+using System.Windows.Forms;
+
+namespace mySolution
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
+    }
+}`, 14)}
+          <div class="stack">
+            <h2 class="slide-h2" style="font-size:24px;">Что делает строка?</h2>
+            ${matcher("frm", [["u", "Библиотека"], ["n", "Пространство имён"], ["c", "Класс формы"], ["k", "Конструктор"]], [
+              { t: "<code>using System;</code>", ans: "u" },
+              { t: "<code>namespace mySolution</code>", ans: "n" },
+              { t: "<code>public partial class Form1 : Form</code>", ans: "c" },
+              { t: "<code>public Form1()</code>", ans: "k" },
+              { t: "<code>using System.Windows.Forms;</code>", ans: "u" },
+            ])}
+          </div>
+        </div></div>${src(P1 + "слайд 15 (структура Form1.cs; using-директивы сокращены)")}`;
+      },
+    },
+    {
+      badge: "Новое · компоненты",
+      shortTitle: "Компоненты Toolbox",
+      timing: "23–28 мин",
+      source: P2 + "слайды 4–5; " + P1 + "слайд 17",
+      notes: "Фронтально: назначение компонентов. Покажите их в Toolbox. Главное различие CheckBox и RadioButton — радиокнопка даёт выбрать только один параметр из группы.",
+      render() {
+        const c = (n, t) => `<div class="card"><b>${n}</b><br>${t}</div>`;
+        return `<div class="body">
+          <h2 class="slide-h2">Стандартные компоненты Visual Studio</h2>
+          <div class="cards text-xs" style="grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;">
+            ${c("Form", "окно приложения")}
+            ${c("Button", "кнопка; события Click, MouseDown — реакция на щелчки")}
+            ${c("Label", "текст только для чтения: подписи, заголовки")}
+            ${c("TextBox", "отображение текста и текстовый ввод")}
+            ${c("CheckBox", "флажок: отмечен или не отмечен")}
+            ${c("RadioButton", "выбор только одного параметра из группы")}
+            ${c("GroupBox", "объединяет несколько элементов в группу")}
+            ${c("ListBox / ComboBox", "простой и выпадающий список")}
+            ${c("PictureBox", "показ изображений на форме")}
+            ${c("TrackBar", "ползунок, например регулятор громкости")}
+            ${c("NumericUpDown", "ввод чисел стрелками вверх/вниз")}
+            ${c("Timer", "работа со временем через события")}
+          </div>
+        </div>${src(P2 + "слайды 4–5 (компоненты); " + P1 + "слайд 17 (таблица Toolbox)")}`;
+      },
+    },
+    {
+      badge: "Практика · компоненты",
+      shortTitle: "Подбери компонент",
+      timing: "28–31 мин",
+      source: P2 + "слайды 4–5; " + P1 + "слайд 17",
+      notes: "Ученики называют компонент для ситуации; щёлкните ответ. Обоснование — по назначению компонента.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Какой компонент нужен?</h2>
+          ${matcher("cmp", [["tb", "TextBox"], ["lb", "Label"], ["bt", "Button"], ["cb", "CheckBox"], ["rb", "RadioButton"], ["pb", "PictureBox"], ["tr", "TrackBar"]], [
+            { t: "Пользователь вводит своё имя", ans: "tb" },
+            { t: "Выбрать один пол из двух", ans: "rb" },
+            { t: "Отметить несколько нужных пунктов", ans: "cb" },
+            { t: "Заголовок, который нельзя редактировать", ans: "lb" },
+            { t: "Показать фотографию на форме", ans: "pb" },
+            { t: "Запустить расчёт щелчком", ans: "bt" },
+            { t: "Регулятор громкости", ans: "tr" },
+          ])}
+        </div>${src(P2 + "слайды 4–5 (назначение компонентов); " + P1 + "слайд 17")}`;
+      },
+    },
+    {
+      badge: "Новое · свойства",
+      shortTitle: "Свойства в окне Properties",
+      timing: "31–35 мин",
+      source: P2 + "слайды 6–8",
+      notes: "Основные свойства. Подчеркните различие Name и Text: Name — имя для кода (меняется только во время разработки), Text — текст, связанный с элементом.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Основные свойства элементов управления</h2>
+          <div class="grid-2" style="gap:16px;grid-template-columns:1.4fr 1fr;">
+            <table class="t" style="font-size:15px;">
+              <tr><th>Свойство</th><th>Назначение</th></tr>
+              <tr><td><code>BackColor</code></td><td>цвет фона</td></tr>
+              <tr><td><code>ForeColor</code></td><td>цвет переднего плана, главным образом текста</td></tr>
+              <tr><td><code>Font</code></td><td>шрифт текста</td></tr>
+              <tr><td><code>Enabled</code></td><td>активен ли элемент; неактивный — серый, его нельзя выбрать</td></tr>
+              <tr><td><code>Visible</code></td><td>видим ли элемент (true / false)</td></tr>
+              <tr><td><code>Location</code></td><td>координаты расположения на форме</td></tr>
+            </table>
+            <div class="stack text-sm">
+              <div class="card"><h3>Name</h3><p>Имя для ссылки на элемент в коде C#. Меняется только во время разработки.</p></div>
+              <div class="card"><h3>Text</h3><p>Текст, связанный с элементом управления (надпись на кнопке, текст метки).</p></div>
+            </div>
+          </div>
+        </div>${src(P2 + "слайд 6 (BackColor, Enabled), слайд 7 (Font, ForeColor, Location, Name), слайд 8 (Text, Visible)")}`;
+      },
+    },
+    {
+      badge: "Новое · свойства в коде",
+      shortTitle: "Два способа задать свойство",
+      timing: "35–40 мин",
+      source: P1 + "слайд 14; " + P2 + "слайд 10; " + SB + "стр. 190",
+      notes: "Два способа: в окне Properties (при разработке) и программно — в обработчике события, через точку: ИмяОбъекта.Свойство = значение. this — текущая форма. Двойной щелчок по кнопке открывает шаблон обработчика button1_Click.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;align-items:start;">
+          <div class="stack">
+            <div class="card"><h3><span class="ico">🛠</span>1. В окне Properties</h3><p>Во время разработки: выделить объект на форме → найти свойство → ввести значение.</p></div>
+            <div class="card"><h3><span class="ico">⌨</span>2. Программно</h3><p>Во время работы приложения, в обработчике события:<br><code>ИмяОбъекта.Свойство = значение;</code></p></div>
+            <div class="note text-sm"><b>Двойной щелчок</b> по кнопке на форме открывает окно кода с шаблоном обработчика <code>button1_Click</code>.</div>
+          </div>
+          ${code(`private void button1_Click(object sender, EventArgs e)
+{
+    label1.Text = "Hello, world!";   // текст метки
+    this.BackColor = Color.Red;      // цвет формы
+    richTextBox1.Visible = false;    // скрыть компонент
+    MessageBox.Show("Желаю удачи");  // окно сообщения
+}`, 14.5)}
+        </div></div>${src(P1 + "слайды 14, 16 (обработчик, MessageBox); " + P2 + "слайд 10 (this.BackColor); " + SB + "стр. 190 (Visible); строки собраны в один условный обработчик")}`;
+      },
+    },
+    {
+      badge: "Практика · первая программа",
+      shortTitle: "Hello, world! по шагам",
+      timing: "40–45 мин",
+      source: P1 + "слайды 13–14, 16",
+      notes: "Ученики по очереди щёлкают шаги в правильном порядке; неверный шаг подсвечивается. Затем выполняют их в Visual Studio.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Расставьте шаги создания программы «Hello, world!»</h2>
+          ${orderGame("hw", [
+            "Создать новую папку с именем приложения и новый проект Windows Forms.",
+            "Перенести из Toolbox на Form1 кнопку Button и надпись Label.",
+            "Дважды щёлкнуть по кнопке — откроется шаблон button1_Click.",
+            "Записать в обработчике: <code>label1.Text = \"Hello, world!\";</code>",
+            "Нажать «Пуск» (F5) и щёлкнуть по button1.",
+            "Сохранить всё: Файл → «Сохранить все» (Ctrl + Shift + S).",
+          ], [2, 5, 0, 4, 1, 3])}
+        </div>${src(P1 + "слайд 13 (создание проекта, папка), слайд 14 (шаги 1–3), слайд 16 (сохранение)")}`;
+      },
+    },
+    {
+      badge: "Практическая работа",
+      shortTitle: "Проект 1 «Приветствие»",
+      timing: "45–52 мин",
+      source: "КСП урока 3; " + P1 + "слайды 14, 16; " + P2 + "слайды 9–10; " + SB + "стр. 190–191",
+      notes: "Проект 1: Label, TextBox и три кнопки. Код — условный, собран из конструкций материалов: сцепление строк «+» (учебник стр. 191), Visible (стр. 190), логическое НЕ «!» (П2 слайд 9), Application.Exit (П2 слайд 10).",
+      render() {
+        return `<div class="body"><div class="grid-2" style="grid-template-columns:1fr 1.25fr;gap:20px;align-items:start;">
+          <div class="stack text-sm">
+            <h2 class="slide-h2" style="font-size:24px;">Проект 1 «Приветствие»</h2>
+            <div class="steps">
+              <div class="step">На форме: <code>label1</code>, <code>textBox1</code>, кнопки «Поприветствовать», «Скрыть/Показать», «Выход».</div>
+              <div class="step">Кнопка 1 выводит в <code>label1</code> приветствие с именем из <code>textBox1</code>.</div>
+              <div class="step">Кнопка 2 переключает видимость <code>label1</code>; кнопка 3 закрывает приложение.</div>
+            </div>
+          </div>
+          ${code(`private void button1_Click(object sender, EventArgs e)
+{
+    label1.Text = "Привет, " + textBox1.Text + "!";
+}
+private void button2_Click(object sender, EventArgs e)
+{
+    label1.Visible = !label1.Visible;
+}
+private void button3_Click(object sender, EventArgs e)
+{
+    Application.Exit();
+}`, 14)}
+        </div></div>${src("КСП урока 3 (проект 1); " + SB + "стр. 190–191 (Visible, сцепление строк); " + P2 + "слайд 9 (!), слайд 10 (Application.Exit); код — условный")}`;
+      },
+    },
+    {
+      badge: "Практическая работа",
+      shortTitle: "Проект 2 «Радуга»",
+      timing: "52–60 мин",
+      source: P2 + "слайд 10",
+      notes: "Практикум «Радуга»: кнопки цветов радуги, кнопка «Выход», метка label1. Для каждой кнопки — свой обработчик Click: цвет формы this.BackColor и слово-подсказка в label1.Text. Образец дан для красного цвета.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="grid-template-columns:1fr 1.2fr;gap:20px;align-items:start;">
+          <div class="stack text-sm">
+            <h2 class="slide-h2" style="font-size:24px;">Проект 2 «Радуга»</h2>
+            <div class="steps">
+              <div class="step">Разместите кнопки цветов радуги, кнопку «Выход» и метку <code>label1</code>; задайте свойства формы.</div>
+              <div class="step">Для кнопки каждого цвета — обработчик Click: <code>this.BackColor</code> и слово в <code>label1.Text</code>.</div>
+              <div class="step">Кнопка «Выход»: <code>Application.Exit();</code></div>
+            </div>
+          </div>
+          ${code(`// обработчик события Click для кнопки btnRed
+private void btnRed_Click(object sender, EventArgs e)
+{
+    // изменяем цвет формы на красный
+    this.BackColor = Color.Red;
+    // выводим текст в метку
+    label1.Text = "Красный - каждый";
+}
+// обработчик Click для кнопки выхода
+private void button8_Click(object sender, EventArgs e)
+{
+    Application.Exit();
+}`, 14)}
+        </div></div>${src(P2 + "слайд 10 (практикум «Радуга»: код и инструкция)")}`;
+      },
+    },
+    {
+      badge: "Проверка · код",
+      shortTitle: "Найди ошибку в обработчике",
+      timing: "60–65 мин",
+      source: P1 + "слайд 7; " + P2 + "слайды 7–8, 10",
+      notes: "Взаимопроверка перед демонстрацией. Ученики решают, верна ли строка; щёлкните, чтобы показать ответ и пояснение.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Верна ли строка в обработчике события?</h2>
+          ${statements("err", [
+            { t: "<code>label1.Text = \"Красный - каждый\";</code>", ok: true, why: "свойство Text метки" },
+            { t: "<code>label1.text = \"Привет\";</code>", ok: false, why: "C# различает регистр: Text" },
+            { t: "<code>button1.Name = \"btnGo\";</code> — в обработчике", ok: false, why: "Name меняется только при разработке" },
+            { t: "<code>this.BackColor = Color.Red;</code>", ok: true, why: "цвет фона формы" },
+            { t: "<code>Application.Exit();</code>", ok: true, why: "закрывает приложение" },
+          ])}
+        </div>${src(P1 + "слайд 7 (регистр); " + P2 + "слайд 7 (Name), слайд 8 (Text), слайд 10 (код «Радуги»)")}`;
+      },
+    },
+    {
+      badge: "Подготовка к СОЧ",
+      shortTitle: "Демонстрация и формат СОЧ",
+      timing: "65–70 мин",
+      source: SPEC + "; " + P1 + "слайд 2",
+      notes: "Демонстрация приложений и взаимооценивание по дескрипторам. Тренировочное задание в формате СОЧ (развёрнутый ответ) — не из СОЧ, можно дать как домашнюю подготовку.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;align-items:start;">
+          <div class="stack">
+            <h2 class="slide-h2" style="font-size:24px;">Взаимооценивание проекта</h2>
+            <div class="card text-sm"><p>☐ на форме нужные компоненты с понятными надписями (Text);<br>☐ обработчик Click для каждой кнопки;<br>☐ свойства меняются программно (Text, BackColor, Visible);<br>☐ кнопка выхода работает;<br>☐ проект сохранён в отдельной папке.</p></div>
+          </div>
+          <div class="stack">
+            <div class="text-xs text-muted">Тренировочное задание · РО · 4 балла</div>
+            <div class="card text-sm"><p>Приложение: при нажатии на кнопку «Тёмная тема» цвет формы становится чёрным, а метка <code>label1</code> показывает «Тема включена». <b>Опишите</b> компоненты формы и <b>запишите</b> обработчик события.</p></div>
+            <div class="card text-xs"><b>Дескрипторы:</b> называет компоненты (Button, Label); записывает заголовок обработчика Click; изменяет свойство формы через this; изменяет Text метки.</div>
+          </div>
+        </div></div>${src(SPEC + " (тип РО); " + P1 + "слайд 2 (дескрипторы урока); задание — условное")}`;
+      },
+    },
+
+    /* ---------------- КОНЕЦ УРОКА (10 мин) ---------------- */
+    {
+      badge: "Конец урока · проверка",
+      shortTitle: "Блиц-опрос",
+      timing: "70–76 мин",
+      source: P1 + "слайд 14; " + P2 + "слайды 4, 6–8",
+      notes: "Блиц-опрос «Какой компонент и какое свойство выбрать?». Ответ — поднятием карточки a/b/c/d.",
+      render() {
+        return `<div class="body"><div class="grid-2 quizgrid" style="gap:14px;">
+          ${quiz("q1", "1. Как запретить нажимать на кнопку?", ["button1.Visible = true;", "button1.Enabled = false;", "button1.Text = \"\";", "button1.Name = \"off\";"], 1)}
+          ${quiz("q2", "2. Чем свойство Name отличается от Text?", ["ничем", "Name — текст на экране, Text — имя в коде", "Name — имя в коде, Text — текст, связанный с элементом", "Name можно менять во время работы"], 2)}
+          ${quiz("q3", "3. Как открыть шаблон обработчика button1_Click?", ["двойной щелчок по кнопке на форме", "клавиша Ctrl + Shift + S", "в Обозревателе решений", "в меню «Файл»"], 0)}
+          ${quiz("q4", "4. Какой компонент — для ввода текста пользователем?", ["Label", "PictureBox", "TextBox", "Timer"], 2)}
+        </div></div>${src(P1 + "слайд 14 (двойной щелчок), слайд 16 (сохранение); " + P2 + "слайды 4 (компоненты), 6–8 (Enabled, Name, Text)")}`;
+      },
+    },
+    {
+      badge: "Конец урока · рефлексия",
+      shortTitle: "Рефлексия и домашнее задание",
+      timing: "76–80 мин",
+      source: P2 + "слайд 12; КСП урока 3",
+      notes: "Рефлексия по вопросам презентации урока 2. Домашнее задание — по КСП.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;">
+          <div class="stack">
+            <h2 class="slide-h2">Рефлексия</h2>
+            <div class="card"><p>Какие компоненты Visual Studio вы использовали сегодня?</p></div>
+            <div class="card"><p>Какие свойства настроили в окне Properties, а какие — в коде?</p></div>
+          </div>
+          <div class="stack">
+            <h2 class="slide-h2">Домашнее задание</h2>
+            <div class="card"><h3>📝 Повторить</h3><p>Назначение компонентов Toolbox и основных свойств окна Properties.</p></div>
+          </div>
+        </div></div>${src(P2 + "слайд 12 (рефлексия); КСП урока 3 (домашнее задание)")}`;
+      },
+    },
+  ],
+});
+</script>
+</body>
+</html>

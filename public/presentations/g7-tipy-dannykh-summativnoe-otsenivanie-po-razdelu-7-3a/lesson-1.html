@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>7.3А · Урок 5 · Математика в программировании. Арифметические выражения</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+  <link rel="stylesheet" href="../_engine/lesson.css" />
+  <style>.tight table.t td, .tight table.t th { padding: 4px 10px; } .tight .opt { padding: 6px 12px; } .tight .chip { padding: 3px 7px; } .tight .match-row { gap: 8px; padding: 3px 10px; }</style>
+</head>
+<body class="lesson">
+<script src="../_engine/deck.js"></script>
+<script src="../_engine/lesson.js"></script>
+<script src="../g7-blok-skhemy-lineynykh-algoritmov/cpp-7-3a.js"></script>
+<script>
+/*
+ * 7.3А «Программирование линейных алгоритмов (C++)», урок 5 (КТП) — «Типы данных. СО по разделу 7.3А», урок 1 темы.
+ * Цели обучения: 7.4.3.4 записывать арифметические выражения на языке программирования;
+ *                7.4.3.5 программировать линейные алгоритмы для решения задач из различных предметных областей.
+ * Ход урока — КСП content/lesson-plans/g7-tipy-dannykh-summativnoe-otsenivanie-po-razdelu-7-3a.json, урок 1 (10 + 60 + 10 мин).
+ * Содержание — только из материалов: SB 7 кл. стр. 132–133; THB 7 кл. стр. 96–97;
+ * презентации учителя «3 ур Типы данных.pptx» (слайды 9–13, 17–18), «4 ур Повтор 7_3А.pptx» (слайд 9).
+ * Расхождения: d = c + b — в SB/THB ошибка (Error), в презентации «A» → берём SB; THB стр. 97 ответ 3 неверен
+ * (c — double; 2 получается из-за деления int a / int b, как в SB стр. 132). % работает без cmath (повтор, слайд 9).
+ */
+const SB = "Учебник 7 кл., ";
+const TG = "Руководство для учителя 7 кл., ";
+const PR = "Презентация «3 ур Типы данных», ";
+const PR4 = "Презентация «4 ур Повтор 7_3А», ";
+const { src, reveal, statements, quiz, matcher } = LESSON;
+const S = () => window.DECK_STATE;
+const c = (t) => `<code>${DECK_ESC(t)}</code>`;
+
+initDeck({
+  badge: "7.3А · Урок 5",
+  title: "Математика в программировании. Арифметические выражения",
+  subtitle: "7 класс · 3 четверть · цели 7.4.3.4, 7.4.3.5 · 80 минут",
+  footer: "НИШ ЕМН г. Кызылорда · Информатика · 7 класс · Раздел 7.3А «Программирование линейных алгоритмов (C++)»",
+  slides: [
+    /* ---------------- НАЧАЛО УРОКА (10 мин) ---------------- */
+    {
+      badge: "Начало урока",
+      shortTitle: "Тема, цели и критерии",
+      timing: "0–3 мин",
+      source: "КТП 2026; КСП урока 1; " + PR + "слайд 1",
+      notes: "Приветствие, инструктаж по ТБ. Озвучьте тему, цели и критерии.",
+      render() {
+        return `<div class="hero">
+          <div>
+            <div class="hero-kicker">Раздел 7.3А · Программирование линейных алгоритмов (C++)</div>
+            <h1>Математика в программировании. Арифметические выражения</h1>
+            <div class="stack">
+              <div class="goal"><b>7.4.3.4</b> — записывать арифметические выражения на языке программирования.</div>
+              <div class="goal"><b>7.4.3.5</b> — программировать линейные алгоритмы для решения задач из различных предметных областей.</div>
+            </div>
+          </div>
+          <div class="stack text-sm">
+            <div class="card"><h3>🎯 Цели урока</h3>
+              <p><b>Все:</b> называют операции +, -, *, /, %; записывают простое выражение на C++.<br>
+              <b>Большинство:</b> объясняют разницу деления целых и вещественных чисел; используют floor, ceil, M_PI и cmath; пишут линейные программы.<br>
+              <b>Некоторые:</b> прослеживают изменение переменных (трассировка); обосновывают, какой вариант программы точнее.</p></div>
+            <div class="card"><h3>✅ Критерии оценивания</h3><p>Записывает арифметические выражения на языке программирования. Программирует линейные алгоритмы для решения задач.</p></div>
+          </div>
+        </div>${src("КТП 2026 (цели 7.4.3.4, 7.4.3.5); КСП урока 1; " + PR + "слайд 1")}`;
+      },
+    },
+    {
+      badge: "Начало урока",
+      shortTitle: "Мотивация",
+      timing: "3–7 мин",
+      source: SB + "стр. 115",
+      notes: "«Сегодня наши программы станут “умнее” и будут выполнять математические операции». Стимулирующий вопрос со стр. 115 — выслушайте идеи.",
+      render() {
+        return `<div class="body" style="align-items:center;justify-content:center;text-align:center;">
+          <div style="font-size:64px;">🧮</div>
+          <h2 class="slide-h2">Как написать программу, которая будет делать уроки по математике?</h2>
+          <p class="lead">Сегодня наши программы станут «умнее» — будут вычислять.</p>
+        </div>${src(SB + "стр. 115 (вопросы раздела); КСП урока 1")}`;
+      },
+    },
+    {
+      badge: "Начало урока",
+      shortTitle: "Терминология",
+      timing: "7–10 мин",
+      source: "КСП урока 1",
+      notes: "3 минуты: ученики находят перевод терминов на казахский и английский языки (переводы на слайде не даны).",
+      render() {
+        const terms = ["оператор", "арифметическое выражение", "деление", "остаток от деления", "округление", "трассировка"];
+        return `<div class="body">
+          <h2 class="slide-h2">Термины урока: найди перевод</h2>
+          <table class="t"><tr><th>Русский</th><th>Қазақша</th><th>English</th></tr>
+            ${terms.map((t) => `<tr><td><b>${t}</b></td><td></td><td></td></tr>`).join("")}
+          </table>
+        </div>${src("КСП урока 1 (языковые цели)")}`;
+      },
+    },
+
+    /* ---------------- СЕРЕДИНА УРОКА (60 мин) ---------------- */
+    {
+      badge: "Новое · операции",
+      shortTitle: "Арифметические операции",
+      timing: "10–15 мин",
+      source: SB + "стр. 132–133; " + PR + "слайды 9, 11",
+      notes: "Фронтально по таблице (стр. 132). Операторы используются для выполнения операций над переменными и значениями. Важно: деление двух int даёт целое число. Для floor, ceil и M_PI в начале программы подключают #include <cmath>. «Знаешь ли ты?»: сокращённая запись операторов.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:18px;grid-template-columns:1.6fr 1fr;">
+          <table class="t text-xs tight">
+            <tr><th>Операция</th><th>Название</th><th>Пример</th></tr>
+            <tr><td>${c("+  -  *")}</td><td>сложение, вычитание, умножение</td><td>${c("cout<<a + b;")}</td></tr>
+            <tr><td>${c("/")}</td><td>деление: <b>int a, b</b> → целое</td><td>a=6; b=4; c = a / b → <b>1</b></td></tr>
+            <tr><td>${c("/")}</td><td>деление: <b>double a, b</b> → вещественное</td><td>a=6; b=4; c = a / b → <b>1.5</b></td></tr>
+            <tr><td>${c("%")}</td><td>остаток от деления</td><td>17 % 7 = 3 · 14 % 7 = 0 · 7 % 17 = 7</td></tr>
+            <tr><td>${c("floor")}</td><td>до ближайшего наименьшего целого</td><td>floor(13.4) = 13</td></tr>
+            <tr><td>${c("ceil")}</td><td>до ближайшего наибольшего целого</td><td>ceil(13.5) = 14</td></tr>
+            <tr><td>${c("M_PI")}</td><td>число π (Пи)</td><td>${c("C=M_PI*d")}</td></tr>
+          </table>
+          <div class="stack">
+            <div class="note">${c("#include <cmath>")} — подключают в начале программы для floor, ceil, M_PI.</div>
+            <table class="t text-xs tight">
+              <tr><th>Короче</th><th>То же самое</th></tr>
+              <tr><td>${c("i ++")}</td><td>${c("i = i + 1")}</td></tr>
+              <tr><td>${c("i += 3")}</td><td>${c("i = i + 3")}</td></tr>
+              <tr><td>${c("i -= 3")}</td><td>${c("i = i - 3")}</td></tr>
+              <tr><td>${c("i *= 3")}</td><td>${c("i = i * 3")}</td></tr>
+              <tr><td>${c("i /= 3")}</td><td>${c("i = i / 3")}</td></tr>
+              <tr><td>${c("i %= 3")}</td><td>${c("i = i % 3")}</td></tr>
+            </table>
+          </div>
+        </div></div>${src(SB + "стр. 132 (таблица операций), стр. 133 («Знаешь ли ты?»); " + PR + "слайды 9, 11")}`;
+      },
+    },
+    {
+      badge: "Практическая работа · трассировка",
+      shortTitle: "Трассировка: заполни таблицу",
+      timing: "15–25 мин",
+      source: SB + "стр. 132–133, задание 1; " + PR + "слайд 10",
+      notes: "Задание 1 (стр. 132–133): наберите код построчно вместе с учениками и заполняйте таблицу значений. Пустая ячейка = значение не изменилось. Открывайте ячейки по одной после ответа класса.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Как меняются значения переменных?</h2>
+          <div class="grid-2" style="gap:18px;grid-template-columns:1fr 1.25fr;">
+            ${CPP.code(`int a=12; int b=5;
+double c=4; string d="День";
+c=a+b;
+c=a/b;
+b=a*b+3;
+a=b/a;
+d=c+b;   // строка 6`, { size: 16, title: "Строки 1–6 программы" })}
+            <div class="tight text-sm">${CPP.fill("tr", ["№", "Операция", "int a", "int b", "double c", "string d"], [
+              ["1", "начальное значение", "12", "5", "4", "День"],
+              ["2", c("c = a + b;"), "", "", "?17", ""],
+              ["3", c("c = a / b;"), "", "", "?2", ""],
+              ["4", c("b = a * b + 3;"), "", "?63", "", ""],
+              ["5", c("a = b / a;"), "?5", "", "", ""],
+              ["6", c("d = c + b;"), "", "", "", "?<b style='color:var(--danger)'>Error</b>"],
+            ])}</div>
+          </div>
+        </div>${src(SB + "стр. 132 (задание 1), стр. 133 (таблица, строка 6 — Error); " + PR + "слайд 10")}`;
+      },
+    },
+    {
+      badge: "Практическая работа · обсуждение",
+      shortTitle: "Почему так получилось?",
+      timing: "25–30 мин",
+      source: SB + "стр. 132–133",
+      notes: "Вопросы к заданию 1 (стр. 133). Щёлкайте вопросы — откроется ответ. Обратите внимание: c имеет тип double, но a и b — int, поэтому a / b — деление целых чисел (SB стр. 132). В THB стр. 97 здесь неточность.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Ответь на вопросы</h2>
+          <div class="tight">${statements("why", [
+            { t: "Почему в строке 3 переменная c равна 2, а не 2.4?", ok: true, okLabel: "→", why: "a и b — int: деление целых чисел даёт целое (12 / 5 = 2)" },
+            { t: "Чему в строке 5 равны a, b, c?", ok: true, okLabel: "→", why: "a = 63 / 12 = 5; b = 63; c = 2" },
+            { t: "Что определяет тип переменной?", ok: true, okLabel: "→", why: "какие данные хранятся под её именем и диапазон значений" },
+            { t: "Почему строка d = c + b; вызывает ошибку?", ok: false, badLabel: "→", why: "d — string, а c + b — число: в строковую переменную нельзя записать число" },
+          ])}</div>
+        </div>${src(SB + "стр. 132 (деление целых чисел), стр. 133 (вопросы 1–5 к заданию 1)")}`;
+      },
+    },
+    {
+      badge: "Практика · floor, ceil, %",
+      shortTitle: "Что выведет программа?",
+      timing: "30–40 мин",
+      source: SB + "стр. 133, задание 2; " + PR + "слайд 12",
+      notes: "Задание 2 (стр. 133), индивидуально: что будет выведено на экран? Обоснуйте и проверьте на компьютере. Напоминание: остаток от деления — не дробная часть числа (17 / 7 = 2 — целая часть, 17 % 7 = 3 — остаток).",
+      render() {
+        return `<div class="body">
+          <div class="grid-2" style="gap:20px;grid-template-columns:1.1fr 1fr;">
+            ${CPP.code(`#include <iostream>
+#include <cmath>
+using namespace std;
+int main() {
+double a;  int b,c,s,k;
+a=21.6;
+b=floor(a);
+cout<<b<<endl;
+c=ceil(a);
+cout<<c<<endl;
+cout<<"Введите целое число:";
+cin>>s;
+k=s%3;
+cout<<k<<endl;  }`, { ln: true, size: 14 })}
+            <div class="stack">
+              <h2 class="slide-h2">Что появится на экране? (ввод: 7)</h2>
+              <div class="tight">${CPP.fill("fc", ["Строка", "Вывод"], [[c("cout<<b;"), "?21"], [c("cout<<c;"), "?22"], [c("cout<<k;"), "?1 (7 % 3)"]])}</div>
+              ${matcher("pct", [["2", "2"], ["3", "3"], ["0", "0"], ["7", "7"]], [
+                { t: c("17 / 7  (int)"), ans: "2" },
+                { t: c("17 % 7"), ans: "3" },
+                { t: c("14 % 7"), ans: "0" },
+                { t: c("7 % 17"), ans: "7" },
+              ])}
+            </div>
+          </div>
+        </div>${src(SB + "стр. 133 (задание 2, рис. 1; 17/7 и 17%7), стр. 132 (примеры %); " + PR + "слайд 12 (результат)")}`;
+      },
+    },
+    {
+      badge: "Физминутка",
+      shortTitle: "Физминутка",
+      timing: "40–42 мин",
+      source: "КСП урока 1",
+      notes: "Упражнения для глаз и кистей рук — 2 минуты.",
+      render() {
+        return `<div class="body" style="align-items:center;justify-content:center;text-align:center;">
+          <div style="font-size:72px;">🧘</div>
+          <h2 class="slide-h2">Физминутка · 2 минуты</h2>
+          <p class="lead">Упражнения для глаз и кистей рук</p>
+        </div>${src("КСП урока 1")}`;
+      },
+    },
+    {
+      badge: "Работа в парах · точность",
+      shortTitle: "Какой вариант точнее?",
+      timing: "42–47 мин",
+      source: SB + "стр. 133, задание 3; " + PR + "слайд 13",
+      notes: "Задание 3 (стр. 133), в парах: длина окружности C = π·d. Какой результат точнее? Обоснование: у M_PI больше знаков после запятой.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Длина окружности C = π · d. Какой вариант точнее?</h2>
+          <div class="grid-2" style="gap:18px;">
+            <div class="stack">${CPP.code(`#include <iostream>
+using namespace std;
+int main() {
+  double c,d,pi;
+  pi=3.14;
+  cout<<"d=";
+  cin>>d;
+  c=d*pi;
+  cout<<"c="<<c;}`, { size: 13, title: "1-й вариант" })}${CPP.screen("d=[[5]]\nc=15.7", { size: 13, title: "" })}</div>
+            <div class="stack">${CPP.code(`#include <iostream>
+#include <cmath>
+using namespace std;
+int main() {
+  double c,d;
+  cout<<"d=";
+  cin>>d;
+  c=d*M_PI;
+  cout<<"c="<<c;}`, { size: 13, title: "2-й вариант" })}${CPP.screen("d=[[5]]\nc=15.708", { size: 13, title: "" })}</div>
+          </div>
+          ${reveal("r-pi", "Ответ", "Точнее <b>2-й вариант</b>: у M_PI больше знаков после запятой, чем у 3.14. Для M_PI нужна строка <code>#include &lt;cmath&gt;</code>.")}
+        </div>${src(SB + "стр. 133 (задание 3); " + PR + "слайд 13 (результаты)")}`;
+      },
+    },
+    {
+      badge: "Решение задач · время",
+      shortTitle: "Часы → минуты → секунды",
+      timing: "47–58 мин",
+      source: PR + "слайд 17",
+      notes: "Индивидуально: постройте блок-схему и напишите программу. Вводится количество часов, вывести минуты и секунды. Сначала блок-схема в тетради, потом код; откройте образцы после работы.",
+      render() {
+        const on = S().revealed["hf"];
+        return `<div class="body">
+          <h2 class="slide-h2">Переведи часы в минуты и секунды</h2>
+          <div class="grid-2" style="gap:18px;grid-template-columns:270px 1fr;">
+            <div>${CPP.flow([["t", "Начало"], ["io", "Ввод h", { hide: 1 }], ["p", "min = h*60", { hide: 1 }], ["p", "sec = min*60", { hide: 1 }], ["io", "Вывод h, min, sec", { hide: 1 }], ["t", "Конец"]], { key: "hms", show: "hf", w: 250, maxH: 420 })}</div>
+            <div class="stack">
+              ${CPP.code(`int h,min,sec;
+cout << "Enter the number of hours: "<<endl;
+cin>>h;
+${on ? "min=h*60;\nsec=min*60;" : "// ???\n// ???"}
+cout <<h<<" hours = "<<min<<" minutes = "<<sec<<" seconds";`, { size: 15, hl: [4, 5] })}
+              ${CPP.screen("Enter the number of hours: [[2]]\n2 hours = 120 minutes = 7200 seconds", { size: 15 })}
+              <button type="button" class="btn btn-primary reveal-btn" onclick="DECK.toggleReveal('hf')">${on ? "Скрыть образец" : "Показать образец"}</button>
+            </div>
+          </div>
+        </div>${src(PR + "слайд 17 (задание 11: код и ответ); блок-схема — составлена по коду")}`;
+      },
+    },
+    {
+      badge: "Решение задач · скидка",
+      shortTitle: "Размер скидки",
+      timing: "58–70 мин",
+      source: PR + "слайд 18; " + PR4 + "слайд 9",
+      notes: "Вводится цена товара и процент скидки; вывести только размер скидки. Ученики пишут выражение сами, затем выбирают верное. Для быстрого темпа — целая часть и остаток от деления двух чисел (кнопка).",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Вычисли размер скидки на товар</h2>
+          <div class="grid-2" style="gap:18px;grid-template-columns:1.1fr 1fr;">
+            <div class="stack">
+              ${CPP.code(`float price, percentage, discount;
+cout<<"Entering the price of the product: "<<endl;
+cin>>price;
+cout<<"Entering a discount percentage: "<<endl;
+cin>>percentage;
+discount= ???;
+cout <<"Display discount: "<<discount<<"\\n";`, { size: 14, hl: [6] })}
+              ${CPP.screen("Entering the price of the product: [[2000]]\nEntering a discount percentage: [[10]]\nDisplay discount: 200", { size: 14 })}
+            </div>
+            <div class="stack quizgrid">
+              ${quiz("qd", "Какое выражение вместо ??? ?", [c("price*percentage"), c("price*(percentage/100)"), c("price-percentage"), c("price/percentage")], 1)}
+              ${reveal("r-fast", "⭐ Для быстрого темпа", "Даны два числа x и y. Найди целую часть от деления x на y и остаток: <code>cout &lt;&lt; x/y;</code> и <code>cout &lt;&lt; x%y;</code> (int). Пример: 19 и 5 → целое = 3, остаток = 4.")}
+            </div>
+          </div>
+        </div>${src(PR + "слайд 18 (задание 12: код и ответ); " + PR4 + "слайд 9 (задача 1)")}`;
+      },
+    },
+
+    /* ---------------- КОНЕЦ УРОКА (10 мин) ---------------- */
+    {
+      badge: "Конец урока · проверь себя",
+      shortTitle: "Проверь себя",
+      timing: "70–75 мин",
+      source: SB + "стр. 132–133",
+      notes: "Формативное оценивание: «Проверь себя» (стр. 133) — щёлкните ответ после голосования. Подготовка к СОР: в задании «напишите программу» оценивают ввод/вывод, арифметическую операцию и вывод результата.",
+      render() {
+        return `<div class="body"><div class="grid-2 quizgrid" style="gap:14px;">
+          ${quiz("q1", "1. Как называется функция округления до ближайшего наибольшего целого?", ["floor", "ceil", "M_PI", "%"], 1)}
+          ${quiz("q2", "2. Для чего предназначена строка " + c("#include <cmath>") + "?", ["для ввода и вывода", "для floor, ceil и числа M_PI", "для типа string", "чтобы завершить программу"], 1)}
+          ${quiz("q3", "3. Чему равно " + c("23 % 5") + "?", ["4", "3", "4.6", "5"], 1)}
+          ${quiz("q4", "4. int a=9, b=2; чему равно " + c("a / b") + "?", ["4.5", "4", "5", "1"], 1)}
+        </div></div>${src(SB + "стр. 132 (операции, деление int), стр. 133 («Проверь себя»)")}`;
+      },
+    },
+    {
+      badge: "Конец урока · рефлексия",
+      shortTitle: "Рефлексия и домашнее задание",
+      timing: "75–80 мин",
+      source: "КСП урока 1",
+      notes: "Рефлексия: стикеры трёх цветов — «Было сложно», «Было легко», «Возьму с собой» — ученики раскладывают их по «корзинам» на плакате. Домашнее задание — две задачи: в одной нужен #include <cmath>, в другой — нет.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;">
+          <div class="stack">
+            <h2 class="slide-h2">Рефлексия: стикеры</h2>
+            <div class="card"><h3>🟥 Было сложно</h3></div>
+            <div class="card"><h3>🟩 Было легко</h3></div>
+            <div class="card"><h3>🟨 Возьму с собой</h3></div>
+          </div>
+          <div class="stack">
+            <h2 class="slide-h2">Домашнее задание</h2>
+            <div class="card"><h3>📝 Две задачи</h3><p>Составь блок-схему и программу для двух задач:<br>• в одной нужно подключить ${c("#include <cmath>")} (например, длина окружности);<br>• в другой — нет (например, возраст по году рождения).</p></div>
+          </div>
+        </div></div>${src("КСП урока 1 (рефлексия, домашнее задание)")}`;
+      },
+    },
+  ],
+});
+</script>
+</body>
+</html>

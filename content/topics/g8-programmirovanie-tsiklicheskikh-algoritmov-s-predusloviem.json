@@ -1,0 +1,1327 @@
+{
+  "topic": "g8-programmirovanie-tsiklicheskikh-algoritmov-s-predusloviem",
+  "summary": "Циклические алгоритмы в C++: блок-схемы циклов, цикл с предусловием while (условие выхода, бесконечный цикл), трассировочные таблицы, задачи на простые числа, факториал, сумму цифр, НОД; цикл с постусловием do … while.",
+  "theory": [
+    {
+      "title": "Циклические алгоритмы и их блок-схемы",
+      "objectives": [
+        "8.4.1.2"
+      ],
+      "blocks": [
+        {
+          "type": "definition",
+          "term": "Циклический алгоритм",
+          "content": "Алгоритм, который может выполняться многократно до тех пор, пока не будет выполнено определённое условие или достигнут конечный результат."
+        },
+        {
+          "type": "definition",
+          "term": "Цикл",
+          "content": "Управляющая конструкция, которая заставляет блок кода выполняться несколько раз. **Тело цикла** — повторяемые команды; **итерация** — однократное выполнение тела цикла."
+        },
+        {
+          "type": "paragraph",
+          "content": "Циклы — часть повседневной жизни: смена времён года, дыхание (вдох и выдох), учебные четверти, день и ночь, тренировки, повторение припевов в песнях. В программировании цикл позволяет написать код один раз и повторить его, а не копировать 100 раз."
+        },
+        {
+          "type": "comparison",
+          "title": "Виды циклов в C++",
+          "columns": [
+            "Цикл",
+            "Как работает",
+            "Девиз"
+          ],
+          "rows": [
+            [
+              "С предусловием `while`",
+              "условие проверяется **перед** выполнением тела",
+              "«Сначала подумай, потом сделай»"
+            ],
+            [
+              "С параметром (со счётчиком) `for`",
+              "тело выполняется определённое количество раз",
+              "«Сделай точное количество раз»"
+            ],
+            [
+              "С постусловием `do … while`",
+              "условие проверяется **после** тела",
+              "«Сделай, потом подумай»"
+            ]
+          ]
+        },
+        {
+          "type": "steps",
+          "title": "Как построить блок-схему циклического алгоритма",
+          "items": [
+            "Определи тип цикла: с предусловием (условие проверяется перед циклом) или с параметром (цикл выполняется определённое количество раз).",
+            "Определи условие выхода из цикла — условие, при котором цикл завершается.",
+            "Изобрази блоки «Начало» и «Конец».",
+            "Условие цикла запиши в **ромб**. Если условие истинно, стрелка ведёт к телу цикла; если ложно — к следующему блоку после цикла.",
+            "Действия тела цикла размести в **прямоугольниках**; стрелками покажи порядок выполнения и возврат к проверке условия."
+          ]
+        },
+        {
+          "type": "diagram",
+          "format": "mermaid",
+          "caption": "Цикл с предусловием: «пока цель обучения не достигнута»",
+          "content": "flowchart TD\n  A([Начало]) --> B{\"Цель обучения не достигнута?\"}\n  B -- \"+\" --> C[\"Изучи учебный материал\"]\n  C --> D[\"Выполни задание\"]\n  D --> B\n  B -- \"−\" --> E([Конец])"
+        },
+        {
+          "type": "diagram",
+          "format": "mermaid",
+          "caption": "Кубы чисел от 1 до 8: три действия с переменной цикла N",
+          "content": "flowchart TD\n  A([начало]) --> B[\"N = 1\"]\n  B --> C{\"N <= 8?\"}\n  C -- да --> D[\"cubeN = N*N*N\"]\n  D --> E[/\"вывод cubeN\"/]\n  E --> F[\"N++\"]\n  F --> C\n  C -- нет --> G([конец])"
+        },
+        {
+          "type": "callout",
+          "tone": "info",
+          "title": "Стандарт",
+          "content": "В Казахстане правила построения блок-схем определяет стандарт СТ РК ГОСТ 19.701-2011."
+        }
+      ]
+    },
+    {
+      "title": "Цикл с предусловием while",
+      "objectives": [
+        "8.4.3.3"
+      ],
+      "blocks": [
+        {
+          "type": "definition",
+          "term": "Цикл с предусловием (while)",
+          "content": "Конструкция, которая повторяет блок кода до тех пор, пока заданное условие истинно. Проверка условия выполняется **перед** каждым выполнением тела цикла. Если условие ложно с самого начала, цикл не выполнится ни разу."
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "Синтаксис: служебное слово, условие в скобках, тело в фигурных скобках",
+          "content": "while (условие) {\n    // тело цикла: блок кода, который будет повторяться\n}"
+        },
+        {
+          "type": "example",
+          "title": "Ждём автобус",
+          "content": "Ты не знаешь, когда приедет автобус, но ждёшь, пока он не приедет.\n- **Условие:** автобус не приехал.\n- **Действие:** ждать автобус."
+        },
+        {
+          "type": "example",
+          "title": "Проверка пароля",
+          "content": "Программа запрашивает пароль и продолжает запрашивать, пока введённый пароль не совпадёт с сохранённым «OsB51214!». Цикл завершится, когда пароли совпадут, — об этом сообщаем после выхода из цикла."
+        },
+        {
+          "type": "diagram",
+          "format": "mermaid",
+          "caption": "Блок-схема проверки пароля",
+          "content": "flowchart TD\n  A([Начало]) --> B[/\"Вывод: введите пароль\"/]\n  B --> C[/\"Ввод пароля\"/]\n  C --> D{\"Пароль не совпадает с сохранённым\"}\n  D -- \"+\" --> E[/\"Вывод: пароль неверный\"/]\n  E --> F[/\"Вывод: введите пароль\"/]\n  F --> G[/\"Ввод пароля\"/]\n  G --> D\n  D -- \"−\" --> H[/\"Вывод: пароль верный\"/]\n  H --> I([Конец])"
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "Проверка пароля (строки пронумерованы для трассировки)",
+          "content": "1  #include <iostream>\n2  using namespace std;\n3  int main() {\n4    setlocale(LC_ALL, \"Rus\");\n5    string password;\n6    string correctPassword = \"OsB51214!\";\n7    cout << \"Введите пароль: \" << endl;\n8    cin >> password;\n9    while (password != correctPassword) {\n10     cout << \"Пароль неверный \" << endl;\n11     cout << \"Введите пароль: \" << endl;\n12     cin >> password;   }\n13   cout << \"Пароль верный \";\n14   return 0;  }"
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "Обратный отсчёт: переменная i управляет циклом",
+          "content": "#include <iostream>\nusing namespace std;\nint main() {\n    int i = 10;          // счётчик (начало)\n    while (i > 0) {      // пока i больше 0\n        cout << i << endl;\n        i--;             // уменьшаем счётчик (шаг)\n    }\n    cout << \"Поехали!\" << endl;\n    return 0;\n}"
+        },
+        {
+          "type": "warning",
+          "content": "**Бесконечный цикл** — ситуация, когда условие выхода никогда не выполняется. Условие цикла должно быть сформулировано так, чтобы цикл завершился. Если в примере выше убрать `i--;`, i всегда будет равно 10 — программа «зависнет»."
+        }
+      ]
+    },
+    {
+      "title": "Трассировочная таблица",
+      "objectives": [
+        "8.4.3.2"
+      ],
+      "blocks": [
+        {
+          "type": "definition",
+          "term": "Трассировочная таблица",
+          "content": "Инструмент для анализа работы программы, особенно циклических алгоритмов: «ручное» пошаговое исполнение алгоритма с целью его проверки. Таблица показывает изменение переменных и условий на каждой итерации. Если возникает ошибка, по таблице видно, где она возникла."
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Входные данные** — то, что пользователь вводит с клавиатуры.",
+            "**Промежуточные данные** — всё, что используется для решения задачи (переменные, условия).",
+            "**Выходные данные** — результаты, которые выводятся на экран."
+          ]
+        },
+        {
+          "type": "example",
+          "title": "Трассировка: int k = 0; while (k < 5) { k = k + 2; }",
+          "content": "| Шаг | k | Условие k < 5 | Действие |\n|---|---|---|---|\n| Старт | 0 | — | — |\n| 1 | 2 | true | 0 + 2 |\n| 2 | 4 | true | 2 + 2 |\n| 3 | 6 | true | 4 + 2 |\n| Выход | 6 | false | цикл завершён |\n\nУсловие проверяется по значению k **перед** итерацией: 0 < 5, 2 < 5, 4 < 5 — истинно; 6 < 5 — ложно."
+        },
+        {
+          "type": "example",
+          "title": "Трассировка программы «Проверка пароля» (ввод: 123456, qwerty, OsB51214!)",
+          "content": "| № строки | password | correctPassword | password != correctPassword | Вывод |\n|---|---|---|---|---|\n| 6 | | OsB51214! | | |\n| 7 | | | | Введите пароль: |\n| 8 | 123456 | | | |\n| 9 | | | true | |\n| 10 | | | | Пароль неверный |\n| 11 | | | | Введите пароль: |\n| 12 | qwerty | | | |\n| 9 | | | true | |\n| 10 | | | | Пароль неверный |\n| 11 | | | | Введите пароль: |\n| 12 | OsB51214! | | | |\n| 9 | | | false | |\n| 13 | | | | Пароль верный |"
+        },
+        {
+          "type": "example",
+          "title": "Обратный отсчёт от t = 5",
+          "content": "```cpp\nwhile (t > 0) {\n    cout << t << endl;\n    t--; }\ncout << \"Время вышло!\";\n```\n\n| t | t > 0 | Вывод |\n|---|---|---|\n| 5 | true | 5 |\n| 4 | true | 4 |\n| 3 | true | 3 |\n| 2 | true | 2 |\n| 1 | true | 1 |\n| 0 | false | Время вышло! |"
+        }
+      ]
+    },
+    {
+      "title": "while в математических задачах",
+      "objectives": [
+        "8.4.3.3",
+        "8.4.3.2",
+        "8.4.1.2"
+      ],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "content": "Программирование автоматизирует повторяющиеся вычисления: сумма ряда чисел, проверка делимости, факториал. Это экономит время и уменьшает вероятность ошибок."
+        },
+        {
+          "type": "example",
+          "title": "Простое ли число?",
+          "content": "Посчитаем делители числа n, кроме 1 и самого числа. Если их 0 — число простое. Перебираем i от n − 1 вниз, пока i > 1."
+        },
+        {
+          "type": "diagram",
+          "format": "mermaid",
+          "caption": "Блок-схема проверки простоты числа",
+          "content": "flowchart TD\n  A([Начало]) --> B[/\"Ввод n\"/]\n  B --> C[\"count = 0\"]\n  C --> D[\"i = n - 1\"]\n  D --> E{\"i > 1\"}\n  E -- ДА --> F{\"n % i == 0\"}\n  F -- ДА --> G[\"count++\"]\n  G --> H[\"i--\"]\n  F -- НЕТ --> H\n  H --> E\n  E -- НЕТ --> K{\"count == 0\"}\n  K -- ДА --> L[/\"Вывод: n - простое число\"/]\n  K -- НЕТ --> M[/\"Вывод: n - не простое число\"/]\n  L --> N([Конец])\n  M --> N"
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "Проверка простоты числа",
+          "content": "int n;\ncin >> n;\nint count = 0;      // количество промежуточных делителей\nint i = n - 1;      // исключаем само число n\nwhile (i > 1)       // пока не переберём все числа между 1 и n\n{\n    if (n % i == 0) // нашли промежуточный делитель\n        count++;\n    i--;            // берём следующее i\n}\nif (count == 0)\n    cout << n << \" - простое число\";\nelse\n    cout << n << \" - не простое число\";"
+        },
+        {
+          "type": "example",
+          "title": "Трассировка при n = 4",
+          "content": "| n | i | i > 1 | n % i == 0 | count | Вывод |\n|---|---|---|---|---|---|\n| 4 | 3 | true | false | 0 | |\n| | 2 | true | true | 1 | |\n| | 1 | false | | 1 | |\n| | | | | count == 0: false | 4 - не простое число |"
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "Факториал: произведение натуральных чисел от 1 до N (5! = 1·2·3·4·5 = 120)",
+          "content": "int N, factorial = 1;\ncout << \"Введите число N: \";\ncin >> N;\nint i = 1;\nwhile (i <= N) {\n    factorial *= i;\n    i++;\n}\ncout << \"Факториал числа \" << N << \" равен \" << factorial << endl;"
+        },
+        {
+          "type": "example",
+          "title": "Сумма цифр числа 123",
+          "content": "```cpp\nint n = 123;\nint sum = 0;\nwhile (n > 0) {\n    sum += n % 10;  // берём последнюю цифру\n    n = n / 10;     // отбрасываем её\n}\ncout << sum;\n```\n\n| n | n % 10 | sum | n / 10 |\n|---|---|---|---|\n| 123 | 3 | 3 | 12 |\n| 12 | 2 | 5 | 1 |\n| 1 | 1 | 6 | 0 |\n\nn = 0 — цикл завершается, сумма цифр 6."
+        },
+        {
+          "type": "diagram",
+          "format": "mermaid",
+          "caption": "НОД двух чисел вычитанием",
+          "content": "flowchart TD\n  A([Начало]) --> B[/\"Вывод: Введите два числа\"/]\n  B --> C[/\"Ввод A и B\"/]\n  C --> D{\"A != B\"}\n  D -- ДА --> E{\"A > B\"}\n  E -- ДА --> F[\"A = A - B\"]\n  E -- НЕТ --> G[\"B = B - A\"]\n  F --> D\n  G --> D\n  D -- НЕТ --> H[/\"Вывод: НОД чисел A и B равен A\"/]\n  H --> I([Конец])"
+        }
+      ]
+    },
+    {
+      "title": "Цикл с постусловием do … while",
+      "objectives": [
+        "8.4.3.3"
+      ],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "content": "В цикле `do … while` тело выполняется **как минимум один раз**, даже если условие ложно: сначала выполняется тело, потом проверяется условие."
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "Запрос пароля, пока не введут 1234",
+          "content": "int pass;\ndo {\n    cout << \"Введите пароль: \";\n    cin >> pass;\n} while (pass != 1234);\ncout << \"Доступ разрешен!\";"
+        },
+        {
+          "type": "comparison",
+          "title": "while против do … while",
+          "columns": [
+            "Характеристика",
+            "while (предусловие)",
+            "do … while (постусловие)"
+          ],
+          "rows": [
+            [
+              "Логика",
+              "сначала думает, потом делает",
+              "сначала делает, потом думает"
+            ],
+            [
+              "Минимум итераций",
+              "0 раз (может не выполниться)",
+              "1 раз (выполнится обязательно)"
+            ],
+            [
+              "Применение",
+              "математика, чтение данных; «пока банка не пуста, брать печенье»",
+              "ввод пароля, меню пользователя"
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "key": "g8-while-condition-check",
+      "title": "Момент проверки условия в цикле while",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "state",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.2"
+      ],
+      "practice": true,
+      "text": "В какой момент проверяется условие в цикле `while`?",
+      "options": [
+        {
+          "key": "A",
+          "content": "Перед началом выполнения тела цикла"
+        },
+        {
+          "key": "B",
+          "content": "После каждого выполнения тела цикла"
+        },
+        {
+          "key": "C",
+          "content": "Только один раз в самом конце программы"
+        },
+        {
+          "key": "D",
+          "content": "Условие в цикле while не проверяется"
+        }
+      ],
+      "scheme": {
+        "mark_scheme": "A (Перед началом выполнения тела цикла) — 1 балл.",
+        "accepted": {
+          "correct": "A"
+        },
+        "model_answer": "A"
+      },
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 116, 118; C  _Loops_Automation (1).pdf, стр. 5"
+    },
+    {
+      "key": "g8-wh-zero-times",
+      "title": "Может не выполниться",
+      "type": "true_false",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "state",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.3"
+      ],
+      "text": "Верно ли: тело цикла `while` может не выполниться ни разу?",
+      "source": "teacher",
+      "source_reference": "C  _Loops_Automation (1).pdf, стр. 5, 10; G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 121 (Проверь себя 2)",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "Верно — 1 балл.",
+        "accepted": {
+          "correct": true
+        },
+        "explanation": "Если условие ложно с самого начала, тело while не выполнится ни разу."
+      }
+    },
+    {
+      "key": "g8-wh-infinite",
+      "title": "Бесконечный цикл",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.3"
+      ],
+      "text": "Почему этот цикл никогда не закончится?\n\n```cpp\nint i = 5;\nwhile (i > 0) {\n    cout << i << endl;\n}\n```",
+      "options": [
+        {
+          "key": "A",
+          "content": "В теле цикла i не изменяется, условие i > 0 всегда истинно"
+        },
+        {
+          "key": "B",
+          "content": "Условие записано в круглых скобках"
+        },
+        {
+          "key": "C",
+          "content": "Нельзя выводить i внутри цикла"
+        },
+        {
+          "key": "D",
+          "content": "Начальное значение должно быть 0"
+        }
+      ],
+      "source": "teacher",
+      "source_reference": "C  _Loops_Automation (1).pdf, стр. 8",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "A — 1 балл.",
+        "accepted": {
+          "correct": "A"
+        },
+        "model_answer": "A",
+        "explanation": "Не хватает i--; без изменения счётчика условие выхода никогда не выполнится."
+      }
+    },
+    {
+      "key": "g8-wh-blocks-match",
+      "title": "Блоки блок-схемы цикла",
+      "type": "matching",
+      "marks": 4,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.1.2"
+      ],
+      "text": "Сопоставьте элемент блок-схемы с его назначением.",
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "Ромб"
+          },
+          {
+            "key": "L2",
+            "text": "Прямоугольник"
+          },
+          {
+            "key": "L3",
+            "text": "Шестиугольник"
+          },
+          {
+            "key": "L4",
+            "text": "Стрелка"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "Условие цикла"
+          },
+          {
+            "key": "R2",
+            "text": "Действия (операции) в теле цикла"
+          },
+          {
+            "key": "R3",
+            "text": "Цикл с параметром: начальное, конечное значение и шаг"
+          },
+          {
+            "key": "R4",
+            "text": "Направление потока управления"
+          }
+        ]
+      },
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 116–117",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "По 1 баллу за пару.",
+        "accepted": {
+          "pairs": {
+            "L1": "R1",
+            "L2": "R2",
+            "L3": "R3",
+            "L4": "R4"
+          }
+        },
+        "explanation": "Ромб — условие; прямоугольник — процесс; шестиугольник — цикл с параметром; стрелки — порядок выполнения."
+      }
+    },
+    {
+      "key": "g8-wh-arrows",
+      "title": "Куда ведёт стрелка",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.1.2"
+      ],
+      "text": "В блок-схеме цикла с предусловием условие в ромбе оказалось **ложным**. Куда ведёт стрелка?",
+      "options": [
+        {
+          "key": "A",
+          "content": "К началу тела цикла"
+        },
+        {
+          "key": "B",
+          "content": "К следующему блоку после цикла"
+        },
+        {
+          "key": "C",
+          "content": "К блоку «Начало»"
+        },
+        {
+          "key": "D",
+          "content": "Обратно в тот же ромб"
+        }
+      ],
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 116",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "model_answer": "B",
+        "explanation": "Истинно — к телу цикла; ложно — к следующему блоку после цикла."
+      }
+    },
+    {
+      "key": "g8-wh-trace-k",
+      "title": "Трассировка: k += 3",
+      "type": "trace_table",
+      "marks": 4,
+      "difficulty": "medium",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.2"
+      ],
+      "text": "Заполните трассировочную таблицу для фрагмента. В каждой строке — значение k **перед** проверкой условия и результат проверки. Ответ в столбцах условий пишите словами true или false.\n\n```cpp\nint k = 1;\nwhile (k < 10) {\n    k = k + 3;\n}\n```",
+      "content": {
+        "columns": [
+          "Проверка №",
+          "k",
+          "k < 10"
+        ],
+        "rows": 4,
+        "prefill": [
+          [
+            "1",
+            null,
+            null
+          ],
+          [
+            "2",
+            null,
+            null
+          ],
+          [
+            "3",
+            null,
+            null
+          ],
+          [
+            "4",
+            null,
+            null
+          ]
+        ]
+      },
+      "source": "teacher",
+      "source_reference": "C  _Loops_Automation (1).pdf, стр. 12–13; Циклы for while.pptx, слайд 6",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "По 1 баллу за строку: 1 true; 4 true; 7 true; 10 false.",
+        "accepted": {
+          "rows": [
+            [
+              null,
+              "1",
+              "true"
+            ],
+            [
+              null,
+              "4",
+              "true"
+            ],
+            [
+              null,
+              "7",
+              "true"
+            ],
+            [
+              null,
+              "10",
+              "false"
+            ]
+          ]
+        },
+        "explanation": "k растёт на 3: 1, 4, 7, 10. При k = 10 условие ложно — цикл завершён."
+      }
+    },
+    {
+      "key": "g8-wh-count-iter",
+      "title": "Сколько итераций?",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.2"
+      ],
+      "text": "Сколько раз выполнится тело цикла?\n\n```cpp\nint k = 1;\nwhile (k < 10) {\n    k = k + 3;\n}\n```",
+      "source": "teacher",
+      "source_reference": "C  _Loops_Automation (1).pdf, стр. 13",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "3 — 1 балл.",
+        "accepted": {
+          "values": [
+            "3"
+          ],
+          "numeric": true
+        },
+        "explanation": "Итерации при k = 1, 4, 7; при k = 10 условие ложно."
+      }
+    },
+    {
+      "key": "g8-wh-factorial",
+      "title": "Факториал",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.3",
+        "8.4.3.2"
+      ],
+      "text": "Что выведет программа «Факториал» при N = 4?\n\n```cpp\nint i = 1, factorial = 1;\nwhile (i <= N) {\n    factorial *= i;\n    i++;\n}\ncout << factorial;\n```",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 124 (пример 2)",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "24 — 1 балл.",
+        "accepted": {
+          "values": [
+            "24"
+          ],
+          "numeric": true
+        },
+        "explanation": "1 · 2 · 3 · 4 = 24."
+      }
+    },
+    {
+      "key": "g8-wh-factorial-blanks",
+      "title": "Допиши факториал",
+      "type": "fill_blank",
+      "marks": 2,
+      "difficulty": "medium",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.3"
+      ],
+      "text": "Допишите цикл вычисления факториала N.\n\n```cpp\nint i = 1, factorial = 1;\nwhile (i [[1]] N) {\n    factorial [[2]] i;\n    i++;\n}\n```",
+      "content": {
+        "blank_count": 2
+      },
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 124",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "[[1]] <= (1); [[2]] *= (1).",
+        "accepted": {
+          "blanks": [
+            [
+              "<="
+            ],
+            [
+              "*="
+            ]
+          ],
+          "ignore_spaces": true
+        },
+        "explanation": "Перебираем i от 1 до N включительно и умножаем factorial на i."
+      }
+    },
+    {
+      "key": "g8-wh-digits",
+      "title": "Сумма цифр",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.3",
+        "8.4.3.2"
+      ],
+      "text": "Что выведет фрагмент?\n\n```cpp\nint n = 2026, sum = 0;\nwhile (n > 0) {\n    sum += n % 10;\n    n = n / 10;\n}\ncout << sum;\n```",
+      "source": "teacher",
+      "source_reference": "C  _Loops_Automation (1).pdf, стр. 16",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "10 — 1 балл.",
+        "accepted": {
+          "values": [
+            "10"
+          ],
+          "numeric": true
+        },
+        "explanation": "6 + 2 + 0 + 2 = 10."
+      }
+    },
+    {
+      "key": "g8-wh-trace-digits",
+      "title": "Трассировка: сумма цифр",
+      "type": "trace_table",
+      "marks": 3,
+      "difficulty": "medium",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.2"
+      ],
+      "text": "Заполните трассировочную таблицу для `n = 345` (фрагмент «Сумма цифр»). Одна строка — одна итерация.\n\n```cpp\nint sum = 0;\nwhile (n > 0) {\n    sum += n % 10;\n    n = n / 10;\n}\n```",
+      "content": {
+        "columns": [
+          "n в начале итерации",
+          "n % 10",
+          "sum",
+          "n / 10"
+        ],
+        "rows": 3,
+        "prefill": [
+          [
+            "345",
+            null,
+            null,
+            null
+          ],
+          [
+            "34",
+            null,
+            null,
+            null
+          ],
+          [
+            "3",
+            null,
+            null,
+            null
+          ]
+        ]
+      },
+      "source": "teacher",
+      "source_reference": "C  _Loops_Automation (1).pdf, стр. 16",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "По 1 баллу за строку: 5, 5, 34; 4, 9, 3; 3, 12, 0.",
+        "accepted": {
+          "rows": [
+            [
+              null,
+              "5",
+              "5",
+              "34"
+            ],
+            [
+              null,
+              "4",
+              "9",
+              "3"
+            ],
+            [
+              null,
+              "3",
+              "12",
+              "0"
+            ]
+          ]
+        },
+        "explanation": "Последняя цифра прибавляется к sum и отбрасывается; при n = 0 цикл заканчивается, sum = 12."
+      }
+    },
+    {
+      "key": "g8-wh-nod",
+      "title": "НОД вычитанием",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "hard",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.2",
+        "8.4.1.2"
+      ],
+      "text": "По блок-схеме «НОД двух чисел вычитанием» (пока A != B: если A > B, то A = A − B, иначе B = B − A) найдите результат для A = 24, B = 18.",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 124 (рис. 1)",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "6 — 1 балл.",
+        "accepted": {
+          "values": [
+            "6"
+          ],
+          "numeric": true
+        },
+        "explanation": "(24, 18) → (6, 18) → (6, 12) → (6, 6); A = B = 6."
+      }
+    },
+    {
+      "key": "g8-wh-do-while",
+      "title": "Хотя бы один раз",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.3"
+      ],
+      "text": "Какой цикл выполняет тело **как минимум один раз**, даже если условие ложно?",
+      "options": [
+        {
+          "key": "A",
+          "content": "while"
+        },
+        {
+          "key": "B",
+          "content": "do … while"
+        },
+        {
+          "key": "C",
+          "content": "for"
+        },
+        {
+          "key": "D",
+          "content": "Такого цикла нет"
+        }
+      ],
+      "source": "teacher",
+      "source_reference": "C  _Loops_Automation (1).pdf, стр. 9–10",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "model_answer": "B",
+        "explanation": "В do … while условие проверяется после тела."
+      }
+    },
+    {
+      "key": "g8-wh-password-code",
+      "title": "Программа: проверка пароля",
+      "type": "code_completion",
+      "marks": 3,
+      "difficulty": "medium",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "8.4.3.3"
+      ],
+      "text": "Напишите программу на C++, которая запрашивает пароль и, пока он не совпадает с «Nis2026», выводит «Пароль неверный» и снова запрашивает. После ввода верного пароля выводит «Пароль верный».",
+      "content": {
+        "starter_code": "#include <iostream>\nusing namespace std;\nint main() {\n\n    return 0;\n}"
+      },
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 118–119",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "- string-переменные и первый ввод пароля до цикла (1)\n- while (password != \"Nis2026\") (1)\n- в теле: сообщение и повторный ввод; после цикла — «Пароль верный» (1)",
+        "points": [
+          {
+            "criterion": "Переменная string и ввод пароля до цикла",
+            "marks": 1
+          },
+          {
+            "criterion": "Условие while: пароль не совпадает",
+            "marks": 1
+          },
+          {
+            "criterion": "Тело: «Пароль неверный» и новый ввод; после цикла — «Пароль верный»",
+            "marks": 1
+          }
+        ],
+        "model_answer": "```cpp\n#include <iostream>\nusing namespace std;\nint main() {\n    string password;\n    string correctPassword = \"Nis2026\";\n    cout << \"Введите пароль: \" << endl;\n    cin >> password;\n    while (password != correctPassword) {\n        cout << \"Пароль неверный \" << endl;\n        cout << \"Введите пароль: \" << endl;\n        cin >> password;\n    }\n    cout << \"Пароль верный \";\n    return 0;\n}\n```"
+      }
+    },
+    {
+      "key": "g8-wh-why-loop",
+      "title": "Почему программа зацикливается",
+      "type": "short_answer",
+      "marks": 2,
+      "difficulty": "medium",
+      "command_word": "explain",
+      "grading": "AI",
+      "objectives": [
+        "8.4.3.3"
+      ],
+      "text": "Бывает, что программа зацикливается — тело цикла выполняется бесконечно. Почему это происходит и как этого избежать?",
+      "content": {
+        "answer_lines": 3
+      },
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 118, 121 (Проверь себя 3); C  _Loops_Automation (1).pdf, стр. 8",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "Причина: условие выхода никогда не выполняется (например, в теле не меняется переменная из условия) (1). Как избежать: формулировать условие так, чтобы цикл завершился; изменять переменную цикла в теле (1).",
+        "points": [
+          {
+            "criterion": "Причина: условие всегда истинно / переменная условия не изменяется",
+            "marks": 1
+          },
+          {
+            "criterion": "Способ: изменять переменную в теле, условие должно стать ложным",
+            "marks": 1
+          }
+        ],
+        "model_answer": "Цикл зацикливается, когда условие выхода никогда не выполняется — например, в теле не изменяется переменная, от которой зависит условие (нет i--). Нужно формулировать условие так, чтобы оно когда-то стало ложным, и изменять переменную цикла в теле."
+      }
+    },
+    {
+      "key": "g8-wh-flowchart-sum",
+      "title": "Блок-схема: сумма от 1 до n",
+      "type": "flowchart",
+      "marks": 4,
+      "difficulty": "medium",
+      "command_word": "draw",
+      "grading": "AI",
+      "objectives": [
+        "8.4.1.2"
+      ],
+      "text": "Постройте блок-схему алгоритма с циклом с предусловием: пользователь вводит n, программа находит и выводит сумму чисел от 1 до n.",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 116, 122, 124; Циклы for while.pptx, слайды 10, 15",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "- Начало/Конец и ввод n (1)\n- начальные значения s = 0, i = 1 (1)\n- ромб с условием i <= n, ветви да/нет (1)\n- тело s = s + i, i = i + 1 с возвратом к условию; вывод s после цикла (1)",
+        "points": [
+          {
+            "criterion": "Начало, Конец, ввод n",
+            "marks": 1
+          },
+          {
+            "criterion": "Начальные значения s = 0, i = 1",
+            "marks": 1
+          },
+          {
+            "criterion": "Ромб с условием i <= n и подписанными ветвями",
+            "marks": 1
+          },
+          {
+            "criterion": "Тело s = s + i; i++ с возвратом к ромбу; вывод s на ветке «нет»",
+            "marks": 1
+          }
+        ],
+        "model_answer": "Начало → Ввод n → s = 0, i = 1 → ромб «i <= n?» → да: s = s + i → i = i + 1 → назад к ромбу; нет: Вывод s → Конец."
+      }
+    },
+    {
+      "key": "g8-wh-exam-1",
+      "title": "Проверка условия",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "exam",
+      "command_word": "state",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.3"
+      ],
+      "text": "Чем цикл `while` отличается от `do … while`?",
+      "options": [
+        {
+          "key": "A",
+          "content": "В while условие проверяется перед телом, в do … while — после"
+        },
+        {
+          "key": "B",
+          "content": "while выполняется ровно 10 раз"
+        },
+        {
+          "key": "C",
+          "content": "В do … while нет условия"
+        },
+        {
+          "key": "D",
+          "content": "while нельзя использовать с переменными int"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "C  _Loops_Automation (1).pdf, стр. 5, 9–10",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "A — 1 балл.",
+        "accepted": {
+          "correct": "A"
+        },
+        "model_answer": "A",
+        "explanation": "while — цикл с предусловием, do … while — с постусловием."
+      }
+    },
+    {
+      "key": "g8-wh-exam-2",
+      "title": "Минимум итераций",
+      "type": "true_false",
+      "marks": 1,
+      "difficulty": "exam",
+      "command_word": "state",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.3"
+      ],
+      "text": "Верно ли: тело цикла `while` всегда выполняется хотя бы один раз?",
+      "source": "nis_style",
+      "source_reference": "C  _Loops_Automation (1).pdf, стр. 5, 10",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "Неверно — 1 балл.",
+        "accepted": {
+          "correct": false
+        },
+        "explanation": "Если условие ложно сразу, тело while не выполнится ни разу."
+      }
+    },
+    {
+      "key": "g8-wh-exam-3",
+      "title": "Трассировка: a *= 3",
+      "type": "trace_table",
+      "marks": 3,
+      "difficulty": "exam",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.2"
+      ],
+      "text": "Заполните трассировочную таблицу: значения переменных **после** каждой итерации.\n\n```cpp\nint a = 2, n = 0;\nwhile (a < 40) {\n    a = a * 3;\n    n++;\n}\n```",
+      "content": {
+        "columns": [
+          "Итерация",
+          "a",
+          "n"
+        ],
+        "rows": 3,
+        "prefill": [
+          [
+            "1",
+            null,
+            null
+          ],
+          [
+            "2",
+            null,
+            null
+          ],
+          [
+            "3",
+            null,
+            null
+          ]
+        ]
+      },
+      "source": "nis_style",
+      "source_reference": "C  _Loops_Automation (1).pdf, стр. 12–13; G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 119–121",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "По 1 баллу за строку: 6, 1; 18, 2; 54, 3.",
+        "accepted": {
+          "rows": [
+            [
+              null,
+              "6",
+              "1"
+            ],
+            [
+              null,
+              "18",
+              "2"
+            ],
+            [
+              null,
+              "54",
+              "3"
+            ]
+          ]
+        },
+        "explanation": "2 → 6 → 18 → 54; при a = 54 условие a < 40 ложно."
+      }
+    },
+    {
+      "key": "g8-wh-exam-4",
+      "title": "Число повторений",
+      "type": "calculation",
+      "marks": 2,
+      "difficulty": "exam",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.2"
+      ],
+      "text": "Сколько раз выполнится тело цикла? (Деление целых чисел.)\n\n```cpp\nint x = 100;\nwhile (x > 1) {\n    x = x / 2;\n}\n```",
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 108, 119–121",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "6 — 2 балла (трассировка 100, 50, 25, 12, 6, 3, 1).",
+        "accepted": {
+          "values": [
+            "6"
+          ],
+          "numeric": true
+        },
+        "explanation": "100 → 50 → 25 → 12 → 6 → 3 → 1: шесть итераций; при x = 1 условие ложно."
+      }
+    },
+    {
+      "key": "g8-wh-exam-5",
+      "title": "Сумма цифр",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "exam",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.3"
+      ],
+      "text": "Что выведет фрагмент при `n = 9071`?\n\n```cpp\nint sum = 0;\nwhile (n > 0) {\n    sum += n % 10;\n    n = n / 10;\n}\ncout << sum;\n```",
+      "source": "nis_style",
+      "source_reference": "C  _Loops_Automation (1).pdf, стр. 16",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "17 — 1 балл.",
+        "accepted": {
+          "values": [
+            "17"
+          ],
+          "numeric": true
+        },
+        "explanation": "1 + 7 + 0 + 9 = 17."
+      }
+    },
+    {
+      "key": "g8-wh-exam-6",
+      "title": "Обратный отсчёт",
+      "type": "fill_blank",
+      "marks": 2,
+      "difficulty": "exam",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.3"
+      ],
+      "text": "Допишите программу, которая выводит числа от 10 до 1, а затем «Поехали!».\n\n```cpp\nint i = 10;\nwhile (i [[1]] 0) {\n    cout << i << endl;\n    [[2]];\n}\ncout << \"Поехали!\";\n```",
+      "content": {
+        "blank_count": 2
+      },
+      "source": "nis_style",
+      "source_reference": "C  _Loops_Automation (1).pdf, стр. 7; G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 120",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "[[1]] > (1); [[2]] i-- (1).",
+        "accepted": {
+          "blanks": [
+            [
+              ">"
+            ],
+            [
+              "i--",
+              "--i",
+              "i=i-1",
+              "i-=1"
+            ]
+          ],
+          "ignore_spaces": true
+        },
+        "explanation": "Пока i > 0, выводим i и уменьшаем счётчик."
+      }
+    },
+    {
+      "key": "g8-wh-exam-7",
+      "title": "Найди ошибку",
+      "type": "short_answer",
+      "marks": 2,
+      "difficulty": "exam",
+      "command_word": "explain",
+      "grading": "AI",
+      "objectives": [
+        "8.4.3.3",
+        "8.4.3.2"
+      ],
+      "text": "Программа должна вывести числа 1, 2, 3, 4, 5, но «зависает». Найдите ошибку, объясните её и исправьте.\n\n```cpp\nint i = 1;\nwhile (i <= 5) {\n    cout << i << endl;\n}\n```",
+      "content": {
+        "answer_lines": 3
+      },
+      "source": "nis_style",
+      "source_reference": "C  _Loops_Automation (1).pdf, стр. 8; G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 118",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "Бесконечный цикл: i не изменяется, условие i <= 5 всегда истинно (1). Исправление: добавить i++ в тело цикла (1).",
+        "points": [
+          {
+            "criterion": "Объяснение: i не меняется, условие всегда истинно — бесконечный цикл",
+            "marks": 1
+          },
+          {
+            "criterion": "Исправление: i++ (или i = i + 1) в теле цикла",
+            "marks": 1
+          }
+        ],
+        "model_answer": "В теле цикла не изменяется i, поэтому условие i <= 5 всегда истинно — бесконечный цикл. Нужно добавить в тело i++; после вывода."
+      }
+    },
+    {
+      "key": "g8-wh-exam-8",
+      "title": "Программа: сумма от 1 до N",
+      "type": "code_completion",
+      "marks": 4,
+      "difficulty": "exam",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "8.4.3.3"
+      ],
+      "text": "Напишите программу на C++ с циклом `while`: пользователь вводит N, программа выводит сумму всех чисел от 1 до N.",
+      "content": {
+        "starter_code": "#include <iostream>\nusing namespace std;\nint main() {\n\n    return 0;\n}"
+      },
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 124 (Проверь себя 2); Циклы for while.pptx, слайд 15",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "- ввод N (1)\n- начальные значения s = 0, i = 1 (1)\n- while (i <= N) (1)\n- в теле s = s + i и i++; вывод s после цикла (1)",
+        "points": [
+          {
+            "criterion": "Ввод N",
+            "marks": 1
+          },
+          {
+            "criterion": "Начальные значения суммы и счётчика",
+            "marks": 1
+          },
+          {
+            "criterion": "Верное условие while (i <= N)",
+            "marks": 1
+          },
+          {
+            "criterion": "Накопление суммы, изменение счётчика, вывод после цикла",
+            "marks": 1
+          }
+        ],
+        "model_answer": "```cpp\n#include <iostream>\nusing namespace std;\nint main() {\n    int n, s = 0, i = 1;\n    cin >> n;\n    while (i <= n) {\n        s = s + i;\n        i++;\n    }\n    cout << \"сумма чисел:\" << s;\n    return 0;\n}\n```"
+      }
+    },
+    {
+      "key": "g8-wh-exam-9",
+      "title": "Блок-схема: факториал",
+      "type": "flowchart",
+      "marks": 4,
+      "difficulty": "exam",
+      "command_word": "draw",
+      "grading": "AI",
+      "objectives": [
+        "8.4.1.2"
+      ],
+      "text": "Постройте блок-схему алгоритма с циклом с предусловием: пользователь вводит N, программа вычисляет и выводит факториал N (произведение чисел от 1 до N).",
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 116, 124",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "- Начало/Конец, ввод N (1)\n- начальные значения factorial = 1, i = 1 (1)\n- ромб i <= N с ветвями да/нет (1)\n- тело factorial = factorial * i, i++ с возвратом к ромбу; вывод после цикла (1)",
+        "points": [
+          {
+            "criterion": "Начало, Конец, ввод N",
+            "marks": 1
+          },
+          {
+            "criterion": "factorial = 1, i = 1",
+            "marks": 1
+          },
+          {
+            "criterion": "Ромб с условием i <= N и подписанными ветвями",
+            "marks": 1
+          },
+          {
+            "criterion": "Тело цикла с возвратом к условию; вывод factorial на ветке «нет»",
+            "marks": 1
+          }
+        ],
+        "model_answer": "Начало → Ввод N → factorial = 1, i = 1 → ромб «i <= N?» → да: factorial = factorial * i → i = i + 1 → назад к ромбу; нет: Вывод factorial → Конец."
+      }
+    },
+    {
+      "key": "g8-wh-exam-10",
+      "title": "Элементы блок-схемы",
+      "type": "matching",
+      "marks": 3,
+      "difficulty": "exam",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.1.2"
+      ],
+      "text": "Сопоставьте элемент блок-схемы цикла с его назначением.",
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "Ромб"
+          },
+          {
+            "key": "L2",
+            "text": "Прямоугольник"
+          },
+          {
+            "key": "L3",
+            "text": "Шестиугольник"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "Проверяемое условие"
+          },
+          {
+            "key": "R2",
+            "text": "Операция в теле цикла"
+          },
+          {
+            "key": "R3",
+            "text": "Цикл с параметром"
+          },
+          {
+            "key": "R4",
+            "text": "Начало алгоритма"
+          }
+        ]
+      },
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 116–117",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "По 1 баллу за пару.",
+        "accepted": {
+          "pairs": {
+            "L1": "R1",
+            "L2": "R2",
+            "L3": "R3"
+          }
+        },
+        "explanation": "Ромб — условие; прямоугольник — действие; шестиугольник — цикл с параметром."
+      }
+    }
+  ],
+  "topic_exam": {
+    "duration": 30,
+    "title": "Цикл с предусловием — экзамен",
+    "instructions": "Ответьте на **все** вопросы. Код записан на C++. В трассировочных таблицах условия записывайте словами true или false. Блок-схемы стройте в редакторе. Всего: 23 балла. Время: 30 минут.",
+    "questions": [
+      "g8-wh-exam-1",
+      "g8-wh-exam-2",
+      "g8-wh-exam-3",
+      "g8-wh-exam-4",
+      "g8-wh-exam-5",
+      "g8-wh-exam-6",
+      "g8-wh-exam-7",
+      "g8-wh-exam-8",
+      "g8-wh-exam-9",
+      "g8-wh-exam-10"
+    ]
+  }
+}

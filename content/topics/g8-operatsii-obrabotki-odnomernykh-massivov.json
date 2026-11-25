@@ -1,0 +1,904 @@
+{
+  "topic": "g8-operatsii-obrabotki-odnomernykh-massivov",
+  "summary": "Алгоритмы обработки одномерного массива в C++: сумма, произведение и количество элементов (паттерн «накопитель»), отбор элементов по критериям с помощью if внутри цикла, поиск минимального и максимального элементов, трассировка и типичные ошибки.",
+  "theory": [
+    {
+      "title": "Накопитель: сумма, произведение, количество",
+      "objectives": ["8.4.3.9", "8.4.3.10"],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "content": "При обработке элементов массива задачи чаще всего сводятся к **подсчёту данных**: сумма, произведение или количество элементов. Массив обходят циклом `for`: переменная `i` — номер позиции (индекс), `A[i]` — содержимое ячейки, на которую сейчас «смотрит» цикл. Индекс меняется от 0 до N − 1, поэтому условие цикла — строго `i < N`."
+        },
+        {
+          "type": "comparison",
+          "title": "Начальное значение и действие в цикле",
+          "columns": ["Что находим", "Начальное значение", "Действие в цикле"],
+          "rows": [
+            ["Сумма", "`S = 0`", "увеличивается на величину элемента: `S = S + A[i];` (или `S += A[i];`)"],
+            ["Произведение", "`P = 1`", "умножается на элемент: `P = P * A[i];` (или `P *= A[i];`)"],
+            ["Количество", "`K = 0`", "увеличивается на 1: `K = K + 1;` (или `K++;`)"]
+          ]
+        },
+        {
+          "type": "exam_tip",
+          "content": "Почему произведение начинают с **1**, а не с 0? Любое число при умножении на 0 даёт 0 — при `P = 0` результат всегда будет 0. Для суммы старт с 0 не меняет результат: «пустая корзина»."
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "Сумма и произведение всех элементов",
+          "content": "int S = 0;\nfor (int i = 0; i < N; i++)\n    S += A[i];\n\nint P = 1;\nfor (int i = 0; i < N; i++)\n    P *= A[i];"
+        },
+        {
+          "type": "example",
+          "title": "Пошагово для массива [4, 5, 2]",
+          "content": "| Шаг | Сумма S | Произведение P |\n|---|---|---|\n| старт | 0 | 1 |\n| 1 | 0 + 4 = 4 | 1 · 4 = 4 |\n| 2 | 4 + 5 = 9 | 4 · 5 = 20 |\n| 3 | 9 + 2 = 11 | 20 · 2 = 40 |"
+        },
+        {
+          "type": "diagram",
+          "format": "mermaid",
+          "caption": "Универсальная схема обработки одномерного массива",
+          "content": "flowchart TD\n  A([Начало]) --> B[\"Инициализация: S = 0, P = 1, K = 0\"]\n  B --> C{{\"for (i = 0; i < N; i++)\"}}\n  C -- \"очередной i\" --> D{\"a[i] > 0 ?\"}\n  D -- Да --> E[\"S = S + a[i]\"]\n  E --> C\n  D -- Нет --> C\n  C -- \"цикл завершён\" --> F[/\"Вывод S\"/]\n  F --> G([Конец])"
+        },
+        {
+          "type": "paragraph",
+          "content": "Цикл со счётчиком и цикл с предусловием могут выполнять одну и ту же работу — разница лишь в расположении деталей: в `while` переменную `i` задают до цикла, а увеличивают в теле цикла."
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "Одна и та же сумма: for и while",
+          "content": "// модель FOR\nfor (int i = 0; i < N; i++) {\n    S = S + a[i];\n}\n\n// модель WHILE\nint i = 0;\nwhile (i < N) {\n    S = S + a[i];\n    i++;\n}"
+        }
+      ]
+    },
+    {
+      "title": "Отбор элементов по критериям",
+      "objectives": ["8.4.3.9", "8.4.3.10"],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "content": "Чтобы обработать не все элементы, а только подходящие, условие `if` встраивают **внутрь цикла**. Действие (сложение, умножение, счёт, вывод) выполняется только для элементов, прошедших «фильтр»."
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "Сумма только положительных элементов",
+          "content": "int S = 0;\nfor (int i = 0; i < N; i++) {\n    if (A[i] > 0) {\n        S += A[i];\n    }\n}"
+        },
+        {
+          "type": "comparison",
+          "title": "Частые условия отбора",
+          "columns": ["Условие", "Какие элементы проходят"],
+          "rows": [
+            ["`a[i] > 0`", "положительные"],
+            ["`a[i] < 0`", "отрицательные"],
+            ["`a[i] % 2 == 0`", "чётные"],
+            ["`a[i] % 2 != 0`", "нечётные"],
+            ["`a[i] % 3 == 0`", "кратные 3"],
+            ["`a[i] != 0`", "не равные нулю"],
+            ["`a[i] > K`", "больше заданного числа K"],
+            ["`i % 2 == 0`", "стоящие на позициях с чётными индексами (0, 2, 4…)"],
+            ["`a[i] % 2 != 0 && a[i] % 3 == 0`", "кратные 3 **и** не кратные 2"],
+            ["`a[i] % 2 == 0 || a[i] % 3 == 0`", "кратные 2 **или** кратные 3"]
+          ]
+        },
+        {
+          "type": "exam_tip",
+          "content": "Различайте **индекс** и **значение**: `i % 2 == 0` проверяет номер позиции, а `a[i] % 2 == 0` — сам элемент. Для массива [10, 20, 30, 40, 50] сумма элементов с чётными индексами: A[0] + A[2] + A[4] = 10 + 30 + 50 = 90."
+        },
+        {
+          "type": "heading",
+          "text": "Подсчёт количества",
+          "level": 3
+        },
+        {
+          "type": "paragraph",
+          "content": "При подсчёте количества значение переменной-счётчика увеличивается в цикле на 1 («кликер»), первоначальное значение — 0. Например, количество отрицательных элементов: `if (a[i] < 0) count++;`. За один проход цикла можно считать сразу несколько величин — например, сумму положительных температур и количество отрицательных:"
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "Два результата за один проход",
+          "content": "int S = 0, K = 0;\nfor (int i = 0; i < 10; i++) {\n    if (T[i] > 0) S = S + T[i];\n    if (T[i] < 0) K = K + 1;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Трассировка",
+          "level": 3
+        },
+        {
+          "type": "paragraph",
+          "content": "**Трассировка** — метод пошагового выполнения программы с отслеживанием значений всех переменных. Пример: произведение элементов, кратных 2 и не кратных 3 (условие `A[i] % 2 == 0 && A[i] % 3 != 0`), массив 12, −6, 3, 4, 65, 11, −13, 18, 8, 72."
+        },
+        {
+          "type": "example",
+          "title": "Трассировочная таблица",
+          "content": "| A[i] | ост. на 2 | ост. на 3 | Условие | P |\n|---|---|---|---|---|\n| — | — | — | — | 1 |\n| 12 | 0 | 0 | ложь | 1 |\n| −6 | 0 | 0 | ложь | 1 |\n| 3 | 1 | 0 | ложь | 1 |\n| 4 | 0 | 1 | истина | 4 |\n| 65 | 1 | 2 | ложь | 4 |\n| 11 | 1 | 2 | ложь | 4 |\n| −13 | −1 | −1 | ложь | 4 |\n| 18 | 0 | 0 | ложь | 4 |\n| 8 | 0 | 2 | истина | 32 |\n| 72 | 0 | 0 | ложь | 32 |\n\nРезультат: **32**."
+        },
+        {
+          "type": "heading",
+          "text": "Вывод отобранных элементов",
+          "level": 3
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "Чётные элементы, расположенные на нечётных местах",
+          "content": "#include <iostream>\nusing namespace std;\nint main(){\n    int numbers[10] = {2, 4, 6, 5, 4, 6, 7, 8, 9, 10};\n    int n = sizeof(numbers) / sizeof(numbers[0]);\n    for (int i = 0; i < n; i++)\n        if (numbers[i] % 2 == 0 && i % 2 == 1)\n            cout << numbers[i] << endl;\n    return 0;}"
+        },
+        {
+          "type": "paragraph",
+          "content": "Вывод: 4, 6, 8, 10. Выражение `sizeof(numbers) / sizeof(numbers[0])` определяет длину массива: размер всего массива делится на размер одного элемента."
+        }
+      ]
+    },
+    {
+      "title": "Поиск минимального и максимального элементов",
+      "objectives": ["8.4.3.10"],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "content": "Поиск минимального и максимального элементов — один из базовых алгоритмов обработки массивов (статистика, экономика, отчёты, графики)."
+        },
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "задать элементы массива;",
+            "приравнять **первый элемент** массива к переменным `min` и `max`;",
+            "в цикле сравнивать элементы с `min` и `max` и в зависимости от условия менять их значения или оставлять без изменений;",
+            "после завершения цикла вывести значения `min` и `max`."
+          ]
+        },
+        {
+          "type": "diagram",
+          "format": "mermaid",
+          "caption": "Блок-схема поиска максимального элемента и его индекса",
+          "content": "flowchart TD\n  A([Начало]) --> B[/\"Массив a из n элементов\"/]\n  B --> C[\"max = a[0], k = 0\"]\n  C --> D{{\"i = 1; i < n; i++\"}}\n  D -- \"очередной i\" --> E{\"a[i] > max ?\"}\n  E -- Да --> F[\"max = a[i], k = i\"]\n  F --> D\n  E -- Нет --> D\n  D -- \"цикл завершён\" --> G[/\"Вывод max, k\"/]\n  G --> H([Конец])"
+        },
+        {
+          "type": "paragraph",
+          "content": "Так как `min` и `max` уже равны `a[0]`, цикл начинают с `i = 1` — проверка идёт со второго элемента. Для минимума знак сравнения меняют на противоположный: `<`. Чтобы запомнить порядковый номер элемента, при переопределении значения сохраняют индекс в дополнительную переменную (`k = i`)."
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "Минимум и максимум в C++",
+          "content": "#include <iostream>\nusing namespace std;\nint main() {\n    int numbers[10] = {2, 4, -17, 25, 4, 16, -17, 8, 25, 10};\n    int max = numbers[0], min = numbers[0];\n    int n = sizeof(numbers) / sizeof(numbers[0]);\n    for (int i = 1; i < n; i++)\n        if (numbers[i] > max) max = numbers[i];\n        else if (numbers[i] < min) min = numbers[i];\n    cout << \"min=\" << min << \"  max=\" << max << endl;\n    return 0; }"
+        },
+        {
+          "type": "paragraph",
+          "content": "Вывод: `min=-17  max=25`. Сумму минимального и максимального элементов можно вывести оператором `cout << \"min+max=\" << min + max << endl;`."
+        },
+        {
+          "type": "heading",
+          "text": "Сначала найти максимум, потом отобрать",
+          "level": 3
+        },
+        {
+          "type": "paragraph",
+          "content": "Многие задачи решают двумя циклами: первым находят минимум или максимум, вторым — отбирают элементы, равные ему. Например, вывести фамилии всех учащихся с наименьшим баллом:"
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "Все учащиеся с минимальным баллом",
+          "content": "int marks[7] = {64, 56, 65, 56, 95, 56, 100};\nstring name[7] = {\"Zhoi\", \"Kim\", \"Ivanov\", \"Petrov\", \"Akhmetov\", \"Dulat\", \"Kanat\"};\nint min_mark = marks[0];\nint n = sizeof(marks) / sizeof(marks[0]);\nfor (int i = 1; i < n; i++)\n    if (marks[i] < min_mark) min_mark = marks[i];\nfor (int i = 0; i < n; i++)\n    if (marks[i] == min_mark) cout << name[i] << endl;"
+        },
+        {
+          "type": "paragraph",
+          "content": "Вывод: Kim, Petrov, Dulat (у всех троих по 56 баллов). Так же считают **количество максимальных элементов**: во втором цикле `if (numbers[i] == max) count++;`."
+        }
+      ]
+    },
+    {
+      "title": "Типичные ошибки",
+      "objectives": ["8.4.3.9", "8.4.3.10"],
+      "blocks": [
+        {
+          "type": "warning",
+          "content": "**Ошибка инициализации:** `int P = 0;` для произведения — результат всегда 0. Нужно `P = 1`. Не задать начальное значение вовсе (`int S;`) — тоже ошибка: в S окажется случайное число."
+        },
+        {
+          "type": "warning",
+          "content": "**Выход за границы:** `for (int i = 0; i <= N; i++)` — компьютер обращается к несуществующей ячейке `A[N]` (массив заканчивается на N − 1). Нужно строго `i < N`. Начало с `i = 1` пропускает элемент `A[0]`."
+        },
+        {
+          "type": "warning",
+          "content": "**Фальстарт вывода:** `cout << S;` внутри фигурных скобок цикла выводит промежуточную сумму на каждом шаге. Результат выводят только **после** завершения цикла."
+        },
+        {
+          "type": "warning",
+          "content": "**Потерянные скобки:** забытые `{ }` при добавлении условия `if` ломают логику цикла — в цикл или в условие попадает не тот оператор."
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "key": "g8-arrp-init-sum",
+      "title": "Начальное значение суммы",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": ["8.4.3.9"],
+      "text": "Каким должно быть начальное значение переменной `S` перед циклом, в котором находят сумму элементов массива?",
+      "source": "teacher",
+      "source_reference": "C  _Array_Mission (1).pdf, стр. 3, 5; G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 151",
+      "practice": true,
+      "options": [
+        { "key": "A", "content": "`S = 1`" },
+        { "key": "B", "content": "`S = 0`" },
+        { "key": "C", "content": "`S = A[0]`" },
+        { "key": "D", "content": "Не задаётся" }
+      ],
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": { "correct": "B" },
+        "explanation": "Сумма начинается с нуля («пустая корзина»), затем в цикле увеличивается на величину элемента."
+      }
+    },
+    {
+      "key": "g8-arrp-init-product",
+      "title": "Ошибка инициализации произведения",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "explain",
+      "grading": "AUTO",
+      "objectives": ["8.4.3.9"],
+      "text": "Ученик написал `int P = 0;` перед циклом `P = P * a[i];`. Что получится?",
+      "source": "teacher",
+      "source_reference": "C  _Array_Mission (1).pdf, стр. 4, 9; C  _Array_Assembly (1).pdf, стр. 5",
+      "practice": true,
+      "options": [
+        { "key": "A", "content": "Произведение всегда будет равно 0" },
+        { "key": "B", "content": "Получится сумма элементов" },
+        { "key": "C", "content": "Программа посчитает верно" },
+        { "key": "D", "content": "Получится произведение без первого элемента" }
+      ],
+      "scheme": {
+        "mark_scheme": "A — 1 балл.",
+        "accepted": { "correct": "A" },
+        "explanation": "Любое число при умножении на 0 даёт 0. Для произведения начальное значение — 1."
+      }
+    },
+    {
+      "key": "g8-arrp-accum-match",
+      "title": "Сумма, количество, произведение",
+      "type": "matching",
+      "marks": 3,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": ["8.4.3.9", "8.4.3.10"],
+      "text": "Сопоставьте величину с тем, как меняется её переменная при обработке массива.",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 151, 153; G8_Информатика_TG_RU_07.02.25_ФИНАЛ 1.pdf, стр. 125",
+      "practice": true,
+      "content": {
+        "left": [
+          { "key": "L1", "text": "Сумма" },
+          { "key": "L2", "text": "Количество" },
+          { "key": "L3", "text": "Произведение" }
+        ],
+        "right": [
+          { "key": "R1", "text": "старт 0, в цикле увеличивается на величину элемента" },
+          { "key": "R2", "text": "старт 0, в цикле увеличивается на 1" },
+          { "key": "R3", "text": "старт 1, в цикле умножается на элемент" }
+        ]
+      },
+      "scheme": {
+        "mark_scheme": "По 1 баллу за пару.",
+        "accepted": { "pairs": { "L1": "R1", "L2": "R2", "L3": "R3" } },
+        "explanation": "S = S + A[i] (S = 0); K = K + 1 (K = 0); P = P * A[i] (P = 1)."
+      }
+    },
+    {
+      "key": "g8-arrp-sum-calc",
+      "title": "Сумма элементов",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": ["8.4.3.9"],
+      "text": "Чему равно `S` после выполнения фрагмента для массива `a = {3, 7, 1, 6}`?\n\n```cpp\nint S = 0;\nfor (int i = 0; i < 4; i++)\n    S = S + a[i];\n```",
+      "source": "teacher",
+      "source_reference": "C  _Array_Mission (1).pdf, стр. 3; C  _Array_Assembly (1).pdf, стр. 6",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "17 — 1 балл.",
+        "accepted": { "values": ["17"], "numeric": true },
+        "explanation": "0 + 3 + 7 + 1 + 6 = 17."
+      }
+    },
+    {
+      "key": "g8-arrp-product-calc",
+      "title": "Произведение элементов",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": ["8.4.3.9"],
+      "text": "Чему равно `P` после выполнения фрагмента для массива `a = {2, 3, 1, 4}`?\n\n```cpp\nint P = 1;\nfor (int i = 0; i < 4; i++)\n    P *= a[i];\n```",
+      "source": "teacher",
+      "source_reference": "C  _Array_Assembly (1).pdf, стр. 3, 6",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "24 — 1 балл.",
+        "accepted": { "values": ["24"], "numeric": true },
+        "explanation": "1 · 2 · 3 · 1 · 4 = 24."
+      }
+    },
+    {
+      "key": "g8-arrp-sum-positive",
+      "title": "Сумма положительных",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": ["8.4.3.9", "8.4.3.10"],
+      "text": "Найдите сумму строго положительных элементов массива `{-4, 6, 0, 3, -2}` (условие `a[i] > 0`).",
+      "source": "teacher",
+      "source_reference": "C  _Array_Assembly (1).pdf, стр. 4, 7; C  _Array_Mission (1).pdf, стр. 6–7",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "9 — 1 балл.",
+        "accepted": { "values": ["9"], "numeric": true },
+        "explanation": "Проходят 6 и 3 (0 не больше 0): 6 + 3 = 9."
+      }
+    },
+    {
+      "key": "g8-arrp-product-even",
+      "title": "Произведение чётных",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": ["8.4.3.9", "8.4.3.10"],
+      "text": "Чему равно `P` для массива `a = {5, -2, 3, 6, 7}`?\n\n```cpp\nint P = 1;\nfor (int i = 0; i < 5; i++)\n    if (a[i] % 2 == 0)\n        P = P * a[i];\n```",
+      "source": "teacher",
+      "source_reference": "C  _Array_Mission (1).pdf, стр. 7; C  _Array_Assembly (1).pdf, стр. 7",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "−12 — 1 балл.",
+        "accepted": { "values": ["-12"], "numeric": true },
+        "explanation": "Чётные: −2 и 6. 1 · (−2) · 6 = −12."
+      }
+    },
+    {
+      "key": "g8-arrp-trace-product",
+      "title": "Трассировка: произведение чётных",
+      "type": "trace_table",
+      "marks": 3,
+      "difficulty": "medium",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": ["8.4.3.9", "8.4.3.10"],
+      "text": "Заполните столбец `P` трассировочной таблицы (значение после шага) для массива `a = {4, 5, 2}`.\n\n```cpp\nint P = 1;\nfor (int i = 0; i < 3; i++)\n    if (a[i] % 2 == 0) P = P * a[i];\n```",
+      "source": "teacher",
+      "source_reference": "C  _Array_Mission (1).pdf, стр. 13; G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 152",
+      "practice": true,
+      "content": {
+        "columns": ["i", "a[i]", "P"],
+        "rows": 3,
+        "prefill": [["0", "4", null], ["1", "5", null], ["2", "2", null]]
+      },
+      "scheme": {
+        "mark_scheme": "По 1 баллу за строку.",
+        "accepted": { "rows": [[null, null, "4"], [null, null, "4"], [null, null, "8"]] },
+        "explanation": "4 чётное: P = 1·4 = 4; 5 нечётное: P не меняется; 2 чётное: P = 4·2 = 8."
+      }
+    },
+    {
+      "key": "g8-arrp-cond-mult3",
+      "title": "Условие кратности",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": ["8.4.3.10"],
+      "text": "Какое условие отбирает элементы массива, кратные 3?",
+      "source": "teacher",
+      "source_reference": "C  _Array_Assembly (1).pdf, стр. 8, 14",
+      "practice": true,
+      "options": [
+        { "key": "A", "content": "`a[i] / 3 == 0`" },
+        { "key": "B", "content": "`a[i] % 3 == 0`" },
+        { "key": "C", "content": "`i % 3 == 0`" },
+        { "key": "D", "content": "`a[i] % 3 != 0`" }
+      ],
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": { "correct": "B" },
+        "explanation": "Кратное 3 делится на 3 без остатка: остаток `%` равен 0. `i % 3` проверяет индекс, а не значение."
+      }
+    },
+    {
+      "key": "g8-arrp-cond-match",
+      "title": "Условие и критерий",
+      "type": "matching",
+      "marks": 4,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": ["8.4.3.10"],
+      "text": "Сопоставьте условие с критерием отбора.",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 166; C  _Array_Assembly (1).pdf, стр. 4, 9",
+      "practice": true,
+      "content": {
+        "left": [
+          { "key": "L1", "text": "a[i] % 2 == 0" },
+          { "key": "L2", "text": "a[i] % 2 != 0 && a[i] % 3 == 0" },
+          { "key": "L3", "text": "a[i] % 2 == 0 || a[i] % 3 == 0" },
+          { "key": "L4", "text": "i % 2 == 0" }
+        ],
+        "right": [
+          { "key": "R1", "text": "чётный элемент" },
+          { "key": "R2", "text": "элемент, кратный 3 и не кратный 2" },
+          { "key": "R3", "text": "элемент, кратный 2 или кратный 3" },
+          { "key": "R4", "text": "элемент на позиции с чётным индексом" }
+        ]
+      },
+      "scheme": {
+        "mark_scheme": "По 1 баллу за пару.",
+        "accepted": { "pairs": { "L1": "R1", "L2": "R2", "L3": "R3", "L4": "R4" } },
+        "explanation": "&& — «и» (оба условия), || — «или» (хотя бы одно). `i % 2` проверяет индекс, а не значение."
+      }
+    },
+    {
+      "key": "g8-arrp-index-sum",
+      "title": "Сумма по чётным индексам",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": ["8.4.3.9", "8.4.3.10"],
+      "text": "Массив `a = {10, 3, 8, 5, 1}`. Чему равна сумма элементов с чётными индексами (условие `i % 2 == 0`)?",
+      "source": "teacher",
+      "source_reference": "C  _Array_Assembly (1).pdf, стр. 9, 14",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "19 — 1 балл.",
+        "accepted": { "values": ["19"], "numeric": true },
+        "explanation": "Индексы 0, 2, 4: a[0] + a[2] + a[4] = 10 + 8 + 1 = 19."
+      }
+    },
+    {
+      "key": "g8-arrp-count-blanks",
+      "title": "Счётчик отрицательных",
+      "type": "fill_blank",
+      "marks": 2,
+      "difficulty": "easy",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": ["8.4.3.10"],
+      "text": "Допишите фрагмент подсчёта количества отрицательных элементов массива `a` из `n` элементов.\n\n```cpp\nint count = 0;\nfor (int i = 0; i < n; i++)\n    if (a[i] [[1]] 0) [[2]]++;\n```",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_TG_RU_07.02.25_ФИНАЛ 1.pdf, стр. 125; G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 151",
+      "practice": true,
+      "content": { "blank_count": 2 },
+      "scheme": {
+        "mark_scheme": "[[1]] < (1); [[2]] count (1).",
+        "accepted": { "blanks": [["<"], ["count"]], "ignore_spaces": true },
+        "explanation": "Отрицательный элемент меньше 0; счётчик увеличивается на 1: count++."
+      }
+    },
+    {
+      "key": "g8-arrp-while-blanks",
+      "title": "Из for в while",
+      "type": "fill_blank",
+      "marks": 2,
+      "difficulty": "medium",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": ["8.4.3.9"],
+      "text": "Перепишите `for (int i = 0; i < 6; i++) { S = S + a[i]; }` через `while`.\n\n```cpp\nint i = 0;\nwhile ( [[1]] ) {\n    S = S + a[i];\n    [[2]];\n}\n```",
+      "source": "teacher",
+      "source_reference": "C  _Array_Mission (1).pdf, стр. 8",
+      "practice": true,
+      "content": { "blank_count": 2 },
+      "scheme": {
+        "mark_scheme": "[[1]] i < 6 (1); [[2]] i++ (1).",
+        "accepted": { "blanks": [["i<6", "i < 6"], ["i++", "i=i+1", "i = i + 1", "++i", "i+=1"]], "ignore_spaces": true },
+        "explanation": "В while условие то же, что в for, а i увеличивают в конце тела цикла."
+      }
+    },
+    {
+      "key": "g8-arrp-minmax-init-tf",
+      "title": "Начальное значение min/max",
+      "type": "true_false",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "state",
+      "grading": "AUTO",
+      "objectives": ["8.4.3.10"],
+      "text": "При поиске минимального или максимального элемента массива начальные значения `min` и `max` приравнивают к первому элементу массива.",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 154, 156, 167",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "Верно (1)",
+        "accepted": { "correct": true },
+        "explanation": "min = a[0]; max = a[0]; затем цикл сравнивает с ними остальные элементы, начиная с i = 1."
+      }
+    },
+    {
+      "key": "g8-arrp-minmax-output",
+      "title": "Результат поиска min и max",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": ["8.4.3.10"],
+      "text": "Что выведет фрагмент?\n\n```cpp\nint a[6] = {7, -3, 12, 0, 12, 5};\nint max = a[0], min = a[0];\nfor (int i = 1; i < 6; i++)\n    if (a[i] > max) max = a[i];\n    else if (a[i] < min) min = a[i];\ncout << \"min=\" << min << \" max=\" << max;\n```",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 167",
+      "practice": true,
+      "options": [
+        { "key": "A", "content": "`min=0 max=12`" },
+        { "key": "B", "content": "`min=-3 max=12`" },
+        { "key": "C", "content": "`min=7 max=12`" },
+        { "key": "D", "content": "`min=-3 max=7`" }
+      ],
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": { "correct": "B" },
+        "explanation": "Наименьший элемент −3, наибольший 12."
+      }
+    },
+    {
+      "key": "g8-arrp-max-index",
+      "title": "Индекс максимального",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": ["8.4.3.10"],
+      "text": "Какое значение `k` выведет фрагмент для массива `a = {3, 9, 1, 9, 4}`?\n\n```cpp\nint max = a[0], k = 0;\nfor (int i = 1; i < 5; i++)\n    if (a[i] > max) { max = a[i]; k = i; }\ncout << k;\n```",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 154, 167 (задание 1)",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "1 — 1 балл.",
+        "accepted": { "values": ["1"], "numeric": true },
+        "explanation": "При i = 1 max = 9, k = 1. При i = 3: 9 > 9 ложно (строгое неравенство) — k не меняется."
+      }
+    },
+    {
+      "key": "g8-arrp-bugs",
+      "title": "Найди ошибки: сумма",
+      "type": "code_analysis",
+      "marks": 3,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AI",
+      "objectives": ["8.4.3.9"],
+      "text": "Фрагмент должен найти сумму всех элементов массива `a` из `N` элементов и вывести её один раз. Найдите три ошибки и предложите исправления.",
+      "source": "teacher",
+      "source_reference": "C  _Array_Mission (1).pdf, стр. 9–10; C  _Array_Assembly (1).pdf, стр. 5, 15",
+      "practice": true,
+      "content": {
+        "starter_code": "1  int S;\n2  for (int i = 0; i <= N; i++) {\n3      S = S + a[i];\n4      cout << S;\n5  }",
+        "answer_lines": 4
+      },
+      "scheme": {
+        "mark_scheme": "- строка 1: нет начального значения — int S = 0; (1)\n- строка 2: выход за границы — i < N (1)\n- строка 4: вывод внутри цикла — перенести cout за закрывающую скобку } (1)",
+        "points": [
+          { "criterion": "Строка 1: инициализация S = 0", "marks": 1 },
+          { "criterion": "Строка 2: i < N вместо i <= N", "marks": 1 },
+          { "criterion": "Строка 4: cout после цикла", "marks": 1 }
+        ],
+        "model_answer": "```cpp\nint S = 0;\nfor (int i = 0; i < N; i++) {\n    S = S + a[i];\n}\ncout << S;\n```"
+      }
+    },
+    {
+      "key": "g8-arrp-temps-code",
+      "title": "Программа: температуры",
+      "type": "code_completion",
+      "marks": 4,
+      "difficulty": "hard",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": ["8.4.3.9", "8.4.3.10"],
+      "text": "Дан массив температур за неделю: `int T[7] = {3, -2, 5, -4, 0, 6, -1};`. Допишите программу: за **один проход** цикла найдите сумму положительных температур и количество отрицательных, затем выведите оба результата.",
+      "source": "teacher",
+      "source_reference": "C  _Array_Mission (1).pdf, стр. 12",
+      "practice": true,
+      "content": {
+        "starter_code": "#include <iostream>\nusing namespace std;\nint main() {\n    int T[7] = {3, -2, 5, -4, 0, 6, -1};\n\n    return 0;\n}"
+      },
+      "scheme": {
+        "mark_scheme": "- S = 0, K = 0 до цикла (1)\n- цикл for (i от 0 до 6) (1)\n- if (T[i] > 0) S = S + T[i]; и if (T[i] < 0) K = K + 1; (1)\n- вывод S и K после цикла (1). Ответ: S = 14, K = 3.",
+        "points": [
+          { "criterion": "Инициализация S = 0 и K = 0", "marks": 1 },
+          { "criterion": "Цикл for по всем 7 элементам", "marks": 1 },
+          { "criterion": "Два условия с накоплением суммы и счётом", "marks": 1 },
+          { "criterion": "Вывод результатов после цикла", "marks": 1 }
+        ],
+        "model_answer": "```cpp\n#include <iostream>\nusing namespace std;\nint main() {\n    int T[7] = {3, -2, 5, -4, 0, 6, -1};\n    int S = 0, K = 0;\n    for (int i = 0; i < 7; i++) {\n        if (T[i] > 0) S = S + T[i];\n        if (T[i] < 0) K = K + 1;\n    }\n    cout << \"S=\" << S << \" K=\" << K << endl;\n    return 0;\n}\n```"
+      }
+    },
+    {
+      "key": "g8-arrp-select-output",
+      "title": "Вывод отобранных элементов",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": ["8.4.3.10"],
+      "text": "Какие числа выведет фрагмент?\n\n```cpp\nint a[8] = {3, 6, 8, 1, 4, 10, 7, 2};\nfor (int i = 0; i < 8; i++)\n    if (a[i] % 2 == 0 && i % 2 == 1)\n        cout << a[i] << \" \";\n```",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 164",
+      "practice": true,
+      "options": [
+        { "key": "A", "content": "6 8 4 10 2" },
+        { "key": "B", "content": "6 10 2" },
+        { "key": "C", "content": "8 4" },
+        { "key": "D", "content": "3 1 7" }
+      ],
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": { "correct": "B" },
+        "explanation": "Нечётные индексы 1, 3, 5, 7: элементы 6, 1, 10, 2; из них чётные — 6, 10, 2."
+      }
+    },
+    {
+      "key": "g8-arrp-count-max",
+      "title": "Количество максимальных",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": ["8.4.3.10"],
+      "text": "Сначала находят максимум массива, затем вторым циклом считают `if (a[i] == max) count++;`. Чему равен `count` для массива `{4, 7, -1, 7, 2, 7, 0}`?",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 168",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "3 — 1 балл.",
+        "accepted": { "values": ["3"], "numeric": true },
+        "explanation": "Максимум 7, он встречается 3 раза."
+      }
+    },
+    {
+      "key": "g8-arrp-exam-1",
+      "title": "Начальное значение произведения",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "exam",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": ["8.4.3.9"],
+      "text": "Какое начальное значение нужно задать переменной `P`, чтобы найти произведение элементов массива?",
+      "source": "nis_style",
+      "source_reference": "C  _Array_Mission (1).pdf, стр. 4–5; G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 151",
+      "practice": false,
+      "options": [
+        { "key": "A", "content": "0" },
+        { "key": "B", "content": "1" },
+        { "key": "C", "content": "−1" },
+        { "key": "D", "content": "длину массива" }
+      ],
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": { "correct": "B" },
+        "explanation": "При P = 0 результат всегда 0; умножение на 1 не меняет первый элемент."
+      }
+    },
+    {
+      "key": "g8-arrp-exam-2",
+      "title": "Сумма элементов больше K",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "exam",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": ["8.4.3.9", "8.4.3.10"],
+      "text": "Дано `K = 10` и массив `{4, 15, 10, 22, 7}`. Найдите сумму элементов, которые больше K.",
+      "source": "nis_style",
+      "source_reference": "C  _Array_Assembly (1).pdf, стр. 9, 11",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "37 — 1 балл.",
+        "accepted": { "values": ["37"], "numeric": true },
+        "explanation": "Больше 10: 15 и 22 (10 не больше 10). 15 + 22 = 37."
+      }
+    },
+    {
+      "key": "g8-arrp-exam-3",
+      "title": "Трассировка: сумма положительных",
+      "type": "trace_table",
+      "marks": 4,
+      "difficulty": "exam",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": ["8.4.3.9", "8.4.3.10"],
+      "text": "Заполните столбец `S` (значение после шага) для массива `a = {3, -5, 8, -1}`.\n\n```cpp\nint S = 0;\nfor (int i = 0; i < 4; i++)\n    if (a[i] > 0) S = S + a[i];\n```",
+      "source": "nis_style",
+      "source_reference": "C  _Array_Mission (1).pdf, стр. 6–7, 13; G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 152",
+      "practice": false,
+      "content": {
+        "columns": ["i", "a[i]", "S"],
+        "rows": 4,
+        "prefill": [["0", "3", null], ["1", "-5", null], ["2", "8", null], ["3", "-1", null]]
+      },
+      "scheme": {
+        "mark_scheme": "По 1 баллу за строку.",
+        "accepted": { "rows": [[null, null, "3"], [null, null, "3"], [null, null, "11"], [null, null, "11"]] },
+        "explanation": "3 > 0: S = 3; −5 не проходит; 8 > 0: S = 11; −1 не проходит."
+      }
+    },
+    {
+      "key": "g8-arrp-exam-4",
+      "title": "Условия отбора",
+      "type": "matching",
+      "marks": 3,
+      "difficulty": "exam",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": ["8.4.3.10"],
+      "text": "Сопоставьте условие с критерием отбора.",
+      "source": "nis_style",
+      "source_reference": "C  _Array_Assembly (1).pdf, стр. 4, 8–9; G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 166",
+      "practice": false,
+      "content": {
+        "left": [
+          { "key": "L1", "text": "a[i] != 0" },
+          { "key": "L2", "text": "a[i] % 5 == 0" },
+          { "key": "L3", "text": "i % 2 == 1" }
+        ],
+        "right": [
+          { "key": "R1", "text": "элемент не равен нулю" },
+          { "key": "R2", "text": "элемент кратен 5" },
+          { "key": "R3", "text": "элемент стоит на позиции с нечётным индексом" }
+        ]
+      },
+      "scheme": {
+        "mark_scheme": "По 1 баллу за пару.",
+        "accepted": { "pairs": { "L1": "R1", "L2": "R2", "L3": "R3" } },
+        "explanation": "!= — «не равно»; остаток 0 — делится без остатка; i — индекс."
+      }
+    },
+    {
+      "key": "g8-arrp-exam-5",
+      "title": "Минимум и максимум",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "exam",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": ["8.4.3.10"],
+      "text": "Что выведет фрагмент?\n\n```cpp\nint a[5] = {6, -2, 9, 4, -2};\nint max = a[0], min = a[0];\nfor (int i = 1; i < 5; i++)\n    if (a[i] > max) max = a[i];\n    else if (a[i] < min) min = a[i];\ncout << min + max;\n```",
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 167–168",
+      "practice": false,
+      "options": [
+        { "key": "A", "content": "7" },
+        { "key": "B", "content": "15" },
+        { "key": "C", "content": "4" },
+        { "key": "D", "content": "5" }
+      ],
+      "scheme": {
+        "mark_scheme": "A — 1 балл.",
+        "accepted": { "correct": "A" },
+        "explanation": "min = −2, max = 9; −2 + 9 = 7."
+      }
+    },
+    {
+      "key": "g8-arrp-exam-6",
+      "title": "Найди ошибки: произведение",
+      "type": "code_analysis",
+      "marks": 3,
+      "difficulty": "exam",
+      "command_word": "identify",
+      "grading": "AI",
+      "objectives": ["8.4.3.9", "8.4.3.10"],
+      "text": "Фрагмент должен найти произведение элементов массива `a` из `N` элементов, не равных нулю, и вывести его один раз. Программа всегда выводит 0 и обращается к несуществующей ячейке. Найдите три ошибки и предложите исправления.",
+      "source": "nis_style",
+      "source_reference": "C  _Array_Mission (1).pdf, стр. 9, 11; C  _Array_Assembly (1).pdf, стр. 5",
+      "practice": false,
+      "content": {
+        "starter_code": "1  int P = 0;\n2  for (int i = 0; i <= N; i++) {\n3      if (a[i] != 0)\n4          P = P * a[i];\n5      cout << P;\n6  }",
+        "answer_lines": 4
+      },
+      "scheme": {
+        "mark_scheme": "- строка 1: int P = 1; (1)\n- строка 2: i < N (1)\n- строка 5: cout после закрывающей скобки цикла (1)",
+        "points": [
+          { "criterion": "Строка 1: P = 1 вместо 0", "marks": 1 },
+          { "criterion": "Строка 2: i < N вместо i <= N", "marks": 1 },
+          { "criterion": "Строка 5: вывод вынести за цикл", "marks": 1 }
+        ],
+        "model_answer": "```cpp\nint P = 1;\nfor (int i = 0; i < N; i++) {\n    if (a[i] != 0)\n        P = P * a[i];\n}\ncout << P;\n```"
+      }
+    },
+    {
+      "key": "g8-arrp-exam-7",
+      "title": "Программа: чётные и нечётные",
+      "type": "code_completion",
+      "marks": 5,
+      "difficulty": "exam",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": ["8.4.3.9", "8.4.3.10"],
+      "text": "Напишите программу на C++, которая:\n1. объявляет массив `int a[6] = {7, 4, -3, 10, 5, 2};`;\n2. находит сумму чётных элементов;\n3. находит количество нечётных элементов;\n4. выводит оба результата с поясняющими сообщениями.",
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 151–152, 164; C  _Array_Mission (1).pdf, стр. 12",
+      "practice": false,
+      "content": {
+        "starter_code": "#include <iostream>\nusing namespace std;\nint main() {\n\n    return 0;\n}"
+      },
+      "scheme": {
+        "mark_scheme": "- объявление массива и S = 0, K = 0 (1)\n- цикл for по индексам 0…5 (1)\n- условие a[i] % 2 == 0 и S = S + a[i] (1)\n- условие нечётности (a[i] % 2 != 0 или else) и K++ (1)\n- вывод после цикла с сообщениями (1). Ответ: сумма 16, количество 3.",
+        "points": [
+          { "criterion": "Массив и инициализация S = 0, K = 0", "marks": 1 },
+          { "criterion": "Цикл for от 0 до 5 (i < 6)", "marks": 1 },
+          { "criterion": "Отбор чётных и накопление суммы", "marks": 1 },
+          { "criterion": "Отбор нечётных и подсчёт количества", "marks": 1 },
+          { "criterion": "Вывод результатов после цикла с пояснениями", "marks": 1 }
+        ],
+        "model_answer": "```cpp\n#include <iostream>\nusing namespace std;\nint main() {\n    int a[6] = {7, 4, -3, 10, 5, 2};\n    int S = 0, K = 0;\n    for (int i = 0; i < 6; i++) {\n        if (a[i] % 2 == 0) S = S + a[i];\n        else K++;\n    }\n    cout << \"Сумма чётных: \" << S << endl;\n    cout << \"Количество нечётных: \" << K << endl;\n    return 0;\n}\n```"
+      }
+    },
+    {
+      "key": "g8-arrp-exam-8",
+      "title": "Количество максимальных",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "exam",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": ["8.4.3.10"],
+      "text": "Сколько в массиве `{5, 9, 2, 9, 9, 1}` элементов, равных максимальному?",
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 156, 168",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "3 — 1 балл.",
+        "accepted": { "values": ["3"], "numeric": true },
+        "explanation": "Максимум 9 встречается 3 раза."
+      }
+    },
+    {
+      "key": "g8-arrp-exam-9",
+      "title": "Поиск минимума",
+      "type": "fill_blank",
+      "marks": 2,
+      "difficulty": "exam",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": ["8.4.3.10"],
+      "text": "Допишите фрагмент поиска минимального элемента массива `a` из `n` элементов.\n\n```cpp\nint mn = a[ [[1]] ];\nfor (int i = 1; i < n; i++)\n    if (a[i] [[2]] mn) mn = a[i];\n```",
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 154, 167",
+      "practice": false,
+      "content": { "blank_count": 2 },
+      "scheme": {
+        "mark_scheme": "[[1]] 0 (1); [[2]] < (1).",
+        "accepted": { "blanks": [["0"], ["<"]], "ignore_spaces": true },
+        "explanation": "Начальное значение — первый элемент a[0]; для минимума знак сравнения «<»."
+      }
+    }
+  ],
+  "topic_exam": {
+    "duration": 28,
+    "title": "Операции обработки одномерных массивов — экзамен",
+    "instructions": "Ответьте на **все** вопросы. Код записан на C++; индексы массива начинаются с 0. Всего: 21 балл. Время: 28 минут.",
+    "questions": ["g8-arrp-exam-1", "g8-arrp-exam-2", "g8-arrp-exam-3", "g8-arrp-exam-4", "g8-arrp-exam-5", "g8-arrp-exam-6", "g8-arrp-exam-7", "g8-arrp-exam-8", "g8-arrp-exam-9"]
+  }
+}

@@ -1,0 +1,1830 @@
+{
+  "topic": "g9-polzovatelskie-funktsii-i-podprogrammy",
+  "summary": "Подпрограммы в C++: назначение и преимущества, процедуры (void) и функции с return, формальные и фактические параметры, значения по умолчанию, локальные и глобальные переменные, программы с подпрограммами.",
+  "theory": [
+    {
+      "title": "Подпрограммы и их преимущества",
+      "objectives": [
+        "9.4.3.9",
+        "9.4.3.10"
+      ],
+      "blocks": [
+        {
+          "type": "definition",
+          "term": "Подпрограмма",
+          "content": "Набор команд, который можно вызывать **по имени** несколько раз в главной программе `main()`."
+        },
+        {
+          "type": "paragraph",
+          "content": "Простой код занимает мало строк и компактен. Если фрагмент кода используется **несколько раз**, его лучше вынести в подпрограмму."
+        },
+        {
+          "type": "heading",
+          "text": "Без подпрограммы",
+          "level": 3
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "string name1 = \"John\";\nstring name2 = \"James\";\nstring name3 = \"Jack\";\ncout << \"Hello, \" << name1 << \"!\\n\";\ncout << \"Hello, \" << name2 << \"!\\n\";\ncout << \"Hello, \" << name3 << \"!\\n\";",
+          "caption": "Одна и та же команда вывода повторяется для каждого имени"
+        },
+        {
+          "type": "heading",
+          "text": "С подпрограммой",
+          "level": 3
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "#include <iostream>\nusing namespace std;\nvoid func(string name)   // создаём подпрограмму\n{\n    cout << \"Hello, \" << name << \"!\\n\";\n}\nint main()               // главная (основная) функция\n{\n    func(\"John\");\n    func(\"James\");\n    func(\"Jack\");\n    return 0;\n}",
+          "caption": "Подпрограмма оформлена один раз и вызывается по имени нужное число раз"
+        },
+        {
+          "type": "callout",
+          "tone": "info",
+          "title": "Преимущества подпрограмм",
+          "content": "- сокращают код;\n- облегчают понимание программы;\n- избавляют от многократно повторяющихся фрагментов кода;\n- в коде подпрограммы легко найти и исправить ошибки."
+        },
+        {
+          "type": "example",
+          "title": "Задача про ламинат",
+          "content": "В трёх комнатах нужно постелить ламинат размером 30 × 120 см. Для каждой комнаты повторяются одни и те же действия: ввести ширину и длину, посчитать количество кусков, вывести ответ. Эти действия оформляют в подпрограмму `laminatecount()` и вызывают её три раза."
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "#include <iostream>\n#include <cmath>\nusing namespace std;\ndouble width, length, n;\nvoid laminatecount()\n{\n    cout << \"width(cm)->\";  cin >> width;\n    cout << \"length(cm)->\"; cin >> length;\n    n = ceil(width * length / (120 * 30));\n    cout << \"You need \" << n << \" pieces\" << endl;\n}\nint main()\n{\n    laminatecount();\n    laminatecount();\n    laminatecount();\n    return 0;\n}",
+          "caption": "Одна подпрограмма — три вызова"
+        },
+        {
+          "type": "heading",
+          "text": "Системные и собственные функции",
+          "level": 3
+        },
+        {
+          "type": "comparison",
+          "title": "Виды функций",
+          "columns": [
+            "Вид",
+            "Что это",
+            "Примеры"
+          ],
+          "rows": [
+            [
+              "Системные (библиотечные)",
+              "хранятся в стандартных библиотеках (например, `#include <cmath>`); как они устроены внутри, мы не знаем",
+              "`pow`, `abs`, `cos`, `ceil`"
+            ],
+            [
+              "Собственные (пользовательские)",
+              "функции, которые программист пишет сам",
+              "нахождение максимума, факториала"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Процедура (void) и функция",
+      "objectives": [
+        "9.4.3.9"
+      ],
+      "blocks": [
+        {
+          "type": "definition",
+          "term": "Процедура (функция void)",
+          "content": "Подпрограмма, которая выполняет заданные ей команды (например, вывод на экран), но **не возвращает** значение в место вызова. Процедуры разделяют программу на логические части, где каждая часть выполняет свою задачу."
+        },
+        {
+          "type": "definition",
+          "term": "Функция (типа int, float, …)",
+          "content": "Подпрограмма, которая выполняет заданные ей команды и **возвращает единственный результат**. Функция содержит команду `return`, которая указывает, что нужно передать основной программе."
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "void message()\n{\n    cout << \"Hello, World!\" << endl;  // только выводит сообщение\n}\nint main()\n{\n    message();   // вызов процедуры — отдельной командой\n    return 0;\n}",
+          "caption": "Процедура: ничего не возвращает"
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "int kv(int n)\n{\n    return n * n;   // результат передаётся в место вызова\n}\nint main()\n{\n    int x;\n    cin >> x;\n    cout << kv(x);  // вызов функции в составе выражения\n}",
+          "caption": "Функция: возвращает значение"
+        },
+        {
+          "type": "paragraph",
+          "content": "У функции должны быть:\n\n1. тип возвращаемого значения;\n2. имя функции;\n3. информация о формальных аргументах (параметрах);\n4. тело функции `{ }`;\n5. команда возврата `return`."
+        },
+        {
+          "type": "comparison",
+          "title": "Процедура и функция",
+          "columns": [
+            "",
+            "Процедура (void)",
+            "Функция (int, float, …)"
+          ],
+          "rows": [
+            [
+              "Возвращает значение",
+              "нет",
+              "да, единственный результат"
+            ],
+            [
+              "Перед именем",
+              "`void`",
+              "тип результата (`int`, `float`, …) — функция, как переменная, имеет тип данных"
+            ],
+            [
+              "`return` со значением",
+              "нет",
+              "обязательно"
+            ],
+            [
+              "Вызов",
+              "отдельной командой, в выражении — нельзя",
+              "возможен в составе выражения"
+            ],
+            [
+              "Общее",
+              "обе — подпрограммы",
+              "обе — подпрограммы"
+            ]
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Пример: максимум из трёх чисел",
+          "level": 3
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "void FindMaximum(int a, int b, int c)\n{\n    int max;\n    if (a > b) max = a; else max = b;\n    if (c > max) max = c;\n    cout << \"Max = \" << max << endl;\n}\nint main()\n{\n    int x, y, z;\n    cin >> x >> y >> z;\n    FindMaximum(x, y, z);\n    return 0;\n}",
+          "caption": "Программа с процедурой: вывод внутри подпрограммы"
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "int FindMaximum(int a, int b, int c)\n{\n    int max;\n    if (a > b) max = a; else max = b;\n    if (c > max) max = c;\n    return max;\n}\nint main()\n{\n    int x, y, z;\n    cin >> x >> y >> z;\n    cout << \"Max = \" << FindMaximum(x, y, z) << endl;\n    return 0;\n}",
+          "caption": "Программа с функцией: результат возвращается в main()"
+        },
+        {
+          "type": "diagram",
+          "format": "mermaid",
+          "content": "flowchart TD\n  A([\"main(): cin >> x >> y >> z\"]) --> B[\"Вызов FindMaximum(x, y, z)\"]\n  B --> C[\"Значения x, y, z передаются в a, b, c\"]\n  C --> D[\"Тело функции: поиск max\"]\n  D --> E[\"return max\"]\n  E --> F[\"Результат подставляется в место вызова: cout << ...\"]\n  F --> G([\"return 0\"])",
+          "caption": "Как выполняется вызов функции FindMaximum"
+        }
+      ]
+    },
+    {
+      "title": "Параметры подпрограммы",
+      "objectives": [
+        "9.4.3.11"
+      ],
+      "blocks": [
+        {
+          "type": "definition",
+          "term": "Параметры",
+          "content": "Переменные, которые указываются в заголовке подпрограммы и используются внутри неё. Параметры нужны, чтобы **передавать значения** подпрограмме."
+        },
+        {
+          "type": "definition",
+          "term": "Аргументы",
+          "content": "Значения, которые передаются функции при её вызове. Это могут быть конкретные данные или значения по умолчанию."
+        },
+        {
+          "type": "comparison",
+          "title": "Формальные и фактические параметры",
+          "columns": [
+            "",
+            "Где записываются",
+            "Пример из `float sum(float a, float b)` … `sum(x, y)`"
+          ],
+          "rows": [
+            [
+              "Формальные параметры",
+              "в заголовке подпрограммы",
+              "`a`, `b`"
+            ],
+            [
+              "Фактические параметры (аргументы)",
+              "при вызове подпрограммы",
+              "`x`, `y`"
+            ]
+          ]
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "float sum(float a, float b)   // a, b — формальные параметры\n{\n    return a + b;\n}\nint main()\n{\n    float x, y;\n    cin >> x >> y;\n    cout << sum(x, y);          // x, y — фактические параметры\n}"
+        },
+        {
+          "type": "paragraph",
+          "content": "Подпрограмму можно вызывать с **числами** или с **переменными**: `P1(15, 30, 44);` и `P1(a, b, c);`."
+        },
+        {
+          "type": "heading",
+          "text": "Подпрограммы с параметрами и без параметров",
+          "level": 3
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "int x, y, P;                 // глобальные переменные\nvoid Perimetr(int A, int B)  // с параметрами\n{\n    P = 2 * A + 2 * B;\n    cout << P << endl;\n}\nint main()\n{\n    cin >> x >> y;\n    Perimetr(x, y);          // x, y — фактические параметры\n    return 0;\n}",
+          "caption": "Подпрограмма с параметрами: данные передаются при вызове"
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "int A, B, P;                 // глобальные переменные\nvoid Perimetr()              // без параметров\n{\n    P = 2 * A + 2 * B;\n    cout << P << endl;\n}\nint main()\n{\n    cin >> A >> B;\n    Perimetr();\n    return 0;\n}",
+          "caption": "Подпрограмма без параметров: работает с глобальными переменными"
+        },
+        {
+          "type": "heading",
+          "text": "Значение параметра по умолчанию",
+          "level": 3
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "int add(int a, int b = 5)   // b по умолчанию равно 5\n{\n    return a + b;\n}\nint main()\n{\n    int x;\n    cin >> x;                              // пусть x = 8\n    cout << add(x) << endl;                // 13 (b = 5)\n    cout << add(x, 10) << endl;            // 18 (b = 10)\n    return 0;\n}",
+          "caption": "Если аргумент для b не задан, используется значение по умолчанию"
+        },
+        {
+          "type": "heading",
+          "text": "Параметры разных типов",
+          "level": 3
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "void displayInfo(string name, int age, float height)\n{\n    cout << \"Имя: \" << name << endl;\n    cout << \"Возраст: \" << age << endl;\n    cout << \"Рост: \" << height << \" см\" << endl;\n}",
+          "caption": "Параметры могут иметь разные типы: string, int, float"
+        }
+      ]
+    },
+    {
+      "title": "Локальные и глобальные переменные",
+      "objectives": [
+        "9.4.3.12"
+      ],
+      "blocks": [
+        {
+          "type": "definition",
+          "term": "Локальные переменные",
+          "content": "Принадлежат только подпрограмме (функции), в которой объявлены, и **недоступны** в основной программе."
+        },
+        {
+          "type": "definition",
+          "term": "Глобальные переменные",
+          "content": "Объявлены вне функций и **доступны всем** функциям: основной программе `main()` и подпрограммам."
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "#include <iostream>\nusing namespace std;\nvoid calculateSum()\n{\n    int a = 5;          // локальные переменные подпрограммы\n    int b = 10;\n    int sum = a + b;\n    cout << \"Sum of \" << sum << endl;\n}\nint main()\n{\n    int x = 100;        // локальная переменная main\n    cout << \"Value of x in main: \" << x << endl;\n    calculateSum();\n    return 0;\n}",
+          "caption": "a, b, sum видны только в calculateSum(), x — только в main()"
+        },
+        {
+          "type": "comparison",
+          "title": "Локальные и глобальные",
+          "columns": [
+            "",
+            "Локальные",
+            "Глобальные"
+          ],
+          "rows": [
+            [
+              "Где объявлены",
+              "внутри подпрограммы или main()",
+              "вне функций, в начале программы"
+            ],
+            [
+              "Где доступны",
+              "только в своей функции",
+              "во всех функциях программы"
+            ],
+            [
+              "Пример (Perimetr с параметрами)",
+              "формальные параметры `A`, `B`",
+              "`x`, `y`, `P`"
+            ]
+          ]
+        },
+        {
+          "type": "callout",
+          "tone": "info",
+          "title": "Формальные параметры — тоже локальные",
+          "content": "Формальные параметры подпрограммы являются её локальными переменными: в `int summ(int x, int y)` переменные `x`, `y` (и объявленная внутри `z`) — локальные переменные `summ`, а `a`, `b`, `c`, объявленные в `main()`, — локальные переменные `main`."
+        }
+      ]
+    },
+    {
+      "title": "Программы с подпрограммами",
+      "objectives": [
+        "9.4.3.13"
+      ],
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Факториал числа",
+          "level": 3
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "int fact(int n)\n{\n    int result = 1;\n    for (int i = 1; i <= n; ++i)\n        result *= i;\n    return result;\n}\nint main()\n{\n    int num;\n    cout << \"Введите число : \";\n    cin >> num;\n    cout << \"Факториал = \" << fact(num);\n    return 0;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Проверка простого числа",
+          "level": 3
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "bool prost(int n)\n{\n    if (n <= 1) return false;          // числа <= 1 не простые\n    for (int i = 2; i * i <= n; ++i)\n        if (n % i == 0) return false;  // делится на i — не простое\n    return true;\n}\nint main()\n{\n    int num;\n    cin >> num;\n    if (prost(num)) cout << num << \" — простое число.\" << endl;\n    else cout << num << \" — не простое число.\" << endl;\n    return 0;\n}",
+          "caption": "Функция типа bool возвращает true или false"
+        },
+        {
+          "type": "heading",
+          "text": "Сумма элементов массива",
+          "level": 3
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "int sumArray(int arr[], int size)\n{\n    int sum = 0;\n    for (int i = 0; i < size; i++)\n        sum += arr[i];\n    return sum;\n}",
+          "caption": "Массив и его размер передаются как параметры"
+        },
+        {
+          "type": "heading",
+          "text": "Вызов функции внутри вызова",
+          "level": 3
+        },
+        {
+          "type": "paragraph",
+          "content": "Функцию, которая возвращает значение, можно передать как аргумент другому вызову. Функция максимума из двух чисел находит максимум из трёх и четырёх чисел:"
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "int FindMaximum(int a, int b)\n{\n    if (a > b) return a;\n    else return b;\n}\nint main()\n{\n    int x, y, z, v;\n    cin >> x >> y >> z >> v;\n    cout << \"Max = \" << FindMaximum(FindMaximum(FindMaximum(x, y), z), v) << endl;\n    return 0;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Несколько функций в одной программе",
+          "level": 3
+        },
+        {
+          "type": "paragraph",
+          "content": "Вычислить $y = \\dfrac{2x^5 + 3x^3}{x^5 - x^3}$, создав функции `f5(a)` и `f3(a)`; при $x = 1$ знаменатель равен 0, поэтому сначала проверяем $x \\ne 1$."
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "int f5(int a) { return a * a * a * a * a; }\nint f3(int a) { return a * a * a; }\nint main()\n{\n    int x; float y;\n    cin >> x;\n    if (x != 1)\n    {\n        y = (2 * f5(x) + 3 * f3(x)) / (f5(x) - f3(x));\n        cout << \"y= \" << y;\n    }\n    else cout << \"No\";\n}"
+        },
+        {
+          "type": "diagram",
+          "format": "mermaid",
+          "content": "mindmap\n  root((\"Подпрограммы C++\"))\n    Назначение\n      вызов по имени\n      сокращают код\n      легче найти ошибки\n    Процедура void\n      не возвращает значение\n      вызов отдельной командой\n    Функция int float bool\n      return результат\n      вызов в выражении\n    Параметры\n      формальные в заголовке\n      фактические при вызове\n      значение по умолчанию\n    Переменные\n      локальные в своей функции\n      глобальные для всех",
+          "caption": "Итог раздела"
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "key": "g9-func-def-keyword",
+      "title": "Подпрограмма без возвращаемого значения",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "9.4.3.9"
+      ],
+      "text": "Каким словом в C++ начинается заголовок подпрограммы, которая **не возвращает** значение в место вызова?",
+      "source": "teacher",
+      "source_reference": "2_ПодпрогПродолжение.pptx, слайд 2",
+      "practice": true,
+      "options": [
+        {
+          "key": "A",
+          "content": "int"
+        },
+        {
+          "key": "B",
+          "content": "void"
+        },
+        {
+          "key": "C",
+          "content": "return"
+        },
+        {
+          "key": "D",
+          "content": "main"
+        }
+      ],
+      "scheme": {
+        "mark_scheme": "",
+        "accepted": {
+          "correct": "B"
+        },
+        "explanation": "Функция void — подпрограмма, которая не возвращает результат."
+      }
+    },
+    {
+      "key": "fn9-subprog-def",
+      "title": "Что такое подпрограмма",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "define",
+      "grading": "AUTO",
+      "objectives": [
+        "9.4.3.9"
+      ],
+      "text": "Что такое **подпрограмма**?",
+      "source": "teacher",
+      "source_reference": "1_Подпрограммы.pptx, слайд 5",
+      "practice": true,
+      "options": [
+        {
+          "key": "A",
+          "content": "Набор команд, который можно вызывать по имени несколько раз в главной программе"
+        },
+        {
+          "key": "B",
+          "content": "Библиотека, которую подключают командой #include"
+        },
+        {
+          "key": "C",
+          "content": "Переменная, доступная всем функциям программы"
+        },
+        {
+          "key": "D",
+          "content": "Команда, которая завершает программу"
+        }
+      ],
+      "scheme": {
+        "mark_scheme": "",
+        "accepted": {
+          "correct": "A"
+        }
+      }
+    },
+    {
+      "key": "fn9-advantages",
+      "title": "Преимущества подпрограмм",
+      "type": "multiple_response",
+      "marks": 2,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "9.4.3.10"
+      ],
+      "text": "Выберите **все** преимущества использования подпрограмм.",
+      "source": "teacher",
+      "source_reference": "1_Подпрограммы.pptx, слайд 5",
+      "practice": true,
+      "options": [
+        {
+          "key": "A",
+          "content": "Сокращают код"
+        },
+        {
+          "key": "B",
+          "content": "Облегчают понимание программы"
+        },
+        {
+          "key": "C",
+          "content": "Избавляют от многократно повторяющихся фрагментов кода"
+        },
+        {
+          "key": "D",
+          "content": "В коде подпрограммы легко найти и исправить ошибки"
+        },
+        {
+          "key": "E",
+          "content": "Позволяют не объявлять переменные"
+        },
+        {
+          "key": "F",
+          "content": "Делают функцию main() ненужной"
+        }
+      ],
+      "scheme": {
+        "mark_scheme": "",
+        "accepted": {
+          "correct": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ]
+        }
+      }
+    },
+    {
+      "key": "fn9-simplify",
+      "title": "Как упростить повторяющийся код",
+      "type": "short_answer",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "explain",
+      "grading": "AI",
+      "objectives": [
+        "9.4.3.10"
+      ],
+      "text": "Программа выводит приветствие для пяти учеников:\n\n```cpp\ncout << \"Good morning, \" << s1 << \"!\\n\";\ncout << \"Good morning, \" << s2 << \"!\\n\";\ncout << \"Good morning, \" << s3 << \"!\\n\";\ncout << \"Good morning, \" << s4 << \"!\\n\";\ncout << \"Good morning, \" << s5 << \"!\\n\";\n```\n\nКак упростить этот код?",
+      "source": "teacher",
+      "source_reference": "1_Подпрограммы.pptx, слайд 4 (сюжет изменён)",
+      "practice": true,
+      "content": {
+        "answer_lines": 2
+      },
+      "scheme": {
+        "mark_scheme": "Повторяющийся фрагмент вынести в подпрограмму (с параметром-именем) и вызывать её для каждого ученика (1).",
+        "points": [
+          {
+            "criterion": "Вынести повторяющийся фрагмент в подпрограмму и вызывать её",
+            "marks": 1
+          }
+        ],
+        "model_answer": "Фрагмент повторяется несколько раз, поэтому его лучше оформить в подпрограмму, например `void hello(string name)`, и вызвать её 5 раз: `hello(s1); … hello(s5);`."
+      }
+    },
+    {
+      "key": "fn9-void-vs-func",
+      "title": "Процедура, функция, return, main",
+      "type": "matching",
+      "marks": 2,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "9.4.3.9"
+      ],
+      "text": "Сопоставьте понятие и его описание.",
+      "source": "teacher",
+      "source_reference": "2_ПодпрогПродолжение.pptx, слайды 2, 4–5; 1_Подпрограммы.pptx, слайд 4",
+      "practice": true,
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "Функция void"
+          },
+          {
+            "key": "L2",
+            "text": "Функция типа int, float"
+          },
+          {
+            "key": "L3",
+            "text": "return"
+          },
+          {
+            "key": "L4",
+            "text": "main()"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "подпрограмма, которая не возвращает значение в место вызова"
+          },
+          {
+            "key": "R2",
+            "text": "подпрограмма, которая возвращает результат; перед заголовком указан тип"
+          },
+          {
+            "key": "R3",
+            "text": "команда, которая указывает, что нужно передать основной программе"
+          },
+          {
+            "key": "R4",
+            "text": "главная (основная) функция программы"
+          }
+        ]
+      },
+      "scheme": {
+        "mark_scheme": "",
+        "accepted": {
+          "pairs": {
+            "L1": "R1",
+            "L2": "R2",
+            "L3": "R3",
+            "L4": "R4"
+          }
+        }
+      }
+    },
+    {
+      "key": "fn9-call-in-expr",
+      "title": "Вызов void в выражении",
+      "type": "true_false",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "state",
+      "grading": "AUTO",
+      "objectives": [
+        "9.4.3.9"
+      ],
+      "text": "Вызов функции `void` можно записать в составе выражения, например `cout << message();`.",
+      "source": "teacher",
+      "source_reference": "2_ПодпрогПродолжение.pptx, слайд 4",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "",
+        "accepted": {
+          "correct": false
+        },
+        "explanation": "Вызов void требует отдельной записи; в составе выражения можно вызывать только функцию, которая возвращает значение."
+      }
+    },
+    {
+      "key": "fn9-system-func",
+      "title": "Системная функция",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "9.4.3.9"
+      ],
+      "text": "Какая из функций является **системной (библиотечной)**?",
+      "source": "teacher",
+      "source_reference": "2_ПодпрогПродолжение.pptx, слайд 3",
+      "practice": true,
+      "options": [
+        {
+          "key": "A",
+          "content": "pow"
+        },
+        {
+          "key": "B",
+          "content": "FindMaximum"
+        },
+        {
+          "key": "C",
+          "content": "fact"
+        },
+        {
+          "key": "D",
+          "content": "laminatecount"
+        }
+      ],
+      "scheme": {
+        "mark_scheme": "",
+        "accepted": {
+          "correct": "A"
+        },
+        "explanation": "pow хранится в стандартной библиотеке cmath; остальные функции программист пишет сам."
+      }
+    },
+    {
+      "key": "fn9-func-parts",
+      "title": "Из чего состоит функция",
+      "type": "multiple_response",
+      "marks": 2,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "9.4.3.9"
+      ],
+      "text": "Что **должно быть** у функции типа int, float и т. д.? Выберите все верные ответы.",
+      "source": "teacher",
+      "source_reference": "2_ПодпрогПродолжение.pptx, слайд 5",
+      "practice": true,
+      "options": [
+        {
+          "key": "A",
+          "content": "Тип возвращаемого значения"
+        },
+        {
+          "key": "B",
+          "content": "Имя функции"
+        },
+        {
+          "key": "C",
+          "content": "Тело функции { }"
+        },
+        {
+          "key": "D",
+          "content": "Команда возврата return"
+        },
+        {
+          "key": "E",
+          "content": "Команда ввода cin"
+        },
+        {
+          "key": "F",
+          "content": "Глобальная переменная"
+        }
+      ],
+      "scheme": {
+        "mark_scheme": "",
+        "accepted": {
+          "correct": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ]
+        },
+        "explanation": "Также в заголовке указывается информация о формальных аргументах."
+      }
+    },
+    {
+      "key": "fn9-formal-actual",
+      "title": "Формальные и фактические параметры",
+      "type": "fill_blank",
+      "marks": 2,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "9.4.3.11"
+      ],
+      "text": "```cpp\nint diff(int p, int q)\n{\n    return p - q;\n}\nint main()\n{\n    int m, n;\n    cin >> m >> n;\n    cout << diff(m, n);\n}\n```\n\nФормальные параметры: [[1]] и [[2]]. Фактические параметры: [[3]] и [[4]].",
+      "source": "teacher",
+      "source_reference": "2_ПодпрогПродолжение.pptx, слайд 8; 1_Подпрограммы.pptx, слайды 7–8 (имена изменены)",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "",
+        "accepted": {
+          "blanks": [
+            [
+              "p"
+            ],
+            [
+              "q"
+            ],
+            [
+              "m"
+            ],
+            [
+              "n"
+            ]
+          ]
+        },
+        "explanation": "Формальные параметры записаны в заголовке функции, фактические — при её вызове."
+      }
+    },
+    {
+      "key": "fn9-swap-output",
+      "title": "Что выведет процедура",
+      "type": "short_answer",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "state",
+      "grading": "AUTO",
+      "objectives": [
+        "9.4.3.11"
+      ],
+      "text": "```cpp\nvoid P1(int x, int y, int z)\n{\n    x = y; y = z; z = x;\n    cout << x << y << z;\n}\n```\n\nЧто выведет вызов `P1(4, 5, 6);`?",
+      "source": "teacher",
+      "source_reference": "1_Подпрограммы.pptx, слайд 6 (числа изменены)",
+      "practice": true,
+      "content": {
+        "answer_lines": 1
+      },
+      "scheme": {
+        "mark_scheme": "565",
+        "accepted": {
+          "values": [
+            "565"
+          ]
+        },
+        "model_answer": "565",
+        "explanation": "x = 5, y = 6, z = x = 5; числа выводятся без пробелов."
+      }
+    },
+    {
+      "key": "fn9-default",
+      "title": "Значение по умолчанию",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "9.4.3.11"
+      ],
+      "text": "```cpp\nint add(int a, int b = 3)\n{\n    return a + b;\n}\n```\n\nКакое число выведет команда `cout << add(4) + add(4, 2);`?",
+      "source": "teacher",
+      "source_reference": "1_Подпрограммы.pptx, слайд 9 (числа изменены)",
+      "practice": true,
+      "content": {
+        "hint": "Если второй аргумент не задан, b = 3."
+      },
+      "scheme": {
+        "mark_scheme": "",
+        "accepted": {
+          "values": [
+            "13"
+          ],
+          "numeric": true,
+          "tolerance": 0
+        },
+        "explanation": "add(4) = 4 + 3 = 7, add(4, 2) = 6; 7 + 6 = 13."
+      }
+    },
+    {
+      "key": "fn9-param-type",
+      "title": "Тип параметра",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "9.4.3.11"
+      ],
+      "text": "```cpp\nvoid displayInfo(string name, int age, float height)\n```\n\nСколько параметров у подпрограммы и какой тип у параметра `height`?",
+      "source": "teacher",
+      "source_reference": "1_Подпрограммы.pptx, слайд 10",
+      "practice": true,
+      "options": [
+        {
+          "key": "A",
+          "content": "3 параметра, float"
+        },
+        {
+          "key": "B",
+          "content": "3 параметра, int"
+        },
+        {
+          "key": "C",
+          "content": "1 параметр, string"
+        },
+        {
+          "key": "D",
+          "content": "Параметров нет, float"
+        }
+      ],
+      "scheme": {
+        "mark_scheme": "",
+        "accepted": {
+          "correct": "A"
+        },
+        "explanation": "Функция может иметь параметры разных типов."
+      }
+    },
+    {
+      "key": "fn9-kv",
+      "title": "Значение функции kv",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "9.4.3.13"
+      ],
+      "text": "```cpp\nint kv(int n)\n{\n    return n * n;\n}\n```\n\nКакое число выведет команда `cout << kv(3) + kv(4);`?",
+      "source": "teacher",
+      "source_reference": "2_ПодпрогПродолжение.pptx, слайд 5 (числа изменены)",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "",
+        "accepted": {
+          "values": [
+            "25"
+          ],
+          "numeric": true,
+          "tolerance": 0
+        },
+        "explanation": "9 + 16 = 25."
+      }
+    },
+    {
+      "key": "fn9-nested-min",
+      "title": "Минимум из четырёх",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "9.4.3.13"
+      ],
+      "text": "```cpp\nint FindMinimum(int a, int b)\n{\n    if (a < b) return a;\n    else return b;\n}\n```\n\nКакое число выведет `cout << FindMinimum(FindMinimum(FindMinimum(8, 3), 5), 6);`?",
+      "source": "teacher",
+      "source_reference": "3 ур Процедуры Функции.pptx, слайд 11 (числа изменены)",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "",
+        "accepted": {
+          "values": [
+            "3"
+          ],
+          "numeric": true,
+          "tolerance": 0
+        },
+        "explanation": "min(8, 3) = 3; min(3, 5) = 3; min(3, 6) = 3."
+      }
+    },
+    {
+      "key": "fn9-global-def",
+      "title": "Переменная, доступная всем",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "9.4.3.12"
+      ],
+      "text": "Как называется переменная, которая доступна всем функциям программы — и `main()`, и подпрограммам?",
+      "source": "teacher",
+      "source_reference": "2_ПодпрогПродолжение.pptx, слайд 6",
+      "practice": true,
+      "options": [
+        {
+          "key": "A",
+          "content": "Локальная"
+        },
+        {
+          "key": "B",
+          "content": "Глобальная"
+        },
+        {
+          "key": "C",
+          "content": "Формальная"
+        },
+        {
+          "key": "D",
+          "content": "Фактическая"
+        }
+      ],
+      "scheme": {
+        "mark_scheme": "",
+        "accepted": {
+          "correct": "B"
+        }
+      }
+    },
+    {
+      "key": "fn9-local-access",
+      "title": "Доступ к локальной переменной",
+      "type": "true_false",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "state",
+      "grading": "AUTO",
+      "objectives": [
+        "9.4.3.12"
+      ],
+      "text": "Переменную, объявленную внутри подпрограммы, можно вывести на экран командой в `main()`.",
+      "source": "teacher",
+      "source_reference": "2_ПодпрогПродолжение.pptx, слайд 6",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "",
+        "accepted": {
+          "correct": false
+        },
+        "explanation": "Локальные переменные принадлежат только подпрограмме и недоступны в основной программе."
+      }
+    },
+    {
+      "key": "fn9-identify-vars",
+      "title": "Виды переменных в программе",
+      "type": "matching",
+      "marks": 2,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "9.4.3.11",
+        "9.4.3.12"
+      ],
+      "text": "```cpp\nint k = 2;\nvoid show(int t)\n{\n    int r = t * k;\n    cout << r;\n}\nint main()\n{\n    int v = 7;\n    show(v);\n    return 0;\n}\n```\n\nСопоставьте имя и его роль в программе.",
+      "source": "teacher",
+      "source_reference": "2_ПодпрогПродолжение.pptx, слайды 6, 8, 10–11; 3 ур Процедуры Функции.pptx, слайд 10",
+      "practice": true,
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "k"
+          },
+          {
+            "key": "L2",
+            "text": "r"
+          },
+          {
+            "key": "L3",
+            "text": "t"
+          },
+          {
+            "key": "L4",
+            "text": "v"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "глобальная переменная"
+          },
+          {
+            "key": "R2",
+            "text": "локальная переменная, объявленная в теле show"
+          },
+          {
+            "key": "R3",
+            "text": "формальный параметр"
+          },
+          {
+            "key": "R4",
+            "text": "фактический параметр (локальная переменная main)"
+          }
+        ]
+      },
+      "scheme": {
+        "mark_scheme": "",
+        "accepted": {
+          "pairs": {
+            "L1": "R1",
+            "L2": "R2",
+            "L3": "R3",
+            "L4": "R4"
+          }
+        }
+      }
+    },
+    {
+      "key": "fn9-area-noparams",
+      "title": "Подпрограмма без параметров",
+      "type": "fill_blank",
+      "marks": 2,
+      "difficulty": "medium",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "9.4.3.12",
+        "9.4.3.13"
+      ],
+      "text": "Подпрограмма без параметров вычисляет площадь прямоугольника, используя глобальные переменные. Дополните код.\n\n```cpp\nint A, B, S;   // глобальные переменные\nvoid Area()\n{\n    S = ___1___;\n    cout << S << endl;\n}\nint main()\n{\n    cin >> A >> B;\n    ___2___;\n    return 0;\n}\n```\n\n1: [[1]]  2: [[2]]",
+      "source": "teacher",
+      "source_reference": "2_ПодпрогПродолжение.pptx, слайд 11 (периметр заменён площадью)",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "",
+        "accepted": {
+          "blanks": [
+            [
+              "A*B",
+              "A * B",
+              "B*A",
+              "B * A"
+            ],
+            [
+              "Area()",
+              "Area();"
+            ]
+          ]
+        },
+        "explanation": "Глобальные A и B доступны в подпрограмме; подпрограмму без параметров вызывают с пустыми скобками."
+      }
+    },
+    {
+      "key": "fn9-fact-trace",
+      "title": "Трассировка fact(4)",
+      "type": "trace_table",
+      "marks": 4,
+      "difficulty": "medium",
+      "command_word": "complete",
+      "grading": "HYBRID",
+      "objectives": [
+        "9.4.3.13"
+      ],
+      "text": "```cpp\nint fact(int n)\n{\n    int result = 1;\n    for (int i = 1; i <= n; ++i)\n        result *= i;\n    return result;\n}\n```\n\nЗаполните трассировочную таблицу для вызова `fact(4)`: по строке на каждый виток цикла (значение i и result **после** выполнения `result *= i`).",
+      "source": "teacher",
+      "source_reference": "1_Подпрограммы.pptx, слайд 13",
+      "practice": true,
+      "content": {
+        "columns": [
+          "i",
+          "result"
+        ],
+        "rows": 4
+      },
+      "scheme": {
+        "mark_scheme": "По 1 баллу за строку: 1 1; 2 2; 3 6; 4 24.",
+        "points": [
+          {
+            "criterion": "Строка 1",
+            "marks": 1
+          },
+          {
+            "criterion": "Строка 2",
+            "marks": 1
+          },
+          {
+            "criterion": "Строка 3",
+            "marks": 1
+          },
+          {
+            "criterion": "Строка 4",
+            "marks": 1
+          }
+        ],
+        "model_answer": "| i | result |\n|---|---|\n| 1 | 1 |\n| 2 | 2 |\n| 3 | 6 |\n| 4 | 24 |",
+        "accepted": {
+          "rows": [
+            [
+              "1",
+              "1"
+            ],
+            [
+              "2",
+              "2"
+            ],
+            [
+              "3",
+              "6"
+            ],
+            [
+              "4",
+              "24"
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "key": "fn9-prost",
+      "title": "Функция prost",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "analyse",
+      "grading": "AUTO",
+      "objectives": [
+        "9.4.3.13"
+      ],
+      "text": "```cpp\nbool prost(int n)\n{\n    if (n <= 1) return false;\n    for (int i = 2; i * i <= n; ++i)\n        if (n % i == 0) return false;\n    return true;\n}\n```\n\nПри каком значении аргумента функция вернёт `true`?",
+      "source": "teacher",
+      "source_reference": "1_Подпрограммы.pptx, слайд 16",
+      "practice": true,
+      "options": [
+        {
+          "key": "A",
+          "content": "1"
+        },
+        {
+          "key": "B",
+          "content": "9"
+        },
+        {
+          "key": "C",
+          "content": "13"
+        },
+        {
+          "key": "D",
+          "content": "15"
+        }
+      ],
+      "scheme": {
+        "mark_scheme": "",
+        "accepted": {
+          "correct": "C"
+        },
+        "explanation": "13 не делится ни на 2, ни на 3; 1 — не простое, 9 делится на 3, 15 делится на 3."
+      }
+    },
+    {
+      "key": "fn9-write-odd",
+      "title": "Функция Odd",
+      "type": "code_completion",
+      "marks": 3,
+      "difficulty": "medium",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "9.4.3.13"
+      ],
+      "text": "Напишите функцию `bool Odd(int n)`, которая возвращает `true`, если число **нечётное**, иначе `false`. В `main()` введите число и с помощью функции выведите «нечётное» или «чётное».",
+      "source": "teacher",
+      "source_reference": "2_ПодпрогПродолжение.pptx, слайд 13 (условие изменено); 1_Подпрограммы.pptx, слайд 16",
+      "practice": true,
+      "content": {
+        "starter_code": "#include <iostream>\nusing namespace std;\n"
+      },
+      "scheme": {
+        "mark_scheme": "- заголовок bool Odd(int n) (1)\n- верное условие n % 2 != 0 и return true / false (1)\n- ввод в main и вызов Odd в условии if с выводом (1)",
+        "points": [
+          {
+            "criterion": "Заголовок функции bool с параметром",
+            "marks": 1
+          },
+          {
+            "criterion": "Условие и return true/false",
+            "marks": 1
+          },
+          {
+            "criterion": "Ввод, вызов в if, вывод",
+            "marks": 1
+          }
+        ],
+        "model_answer": "```cpp\n#include <iostream>\nusing namespace std;\nbool Odd(int n)\n{\n    if (n % 2 != 0) return true;\n    else return false;\n}\nint main()\n{\n    int x;\n    cin >> x;\n    if (Odd(x)) cout << \"нечётное\";\n    else cout << \"чётное\";\n    return 0;\n}\n```",
+        "ai_instructions": "Ответ на C++. Принимать эквивалентные решения (return n % 2 != 0; n % 2 == 1; другие имена). Мелкие опечатки синтаксиса не снижают балл, если логика верна."
+      }
+    },
+    {
+      "key": "fn9-proc-to-func",
+      "title": "Процедуру — в функцию",
+      "type": "code_completion",
+      "marks": 3,
+      "difficulty": "hard",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "9.4.3.9",
+        "9.4.3.13"
+      ],
+      "text": "Перепишите процедуру в **функцию, которая возвращает** меньшее из двух чисел, и вызовите её в `main()` в составе команды вывода.\n\n```cpp\nvoid FindMin(int a, int b)\n{\n    if (a < b) cout << \"Min = \" << a;\n    else cout << \"Min = \" << b;\n}\nint main()\n{\n    int x, y;\n    cin >> x >> y;\n    FindMin(x, y);\n    return 0;\n}\n```",
+      "source": "teacher",
+      "source_reference": "3 ур Процедуры Функции.pptx, слайды 6–8, 11–12",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "- тип int вместо void (1)\n- return a / return b вместо вывода (1)\n- вызов в выражении: cout << \"Min = \" << FindMin(x, y) (1)",
+        "points": [
+          {
+            "criterion": "Тип возвращаемого значения int",
+            "marks": 1
+          },
+          {
+            "criterion": "return вместо cout в теле",
+            "marks": 1
+          },
+          {
+            "criterion": "Вызов в составе вывода",
+            "marks": 1
+          }
+        ],
+        "model_answer": "```cpp\nint FindMin(int a, int b)\n{\n    if (a < b) return a;\n    else return b;\n}\nint main()\n{\n    int x, y;\n    cin >> x >> y;\n    cout << \"Min = \" << FindMin(x, y);\n    return 0;\n}\n```",
+        "ai_instructions": "Ответ на C++. Принимать другие имена и эквивалентную запись условия."
+      }
+    },
+    {
+      "key": "fn9-sum-yes-no",
+      "title": "YES или NO с функцией",
+      "type": "code_completion",
+      "marks": 3,
+      "difficulty": "medium",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "9.4.3.13"
+      ],
+      "text": "Дана функция:\n\n```cpp\nint sum(int a, int b)\n{\n    return a + b;\n}\n```\n\nНапишите `main()`: ввести два натуральных числа и с помощью функции `sum` вывести YES, если их сумма больше 100, иначе — NO.",
+      "source": "teacher",
+      "source_reference": "2_ПодпрогПродолжение.pptx, слайд 12 (функция и условие изменены)",
+      "practice": true,
+      "content": {
+        "starter_code": "#include <iostream>\nusing namespace std;\nint sum(int a, int b)\n{\n    return a + b;\n}\n"
+      },
+      "scheme": {
+        "mark_scheme": "- объявление и ввод двух чисел (1)\n- вызов sum(…) в условии: sum(x, y) > 100 (1)\n- вывод YES / NO в ветвях (1)",
+        "points": [
+          {
+            "criterion": "Ввод двух чисел",
+            "marks": 1
+          },
+          {
+            "criterion": "Вызов функции в условии",
+            "marks": 1
+          },
+          {
+            "criterion": "Вывод YES/NO",
+            "marks": 1
+          }
+        ],
+        "model_answer": "```cpp\nint main()\n{\n    int x, y;\n    cin >> x >> y;\n    if (sum(x, y) > 100) cout << \"YES\";\n    else cout << \"NO\";\n    return 0;\n}\n```",
+        "ai_instructions": "Ответ на C++. Допустимо сохранить результат sum в переменную перед if."
+      }
+    },
+    {
+      "key": "fn9-ex-1",
+      "title": "Преимущества подпрограмм",
+      "type": "short_answer",
+      "marks": 2,
+      "difficulty": "exam",
+      "command_word": "explain",
+      "grading": "AI",
+      "objectives": [
+        "9.4.3.10"
+      ],
+      "text": "Программист заметил, что один и тот же фрагмент кода повторяется в его программе пять раз. Объясните **два** преимущества, которые он получит, если оформит этот фрагмент в подпрограмму.",
+      "source": "teacher",
+      "source_reference": "1_Подпрограммы.pptx, слайды 4–5, 11",
+      "practice": false,
+      "content": {
+        "answer_lines": 3
+      },
+      "scheme": {
+        "mark_scheme": "Любые два по 1 баллу: сокращает код; облегчает понимание программы; избавляет от многократно повторяющихся фрагментов; в подпрограмме легко найти и исправить ошибку.",
+        "points": [
+          {
+            "criterion": "Первое преимущество",
+            "marks": 1
+          },
+          {
+            "criterion": "Второе преимущество",
+            "marks": 1
+          }
+        ],
+        "model_answer": "Код станет короче (фрагмент записан один раз и вызывается по имени), и в нём легче найти и исправить ошибку — исправлять нужно только в подпрограмме."
+      }
+    },
+    {
+      "key": "fn9-ex-2",
+      "title": "Процедура и функция",
+      "type": "structured",
+      "marks": 3,
+      "difficulty": "exam",
+      "command_word": null,
+      "grading": "AI",
+      "objectives": [],
+      "text": "Ответьте на вопросы о процедурах и функциях.",
+      "source": "teacher",
+      "source_reference": "2_ПодпрогПродолжение.pptx, слайды 2, 4–5; 3 ур Процедуры Функции.pptx, слайды 7–8",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": ""
+      },
+      "parts": [
+        {
+          "key": "fn9-ex2-a",
+          "title": "Главное отличие",
+          "type": "short_answer",
+          "marks": 1,
+          "difficulty": "exam",
+          "command_word": "explain",
+          "grading": "AI",
+          "objectives": [
+            "9.4.3.9"
+          ],
+          "text": "Чем функция (типа int, float, …) отличается от процедуры (void) по результату работы?",
+          "source": "teacher",
+          "source_reference": "3 ур Процедуры Функции.pptx, слайд 7; 2_ПодпрогПродолжение.pptx, слайд 4",
+          "practice": false,
+          "part_label": "(a)",
+          "content": {
+            "answer_lines": 2
+          },
+          "scheme": {
+            "mark_scheme": "Функция возвращает значение (результат) в место вызова через return, процедура — нет (1).",
+            "points": [
+              {
+                "criterion": "Функция возвращает значение, процедура нет",
+                "marks": 1
+              }
+            ],
+            "model_answer": "Функция возвращает единственный результат в место вызова (return), а процедура только выполняет команды и ничего не возвращает."
+          }
+        },
+        {
+          "key": "fn9-ex2-b",
+          "title": "Заголовок функции",
+          "type": "short_answer",
+          "marks": 1,
+          "difficulty": "exam",
+          "command_word": "write",
+          "grading": "AI",
+          "objectives": [
+            "9.4.3.9",
+            "9.4.3.11"
+          ],
+          "text": "Запишите заголовок (первую строку) функции `avg`, которая принимает два **вещественных** числа и возвращает вещественный результат.",
+          "source": "teacher",
+          "source_reference": "2_ПодпрогПродолжение.pptx, слайды 5, 8",
+          "practice": false,
+          "part_label": "(b)",
+          "content": {
+            "answer_lines": 1
+          },
+          "scheme": {
+            "mark_scheme": "float avg(float a, float b) — тип результата float/double и два вещественных параметра (1).",
+            "points": [
+              {
+                "criterion": "Верный тип результата и два вещественных параметра",
+                "marks": 1
+              }
+            ],
+            "model_answer": "`float avg(float a, float b)`"
+          }
+        },
+        {
+          "key": "fn9-ex2-c",
+          "title": "Вызов в выражении",
+          "type": "true_false",
+          "marks": 1,
+          "difficulty": "exam",
+          "command_word": "state",
+          "grading": "AUTO",
+          "objectives": [
+            "9.4.3.9"
+          ],
+          "text": "Вызов функции, которая возвращает значение, можно записать в составе выражения, например `y = 2 * kv(x);`.",
+          "source": "teacher",
+          "source_reference": "2_ПодпрогПродолжение.pptx, слайд 4",
+          "practice": false,
+          "part_label": "(c)",
+          "scheme": {
+            "mark_scheme": "",
+            "accepted": {
+              "correct": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "key": "fn9-ex-3",
+      "title": "Параметры функции price",
+      "type": "structured",
+      "marks": 3,
+      "difficulty": "exam",
+      "command_word": null,
+      "grading": "AI",
+      "objectives": [],
+      "text": "```cpp\nint price(int count, int cost = 200)\n{\n    return count * cost;\n}\nint main()\n{\n    int n;\n    cin >> n;\n    cout << price(n) << \" \" << price(n, 150);\n    return 0;\n}\n```",
+      "source": "teacher",
+      "source_reference": "1_Подпрограммы.pptx, слайды 6–9; 2_ПодпрогПродолжение.pptx, слайд 8",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": ""
+      },
+      "parts": [
+        {
+          "key": "fn9-ex3-a",
+          "title": "Формальные параметры",
+          "type": "short_answer",
+          "marks": 1,
+          "difficulty": "exam",
+          "command_word": "identify",
+          "grading": "AUTO",
+          "objectives": [
+            "9.4.3.11"
+          ],
+          "text": "Выпишите формальные параметры функции `price`.",
+          "source": "teacher",
+          "source_reference": "2_ПодпрогПродолжение.pptx, слайд 8",
+          "practice": false,
+          "part_label": "(a)",
+          "content": {
+            "answer_lines": 1
+          },
+          "scheme": {
+            "mark_scheme": "count, cost",
+            "accepted": {
+              "values": [
+                "count, cost",
+                "count cost",
+                "count и cost",
+                "count,cost"
+              ]
+            },
+            "model_answer": "count, cost"
+          }
+        },
+        {
+          "key": "fn9-ex3-b",
+          "title": "Аргументы второго вызова",
+          "type": "short_answer",
+          "marks": 1,
+          "difficulty": "exam",
+          "command_word": "identify",
+          "grading": "AUTO",
+          "objectives": [
+            "9.4.3.11"
+          ],
+          "text": "Выпишите фактические параметры (аргументы) **второго** вызова функции.",
+          "source": "teacher",
+          "source_reference": "2_ПодпрогПродолжение.pptx, слайд 8; 1_Подпрограммы.pptx, слайд 6",
+          "practice": false,
+          "part_label": "(b)",
+          "content": {
+            "answer_lines": 1
+          },
+          "scheme": {
+            "mark_scheme": "n, 150",
+            "accepted": {
+              "values": [
+                "n, 150",
+                "n 150",
+                "n и 150",
+                "n,150"
+              ]
+            },
+            "model_answer": "n, 150"
+          }
+        },
+        {
+          "key": "fn9-ex3-c",
+          "title": "Результат программы",
+          "type": "short_answer",
+          "marks": 1,
+          "difficulty": "exam",
+          "command_word": "state",
+          "grading": "AUTO",
+          "objectives": [
+            "9.4.3.11"
+          ],
+          "text": "Что выведет программа, если ввести n = 3?",
+          "source": "teacher",
+          "source_reference": "1_Подпрограммы.pptx, слайд 9",
+          "practice": false,
+          "part_label": "(c)",
+          "content": {
+            "answer_lines": 1
+          },
+          "scheme": {
+            "mark_scheme": "600 450",
+            "accepted": {
+              "values": [
+                "600 450"
+              ]
+            },
+            "model_answer": "600 450",
+            "explanation": "price(3) = 3 · 200 (значение по умолчанию); price(3, 150) = 450."
+          }
+        }
+      ]
+    },
+    {
+      "key": "fn9-ex-4",
+      "title": "Локальные и глобальные переменные",
+      "type": "structured",
+      "marks": 4,
+      "difficulty": "exam",
+      "command_word": null,
+      "grading": "AI",
+      "objectives": [],
+      "text": "```cpp\nint total = 0;\nvoid addScore(int s)\n{\n    int bonus = 5;\n    total = total + s + bonus;\n}\nint main()\n{\n    int a = 10;\n    addScore(a);\n    addScore(3);\n    cout << total;\n    return 0;\n}\n```",
+      "source": "teacher",
+      "source_reference": "2_ПодпрогПродолжение.pptx, слайды 6, 10–11",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": ""
+      },
+      "parts": [
+        {
+          "key": "fn9-ex4-a",
+          "title": "Глобальная переменная",
+          "type": "short_answer",
+          "marks": 1,
+          "difficulty": "exam",
+          "command_word": "identify",
+          "grading": "AUTO",
+          "objectives": [
+            "9.4.3.12"
+          ],
+          "text": "Выпишите глобальную переменную.",
+          "source": "teacher",
+          "source_reference": "2_ПодпрогПродолжение.pptx, слайды 6, 11",
+          "practice": false,
+          "part_label": "(a)",
+          "content": {
+            "answer_lines": 1
+          },
+          "scheme": {
+            "mark_scheme": "total",
+            "accepted": {
+              "values": [
+                "total"
+              ]
+            },
+            "model_answer": "total"
+          }
+        },
+        {
+          "key": "fn9-ex4-b",
+          "title": "Локальная переменная подпрограммы",
+          "type": "short_answer",
+          "marks": 1,
+          "difficulty": "exam",
+          "command_word": "identify",
+          "grading": "AUTO",
+          "objectives": [
+            "9.4.3.12"
+          ],
+          "text": "Выпишите локальную переменную, **объявленную в теле** `addScore`.",
+          "source": "teacher",
+          "source_reference": "2_ПодпрогПродолжение.pptx, слайд 6",
+          "practice": false,
+          "part_label": "(b)",
+          "content": {
+            "answer_lines": 1
+          },
+          "scheme": {
+            "mark_scheme": "bonus",
+            "accepted": {
+              "values": [
+                "bonus"
+              ]
+            },
+            "model_answer": "bonus"
+          }
+        },
+        {
+          "key": "fn9-ex4-c",
+          "title": "Результат",
+          "type": "calculation",
+          "marks": 1,
+          "difficulty": "exam",
+          "command_word": "calculate",
+          "grading": "AUTO",
+          "objectives": [
+            "9.4.3.12",
+            "9.4.3.13"
+          ],
+          "text": "Какое число выведет программа?",
+          "source": "teacher",
+          "source_reference": "2_ПодпрогПродолжение.pptx, слайды 6, 11",
+          "practice": false,
+          "part_label": "(c)",
+          "scheme": {
+            "mark_scheme": "",
+            "accepted": {
+              "values": [
+                "23"
+              ],
+              "numeric": true,
+              "tolerance": 0
+            },
+            "explanation": "0 + 10 + 5 = 15; 15 + 3 + 5 = 23."
+          }
+        },
+        {
+          "key": "fn9-ex4-d",
+          "title": "Почему нельзя вывести bonus",
+          "type": "short_answer",
+          "marks": 1,
+          "difficulty": "exam",
+          "command_word": "explain",
+          "grading": "AI",
+          "objectives": [
+            "9.4.3.12"
+          ],
+          "text": "Почему команда `cout << bonus;` в `main()` вызовет ошибку?",
+          "source": "teacher",
+          "source_reference": "2_ПодпрогПродолжение.pptx, слайд 6",
+          "practice": false,
+          "part_label": "(d)",
+          "content": {
+            "answer_lines": 2
+          },
+          "scheme": {
+            "mark_scheme": "bonus — локальная переменная addScore, принадлежит только подпрограмме и недоступна в основной программе (1).",
+            "points": [
+              {
+                "criterion": "Локальная переменная недоступна в main",
+                "marks": 1
+              }
+            ],
+            "model_answer": "bonus — локальная переменная подпрограммы addScore: она принадлежит только этой подпрограмме и недоступна в main()."
+          }
+        }
+      ]
+    },
+    {
+      "key": "fn9-ex-5",
+      "title": "Максимум из трёх через функцию",
+      "type": "code_completion",
+      "marks": 4,
+      "difficulty": "exam",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "9.4.3.13"
+      ],
+      "text": "Напишите функцию `int Max2(int a, int b)`, которая **возвращает** большее из двух чисел. В `main()` введите три целых числа и, вызывая только `Max2`, выведите наибольшее из них.",
+      "source": "teacher",
+      "source_reference": "3 ур Процедуры Функции.pptx, слайды 8–10",
+      "practice": false,
+      "content": {
+        "starter_code": "#include <iostream>\nusing namespace std;\n"
+      },
+      "scheme": {
+        "mark_scheme": "- заголовок int Max2(int a, int b) (1)\n- верное сравнение и return большего (1)\n- ввод трёх чисел в main (1)\n- вложенный вызов Max2(Max2(x, y), z) или два вызова с промежуточной переменной и вывод (1)",
+        "points": [
+          {
+            "criterion": "Заголовок функции",
+            "marks": 1
+          },
+          {
+            "criterion": "Сравнение и return",
+            "marks": 1
+          },
+          {
+            "criterion": "Ввод трёх чисел",
+            "marks": 1
+          },
+          {
+            "criterion": "Вызовы Max2 и вывод результата",
+            "marks": 1
+          }
+        ],
+        "model_answer": "```cpp\n#include <iostream>\nusing namespace std;\nint Max2(int a, int b)\n{\n    if (a > b) return a;\n    else return b;\n}\nint main()\n{\n    int x, y, z;\n    cin >> x >> y >> z;\n    cout << \"Max = \" << Max2(Max2(x, y), z);\n    return 0;\n}\n```",
+        "ai_instructions": "Ответ на C++. Принимать эквивалентные решения (промежуточная переменная, тернарный оператор). Мелкие опечатки синтаксиса не снижают балл, если логика верна. Решение без функции Max2 — не выше 1 балла (ввод)."
+      }
+    },
+    {
+      "key": "fn9-ex-6",
+      "title": "Процедура: часы и минуты",
+      "type": "code_completion",
+      "marks": 4,
+      "difficulty": "exam",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "9.4.3.12",
+        "9.4.3.13"
+      ],
+      "text": "Напишите программу с **процедурой** `void showTime(int sec)`, которая по заданному количеству секунд выводит количество полных часов и оставшихся полных минут (например, для 7500 секунд: `2 h 5 min`). В `main()` введите количество секунд и вызовите процедуру. Переменные для часов и минут сделайте **локальными** переменными процедуры.",
+      "source": "teacher",
+      "source_reference": "2_ПодпрогПродолжение.pptx, слайд 16 (задача 1)",
+      "practice": false,
+      "content": {
+        "starter_code": "#include <iostream>\nusing namespace std;\n"
+      },
+      "scheme": {
+        "mark_scheme": "- заголовок void showTime(int sec) (1)\n- локальные переменные: часы = sec / 3600 (1)\n- минуты = sec % 3600 / 60 и вывод в процедуре (1)\n- ввод секунд в main и вызов showTime(…) отдельной командой (1)",
+        "points": [
+          {
+            "criterion": "Заголовок процедуры void с параметром",
+            "marks": 1
+          },
+          {
+            "criterion": "Часы sec / 3600 в локальной переменной",
+            "marks": 1
+          },
+          {
+            "criterion": "Минуты и вывод",
+            "marks": 1
+          },
+          {
+            "criterion": "Ввод и вызов в main",
+            "marks": 1
+          }
+        ],
+        "model_answer": "```cpp\n#include <iostream>\nusing namespace std;\nvoid showTime(int sec)\n{\n    int h = sec / 3600;\n    int m = sec % 3600 / 60;\n    cout << h << \" h \" << m << \" min\";\n}\nint main()\n{\n    int s;\n    cin >> s;\n    showTime(s);\n    return 0;\n}\n```",
+        "ai_instructions": "Ответ на C++. Принимать эквивалентные формулы (например, (sec - h * 3600) / 60) и любой понятный формат вывода. Мелкие опечатки синтаксиса не снижают балл."
+      }
+    },
+    {
+      "key": "fn9-ex-7",
+      "title": "Значение fact(5)",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "exam",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "9.4.3.13"
+      ],
+      "text": "```cpp\nint fact(int n)\n{\n    int result = 1;\n    for (int i = 1; i <= n; ++i)\n        result *= i;\n    return result;\n}\n```\n\nКакое значение вернёт вызов `fact(5)`?",
+      "source": "teacher",
+      "source_reference": "1_Подпрограммы.pptx, слайд 13",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "",
+        "accepted": {
+          "values": [
+            "120"
+          ],
+          "numeric": true,
+          "tolerance": 0
+        },
+        "explanation": "1 · 2 · 3 · 4 · 5 = 120."
+      }
+    }
+  ],
+  "topic_exam": {
+    "duration": 28,
+    "title": "Пользовательские функции и подпрограммы — экзамен",
+    "instructions": "Выполните **все** задания. Количество баллов указано у каждого задания. Всего: 21 баллов. Время: 28 минут.",
+    "questions": [
+      "fn9-ex-1",
+      "fn9-ex-2",
+      "fn9-ex-3",
+      "fn9-ex-4",
+      "fn9-ex-5",
+      "fn9-ex-6",
+      "fn9-ex-7"
+    ]
+  }
+}

@@ -1,0 +1,1055 @@
+{
+  "topic": "g7-struktura-programmy-lineynykh-algoritmov",
+  "summary": "Программа и язык C++, структура программы (#include, using namespace std, main, return 0), вывод cout, переход на новую строку endl и \\n, ввод cin.",
+  "theory": [
+    {
+      "title": "Знакомство с C++",
+      "objectives": [
+        "7.4.3.1"
+      ],
+      "blocks": [
+        {
+          "type": "definition",
+          "term": "Программа",
+          "content": "Последовательность команд, которая определяет, какие действия должен выполнять компьютер."
+        },
+        {
+          "type": "definition",
+          "term": "C++",
+          "content": "Язык программирования для создания приложений (например, операционных систем, драйверов, компьютерных игр и так далее). Отличается быстротой и универсальностью; изучив C++, можно легко перейти на Java, C#, Objective-C или C."
+        },
+        {
+          "type": "paragraph",
+          "content": "Чтобы создавать программы на C++, нужна **среда программирования**: например, Visual C++, CodeBlocks, DevC++. Среду разработки можно установить на компьютер, а можно создавать программы онлайн (в учебнике — среда Replit). В среде есть кнопки **Run** (запустить программу) и **Stop** (остановить программу)."
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "#include <iostream>\nusing namespace std;\nint main()\n{\n  setlocale(LC_CTYPE, \"Russian\");\n  cout << \"Первая программа. \" << endl;\n  cout << \"Я учусь программировать. \" << endl;\n  cout << \"И это мне нравится!. \" << endl;\n  return 0;\n}",
+          "caption": "Первая программа: на экране три строки текста"
+        },
+        {
+          "type": "exam_tip",
+          "content": "Если в программе ошибка, среда разработки показывает номер строки и место ошибки."
+        }
+      ]
+    },
+    {
+      "title": "Структура программы на C++",
+      "objectives": [
+        "7.4.3.1"
+      ],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "content": "Программа на C++ состоит из набора инструкций. Каждая инструкция выполняет определенное действие. В конце инструкции ставится **точка с запятой** `;` — она указывает на завершение инструкции."
+        },
+        {
+          "type": "definition",
+          "term": "Библиотеки",
+          "content": "Файлы, в которых содержатся команды C++."
+        },
+        {
+          "type": "comparison",
+          "title": "Структура программы C++",
+          "columns": [
+            "Строка",
+            "Описание"
+          ],
+          "rows": [
+            [
+              "`#include <iostream>`",
+              "`#include` — подключение библиотек. `iostream` — библиотека для команды ввода (`cin`) и команды вывода (`cout`)."
+            ],
+            [
+              "`using namespace std;`",
+              "Позволяет не писать в коде `std::`: например, вместо `std::cin` можно писать просто `cin`."
+            ],
+            [
+              "`int main ()`",
+              "Функция с именем `main`, после которой располагают код программы. `int` означает: если программа выполнится безошибочно, результатом функции будет число 0."
+            ],
+            [
+              "`{` … `}`",
+              "Начало и конец кода программы."
+            ],
+            [
+              "`setlocale(LC_CTYPE, \"Russian\");`",
+              "Функция русского языка (русский шрифт) в консоли."
+            ],
+            [
+              "`cin >> number;`",
+              "Оператор ввода: присваивает переменной значение, введенное с клавиатуры."
+            ],
+            [
+              "`cout << \"Hello!\";`",
+              "Оператор вывода (произносится «си аут»): отображает текст на экране."
+            ],
+            [
+              "`endl`",
+              "Переводит курсор на новую строку."
+            ],
+            [
+              "`return 0;`",
+              "Прописывают в конце программы, чтобы корректно завершить программу."
+            ]
+          ]
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "#include <iostream>\nusing namespace std;\nint main()\n{\n    setlocale(LC_CTYPE, \"Russian\");\n    cout << \"Моя программа\" << endl;\n    return 0;\n}",
+          "caption": "Простейшая программа на C++"
+        },
+        {
+          "type": "diagram",
+          "format": "mermaid",
+          "content": "flowchart TD\n    A[\"#include iostream — подключение библиотек\"] --> B[\"using namespace std; — без std::\"]\n    B --> C[\"int main () — главная функция\"]\n    C --> D[\"{ — начало кода\"]\n    D --> E[\"инструкции; — каждая заканчивается ;\"]\n    E --> F[\"return 0; — корректное завершение\"]\n    F --> G[\"} — конец кода\"]",
+          "caption": "Порядок частей программы"
+        }
+      ]
+    },
+    {
+      "title": "Вывод на экран: cout, endl и \\n",
+      "objectives": [
+        "7.4.3.1"
+      ],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "content": "Текст, который нужно вывести, записывают **в кавычках** после `cout <<`. Перейти на новую строку можно с помощью `endl` или символа `\\n`. И `\\n`, и `endl` используются часто; `\\n` встречается в программах чаще."
+        },
+        {
+          "type": "comparison",
+          "title": "Переход на новую строку",
+          "columns": [
+            "",
+            "Через \\n",
+            "Через endl"
+          ],
+          "rows": [
+            [
+              "Разрыв строки",
+              "`cout << \"Пример\\n\";`",
+              "`cout << \"Пример\" << endl;`"
+            ],
+            [
+              "Разрыв строки два раза",
+              "`cout << \"Пример\\n\\n\";`",
+              "`cout << \"Пример\" << endl << endl;`"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": "Строка `cout << endl;` выводит пустую строку — так делают визуальный отступ текста на экране. Если убрать `endl`, следующий текст продолжится **на той же строке**."
+        },
+        {
+          "type": "paragraph",
+          "content": "Несколько переменных можно вывести в одной строке: `cout << a << b << c;`"
+        },
+        {
+          "type": "example",
+          "title": "ASCII-art: рисунок символами",
+          "content": "Каждая строка рисунка выводится отдельной командой `cout`:\n\n```cpp\ncout << \"******************\" << endl;\ncout << \"*                *\" << endl;\ncout << \"*                *\" << endl;\ncout << \"******************\" << endl;\n```"
+        },
+        {
+          "type": "warning",
+          "content": "Если перенести кавычку: `cout << \"Первая программа. <<endl \";` — среда **не** покажет ошибку, но на экране появится лишняя надпись `<<endl`: все, что внутри кавычек, выводится как текст."
+        },
+        {
+          "type": "example",
+          "title": "Найди ошибки в коде",
+          "content": "```cpp\n1  #include <iostream>\n2  using namespace std;\n3  int main ()\n4  {\n5  cout<<\"Привет!\"<<endl;\n6  cout <<Я ученик 7 класса<<endl;\n7  cout <\"Это моя первая программа\"<<endl;\n8  cout <<\"---------------\"<<endl\n9  return 0;\n10 }\n```\n\n- строка 6 — пропущены кавычки вокруг текста;\n- строка 7 — пропущен знак `<` (нужно `<<`);\n- строка 8 — пропущена точка с запятой в конце."
+        }
+      ]
+    },
+    {
+      "title": "Ввод данных: программа «Приветствие»",
+      "objectives": [
+        "7.4.3.1"
+      ],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "content": "Оператор `cin >>` присваивает переменной значение, введенное с клавиатуры. Для имени пользователя нужна переменная строкового типа: `string a;`. Несколько переменных можно ввести в одной строке: `cin >> a >> b >> c;`"
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "#include <iostream>\nint main ()\n{\nstd::string a;\nstd::cout<<\"Как тебя зовут?\"<<std::endl;\nstd::cin>>a;\nstd::cout<<a<<\", здравствуй!\"<<std::endl;\n}",
+          "caption": "«Приветствие», первый вариант: без using namespace std — перед cout, cin, endl, string пишут std::"
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "content": "#include <iostream>\nusing namespace std;\nint main ()\n{\nstring a;\ncout<<\"Как тебя зовут?\"<<endl;\ncin>>a;\ncout<<a<<\", здравствуй!\"<<endl;\n}",
+          "caption": "«Приветствие», второй вариант: с using namespace std"
+        },
+        {
+          "type": "paragraph",
+          "content": "Результат работы обеих программ одинаковый:\n\n```\nКак тебя зовут?\nМарат\nМарат, здравствуй!\n```\n\nВнешний вид кода отличается, а смысл и результат — нет."
+        },
+        {
+          "type": "callout",
+          "tone": "info",
+          "title": "Как запомнить >> и <<",
+          "content": "Стрелки «указывают» в сторону перемещения данных: `>> x` перемещает данные **в** переменную `x` (ввод), `<< x` перемещает данные **из** переменной `x` (вывод)."
+        },
+        {
+          "type": "diagram",
+          "format": "mermaid",
+          "content": "flowchart TD\n    A([\"Начало\"]) --> B[/\"Вывод: Как тебя зовут?\"/]\n    B --> C[/\"Ввод a\"/]\n    C --> D[/\"Вывод: a, здравствуй!\"/]\n    D --> E([\"Конец\"])",
+          "caption": "Блок-схема программы «Приветствие»"
+        },
+        {
+          "type": "exam_tip",
+          "content": "Без строки `return 0;` программа тоже завершится: по стандарту C++ функция `main()` возвращает 0 по умолчанию. В учебнике эту строку пишут, потому что она часто встречается в других источниках."
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "key": "g7-prog-python-input",
+      "title": "Ввод данных в C++",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.1"
+      ],
+      "practice": true,
+      "text": "Какой оператор в языке C++ используется для получения данных, введенных пользователем с клавиатуры?",
+      "options": [
+        {
+          "key": "A",
+          "content": "cout <<"
+        },
+        {
+          "key": "B",
+          "content": "cin >>"
+        },
+        {
+          "key": "C",
+          "content": "endl"
+        },
+        {
+          "key": "D",
+          "content": "return 0;"
+        }
+      ],
+      "scheme": {
+        "mark_scheme": "B (cin >>) — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "model_answer": "B",
+        "explanation": "cin — оператор ввода, cout — вывода, endl — переход на новую строку, return 0 — завершение программы."
+      },
+      "source": "original",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 128; 2 ур Струк пр лин алг.pptx, слайд 3"
+    },
+    {
+      "key": "g7-prog-structure-explain",
+      "title": "Зачем нужна строка using namespace std",
+      "type": "short_answer",
+      "marks": 2,
+      "difficulty": "medium",
+      "command_word": "explain",
+      "grading": "AI",
+      "objectives": [
+        "7.4.3.1"
+      ],
+      "practice": true,
+      "text": "Зачем в программе на C++ пишут строку `using namespace std;`? Приведи пример, как изменится запись команды без этой строки.",
+      "content": {
+        "answer_lines": 3
+      },
+      "scheme": {
+        "mark_scheme": "- Строка позволяет не писать в коде std:: (1 балл)\n- Пример: без нее нужно писать std::cout / std::cin / std::endl вместо cout / cin / endl (1 балл)",
+        "points": [
+          {
+            "criterion": "Позволяет не писать std::",
+            "marks": 1
+          },
+          {
+            "criterion": "Верный пример (std::cin вместо cin и т. п.)",
+            "marks": 1
+          }
+        ],
+        "model_answer": "Строка using namespace std; позволяет не писать в коде std::. Без нее вместо cout << \"Привет\"; нужно писать std::cout << \"Привет\";, вместо cin — std::cin."
+      },
+      "source": "original",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 128–129; 2 ур Струк пр лин алг.pptx, слайд 3; G7_Информатика_THB_Финал_26.10.23 1.pdf, стр. 92–93"
+    },
+    {
+      "key": "sp7-iostream",
+      "title": "Библиотека iostream",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.1"
+      ],
+      "text": "Для чего в программе нужна строка `#include <iostream>`?",
+      "options": [
+        {
+          "key": "A",
+          "content": "Подключает библиотеку для команд ввода (cin) и вывода (cout)"
+        },
+        {
+          "key": "B",
+          "content": "Переводит курсор на новую строку"
+        },
+        {
+          "key": "C",
+          "content": "Корректно завершает программу"
+        },
+        {
+          "key": "D",
+          "content": "Подключает русский шрифт в консоли"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 128; 2 ур Струк пр лин алг.pptx, слайд 3; 4 ур Повтор 7_3А.pptx, слайд 4",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "A — 1 балл.",
+        "accepted": {
+          "correct": "A"
+        },
+        "model_answer": "A",
+        "explanation": "#include — подключение библиотек; iostream нужна для cin и cout."
+      }
+    },
+    {
+      "key": "sp7-structure",
+      "title": "Части программы",
+      "type": "matching",
+      "marks": 5,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.1"
+      ],
+      "text": "Сопоставь строку программы и ее назначение.",
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "`#include <iostream>`"
+          },
+          {
+            "key": "L2",
+            "text": "`using namespace std;`"
+          },
+          {
+            "key": "L3",
+            "text": "`int main ()`"
+          },
+          {
+            "key": "L4",
+            "text": "`{` и `}`"
+          },
+          {
+            "key": "L5",
+            "text": "`return 0;`"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "Начало и конец кода программы"
+          },
+          {
+            "key": "R2",
+            "text": "Корректно завершает программу"
+          },
+          {
+            "key": "R3",
+            "text": "Подключает библиотеку ввода/вывода"
+          },
+          {
+            "key": "R4",
+            "text": "Позволяет не писать std::"
+          },
+          {
+            "key": "R5",
+            "text": "Функция, после которой располагают код программы"
+          }
+        ]
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 128; 2 ур Струк пр лин алг.pptx, слайд 3; 4 ур Повтор 7_3А.pptx, слайд 4",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "L1–R3; L2–R4; L3–R5; L4–R1; L5–R2. Всего 5 б.",
+        "accepted": {
+          "pairs": {
+            "L1": "R3",
+            "L2": "R4",
+            "L3": "R5",
+            "L4": "R1",
+            "L5": "R2"
+          }
+        },
+        "explanation": "См. таблицу «Структура программы C++»."
+      }
+    },
+    {
+      "key": "sp7-semicolon",
+      "title": "Конец инструкции",
+      "type": "fill_blank",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.1"
+      ],
+      "text": "В конце каждой инструкции в C++ ставится знак [[1]].",
+      "content": {
+        "blank_count": 1
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 128",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "[[1]] ; — по 1 баллу",
+        "accepted": {
+          "blanks": [
+            [
+              ";",
+              "точка с запятой"
+            ]
+          ]
+        },
+        "explanation": "Точка с запятой указывает на завершение инструкции."
+      }
+    },
+    {
+      "key": "sp7-endl",
+      "title": "Назначение endl",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.1"
+      ],
+      "text": "Что делает `endl` в строке `cout << \"Привет\" << endl;`?",
+      "options": [
+        {
+          "key": "A",
+          "content": "Завершает программу"
+        },
+        {
+          "key": "B",
+          "content": "Переводит курсор на новую строку"
+        },
+        {
+          "key": "C",
+          "content": "Вводит значение с клавиатуры"
+        },
+        {
+          "key": "D",
+          "content": "Выводит слово endl на экран"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 128–129; 2 ур Струк пр лин алг.pptx, слайд 3",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "model_answer": "B",
+        "explanation": "endl — переход на новую строку."
+      }
+    },
+    {
+      "key": "sp7-n-endl",
+      "title": "\\n и endl",
+      "type": "true_false",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.1"
+      ],
+      "text": "Символ `\\n` внутри кавычек и `endl` выполняют одинаковую функцию — переход на новую строку.",
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 129; G7_Информатика_THB_Финал_26.10.23 1.pdf, стр. 92",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "Верно — 1 балл.",
+        "accepted": {
+          "correct": true
+        },
+        "explanation": "У \\n и endl одинаковые функции — разрыв строки."
+      }
+    },
+    {
+      "key": "sp7-lines",
+      "title": "Сколько строк на экране",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "calculate",
+      "grading": "HYBRID",
+      "objectives": [
+        "7.4.3.1"
+      ],
+      "text": "Сколько строк текста появится на экране после выполнения фрагмента?\n\n```cpp\ncout << \"Казахстан\" << endl;\ncout << \"Астана\";\ncout << \"Байтерек\\n\";\ncout << \"Конец\";\n```",
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 129; 2 ур Струк пр лин алг.pptx, слайд 7",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "3 — 1 балл.",
+        "accepted": {
+          "values": [
+            "3"
+          ],
+          "numeric": true,
+          "tolerance": 0.001
+        },
+        "model_answer": "3",
+        "explanation": "1) Казахстан; 2) АстанаБайтерек (после «Астана» нет перехода); 3) Конец."
+      }
+    },
+    {
+      "key": "sp7-quote",
+      "title": "Перенесенная кавычка",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.1"
+      ],
+      "text": "Что произойдет при выполнении строки `cout << \"Мой класс <<endl \";`?",
+      "options": [
+        {
+          "key": "A",
+          "content": "Среда покажет ошибку в этой строке"
+        },
+        {
+          "key": "B",
+          "content": "На экран выведется «Мой класс» и курсор перейдет на новую строку"
+        },
+        {
+          "key": "C",
+          "content": "На экран выведется текст «Мой класс <<endl» — ошибки нет, но появится лишняя надпись"
+        },
+        {
+          "key": "D",
+          "content": "Программа ничего не выведет"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 127 (задание 2); G7_Информатика_THB_Финал_26.10.23 1.pdf, стр. 90",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "C — 1 балл.",
+        "accepted": {
+          "correct": "C"
+        },
+        "model_answer": "C",
+        "explanation": "Все внутри кавычек — текст, поэтому <<endl выводится как надпись; среда ошибку не находит."
+      }
+    },
+    {
+      "key": "sp7-errors",
+      "title": "Найди ошибки",
+      "type": "code_analysis",
+      "marks": 3,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AI",
+      "objectives": [
+        "7.4.3.1"
+      ],
+      "text": "Найди три ошибки в программе и объясни, как их исправить.",
+      "content": {
+        "starter_code": "1  #include <iostream>\n2  using namespace std;\n3  int main ()\n4  {\n5  cout << Добрый день << endl;\n6  cout << \"Сегодня урок информатики\" << endl\n7  cout >> \"До свидания!\" << endl;\n8  return 0;\n9  }",
+        "answer_lines": 4
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 127 («Проверь себя»); G7_Информатика_THB_Финал_26.10.23 1.pdf, стр. 91; 2 ур Струк пр лин алг.pptx, слайд 5",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "- Строка 5: пропущены кавычки вокруг текста Добрый день (1)\n- Строка 6: пропущена точка с запятой в конце (1)\n- Строка 7: нужен знак << (стоит >>/один знак) у cout (1)",
+        "points": [
+          {
+            "criterion": "Строка 5: пропущены кавычки вокруг текста Добрый день",
+            "marks": 1
+          },
+          {
+            "criterion": "Строка 6: пропущена точка с запятой в конце",
+            "marks": 1
+          },
+          {
+            "criterion": "Строка 7: нужен знак << (стоит >>/один знак) у cout",
+            "marks": 1
+          }
+        ],
+        "model_answer": "Строка 5: cout << \"Добрый день\" << endl; — нужны кавычки. Строка 6: в конце нужна ;. Строка 7: у cout должен быть знак <<, а не >>."
+      }
+    },
+    {
+      "key": "sp7-std",
+      "title": "Без using namespace std",
+      "type": "fill_blank",
+      "marks": 2,
+      "difficulty": "medium",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.1"
+      ],
+      "text": "Программа записана **без** строки `using namespace std;`. Допиши пропуски.\n\n```cpp\n#include <iostream>\nint main ()\n{\nstd::string a;\n[[1]]::cout << \"Как тебя зовут?\" << std::endl;\nstd::[[2]] >> a;\n}\n```",
+      "content": {
+        "blank_count": 2
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 128 (задание 1); 2 ур Струк пр лин алг.pptx, слайд 3",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "[[1]] std; [[2]] cin — по 1 баллу",
+        "accepted": {
+          "blanks": [
+            [
+              "std"
+            ],
+            [
+              "cin"
+            ]
+          ],
+          "ignore_spaces": true
+        },
+        "explanation": "Без using namespace std перед cout, cin, endl, string пишут std::."
+      }
+    },
+    {
+      "key": "sp7-friends",
+      "title": "Программа «Одноклассник»",
+      "type": "code_completion",
+      "marks": 4,
+      "difficulty": "medium",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "7.4.3.1"
+      ],
+      "text": "Напиши программу на C++: она спрашивает «Как тебя зовут?», затем «В каком городе ты живешь?» и выводит строку вида `Аружан живет в городе Шымкент`.",
+      "content": {
+        "starter_code": "#include <iostream>\nusing namespace std;\nint main ()\n{\n\n}",
+        "answer_lines": 10
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 129 («Проверь себя», задачи 2–3); G7_Информатика_THB_Финал_26.10.23 1.pdf, стр. 93",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "- Подключена iostream, using namespace std, int main с фигурными скобками (1)\n- Объявлены строковые переменные (string) (1)\n- Два вопроса выведены через cout и ответы введены через cin (1)\n- Итоговая строка выводит обе переменные с текстом и пробелами (1)",
+        "points": [
+          {
+            "criterion": "Подключена iostream, using namespace std, int main с фигурными скобками",
+            "marks": 1
+          },
+          {
+            "criterion": "Объявлены строковые переменные (string)",
+            "marks": 1
+          },
+          {
+            "criterion": "Два вопроса выведены через cout и ответы введены через cin",
+            "marks": 1
+          },
+          {
+            "criterion": "Итоговая строка выводит обе переменные с текстом и пробелами",
+            "marks": 1
+          }
+        ],
+        "model_answer": "```cpp\n#include <iostream>\nusing namespace std;\nint main ()\n{\nstring a, b;\ncout << \"Как тебя зовут?\" << endl;\ncin >> a;\ncout << \"В каком городе ты живешь?\" << endl;\ncin >> b;\ncout << a << \" живет в городе \" << b << endl;\nreturn 0;\n}\n```"
+      }
+    },
+    {
+      "key": "sp7-return",
+      "title": "return 0",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.1"
+      ],
+      "text": "Для чего в конце программы пишут `return 0;`?",
+      "options": [
+        {
+          "key": "A",
+          "content": "Чтобы вывести на экран число 0"
+        },
+        {
+          "key": "B",
+          "content": "Чтобы корректно завершить программу"
+        },
+        {
+          "key": "C",
+          "content": "Чтобы подключить библиотеку"
+        },
+        {
+          "key": "D",
+          "content": "Чтобы перейти на новую строку"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 128; 2 ур Струк пр лин алг.pptx, слайд 3; 4 ур Повтор 7_3А.pptx, слайд 4",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "model_answer": "B",
+        "explanation": "return 0; — корректное завершение программы."
+      }
+    },
+    {
+      "key": "sp7-output",
+      "title": "Что на экране",
+      "type": "fill_blank",
+      "marks": 2,
+      "difficulty": "medium",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.1"
+      ],
+      "text": "Пользователь ввел имя `Дана`. Что появится на экране?\n\n```cpp\nstring a;\ncout << \"Как тебя зовут?\" << endl;\ncin >> a;\ncout << \"Здравствуй, \" << a << endl;\n```\n\nСтрока 1: [[1]]\n\nСтрока 3 (после ввода): [[2]]",
+      "content": {
+        "blank_count": 2
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 128–129; G7_Информатика_THB_Финал_26.10.23 1.pdf, стр. 93",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "[[1]] Как тебя зовут?; [[2]] Здравствуй, Дана — по 1 баллу",
+        "accepted": {
+          "blanks": [
+            [
+              "Как тебя зовут?"
+            ],
+            [
+              "Здравствуй, Дана"
+            ]
+          ]
+        },
+        "explanation": "Сначала выводится вопрос, затем вводится имя, затем выводится приветствие с именем."
+      }
+    },
+    {
+      "key": "sp7-exam-1",
+      "title": "Структура программы",
+      "type": "matching",
+      "marks": 4,
+      "difficulty": "exam",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.1"
+      ],
+      "text": "Сопоставь элемент программы на C++ и его описание.",
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "`#include`"
+          },
+          {
+            "key": "L2",
+            "text": "`iostream`"
+          },
+          {
+            "key": "L3",
+            "text": "`cout <<`"
+          },
+          {
+            "key": "L4",
+            "text": "`endl`"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "Библиотека для команд ввода и вывода"
+          },
+          {
+            "key": "R2",
+            "text": "Перевод курсора на новую строку"
+          },
+          {
+            "key": "R3",
+            "text": "Подключение библиотек"
+          },
+          {
+            "key": "R4",
+            "text": "Оператор вывода текста на экран"
+          }
+        ]
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 128; 2 ур Струк пр лин алг.pptx, слайд 3; 4 ур Повтор 7_3А.pptx, слайд 4",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "L1–R3; L2–R1; L3–R4; L4–R2. Всего 4 б.",
+        "accepted": {
+          "pairs": {
+            "L1": "R3",
+            "L2": "R1",
+            "L3": "R4",
+            "L4": "R2"
+          }
+        },
+        "explanation": "См. таблицу структуры программы."
+      }
+    },
+    {
+      "key": "sp7-exam-2",
+      "title": "using namespace std",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "exam",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.1"
+      ],
+      "text": "Какая строка позволяет писать в коде `cout` вместо `std::cout`?",
+      "options": [
+        {
+          "key": "A",
+          "content": "#include <iostream>"
+        },
+        {
+          "key": "B",
+          "content": "int main ()"
+        },
+        {
+          "key": "C",
+          "content": "using namespace std;"
+        },
+        {
+          "key": "D",
+          "content": "return 0;"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 128; 2 ур Струк пр лин алг.pptx, слайд 3; 4 ур Повтор 7_3А.pptx, слайд 4",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "C — 1 балл.",
+        "accepted": {
+          "correct": "C"
+        },
+        "model_answer": "C",
+        "explanation": "using namespace std; позволяет не писать std::."
+      }
+    },
+    {
+      "key": "sp7-exam-3",
+      "title": "Библиотеки",
+      "type": "fill_blank",
+      "marks": 1,
+      "difficulty": "exam",
+      "command_word": "define",
+      "grading": "AUTO",
+      "objectives": [
+        "7.4.3.1"
+      ],
+      "text": "Файлы, в которых содержатся команды C++, называются [[1]].",
+      "content": {
+        "blank_count": 1
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 128; 2 ур Струк пр лин алг.pptx, слайд 3",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "[[1]] библиотеки — по 1 баллу",
+        "accepted": {
+          "blanks": [
+            [
+              "библиотеки",
+              "библиотеками"
+            ]
+          ]
+        },
+        "explanation": "Определение библиотек."
+      }
+    },
+    {
+      "key": "sp7-exam-4",
+      "title": "Исправь программу",
+      "type": "code_analysis",
+      "marks": 3,
+      "difficulty": "exam",
+      "command_word": "identify",
+      "grading": "AI",
+      "objectives": [
+        "7.4.3.1"
+      ],
+      "text": "Программа должна вывести две строки: «Добро пожаловать!» и «Урок начался». Найди три ошибки и запиши исправленные строки.",
+      "content": {
+        "starter_code": "1  #include <iostream>\n2  using namespace std;\n3  int main\n4  {\n5  cout << \"Добро пожаловать!\" << endl\n6  cout << Урок начался << endl;\n7  return 0;\n8  }",
+        "answer_lines": 4
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 127–128; G7_Информатика_THB_Финал_26.10.23 1.pdf, стр. 91",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "- Строка 3: int main без скобок () / нужно int main () (1)\n- Строка 5: пропущена точка с запятой после endl (1)\n- Строка 6: текст без кавычек — нужно \"Урок начался\" (1)",
+        "points": [
+          {
+            "criterion": "Строка 3: int main без скобок () / нужно int main ()",
+            "marks": 1
+          },
+          {
+            "criterion": "Строка 5: пропущена точка с запятой после endl",
+            "marks": 1
+          },
+          {
+            "criterion": "Строка 6: текст без кавычек — нужно \"Урок начался\"",
+            "marks": 1
+          }
+        ],
+        "model_answer": "int main ()\ncout << \"Добро пожаловать!\" << endl;\ncout << \"Урок начался\" << endl;"
+      }
+    },
+    {
+      "key": "sp7-exam-5",
+      "title": "Количество строк",
+      "type": "calculation",
+      "marks": 2,
+      "difficulty": "exam",
+      "command_word": "calculate",
+      "grading": "HYBRID",
+      "objectives": [
+        "7.4.3.1"
+      ],
+      "text": "Сколько строк (включая пустые) появится на экране?\n\n```cpp\ncout << \"Раз\" << endl << endl;\ncout << \"Два\";\ncout << \"Три\" << endl;\ncout << \"Четыре\\n\";\n```",
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 129; 2 ур Струк пр лин алг.pptx, слайд 7",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "4 — 2 балла.",
+        "accepted": {
+          "values": [
+            "4"
+          ],
+          "numeric": true,
+          "tolerance": 0.001
+        },
+        "model_answer": "4",
+        "explanation": "1) Раз; 2) пустая строка; 3) ДваТри; 4) Четыре."
+      }
+    },
+    {
+      "key": "sp7-exam-6",
+      "title": "Программа-диалог",
+      "type": "code_completion",
+      "marks": 4,
+      "difficulty": "exam",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "7.4.3.1"
+      ],
+      "text": "Напиши программу: она спрашивает название любимой книги и имя ее автора, а затем выводит строку вида `Книга Абай жолы написана автором Ауэзов`.",
+      "content": {
+        "answer_lines": 10
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 128–129; G7_Информатика_THB_Финал_26.10.23 1.pdf, стр. 93",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "- Правильная структура программы (iostream, using namespace std, int main, { }) (1)\n- Объявлены переменные типа string (1)\n- Вопросы через cout и ввод через cin (1)\n- Итоговый вывод с текстом и переменными, инструкции заканчиваются ; (1)",
+        "points": [
+          {
+            "criterion": "Правильная структура программы (iostream, using namespace std, int main, { })",
+            "marks": 1
+          },
+          {
+            "criterion": "Объявлены переменные типа string",
+            "marks": 1
+          },
+          {
+            "criterion": "Вопросы через cout и ввод через cin",
+            "marks": 1
+          },
+          {
+            "criterion": "Итоговый вывод с текстом и переменными, инструкции заканчиваются ;",
+            "marks": 1
+          }
+        ],
+        "model_answer": "```cpp\n#include <iostream>\nusing namespace std;\nint main ()\n{\nstring kniga, avtor;\ncout << \"Название любимой книги?\" << endl;\ncin >> kniga;\ncout << \"Кто автор?\" << endl;\ncin >> avtor;\ncout << \"Книга \" << kniga << \" написана автором \" << avtor << endl;\nreturn 0;\n}\n```",
+        "ai_instructions": "Название из нескольких слов не требуется вводить целиком: оценивай структуру и использование cin/cout."
+      }
+    },
+    {
+      "key": "sp7-exam-7",
+      "title": "main и return 0",
+      "type": "short_answer",
+      "marks": 2,
+      "difficulty": "exam",
+      "command_word": "explain",
+      "grading": "AI",
+      "objectives": [
+        "7.4.3.1"
+      ],
+      "text": "Объясни назначение строк `int main ()` и `return 0;` в программе на C++.",
+      "content": {
+        "answer_lines": 3
+      },
+      "source": "nis_style",
+      "source_reference": "G7_Информатика_SB_2023_ФИНАЛ_20.10.23 1.pdf, стр. 128; 2 ур Струк пр лин алг.pptx, слайд 3; 4 ур Повтор 7_3А.pptx, слайд 4",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "- int main () — функция, после которой располагают код программы (int: при безошибочном выполнении результат 0) (1)\n- return 0; — корректно завершает программу (1)",
+        "points": [
+          {
+            "criterion": "int main () — функция, после которой располагают код программы (int: при безошибочном выполнении результат 0)",
+            "marks": 1
+          },
+          {
+            "criterion": "return 0; — корректно завершает программу",
+            "marks": 1
+          }
+        ],
+        "model_answer": "int main () — главная функция, после нее располагают код программы; int означает, что при безошибочном выполнении результат будет 0. return 0; пишут в конце, чтобы корректно завершить программу."
+      }
+    }
+  ],
+  "topic_exam": {
+    "duration": 22,
+    "title": "Структура программы линейных алгоритмов — экзамен",
+    "instructions": "Ответьте на **все** вопросы. Количество баллов указано у каждого вопроса. Всего: 17 баллов. Время: 22 минут.",
+    "questions": [
+      "sp7-exam-1",
+      "sp7-exam-2",
+      "sp7-exam-3",
+      "sp7-exam-4",
+      "sp7-exam-5",
+      "sp7-exam-6",
+      "sp7-exam-7"
+    ]
+  }
+}

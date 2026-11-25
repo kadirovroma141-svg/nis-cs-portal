@@ -1,0 +1,1811 @@
+{
+  "topic": "g8-rabota-so-strokami-i-simvolami",
+  "summary": "Символы и строки в C++: коды ASCII, функции int(символ) и char(код), смена регистра, шифр Цезаря; строка как массив символов и '\\0'; функции <cstring> (strlen, strcat, strncat) и методы string (length, +, append, erase, insert, substr, find, replace); подсчёт символов по критериям.",
+  "theory": [
+    {
+      "title": "Символы и их коды",
+      "objectives": [
+        "8.4.3.11"
+      ],
+      "blocks": [
+        {
+          "type": "definition",
+          "term": "Символ",
+          "content": "Минимальная текстовая единица: буква, цифра, знак препинания или другой знак. В памяти символы хранятся как **числовые коды**: в кодировке ASCII символ `'A'` представлен числом 65."
+        },
+        {
+          "type": "definition",
+          "term": "Кодировка символов",
+          "content": "Способ представления символов в памяти компьютера. Популярные кодировки — **ASCII**, **UTF-8**, **UTF-16**. ASCII — стандартная семибитная кодировка: в ней английские буквы, цифры и знаки, **кириллицы в ASCII нет**."
+        },
+        {
+          "type": "paragraph",
+          "content": "В C++ символ хранится в переменной типа `char` и записывается в **одинарных кавычках**: `'A'`, `'c'`, `'!'`. Для кодирования и декодирования символов используют две функции:\n\n| Функция | Что делает | Пример |\n|---|---|---|\n| `int(символ)` | возвращает **код** символа | `int('A')` → 65 |\n| `char(код)` | возвращает **символ** по коду | `char(97)` → `a` |"
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "Код символа и символ по коду",
+          "content": "#include <iostream>\nusing namespace std;\nint main()\n{   char c;          // символьная переменная\n    int code;        // целая переменная\n    cin >> c;\n    cout << int(c) << endl;     // ввели A → 65\n    cin >> code;\n    cout << char(code) << endl; // ввели 97 → a\n    return 0; }"
+        },
+        {
+          "type": "comparison",
+          "title": "Диапазоны кодов ASCII",
+          "columns": [
+            "Символы",
+            "Коды",
+            "Пример"
+          ],
+          "rows": [
+            [
+              "цифры '0'–'9'",
+              "48–57",
+              "'0' → 48"
+            ],
+            [
+              "заглавные 'A'–'Z'",
+              "65–90",
+              "'A' → 65"
+            ],
+            [
+              "строчные 'a'–'z'",
+              "97–122",
+              "'a' → 97"
+            ]
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Заглавные и строчные буквы",
+          "level": 3
+        },
+        {
+          "type": "formula",
+          "latex": "'a' - 'A' = 97 - 65 = 32",
+          "caption": "Разница постоянна для всех пар заглавных и строчных латинских букв"
+        },
+        {
+          "type": "paragraph",
+          "content": "Чтобы заглавную букву сделать строчной, к её коду **прибавляют 32**; строчную в заглавную — **вычитают 32** (`char(ch - 32)`). Проверить, что буква заглавная, можно сравнением с диапазоном `'A'`–`'Z'` (коды 65–90)."
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "Заглавная → строчная",
+          "content": "char ch = 'A';\nif (ch >= 'A' && ch <= 'Z') {   // если буква заглавная\n    ch = ch + ('a' - 'A');      // прибавляем 32 → 'a'\n}"
+        },
+        {
+          "type": "paragraph",
+          "content": "Готовые функции библиотеки `<cctype>`: `tolower(c)` — в нижний регистр, `toupper(c)` — в верхний, `isalpha(c)` — буква ли, `isdigit(c)` — цифра ли, `isalnum(c)` — буква или цифра (**алфанумерический** символ)."
+        },
+        {
+          "type": "heading",
+          "text": "Шифр Цезаря (шифр сдвига)",
+          "level": 3
+        },
+        {
+          "type": "definition",
+          "term": "Криптография",
+          "content": "Наука о методах и принципах передачи и приёма зашифрованной с помощью специальных ключей информации. **Ключ** — секретная информация, используемая при шифровании/расшифровке."
+        },
+        {
+          "type": "paragraph",
+          "content": "Символ — это код, поэтому с ним можно выполнять арифметику. Расшифровка буквы шифра Цезаря: `decryptedChar = encryptedChar - shift`."
+        },
+        {
+          "type": "example",
+          "title": "Сдвиг 3: J R R G → ?",
+          "content": "`'J' - 3` = `'G'`, `'R' - 3` = `'O'`, `'R' - 3` = `'O'`, `'G' - 3` = `'D'` → **GOOD**."
+        },
+        {
+          "type": "warning",
+          "content": "В таблице ASCII нет кириллицы, поэтому эти примеры работают для латинских букв; для кодирования кириллицы используют Unicode."
+        }
+      ]
+    },
+    {
+      "title": "Строка как массив символов",
+      "objectives": [
+        "8.4.3.12"
+      ],
+      "blocks": [
+        {
+          "type": "definition",
+          "term": "Строка",
+          "content": "Последовательность символов: буквы, цифры, пробелы, знаки препинания. Каждый символ строки имеет свой **индекс** (номер); индексы начинаются с **0**."
+        },
+        {
+          "type": "definition",
+          "term": "Символьный массив",
+          "content": "Набор символов, расположенных в памяти последовательно. Объявление: тип `char`, имя и размер: `char s[80];` — до 80 символов."
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "Два способа задать строку",
+          "content": "char s[6] = {'П', 'р', 'и', 'в', 'е', 'т'};\nchar myArray[] = \"Привет\";   // эквивалентно {'П','р','и','в','е','т','\\0'}\nchar firstChar = myArray[0];  // 'П'\nchar secondChar = myArray[1]; // 'р'"
+        },
+        {
+          "type": "comparison",
+          "title": "char s[] = \"Привет\" в памяти",
+          "columns": [
+            "Индекс",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "rows": [
+            [
+              "Символ",
+              "П",
+              "р",
+              "и",
+              "в",
+              "е",
+              "т",
+              "\\0"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": "Строка в C++ заканчивается специальным символом `'\\0'` — **нулевым терминатором** (код 0). Он обозначает конец строки, поэтому массиву нужно место на **длину строки + 1**."
+        },
+        {
+          "type": "warning",
+          "content": "`char c[5] = \"MY STRING\";` — ошибка: в строке 9 символов, а массив на 5. Нужно `char c[10]` или `char c[] = \"MY STRING\";`."
+        },
+        {
+          "type": "heading",
+          "text": "Ввод строки с клавиатуры",
+          "level": 3
+        },
+        {
+          "type": "comparison",
+          "columns": [
+            "Команда",
+            "Что считывает"
+          ],
+          "rows": [
+            [
+              "`cin >> str;`",
+              "только до первого пробела: при вводе `father and mother` в `str` попадёт `father`"
+            ],
+            [
+              "`cin.getline(str, 100);`",
+              "всю строку **с пробелами** (до 100 символов) в символьный массив"
+            ],
+            [
+              "`getline(cin, s);`",
+              "всю строку с пробелами в переменную типа `string`"
+            ]
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Тип string",
+          "level": 3
+        },
+        {
+          "type": "paragraph",
+          "content": "Библиотека `<string>` даёт более безопасные и удобные средства для работы со строками. В многобайтовой кодировке UTF-8 каждая кириллическая буква занимает несколько байт, и функции `<cstring>` могут работать некорректно."
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "Создание строк и доступ к символу",
+          "content": "string str1 = \"Hello\";   // str1 = Hello\nstring str2;              // пустая строка\nstring str3(5, 'A');      // AAAAA\nstring phone;\ncin >> phone;\nif (phone[0] == '+')      // первый символ, как в массиве\n    cout << \"Это международный номер.\";"
+        },
+        {
+          "type": "paragraph",
+          "content": "Строки можно сравнивать оператором `==` (например, `password == confirmPassword`) и менять отдельный символ: `s[0] = s[n];`. Экранированные символы: `\\n` — новая строка, `\\\"` — кавычка внутри строки."
+        }
+      ]
+    },
+    {
+      "title": "Операции со строками",
+      "objectives": [
+        "8.4.3.13"
+      ],
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Функции <cstring> для символьного массива",
+          "level": 3
+        },
+        {
+          "type": "comparison",
+          "columns": [
+            "Функция",
+            "Что делает",
+            "Пример"
+          ],
+          "rows": [
+            [
+              "`strlen(s)`",
+              "длина строки (без `'\\0'`)",
+              "`strlen(\"Hello, world!\")` → 13"
+            ],
+            [
+              "`strcat(s1, s2)`",
+              "добавляет `s2` в конец `s1`",
+              "`\"Hello\"` + `\", world!\"` → `Hello, world!`"
+            ],
+            [
+              "`strncat(s1, s2, n)`",
+              "добавляет **не более n** символов `s2` в конец `s1`",
+              "`strncat(str1, str2, 5)` → `Hello, wor`"
+            ]
+          ]
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "strncat",
+          "content": "#include <iostream>\n#include <cstring>\nusing namespace std;\nint main() {\n    char str1[20] = \"Hello\";\n    char str2[] = \", world!\";\n    strncat(str1, str2, 5); // только первые 5 символов str2\n    cout << str1 << endl;   // Hello, wor\n    return 0; }"
+        },
+        {
+          "type": "heading",
+          "text": "Методы string",
+          "level": 3
+        },
+        {
+          "type": "comparison",
+          "columns": [
+            "Операция",
+            "Что делает",
+            "Пример → результат"
+          ],
+          "rows": [
+            [
+              "`s.length()`, `s.size()`",
+              "длина строки",
+              "`\"Astana\"` → 6"
+            ],
+            [
+              "`s1 + s2`, `s1.append(s2)`",
+              "склеивание (конкатенация)",
+              "`\"Hello\" + \" \" + \"World\"` → `Hello World`"
+            ],
+            [
+              "`s.erase(p, n)`",
+              "удаляет n символов, начиная с позиции p",
+              "`\"abcdefg\".erase(3, 2)` → `abcfg`"
+            ],
+            [
+              "`s.insert(p, t)`",
+              "вставляет t с позиции p",
+              "`\"Writing is easy\".insert(8, \"code \")` → `Writing code is easy`"
+            ],
+            [
+              "`s.substr(p, n)`",
+              "подстрока длиной n с позиции p",
+              "`\"Astana\".substr(0, 3)` → `Ast`"
+            ],
+            [
+              "`s.find(t)`",
+              "позиция первого вхождения t",
+              "`\"C++ programming language\".find(\"programming\")` → 4"
+            ],
+            [
+              "`s.replace(p, n, t)`",
+              "заменяет n символов с позиции p на t",
+              "`str1.replace(2, 3, \"abc\")`"
+            ]
+          ]
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "Поиск и замена подстроки",
+          "content": "string text = \"The qick brown fox jumps over the lazy dog\";\nstring toReplace = \"qick\";\nint found = text.find(toReplace);   // 4\nif (found >= 0) {\n    text.replace(found, toReplace.length(), \"quick\");\n    cout << text;   // The quick brown fox ...\n} else\n    cout << \"Слово для замены не найдено.\";"
+        },
+        {
+          "type": "example",
+          "title": "Трассировка",
+          "content": "```cpp\nstring s = \"Hello\";\ns.append(\" \");        // \"Hello \"\ns.append(\"World\");    // \"Hello World\"\ncout << s.substr(6, 5); // World\n```"
+        },
+        {
+          "type": "exam_tip",
+          "content": "Позиции считаются с **0**: в `\"Hello World\"` буква `W` стоит на позиции 6. `erase(p, n)` и `substr(p, n)` — сначала позиция, затем количество символов."
+        }
+      ]
+    },
+    {
+      "title": "Подсчёт символов по критериям",
+      "objectives": [
+        "8.4.3.14"
+      ],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "content": "Подсчёт символов используется для анализа частотности, проверки на анаграммы, поиска длинного слова, удаления дубликатов, генерации аббревиатур. Схема всегда одна: **счётчик = 0 → цикл по всем символам → условие → счётчик++**."
+        },
+        {
+          "type": "diagram",
+          "format": "mermaid",
+          "caption": "Подсчёт символов по критерию",
+          "content": "flowchart TD\n  A([Начало]) --> B[/\"Ввод строки str\"/]\n  B --> C[\"count = 0; i = 0\"]\n  C --> D{\"i < strlen(str)?\"}\n  D -- да --> E{\"str[i] подходит по критерию?\"}\n  E -- да --> F[\"count++\"]\n  E -- нет --> G[\"i++\"]\n  F --> G\n  G --> D\n  D -- нет --> H[/\"Вывод count\"/]\n  H --> I([Конец])"
+        },
+        {
+          "type": "comparison",
+          "title": "Условия-критерии",
+          "columns": [
+            "Что считаем",
+            "Условие"
+          ],
+          "rows": [
+            [
+              "предложения",
+              "`input[i] == '.' || input[i] == '!' || input[i] == '?'`"
+            ],
+            [
+              "цифры",
+              "`ch >= '0' && ch <= '9'` или `isdigit(ch)`"
+            ],
+            [
+              "заглавные латинские",
+              "`ch >= 'A' && ch <= 'Z'`"
+            ],
+            [
+              "гласные",
+              "`ch == 'a' || ch == 'e' || ch == 'i' || ch == 'o' || ch == 'u'`"
+            ],
+            [
+              "слова (конец слова)",
+              "`str[i] != ' ' && (str[i+1] == ' ' || str[i+1] == '\\0')`"
+            ]
+          ]
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "Количество предложений",
+          "content": "#include <iostream>\n#include <cstring>\nusing namespace std;\nint main()\n{   char input[1000];\n    cout << \"Введите строку: \";\n    cin.getline(input, 1000);\n    int count = 0;\n    int length = strlen(input);\n    for (int i = 0; i < length; i++)\n        if (input[i] == '.' || input[i] == '!' || input[i] == '?')\n            count++;\n    cout << \"Количество предложений: \" << count << endl;\n    return 0; }"
+        },
+        {
+          "type": "example",
+          "title": "Количество слов",
+          "content": "Ввод: `я достигну поставленную цель` → слово заканчивается там, где после непробельного символа идёт пробел или `'\\0'` → **4** слова."
+        },
+        {
+          "type": "example",
+          "title": "Объём сообщения в битах",
+          "content": "Если каждый символ кодируется 8 битами, объём = длина строки × 8. Строка `Hello` (5 символов) → 5 × 8 = **40 бит**."
+        },
+        {
+          "type": "warning",
+          "content": "Такой цикл считает **символы**, а не смысловые предложения: в `Wow!!` знак `!` встретится 2 раза, и счётчик станет 2."
+        },
+        {
+          "type": "diagram",
+          "format": "mermaid",
+          "caption": "Итог раздела (по интеллект-карте учебника)",
+          "content": "mindmap\n  root((Символы и строки C++))\n    Кодирование и декодирование\n      a[\"int(символ)\"]\n      b[\"char(код)\"]\n    Символьный массив\n      c[\"strlen()\"]\n      d[\"strcat()\"]\n      e[\"strncat()\"]\n    Строки string\n      f[\"insert()\"]\n      g[\"append()\"]\n      h[\"find()\"]\n      i[\"substr()\"]\n      j[\"replace()\"]\n      k[\"length()\"]"
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "key": "g8-str-types",
+      "title": "Типы для символов и строк",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.11",
+        "8.4.3.12"
+      ],
+      "text": "Какие типы данных используются в C++ для хранения символов и строк?",
+      "source": "teacher",
+      "source_reference": "СИМВОЛЫ И СТРОКИ (ЯЗЫК С++) _ Wayground (1).pdf, стр. 4; G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 224, 230",
+      "practice": true,
+      "options": [
+        {
+          "key": "A",
+          "content": "int и float"
+        },
+        {
+          "key": "B",
+          "content": "char и string"
+        },
+        {
+          "key": "C",
+          "content": "bool и double"
+        },
+        {
+          "key": "D",
+          "content": "float и bool"
+        }
+      ],
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "explanation": "char хранит один символ, string — строку; строку можно хранить и в массиве char."
+      }
+    },
+    {
+      "key": "g8-str-int-code",
+      "title": "Код символа",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.11"
+      ],
+      "text": "Код символа `'A'` в ASCII равен 65. Что выведет команда `cout << int('E');`?",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 222, 228",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "69 — 1 балл.",
+        "accepted": {
+          "values": [
+            "69"
+          ],
+          "numeric": true
+        },
+        "explanation": "int(символ) возвращает код. E — на 4 позиции дальше A: 65 + 4 = 69."
+      }
+    },
+    {
+      "key": "g8-str-char-code",
+      "title": "Символ по коду",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.11"
+      ],
+      "text": "Код `'a'` равен 97. Что выведет `cout << char(100);`?",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 222, 228",
+      "practice": true,
+      "options": [
+        {
+          "key": "A",
+          "content": "a"
+        },
+        {
+          "key": "B",
+          "content": "c"
+        },
+        {
+          "key": "C",
+          "content": "d"
+        },
+        {
+          "key": "D",
+          "content": "100"
+        }
+      ],
+      "scheme": {
+        "mark_scheme": "C — 1 балл.",
+        "accepted": {
+          "correct": "C"
+        },
+        "explanation": "char(код) возвращает символ: 100 = 97 + 3 → четвёртая буква d."
+      }
+    },
+    {
+      "key": "g8-str-diff",
+      "title": "Разница кодов",
+      "type": "fill_blank",
+      "marks": 2,
+      "difficulty": "easy",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.11"
+      ],
+      "text": "Заполните пропуски.\n\n`'a' - 'A'` = [[1]]. Чтобы заглавную латинскую букву сделать строчной, к её коду нужно [[2]] это число.",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 228",
+      "practice": true,
+      "content": {
+        "blank_count": 2
+      },
+      "scheme": {
+        "mark_scheme": "[[1]] 32 (1); [[2]] прибавить (1).",
+        "accepted": {
+          "blanks": [
+            [
+              "32"
+            ],
+            [
+              "прибавить",
+              "прибавлять",
+              "добавить",
+              "прибавляем",
+              "прибавить 32"
+            ]
+          ]
+        },
+        "explanation": "97 − 65 = 32; 'A' (65) + 32 = 97 = 'a'."
+      }
+    },
+    {
+      "key": "g8-str-caesar",
+      "title": "Шифр Цезаря",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.11"
+      ],
+      "text": "Программа расшифровывает буквы командой `decryptedChar = encryptedChar - shift;`. Сдвиг `shift = 2`, введены зашифрованные буквы `J G N N Q`. Какое слово получится?",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 223; G8_Информатика_TG_RU_07.02.25_ФИНАЛ 1.pdf, стр. 177",
+      "practice": true,
+      "options": [
+        {
+          "key": "A",
+          "content": "LIPPS"
+        },
+        {
+          "key": "B",
+          "content": "HELLO"
+        },
+        {
+          "key": "C",
+          "content": "GEKKN"
+        },
+        {
+          "key": "D",
+          "content": "HELLA"
+        }
+      ],
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "explanation": "Каждую букву сдвигаем на 2 назад: J→H, G→E, N→L, N→L, Q→O."
+      }
+    },
+    {
+      "key": "g8-str-char-word",
+      "title": "char и слово",
+      "type": "true_false",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.11",
+        "8.4.3.12"
+      ],
+      "text": "Объявление `char w = \"Book\";` корректно: переменная типа `char` может хранить целое слово.",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_TG_RU_07.02.25_ФИНАЛ 1.pdf, стр. 175; G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 224",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "Неверно (1)",
+        "accepted": {
+          "correct": false
+        },
+        "explanation": "char хранит один символ в одинарных кавычках ('B'). Слово хранят в string или в массиве char: char w[] = \"Book\";"
+      }
+    },
+    {
+      "key": "g8-str-case",
+      "title": "Смена регистра",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.11"
+      ],
+      "text": "Что делает фрагмент?\n\n```cpp\nif (ch >= 'a' && ch <= 'z')\n    ch = char(ch - 32);\n```",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 228; СИМВОЛЫ И СТРОКИ (ЯЗЫК С++) _ Wayground (1).pdf, стр. 8–9",
+      "practice": true,
+      "options": [
+        {
+          "key": "A",
+          "content": "Делает строчную букву заглавной"
+        },
+        {
+          "key": "B",
+          "content": "Делает заглавную букву строчной"
+        },
+        {
+          "key": "C",
+          "content": "Заменяет букву на её код"
+        },
+        {
+          "key": "D",
+          "content": "Удаляет букву из строки"
+        }
+      ],
+      "scheme": {
+        "mark_scheme": "A — 1 балл.",
+        "accepted": {
+          "correct": "A"
+        },
+        "explanation": "Коды строчных на 32 больше заглавных; вычитая 32, получаем заглавную."
+      }
+    },
+    {
+      "key": "g8-str-ascii-ru",
+      "title": "Кириллица в ASCII",
+      "type": "true_false",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.11"
+      ],
+      "text": "Русские буквы входят в стандартную таблицу ASCII.",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_TG_RU_07.02.25_ФИНАЛ 1.pdf, стр. 175–177; СИМВОЛЫ И СТРОКИ (ЯЗЫК С++) _ Wayground (1).pdf, стр. 6",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "Неверно (1)",
+        "accepted": {
+          "correct": false
+        },
+        "explanation": "В стандартной ASCII — английские буквы, цифры и знаки; кириллицы нет, для неё используют Unicode."
+      }
+    },
+    {
+      "key": "g8-str-null",
+      "title": "Символ \\0",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.12"
+      ],
+      "text": "Зачем в конце строки-массива символов хранится `'\\0'`?",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 224",
+      "practice": true,
+      "options": [
+        {
+          "key": "A",
+          "content": "Это пробел между словами"
+        },
+        {
+          "key": "B",
+          "content": "Это признак окончания строки (код 0)"
+        },
+        {
+          "key": "C",
+          "content": "Это первая буква строки"
+        },
+        {
+          "key": "D",
+          "content": "Это символ новой строки"
+        }
+      ],
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "explanation": "'\\0' — нулевой терминатор, он обозначает конец строки. Новая строка — \\n."
+      }
+    },
+    {
+      "key": "g8-str-cin",
+      "title": "cin и пробел",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.12"
+      ],
+      "text": "Пользователь ввёл `green apple tree`. Что выведет программа?\n\n```cpp\nchar str[100];\ncin >> str;\ncout << str;\n```",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 225",
+      "practice": true,
+      "options": [
+        {
+          "key": "A",
+          "content": "green apple tree"
+        },
+        {
+          "key": "B",
+          "content": "green"
+        },
+        {
+          "key": "C",
+          "content": "tree"
+        },
+        {
+          "key": "D",
+          "content": "greenappletree"
+        }
+      ],
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "explanation": "cin >> считывает только до первого пробела. Всю строку считает cin.getline(str, 100)."
+      }
+    },
+    {
+      "key": "g8-str-size",
+      "title": "Размер массива",
+      "type": "fill_blank",
+      "marks": 2,
+      "difficulty": "medium",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.12"
+      ],
+      "text": "Допишите: минимальный размер массива и символ.\n\n```cpp\nchar city[[[1]]] = \"Taraz\";\n```\nСимвол `city[4]` — это [[2]].",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 224",
+      "practice": true,
+      "content": {
+        "blank_count": 2
+      },
+      "scheme": {
+        "mark_scheme": "[[1]] 6 (1); [[2]] z (1).",
+        "accepted": {
+          "blanks": [
+            [
+              "6"
+            ],
+            [
+              "z",
+              "'z'"
+            ]
+          ],
+          "ignore_spaces": true
+        },
+        "explanation": "5 букв + '\\0' = 6. Индексы: T0 a1 r2 a3 z4."
+      }
+    },
+    {
+      "key": "g8-str-array-err",
+      "title": "Ошибка в объявлении",
+      "type": "code_analysis",
+      "marks": 2,
+      "difficulty": "medium",
+      "command_word": "explain",
+      "grading": "AI",
+      "objectives": [
+        "8.4.3.12"
+      ],
+      "text": "Программа не работает. Найдите ошибку, объясните её и исправьте строку.",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 224 (задание 2)",
+      "practice": true,
+      "content": {
+        "starter_code": "1  char msg[4] = \"HELLO\";\n2  cout << msg;",
+        "answer_lines": 4
+      },
+      "scheme": {
+        "mark_scheme": "- Ошибка в строке 1: в «HELLO» 5 символов, плюс '\\0' — нужно 6, а массив на 4 (1)\n- Исправление: char msg[6] = \"HELLO\"; или char msg[] = \"HELLO\"; (1)",
+        "points": [
+          {
+            "criterion": "Ошибка в строке 1: в «HELLO» 5 символов, плюс '\\0' — нужно 6, а массив на 4",
+            "marks": 1
+          },
+          {
+            "criterion": "Исправление: char msg[6] = \"HELLO\"; или char msg[] = \"HELLO\";",
+            "marks": 1
+          }
+        ],
+        "model_answer": "В строке 1 массив слишком мал: строке HELLO нужно 5 + 1 ('\\0') = 6 ячеек. Исправление: char msg[6] = \"HELLO\"; (или char msg[] = \"HELLO\";)."
+      }
+    },
+    {
+      "key": "g8-str-func-match",
+      "title": "Функции и их действие",
+      "type": "matching",
+      "marks": 3,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.13"
+      ],
+      "text": "Сопоставьте функцию с её действием.",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 226, 232",
+      "practice": true,
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "strlen(s)"
+          },
+          {
+            "key": "L2",
+            "text": "strcat(s1, s2)"
+          },
+          {
+            "key": "L3",
+            "text": "strncat(s1, s2, n)"
+          },
+          {
+            "key": "L4",
+            "text": "s.substr(p, n)"
+          },
+          {
+            "key": "L5",
+            "text": "s.find(t)"
+          },
+          {
+            "key": "L6",
+            "text": "s.replace(p, n, t)"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "Добавляет s2 в конец s1"
+          },
+          {
+            "key": "R2",
+            "text": "Возвращает подстроку длиной n с позиции p"
+          },
+          {
+            "key": "R3",
+            "text": "Возвращает позицию первого вхождения t"
+          },
+          {
+            "key": "R4",
+            "text": "Возвращает количество символов строки"
+          },
+          {
+            "key": "R5",
+            "text": "Заменяет n символов с позиции p на t"
+          },
+          {
+            "key": "R6",
+            "text": "Добавляет не более n символов s2 в конец s1"
+          }
+        ]
+      },
+      "scheme": {
+        "mark_scheme": "L1-R4, L2-R1, L3-R6, L4-R2, L5-R3, L6-R5 (1 балл за 2 пары)",
+        "accepted": {
+          "pairs": {
+            "L1": "R4",
+            "L2": "R1",
+            "L3": "R6",
+            "L4": "R2",
+            "L5": "R3",
+            "L6": "R5"
+          }
+        },
+        "explanation": "strlen — длина; strcat — склеивание; strncat — не более n символов; substr — подстрока; find — позиция; replace — замена."
+      }
+    },
+    {
+      "key": "g8-str-strncat",
+      "title": "strncat",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.13"
+      ],
+      "text": "Что выведет фрагмент?\n\n```cpp\nchar a[20] = \"Data\";\nchar b[] = \"baseball\";\nstrncat(a, b, 4);\ncout << a;\n```",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 226",
+      "practice": true,
+      "options": [
+        {
+          "key": "A",
+          "content": "Databaseball"
+        },
+        {
+          "key": "B",
+          "content": "Database"
+        },
+        {
+          "key": "C",
+          "content": "Datab"
+        },
+        {
+          "key": "D",
+          "content": "baseData"
+        }
+      ],
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "explanation": "strncat добавляет в конец a не более 4 символов b: \"base\" → Database."
+      }
+    },
+    {
+      "key": "g8-str-trace",
+      "title": "Трассировка string",
+      "type": "trace_table",
+      "marks": 5,
+      "difficulty": "medium",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.13"
+      ],
+      "text": "Заполните таблицу: значение `t` после каждого шага и значение `k` / вывод (без кавычек).\n\n```cpp\nstring t = \"Rain\";\nt = t + \"bow\";          // шаг 1\nt.insert(0, \"Big \");    // шаг 2\nint k = t.find(\"R\");    // шаг 3\nt.erase(0, 4);          // шаг 4\ncout << t.length();     // шаг 5\n```",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 232, 234; Интерактивный рабочий лист_ Символы и строки в С++.pdf, стр. 2",
+      "practice": true,
+      "content": {
+        "columns": [
+          "Шаг",
+          "t",
+          "k / вывод"
+        ],
+        "rows": 5,
+        "prefill": [
+          [
+            "1",
+            null,
+            "—"
+          ],
+          [
+            "2",
+            null,
+            "—"
+          ],
+          [
+            "3",
+            null,
+            null
+          ],
+          [
+            "4",
+            null,
+            "—"
+          ],
+          [
+            "5",
+            null,
+            null
+          ]
+        ]
+      },
+      "scheme": {
+        "mark_scheme": "По 1 баллу за строку.",
+        "accepted": {
+          "rows": [
+            [
+              null,
+              "Rainbow",
+              null
+            ],
+            [
+              null,
+              "Big Rainbow",
+              null
+            ],
+            [
+              null,
+              "Big Rainbow",
+              "4"
+            ],
+            [
+              null,
+              "Rainbow",
+              null
+            ],
+            [
+              null,
+              "Rainbow",
+              "7"
+            ]
+          ]
+        },
+        "explanation": "+ склеивает; insert(0, \"Big \") — в начало; R стоит на позиции 4 (B0 i1 g2 пробел3); erase(0, 4) удаляет «Big »; длина Rainbow = 7."
+      }
+    },
+    {
+      "key": "g8-str-strlen",
+      "title": "strlen",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.13"
+      ],
+      "text": "Что выведет фрагмент?\n\n```cpp\nchar s[] = \"NIS 2026!\";\ncout << strlen(s);\n```",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 226, 239",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "9 — 1 балл.",
+        "accepted": {
+          "values": [
+            "9"
+          ],
+          "numeric": true
+        },
+        "explanation": "strlen считает все символы, включая пробел и «!», но не '\\0': N I S _ 2 0 2 6 ! = 9."
+      }
+    },
+    {
+      "key": "g8-str-substr",
+      "title": "substr",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.13"
+      ],
+      "text": "Что выведет фрагмент?\n\n```cpp\nstring city = \"Shymkent\";\ncout << city.substr(0, 4);\n```",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 232",
+      "practice": true,
+      "options": [
+        {
+          "key": "A",
+          "content": "Shym"
+        },
+        {
+          "key": "B",
+          "content": "Shymk"
+        },
+        {
+          "key": "C",
+          "content": "hymk"
+        },
+        {
+          "key": "D",
+          "content": "kent"
+        }
+      ],
+      "scheme": {
+        "mark_scheme": "A — 1 балл.",
+        "accepted": {
+          "correct": "A"
+        },
+        "explanation": "substr(0, 4) — 4 символа начиная с позиции 0."
+      }
+    },
+    {
+      "key": "g8-str-find",
+      "title": "find",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.13"
+      ],
+      "text": "Чему равно `pos`?\n\n```cpp\nstring s = \"I like C++\";\nint pos = s.find(\"like\");\n```",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 232",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "2 — 1 балл.",
+        "accepted": {
+          "values": [
+            "2"
+          ],
+          "numeric": true
+        },
+        "explanation": "Позиции: I — 0, пробел — 1, l — 2. find возвращает позицию начала первого вхождения."
+      }
+    },
+    {
+      "key": "g8-str-replace",
+      "title": "replace",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.13"
+      ],
+      "text": "Что выведет фрагмент?\n\n```cpp\nstring s = \"I love cats\";\ns.replace(7, 4, \"dogs\");\ncout << s;\n```",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 232",
+      "practice": true,
+      "options": [
+        {
+          "key": "A",
+          "content": "I love dogs"
+        },
+        {
+          "key": "B",
+          "content": "I lovedogs"
+        },
+        {
+          "key": "C",
+          "content": "I love catsdogs"
+        },
+        {
+          "key": "D",
+          "content": "I dogs cats"
+        }
+      ],
+      "scheme": {
+        "mark_scheme": "A — 1 балл.",
+        "accepted": {
+          "correct": "A"
+        },
+        "explanation": "Позиция 7 — буква c; 4 символа «cats» заменяются на «dogs»."
+      }
+    },
+    {
+      "key": "g8-str-digits",
+      "title": "Условие для цифры",
+      "type": "fill_blank",
+      "marks": 2,
+      "difficulty": "easy",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.14"
+      ],
+      "text": "Допишите условие подсчёта цифр в строке.\n\n```cpp\nfor (int i = 0; i < strlen(s); i++)\n    if (s[i] >= '[[1]]' && s[i] <= '[[2]]')\n        count++;\n```",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 229",
+      "practice": true,
+      "content": {
+        "blank_count": 2
+      },
+      "scheme": {
+        "mark_scheme": "[[1]] 0 (1); [[2]] 9 (1).",
+        "accepted": {
+          "blanks": [
+            [
+              "0"
+            ],
+            [
+              "9"
+            ]
+          ],
+          "ignore_spaces": true
+        },
+        "explanation": "Цифры — символы от '0' до '9' (коды 48–57)."
+      }
+    },
+    {
+      "key": "g8-str-sentences",
+      "title": "Подсчёт предложений",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.14"
+      ],
+      "text": "Программа считает символы `.`, `!`, `?` в строке. Что она выведет для текста `Hello! Are you ready? Let's go.`?",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 227",
+      "practice": true,
+      "options": [
+        {
+          "key": "A",
+          "content": "2"
+        },
+        {
+          "key": "B",
+          "content": "3"
+        },
+        {
+          "key": "C",
+          "content": "4"
+        },
+        {
+          "key": "D",
+          "content": "6"
+        }
+      ],
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "explanation": "Знаки: «!», «?», «.» — по одному, итого 3. Апостроф не считается."
+      }
+    },
+    {
+      "key": "g8-str-bits",
+      "title": "Объём в битах",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.14"
+      ],
+      "text": "Каждый символ кодируется 8 битами. Каков объём строки `Code is fun` в битах (пробелы тоже символы)?",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 227, 238",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "88 — 1 балл.",
+        "accepted": {
+          "values": [
+            "88"
+          ],
+          "numeric": true
+        },
+        "explanation": "Длина 11 символов (4 + 1 + 2 + 1 + 3); 11 × 8 = 88 бит."
+      }
+    },
+    {
+      "key": "g8-str-digit-cond",
+      "title": "Проверка цифры",
+      "type": "multiple_response",
+      "marks": 3,
+      "difficulty": "medium",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.11",
+        "8.4.3.14"
+      ],
+      "text": "Какие условия верно проверяют, что символ `ch` — цифра?",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 229, 239; G8_Информатика_TG_RU_07.02.25_ФИНАЛ 1.pdf, стр. 185",
+      "practice": true,
+      "options": [
+        {
+          "key": "A",
+          "content": "`ch >= '0' && ch <= '9'`"
+        },
+        {
+          "key": "B",
+          "content": "`int(ch) >= 48 && int(ch) <= 57`"
+        },
+        {
+          "key": "C",
+          "content": "`int(ch) >= 65 && int(ch) <= 90`"
+        },
+        {
+          "key": "D",
+          "content": "`isdigit(ch)`"
+        },
+        {
+          "key": "E",
+          "content": "`ch >= 'a' && ch <= 'z'`"
+        }
+      ],
+      "scheme": {
+        "mark_scheme": "A, B, D (по 1 баллу; −1 за неверный)",
+        "accepted": {
+          "correct": [
+            "A",
+            "B",
+            "D"
+          ]
+        },
+        "explanation": "Цифры — '0'..'9', коды 48–57; isdigit проверяет то же. 65–90 — заглавные, 'a'..'z' — строчные."
+      }
+    },
+    {
+      "key": "g8-str-upper-count",
+      "title": "Подсчёт заглавных",
+      "type": "code_completion",
+      "marks": 3,
+      "difficulty": "hard",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "8.4.3.14"
+      ],
+      "text": "Напишите программу: ввести строку с пробелами в переменную `string s` и вывести количество заглавных латинских букв в ней. Пример: `Hello World NIS` → 5.",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 228, 239; СИМВОЛЫ И СТРОКИ (ЯЗЫК С++) _ Wayground (1).pdf, стр. 11",
+      "practice": true,
+      "content": {
+        "starter_code": "#include <iostream>\n#include <string>\nusing namespace std;\nint main() {\n\n    return 0;\n}"
+      },
+      "scheme": {
+        "mark_scheme": "- Ввод строки с пробелами: getline(cin, s) (1)\n- Цикл по всем символам (i < s.length()) (1)\n- Условие s[i] >= 'A' && s[i] <= 'Z', счётчик и вывод (1)",
+        "points": [
+          {
+            "criterion": "Ввод строки с пробелами: getline(cin, s)",
+            "marks": 1
+          },
+          {
+            "criterion": "Цикл по всем символам (i < s.length())",
+            "marks": 1
+          },
+          {
+            "criterion": "Условие s[i] >= 'A' && s[i] <= 'Z', счётчик и вывод",
+            "marks": 1
+          }
+        ],
+        "model_answer": "```cpp\n#include <iostream>\n#include <string>\nusing namespace std;\nint main() {\n    string s;\n    getline(cin, s);\n    int count = 0;\n    for (int i = 0; i < s.length(); i++)\n        if (s[i] >= 'A' && s[i] <= 'Z')\n            count++;\n    cout << count;\n    return 0; }\n```"
+      }
+    },
+    {
+      "key": "g8-str-exam-1",
+      "title": "Символ + число",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "exam",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.11"
+      ],
+      "text": "Что выведет фрагмент?\n\n```cpp\nchar x = 'B';\nchar y = x + 4;\ncout << y;\n```",
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 223, 228",
+      "practice": false,
+      "options": [
+        {
+          "key": "A",
+          "content": "E"
+        },
+        {
+          "key": "B",
+          "content": "F"
+        },
+        {
+          "key": "C",
+          "content": "G"
+        },
+        {
+          "key": "D",
+          "content": "70"
+        }
+      ],
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "explanation": "'B' имеет код 66; 66 + 4 = 70 — код 'F'; y — типа char, поэтому выводится символ."
+      }
+    },
+    {
+      "key": "g8-str-exam-2",
+      "title": "Почему такой результат",
+      "type": "short_answer",
+      "marks": 1,
+      "difficulty": "exam",
+      "command_word": "explain",
+      "grading": "AI",
+      "objectives": [
+        "8.4.3.11"
+      ],
+      "text": "Для фрагмента `char x = 'B'; char y = x + 4; cout << y;` кратко объясните, почему выводится буква, а не ошибка.",
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 222–223, 228; G8_Информатика_TG_RU_07.02.25_ФИНАЛ 1.pdf, стр. 175",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "- Символ хранится как числовой код (ASCII); к коду прибавляется 4, и y = символ с этим кодом (1)",
+        "points": [
+          {
+            "criterion": "Символ хранится как числовой код (ASCII); к коду прибавляется 4, и y = символ с этим кодом",
+            "marks": 1
+          }
+        ],
+        "model_answer": "Символ в памяти — это код ASCII ('B' = 66). x + 4 = 70, это код буквы F; y имеет тип char, поэтому выводится символ F."
+      }
+    },
+    {
+      "key": "g8-str-exam-3",
+      "title": "Код строчной буквы",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "exam",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.11"
+      ],
+      "text": "Код `'a'` равен 97. Что выведет `cout << int('k');`?",
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 222, 228",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "107 — 1 балл.",
+        "accepted": {
+          "values": [
+            "107"
+          ],
+          "numeric": true
+        },
+        "explanation": "k — 11-я буква алфавита, на 10 позиций дальше a: 97 + 10 = 107."
+      }
+    },
+    {
+      "key": "g8-str-exam-4",
+      "title": "Заглавная → строчная",
+      "type": "fill_blank",
+      "marks": 2,
+      "difficulty": "exam",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.11"
+      ],
+      "text": "Допишите фрагмент, переводящий заглавную латинскую букву в строчную без функций `<cctype>`.\n\n```cpp\nif (ch >= '[[1]]' && ch <= 'Z')\n    ch = ch + [[2]];\n```",
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 228",
+      "practice": false,
+      "content": {
+        "blank_count": 2
+      },
+      "scheme": {
+        "mark_scheme": "[[1]] A (1); [[2]] 32 или ('a' - 'A') (1).",
+        "accepted": {
+          "blanks": [
+            [
+              "A"
+            ],
+            [
+              "32",
+              "('a'-'A')",
+              "'a'-'A'"
+            ]
+          ],
+          "ignore_spaces": true
+        },
+        "explanation": "Заглавные — от 'A' до 'Z'; строчная на 32 больше."
+      }
+    },
+    {
+      "key": "g8-str-exam-5",
+      "title": "Ошибка в символьном массиве",
+      "type": "code_analysis",
+      "marks": 2,
+      "difficulty": "exam",
+      "command_word": "explain",
+      "grading": "AI",
+      "objectives": [
+        "8.4.3.12"
+      ],
+      "text": "Найдите ошибку, объясните её и исправьте.",
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 224",
+      "practice": false,
+      "content": {
+        "starter_code": "1  char word[6] = \"planet\";\n2  cout << word;",
+        "answer_lines": 4
+      },
+      "scheme": {
+        "mark_scheme": "- В «planet» 6 букв + '\\0' = 7 ячеек, массив на 6 мал (1)\n- Исправление: char word[7] = \"planet\"; или char word[] = \"planet\"; (1)",
+        "points": [
+          {
+            "criterion": "В «planet» 6 букв + '\\0' = 7 ячеек, массив на 6 мал",
+            "marks": 1
+          },
+          {
+            "criterion": "Исправление: char word[7] = \"planet\"; или char word[] = \"planet\";",
+            "marks": 1
+          }
+        ],
+        "model_answer": "Строка заканчивается '\\0', поэтому нужно 6 + 1 = 7 ячеек: char word[7] = \"planet\"; (или char word[] = \"planet\";)."
+      }
+    },
+    {
+      "key": "g8-str-exam-6",
+      "title": "Ввод строки с пробелами",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "exam",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.12"
+      ],
+      "text": "Нужно считать в `char s[50]` фразу `blue sky today` целиком. Какая команда подходит?",
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 225; СИМВОЛЫ И СТРОКИ (ЯЗЫК С++) _ Wayground (1).pdf, стр. 11",
+      "practice": false,
+      "options": [
+        {
+          "key": "A",
+          "content": "`cin >> s;`"
+        },
+        {
+          "key": "B",
+          "content": "`cin.getline(s, 50);`"
+        },
+        {
+          "key": "C",
+          "content": "`strcat(s, 50);`"
+        },
+        {
+          "key": "D",
+          "content": "`cout << s;`"
+        }
+      ],
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "explanation": "cin >> остановится на пробеле; cin.getline считывает строку с пробелами."
+      }
+    },
+    {
+      "key": "g8-str-exam-7",
+      "title": "Трассировка операций",
+      "type": "trace_table",
+      "marks": 5,
+      "difficulty": "exam",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.13"
+      ],
+      "text": "Заполните таблицу: значение `s` после каждого шага и значение `p` / вывод (без кавычек).\n\n```cpp\nstring s = \"Sunday\";\ns.erase(3, 3);          // шаг 1\ns.insert(3, \"flower\");  // шаг 2\nint p = s.find(\"f\");    // шаг 3\ns = s + \"s\";            // шаг 4\ncout << s.length();     // шаг 5\n```",
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 232, 234",
+      "practice": false,
+      "content": {
+        "columns": [
+          "Шаг",
+          "s",
+          "p / вывод"
+        ],
+        "rows": 5,
+        "prefill": [
+          [
+            "1",
+            null,
+            "—"
+          ],
+          [
+            "2",
+            null,
+            "—"
+          ],
+          [
+            "3",
+            null,
+            null
+          ],
+          [
+            "4",
+            null,
+            "—"
+          ],
+          [
+            "5",
+            null,
+            null
+          ]
+        ]
+      },
+      "scheme": {
+        "mark_scheme": "По 1 баллу за строку.",
+        "accepted": {
+          "rows": [
+            [
+              null,
+              "Sun",
+              null
+            ],
+            [
+              null,
+              "Sunflower",
+              null
+            ],
+            [
+              null,
+              "Sunflower",
+              "3"
+            ],
+            [
+              null,
+              "Sunflowers",
+              null
+            ],
+            [
+              null,
+              "Sunflowers",
+              "10"
+            ]
+          ]
+        },
+        "explanation": "erase(3, 3) удаляет «day»; insert(3, \"flower\") → Sunflower; f на позиции 3; + \"s\" → Sunflowers (10 символов)."
+      }
+    },
+    {
+      "key": "g8-str-exam-8",
+      "title": "Исправить слово",
+      "type": "code_completion",
+      "marks": 3,
+      "difficulty": "exam",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "8.4.3.13"
+      ],
+      "text": "В строке `string w = \"keybboard\";` лишняя буква `b`. Допишите код: (1) удалите лишнюю букву методом `erase`; (2) вставьте в начало `\"My \"` методом `insert`; (3) выведите длину получившейся строки. Что будет выведено?",
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 232, 234; Интерактивный рабочий лист_ Символы и строки в С++.pdf, стр. 2",
+      "practice": false,
+      "content": {
+        "starter_code": "string w = \"keybboard\";\n"
+      },
+      "scheme": {
+        "mark_scheme": "- w.erase(3, 1) (или erase(4, 1)) → keyboard (1)\n- w.insert(0, \"My \") → My keyboard (1)\n- cout << w.length(); вывод 11 (1)",
+        "points": [
+          {
+            "criterion": "w.erase(3, 1) (или erase(4, 1)) → keyboard",
+            "marks": 1
+          },
+          {
+            "criterion": "w.insert(0, \"My \") → My keyboard",
+            "marks": 1
+          },
+          {
+            "criterion": "cout << w.length(); вывод 11",
+            "marks": 1
+          }
+        ],
+        "model_answer": "```cpp\nstring w = \"keybboard\";\nw.erase(3, 1);        // keyboard\nw.insert(0, \"My \");   // My keyboard\ncout << w.length();   // 11\n```"
+      }
+    },
+    {
+      "key": "g8-str-exam-9",
+      "title": "Длина строки",
+      "type": "multiple_response",
+      "marks": 3,
+      "difficulty": "exam",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.13"
+      ],
+      "text": "Какие команды определяют длину строки в C++?",
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 226, 232; СИМВОЛЫ И СТРОКИ (ЯЗЫК С++) _ Wayground (1).pdf, стр. 12; G8_Информатика_TG_RU_07.02.25_ФИНАЛ 1.pdf, стр. 200",
+      "practice": false,
+      "options": [
+        {
+          "key": "A",
+          "content": "`strlen(s)`"
+        },
+        {
+          "key": "B",
+          "content": "`s.length()`"
+        },
+        {
+          "key": "C",
+          "content": "`strcat(s1, s2)`"
+        },
+        {
+          "key": "D",
+          "content": "`s.size()`"
+        },
+        {
+          "key": "E",
+          "content": "`s.find(\"a\")`"
+        }
+      ],
+      "scheme": {
+        "mark_scheme": "A, B, D (по 1 баллу; −1 за неверный)",
+        "accepted": {
+          "correct": [
+            "A",
+            "B",
+            "D"
+          ]
+        },
+        "explanation": "strlen — для массива char; length() и size() — для string. find ищет, strcat склеивает."
+      }
+    },
+    {
+      "key": "g8-str-exam-10",
+      "title": "Счётчик знаков",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "exam",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.14"
+      ],
+      "text": "Программа увеличивает `count`, когда `input[i]` равен `'.'`, `'!'` или `'?'`. Что она выведет для строки `Wait... What?!`?",
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 227",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "5 — 1 балл.",
+        "accepted": {
+          "values": [
+            "5"
+          ],
+          "numeric": true
+        },
+        "explanation": "Цикл считает каждый знак: три точки, «?» и «!» — 5, хотя предложений два."
+      }
+    },
+    {
+      "key": "g8-str-exam-11",
+      "title": "Цифры и объём",
+      "type": "code_completion",
+      "marks": 4,
+      "difficulty": "exam",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "8.4.3.14"
+      ],
+      "text": "Напишите программу: ввести строку с пробелами в `string s`, подсчитать и вывести количество цифр в ней, а затем объём строки в битах (каждый символ — 8 бит). Пример: `Room 205, floor 2` → цифр: 4, объём: 136 бит.",
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 227, 229, 238; СИМВОЛЫ И СТРОКИ (ЯЗЫК С++) _ Wayground (1).pdf, стр. 11",
+      "practice": false,
+      "content": {
+        "starter_code": "#include <iostream>\n#include <string>\nusing namespace std;\nint main() {\n\n    return 0;\n}"
+      },
+      "scheme": {
+        "mark_scheme": "- Ввод строки с пробелами: getline(cin, s) (1)\n- Цикл по всем символам строки (1)\n- Условие цифры (s[i] >= '0' && s[i] <= '9' или isdigit) и счётчик (1)\n- Вывод счётчика и объёма s.length() * 8 (1)",
+        "points": [
+          {
+            "criterion": "Ввод строки с пробелами: getline(cin, s)",
+            "marks": 1
+          },
+          {
+            "criterion": "Цикл по всем символам строки",
+            "marks": 1
+          },
+          {
+            "criterion": "Условие цифры (s[i] >= '0' && s[i] <= '9' или isdigit) и счётчик",
+            "marks": 1
+          },
+          {
+            "criterion": "Вывод счётчика и объёма s.length() * 8",
+            "marks": 1
+          }
+        ],
+        "model_answer": "```cpp\n#include <iostream>\n#include <string>\nusing namespace std;\nint main() {\n    string s;\n    getline(cin, s);\n    int count = 0;\n    for (int i = 0; i < s.length(); i++)\n        if (s[i] >= '0' && s[i] <= '9')\n            count++;\n    cout << \"Цифр: \" << count << endl;\n    cout << \"Объём: \" << s.length() * 8 << \" бит\";\n    return 0; }\n```"
+      }
+    }
+  ],
+  "topic_exam": {
+    "duration": 30,
+    "title": "Работа со строками и символами — экзамен",
+    "instructions": "Ответьте на **все** вопросы. Код записан на C++; индексы строк и массивов начинаются с 0. Коды ASCII: 'A' = 65, 'a' = 97, '0' = 48. Всего: 24 баллов. Время: 30 минут.",
+    "questions": [
+      "g8-str-exam-1",
+      "g8-str-exam-2",
+      "g8-str-exam-3",
+      "g8-str-exam-4",
+      "g8-str-exam-5",
+      "g8-str-exam-6",
+      "g8-str-exam-7",
+      "g8-str-exam-8",
+      "g8-str-exam-9",
+      "g8-str-exam-10",
+      "g8-str-exam-11"
+    ]
+  }
+}

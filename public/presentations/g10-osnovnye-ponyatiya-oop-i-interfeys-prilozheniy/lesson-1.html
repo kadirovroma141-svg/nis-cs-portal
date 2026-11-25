@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>10.3А · Урок 1 · Основные понятия ООП: класс, объект, свойство, метод, событие</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+  <link rel="stylesheet" href="../_engine/lesson.css" />
+</head>
+<body class="lesson">
+<script src="../_engine/deck.js"></script>
+<script src="../_engine/lesson.js"></script>
+<script>
+/*
+ * 10.3А «Введение в ООП (C#)», урок 1 (КТП) — «Основные понятия ООП: класс, объект, свойство, метод, событие и три принципа ООП».
+ * Цель обучения (КТП 2026): 10.4.3.1 описывать основные понятия ООП: класс, объект, свойства, метод, событие.
+ * Ход урока — КСП content/lesson-plans/g10-osnovnye-ponyatiya-oop-i-interfeys-prilozheniy.json, урок 1 (начало 10 мин, середина 60, конец 10).
+ * Содержание — только из материалов: презентации учителя «1 урок Введение в ООП» (слайды 2–6, 15, 17) и
+ * «2 урок Компоненты ИСР» (слайды 2, 4, 7–8). В учебнике 10 кл. главы «Введение в ООП» нет.
+ * Задания СОР/СОЧ не повторяются; формат СОЧ 3 четверти — по спецификации СОЧ 10 кл.
+ */
+const P1 = "Презентация «1 урок Введение в ООП», ";
+const P2 = "Презентация «2 урок Компоненты ИСР», ";
+const SPEC = "Спецификация СОЧ 10 кл., 3 четверть";
+const { src, reveal, statements, quiz, matcher } = LESSON;
+const S = () => window.DECK_STATE;
+const code = (s, fs = 15) => `<pre class="code-block" style="font-size:${fs}px;line-height:1.45;">${DECK_ESC(s)}</pre>`;
+
+/* ---------- класс → объекты (условная иллюстрация к П1 слайды 3–5) ---------- */
+function diaClass(filled) {
+  const obj = (x, name, color) => `
+    <rect class="blk-a" x="${x}" y="190" width="190" height="96" rx="12"/>
+    <text x="${x + 95}" y="218" text-anchor="middle">${filled ? "Объект" : "?"}</text>
+    <text class="s" x="${x + 95}" y="244" text-anchor="middle">brand = ${name}</text>
+    <text class="s" x="${x + 95}" y="266" text-anchor="middle">color = ${color}</text>`;
+  return `
+<svg class="dia" viewBox="0 0 640 300" role="img" aria-label="Класс Car и три объекта, созданные по нему">
+  <defs><marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--primary)"/></marker></defs>
+  <rect class="blk-p" x="180" y="8" width="280" height="110" rx="12"/>
+  <text x="320" y="36" text-anchor="middle">${filled ? "Класс Car (каркас)" : "Чертёж — это … ?"}</text>
+  <text class="s" x="320" y="62" text-anchor="middle">brand, color, power, maxSpeed …</text>
+  <text class="s" x="320" y="84" text-anchor="middle">QuantityOfKilometers()</text>
+  <text class="s" x="320" y="106" text-anchor="middle">new Car(…)</text>
+  <path class="ar" d="M260 118 L105 186"/><path class="ar" d="M320 118 V186"/><path class="ar" d="M380 118 L535 186"/>
+  ${obj(10, '"Ford"', '"Серый"')}${obj(225, '"Ford"', '"Белый"')}${obj(440, '"Ford"', '"Красный"')}
+</svg>`;
+}
+
+const CAR_FULL = `public class Car
+{
+    private string brand;
+    private string color;
+    private int power;
+    private int maxSpeed;
+    private int volumeOfTank;
+    private double fuelConsumption;
+
+    // конструктор класса
+    public Car(string newBrand, string newColor,
+               int newPower, ...)
+    {
+        brand = newBrand;
+        color = newColor;
+        ...
+    }
+
+    public double QuantityOfKilometers()
+    {
+        double quantity =
+            100 * volumeOfTank / fuelConsumption;
+        return quantity;
+    }
+}`;
+
+initDeck({
+  badge: "10.3А · Урок 1",
+  title: "Основные понятия ООП: класс, объект, свойство, метод, событие",
+  subtitle: "10 класс · 3 четверть · цель 10.4.3.1 · 80 минут",
+  footer: "НИШ ЕМН г. Кызылорда · Информатика · 10 класс · Раздел 10.3А «Введение в ООП (C#)»",
+  slides: [
+    /* ---------------- НАЧАЛО УРОКА (10 мин) ---------------- */
+    {
+      badge: "Начало урока",
+      shortTitle: "Тема, цели и критерии",
+      timing: "0–3 мин",
+      source: "КТП 2026; КСП урока 1; " + P1 + "слайд 2",
+      notes: "Организационный момент. Озвучьте тему, цель обучения и критерии: по ним ученики проверят себя в конце урока.",
+      render() {
+        return `<div class="hero">
+          <div>
+            <div class="hero-kicker">Раздел 10.3А · Введение в ООП (C#)</div>
+            <h1>Основные понятия ООП и три принципа ООП</h1>
+            <div class="stack">
+              <div class="goal"><b>10.4.3.1</b> — описывать основные понятия ООП: класс, объект, свойства, метод, событие.</div>
+            </div>
+          </div>
+          <div class="stack text-sm">
+            <div class="card"><h3>🎯 Цели урока</h3>
+              <p><b>Все:</b> дают определения класса, объекта, свойства, метода, события.<br>
+              <b>Большинство:</b> находят в коде C# поля, конструктор, метод и создание объекта через <code>new</code>.<br>
+              <b>Некоторые:</b> объясняют инкапсуляцию, наследование и полиморфизм на примерах.</p></div>
+            <div class="card"><h3>✅ Критерии оценивания</h3><p>Называет основные понятия ООП и даёт определение терминам: объект, свойства, метод, событие, класс.</p></div>
+          </div>
+        </div>${src("КТП 2026 (цель 10.4.3.1); КСП урока 1; " + P1 + "слайд 2 (дескрипторы)")}`;
+      },
+    },
+    {
+      badge: "Начало урока",
+      shortTitle: "Чертёж и готовые автомобили",
+      timing: "3–7 мин",
+      source: P1 + "слайды 3–5",
+      notes: "Приём «Чертёж и готовые автомобили». Вопрос: чем чертёж отличается от конкретного автомобиля на дороге? Что у автомобилей общее, чем они различаются? Выслушайте 2–3 ответа, затем откройте подписи: чертёж = класс, автомобиль = объект. Значения полей на схеме — условные.",
+      render() {
+        const on = S().revealed["cls"];
+        return `<div class="body"><div class="grid-2" style="grid-template-columns:1.3fr 1fr;gap:24px;align-items:center;">
+          <div>${diaClass(on)}</div>
+          <div class="stack">
+            <h2 class="slide-h2">Один чертёж — много автомобилей</h2>
+            <p class="text-sm">Что общего у всех автомобилей, выпущенных по одному чертежу? Чем они различаются?</p>
+            <button type="button" class="btn btn-primary reveal-btn" onclick="DECK.toggleReveal('cls')">${on ? "Скрыть" : "Показать подписи"}</button>
+            ${on ? `<div class="answer text-sm"><b>Класс</b> — каркас (описание реального объекта). <b>Объект</b> — представитель (экземпляр) класса: у каждого свои значения свойств.</div>` : ""}
+          </div>
+        </div></div>${src(P1 + "слайд 3 (класс — каркас, объект — экземпляр), слайды 4–5 (класс Car); значения полей — условный пример")}`;
+      },
+    },
+    {
+      badge: "Начало урока",
+      shortTitle: "Блиц-опрос",
+      timing: "7–10 мин",
+      source: P1 + "слайд 2",
+      notes: "Повторение 9 класса устно, без оценивания. Ответы не открываются — учитель уточняет по ходу. Затем — цели урока.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Блиц-опрос: что вы помните?</h2>
+          <div class="steps">
+            <div class="step"><b>Ввод и вывод:</b>&nbsp;какие команды для ввода и вывода данных в C++ вы знаете?</div>
+            <div class="step"><b>Типы данных:</b>&nbsp;назовите основные типы данных в C++.</div>
+            <div class="step"><b>Виды алгоритмов:</b>&nbsp;назовите основные виды алгоритмов.</div>
+            <div class="step"><b>Способы записи:</b>&nbsp;какие существуют способы отображения алгоритмов?</div>
+          </div>
+          <div class="note"><b>Сегодня:</b> от процедурного программирования — к объектно-ориентированному (C#).</div>
+        </div>${src(P1 + "слайд 2 (вопросы для повторения)")}`;
+      },
+    },
+
+    /* ---------------- СЕРЕДИНА УРОКА (60 мин) ---------------- */
+    {
+      badge: "Новое · понятия ООП",
+      shortTitle: "Пять базовых понятий",
+      timing: "10–17 мин",
+      source: P1 + "слайд 3",
+      notes: "Фронтально: определение ООП и 5 понятий объектной модели. Ученики записывают определения в тетрадь. Речевая конструкция: «Класс является описанием (каркасом) объектов, а объект — это конкретный экземпляр класса…».",
+      render() {
+        return `<div class="body">
+          <div class="def"><b>Объектно-ориентированное программирование (ООП)</b> — методика разработки программ, в основе которой лежит понятие <b>объект</b>.</div>
+          <div class="cards text-sm" style="grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;">
+            <div class="card"><h3>Класс</h3><p>Элемент ООП, на основе которого может быть создан программный объект. Описывает свойства и методы; это каркас.</p></div>
+            <div class="card"><h3>Объект</h3><p>Представитель (экземпляр) класса с совокупностью свойств и методов; реагирует на события.</p></div>
+            <div class="card"><h3>Свойство</h3><p>Атрибут (характеристика), определяющий состояние объекта: цвет, размер, текст, координаты.</p></div>
+            <div class="card"><h3>Метод</h3><p>Действия, которые можно выполнять над объектом или которые сам объект может выполнять.</p></div>
+            <div class="card"><h3>Событие</h3><p>Отклик объекта на действие (щелчок мыши, нажатие клавиши). Реакция — выполнение процедуры или функции.</p></div>
+          </div>
+        </div>${src(P1 + "слайд 3 (определение ООП и 5 понятий)")}`;
+      },
+    },
+    {
+      badge: "Моделирование",
+      shortTitle: "Класс Animal и объект CAT",
+      timing: "17–21 мин",
+      source: P1 + "слайд 4",
+      notes: "Задание слайда 4 презентации: определите класс, объект, свойства и методы. Ученики называют категорию — щёлкните её в строке. Требуйте обоснование по определению.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">От реального объекта к классу: что это — класс, объект, свойство или метод?</h2>
+          ${matcher("an", [["c", "Класс"], ["o", "Объект"], ["p", "Свойство"], ["m", "Метод"]], [
+            { t: "Animal (Животное) — общее описание", ans: "c" },
+            { t: "breed (порода)", ans: "p" },
+            { t: "sleep()", ans: "m" },
+            { t: "CAT — конкретная кошка", ans: "o" },
+            { t: "color (окрас)", ans: "p" },
+            { t: "eat()", ans: "m" },
+            { t: "age (возраст)", ans: "p" },
+          ])}
+        </div>${src(P1 + "слайд 4 (класс Animal, объект CAT)")}`;
+      },
+    },
+    {
+      badge: "C# · объявление класса",
+      shortTitle: "Класс Car на C#",
+      timing: "21–26 мин",
+      source: P1 + "слайд 4",
+      notes: "Разбор кода. Покажите модификатор доступа public, ключевое слово class, имя класса, тело в фигурных скобках, поля. Вопрос: какие характеристики автомобиля описывают поля? Откройте ответ.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;align-items:start;">
+          <div class="stack">
+            <div class="text-xs text-muted">Car.cs — объявление класса</div>
+            ${code(`public class Car
+{
+    private string brand;
+    private string color;
+    private int power;
+    private int maxSpeed;
+    private int volumeOfTank;
+    private double fuelConsumption;
+}`, 17)}
+          </div>
+          <div class="stack">
+            <div class="card"><h3>Правило синтаксиса</h3><p>Класс объявляется так: модификатор доступа <code>public</code>, ключевое слово <code>class</code> и имя класса. Тело класса — в фигурных скобках <code>{ }</code>. Внутри класса объявлены его <b>поля</b>.</p></div>
+            ${reveal("r-car", "Что описывают поля?", "1) марка <code>brand</code>; 2) цвет <code>color</code>; 3) мощность в л/с <code>power</code>; 4) максимальная скорость км/ч <code>maxSpeed</code>; 5) объём бака в л <code>volumeOfTank</code>; 6) расход топлива (л) на 100 км <code>fuelConsumption</code>.")}
+          </div>
+        </div></div>${src(P1 + "слайд 4 (Car.cs, свойства Car, правило синтаксиса)")}`;
+      },
+    },
+    {
+      badge: "C# · конструктор",
+      shortTitle: "Конструктор и оператор new",
+      timing: "26–31 мин",
+      source: P1 + "слайд 5",
+      notes: "Конструктор — специальный метод, вызывается автоматически при создании объекта; имя совпадает с именем класса. Разберите, какое значение получит каждое поле объекта Ford. Откройте ответ после обсуждения.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;align-items:start;">
+          ${code(`// конструктор класса
+public Car(string newBrand, string newColor, int newPower,
+           int newMaxSpeed, int newVolumeOfTank,
+           double newFuelConsumption)
+{
+    brand = newBrand;
+    color = newColor;
+    power = newPower;
+    maxSpeed = newMaxSpeed;
+    volumeOfTank = newVolumeOfTank;
+    fuelConsumption = newFuelConsumption;
+}`, 15)}
+          <div class="stack">
+            <div class="def" style="font-size:19px;"><b>Конструктор класса</b> — специальный метод, который вызывается автоматически при создании нового объекта. Синтаксис: <code>public Имя([параметры])</code> — имя строго совпадает с именем класса.</div>
+            <div class="text-xs text-muted">Создание экземпляра (объекта) с оператором new:</div>
+            ${code(`Car c = new Car("Ford", "Серый", 150, 210, 55, 6.4);`, 15)}
+            ${reveal("r-new", "Значения полей объекта c", "brand = \"Ford\", color = \"Серый\", power = 150, maxSpeed = 210, volumeOfTank = 55, fuelConsumption = 6.4.")}
+          </div>
+        </div></div>${src(P1 + "слайд 5 (конструктор, экземпляр класса)")}`;
+      },
+    },
+    {
+      badge: "C# · метод",
+      shortTitle: "Метод класса",
+      timing: "31–36 мин",
+      source: P1 + "слайд 6",
+      notes: "Методы класса схожи с функциями процедурного программирования. Разберите схему объявления. Задача: вычислите, что вернёт метод для объекта Ford (бак 55 л, расход 6,4 л на 100 км). Ученики считают в тетради, затем откройте ответ.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;align-items:start;">
+          <div class="stack">
+            <div class="text-xs text-muted">Car.cs — расчёт запаса хода на полном баке</div>
+            ${code(`public double QuantityOfKilometers()
+{
+    double quantity = 100 * volumeOfTank / fuelConsumption;
+    return quantity;
+}`, 14.5)}
+            <div class="card"><h3>Схема объявления</h3><p><code>[модификаторДоступа] типВозвращаемогоЗначения имяМетода([аргументы]) { }</code><br>Тип может быть <code>void</code> (ничего не возвращает). Аргументы необязательны.</p></div>
+          </div>
+          <div class="stack">
+            <h2 class="slide-h2">Что вернёт метод?</h2>
+            <p class="text-sm">Для объекта <code>c</code> со слайда «Конструктор»: <code>volumeOfTank = 55</code>, <code>fuelConsumption = 6.4</code>.</p>
+            ${reveal("r-km", "Ответ", "quantity = 100 · 55 / 6,4 = <b>859,375</b> км — запас хода на полном баке. Тип возвращаемого значения — <code>double</code>.")}
+          </div>
+        </div></div>${src(P1 + "слайд 6 (метод QuantityOfKilometers, схема объявления); данные — слайд 5")}`;
+      },
+    },
+    {
+      badge: "Новое · принципы ООП",
+      shortTitle: "Три принципа ООП",
+      timing: "36–41 мин",
+      source: P1 + "слайды 6, 15",
+      notes: "Три фундаментальных принципа. Пример наследования из кода формы: public partial class Form1 : Form — Form1 наследует все свойства базового класса Form. Ученики записывают определения.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Три фундаментальных принципа ООП</h2>
+          <div class="cards c3">
+            <div class="card"><h3><span class="ico">🔒</span>Инкапсуляция</h3><p>Ограничение прав доступа: скрытие полей объекта, чтобы доступ к ним был только посредством методов класса.</p></div>
+            <div class="card"><h3><span class="ico">🌳</span>Наследование</h3><p>Объекты могут получать свойства и методы других объектов (предков). Класс может иметь подклассы (потомки).</p></div>
+            <div class="card"><h3><span class="ico">🎭</span>Полиморфизм</h3><p>Объекты с одним общим родителем решают схожие по смыслу задачи разными способами.</p></div>
+          </div>
+          <div class="grid-2 text-sm" style="gap:14px;">
+            <div class="note"><b>Полиморфизм:</b> «Один интерфейс — много методов»: любой объект по-своему реагирует на общий набор операций.</div>
+            <div class="card"><b>Наследование в коде формы:</b><br><code>public partial class Form1 : Form</code> — класс Form1 наследует все свойства базового класса Form.</div>
+          </div>
+        </div>${src(P1 + "слайд 6 (принципы), слайд 15 (класс Form1 : Form)")}`;
+      },
+    },
+    {
+      badge: "Практикум · задание 1",
+      shortTitle: "Паспорт объекта",
+      timing: "41–49 мин",
+      source: "КСП урока 1; " + P1 + "слайд 3; " + P2 + "слайды 4, 6–8",
+      notes: "Работа в группах. Каждая группа заполняет паспорт одного объекта: Смартфон, Ученик или кнопка Button. Для Смартфона и Ученика свойства и методы придумывают сами — проверяем по определениям. Для Button откройте образец (свойства и события из презентации урока 2).",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Задание 1. Паспорт объекта</h2>
+          <table class="t">
+            <tr><th>Объект</th><th>Имя класса</th><th>4 свойства (с типами данных)</th><th>3 метода</th><th>2 события</th></tr>
+            <tr><td>Смартфон</td><td>…</td><td>…</td><td>…</td><td>…</td></tr>
+            <tr><td>Ученик</td><td>…</td><td>…</td><td>…</td><td>…</td></tr>
+            <tr><td>Кнопка окна программы</td><td>Button</td><td>…</td><td>—</td><td>…</td></tr>
+          </table>
+          <div class="note"><b>Проверка:</b> свойство — характеристика (существительное), метод — действие (глагол, со скобками), событие — отклик на действие.</div>
+          ${reveal("r-btn", "Образец для Button", "Свойства: <code>Text</code>, <code>BackColor</code>, <code>Enabled</code> (true/false), <code>Visible</code> (true/false). События: <code>Click</code> (щелчок), <code>MouseDown</code>.")}
+        </div>${src("КСП урока 1 (задание 1); " + P1 + "слайд 3 (определения); " + P2 + "слайд 4 (события Button), слайды 6–8 (свойства)")}`;
+      },
+    },
+    {
+      badge: "Практикум · задание 2",
+      shortTitle: "Чтение кода класса",
+      timing: "49–57 мин",
+      source: P1 + "слайды 4–6",
+      notes: "Задание 2 «Чтение кода C#». Пары находят в коде объявление полей, конструктор, метод и строку создания экземпляра через new. Щёлкните, к чему относится каждая строка.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="grid-template-columns:0.85fr 1.3fr;gap:18px;align-items:start;">
+          ${code(CAR_FULL, 12)}
+          <div class="stack">
+            <h2 class="slide-h2" style="font-size:24px;">К чему относится строка?</h2>
+            ${matcher("rd", [["f", "Поле"], ["k", "Конструктор"], ["m", "Метод"], ["n", "Создание объекта"]], [
+              { t: "<code>private int power;</code>", ans: "f" },
+              { t: "<code>public Car(…)</code>", ans: "k" },
+              { t: "<code>public double QuantityOf…()</code>", ans: "m" },
+              { t: "<code>Car c = new Car(\"Ford\", …);</code>", ans: "n" },
+              { t: "<code>private string color;</code>", ans: "f" },
+              { t: "<code>brand = newBrand;</code>", ans: "k" },
+              { t: "<code>return quantity;</code>", ans: "m" },
+            ])}
+          </div>
+        </div></div>${src(P1 + "слайд 4 (поля), слайд 5 (конструктор, new), слайд 6 (метод)")}`;
+      },
+    },
+    {
+      badge: "Практикум · задание 3",
+      shortTitle: "Какой принцип ООП?",
+      timing: "57–64 мин",
+      source: P1 + "слайды 4, 6, 15",
+      notes: "Задание 3: определите принцип в каждом примере. Примеры 3 и 5 — условные (сюжет придуман), проверяем по определениям слайда «Три принципа ООП».",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Какой принцип ООП иллюстрирует пример?</h2>
+          ${matcher("pr", [["e", "Инкапсуляция"], ["i", "Наследование"], ["p", "Полиморфизм"]], [
+            { t: "1. Поля класса Car объявлены <code>private</code>; запас хода узнаём только через метод <code>QuantityOfKilometers()</code>.", ans: "e" },
+            { t: "2. <code>public partial class Form1 : Form</code> — Form1 получает все свойства класса Form.", ans: "i" },
+            { t: "3. Кошка и собака — потомки класса Animal; действие «подать голос» каждая выполняет по-своему. <i>(условный)</i>", ans: "p" },
+            { t: "4. Класс «Животное» имеет подклассы-потомки «Кошка» и «Собака».", ans: "i" },
+            { t: "5. Общая команда «двигаться» для объектов с общим родителем: каждый выполняет её своим способом. <i>(условный)</i>", ans: "p" },
+            { t: "6. Изменить цвет автомобиля напрямую извне нельзя — только методом класса.", ans: "e" },
+          ])}
+        </div>${src(P1 + "слайд 4 (private-поля), слайд 6 (принципы), слайд 15 (Form1 : Form); примеры 3, 5 — условные")}`;
+      },
+    },
+    {
+      badge: "Подготовка к СОЧ",
+      shortTitle: "Формат СОЧ: краткий ответ",
+      timing: "64–70 мин",
+      source: SPEC + "; " + P1 + "слайды 3–6",
+      notes: "Обсуждение результатов и взаимооценивание групп по дескрипторам. Затем — пример задания в формате СОЧ (краткий ответ), не из СОЧ. Ученики пишут в тетради 3 минуты, затем пары проверяют по дескрипторам.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="grid-template-columns:1.2fr 1fr;gap:22px;align-items:start;">
+          <div class="stack">
+            <div class="text-xs text-muted">Тренировочное задание · краткий ответ (КО) · 4 балла</div>
+            ${code(`public class Student
+{
+    private string name;
+    private int age;
+    public void Study() { ... }
+}
+Student s1 = new Student();`, 16)}
+            <p class="text-sm">По фрагменту (условный пример) <b>назовите</b> класс, объект, два свойства и метод.</p>
+          </div>
+          <div class="stack">
+            <div class="card"><h3>Дескрипторы</h3><p>— называет класс;<br>— называет объект (экземпляр);<br>— называет два свойства (поля);<br>— называет метод.</p></div>
+            ${reveal("r-soch", "Ключ", "Класс — <code>Student</code>; объект — <code>s1</code>; свойства — <code>name</code>, <code>age</code>; метод — <code>Study()</code>. По 1 баллу.")}
+            <div class="note text-xs"><b>СОЧ 3 четверти:</b> 40 мин, 30 баллов, раздел 10.3А — 20 баллов; задания МВО, КО, РО.</div>
+          </div>
+        </div></div>${src(SPEC + " (формат, баллы); " + P1 + "слайды 3–6 (понятия); фрагмент кода — условный")}`;
+      },
+    },
+
+    /* ---------------- КОНЕЦ УРОКА (10 мин) ---------------- */
+    {
+      badge: "Конец урока · проверка",
+      shortTitle: "Свойство, метод или событие?",
+      timing: "70–75 мин",
+      source: P1 + "слайды 3, 6, 14, 16; " + P2 + "слайды 4, 10",
+      notes: "Викторина: учитель читает выражение, класс показывает категорию (карточки или руки). Щёлкните ответ в строке.",
+      render() {
+        return `<div class="body">
+          <h2 class="slide-h2">Свойство, метод или событие?</h2>
+          ${matcher("pme", [["p", "Свойство"], ["m", "Метод"], ["e", "Событие"]], [
+            { t: "<code>label1.Text = \"Hello, world!\";</code>", ans: "p" },
+            { t: "<code>MessageBox.Show(\"Желаю удачи\");</code>", ans: "m" },
+            { t: "<code>button1_Click</code> — щелчок по кнопке", ans: "e" },
+            { t: "<code>this.BackColor = Color.Red;</code>", ans: "p" },
+            { t: "<code>Application.Exit();</code>", ans: "m" },
+            { t: "<code>MouseDown</code> у кнопки Button", ans: "e" },
+            { t: "<code>c.QuantityOfKilometers()</code>", ans: "m" },
+          ])}
+        </div>${src(P1 + "слайды 3, 6 (понятия), 14, 16 (код); " + P2 + "слайд 4 (события Button), слайд 10 (Application.Exit, BackColor)")}`;
+      },
+    },
+    {
+      badge: "Конец урока · рефлексия",
+      shortTitle: "Рефлексия и домашнее задание",
+      timing: "75–80 мин",
+      source: P1 + "слайд 17; КСП урока 1",
+      notes: "Рефлексия — продолжить фразы (устно 2–3 ученика или в тетради). Сверьтесь с критериями на первом слайде. Домашнее задание — по КСП.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;">
+          <div class="stack">
+            <h2 class="slide-h2">Продолжите фразы</h2>
+            <div class="card"><p>Сегодня я узнал… · Я научился…</p></div>
+            <div class="card"><p>Было трудно… · Я смог…</p></div>
+            <div class="card"><p>Я понял, что… · Меня удивило…</p></div>
+          </div>
+          <div class="stack">
+            <h2 class="slide-h2">Домашнее задание</h2>
+            <div class="card"><h3>📝 Выучить</h3><p>Определения: класс, объект, свойство, метод, событие, конструктор; три принципа ООП.</p></div>
+            <div class="card"><h3>🌳 Схема наследования</h3><p>Составьте схему: базовый класс «Транспортное средство» и его классы-потомки; для каждого — 2 свойства и 1 метод.</p></div>
+          </div>
+        </div></div>${src(P1 + "слайд 17 (рефлексия); КСП урока 1 (домашнее задание)")}`;
+      },
+    },
+  ],
+});
+</script>
+</body>
+</html>

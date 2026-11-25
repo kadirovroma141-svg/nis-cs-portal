@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 200" width="660" height="200" font-family="Arial, Helvetica, sans-serif">
+  <rect x="0" y="0" width="660" height="200" rx="12" fill="#ffffff"/>
+  <g stroke="#1f2937" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- NOT: инвертор -->
+    <line x1="20" y1="85" x2="60" y2="85"/>
+    <path d="M60 60 L60 110 L110 85 Z" fill="#eef2ff"/>
+    <circle cx="117" cy="85" r="7" fill="#ffffff"/>
+    <line x1="124" y1="85" x2="170" y2="85"/>
+    <!-- AND: конъюнктор -->
+    <line x1="240" y1="70" x2="280" y2="70"/>
+    <line x1="240" y1="100" x2="280" y2="100"/>
+    <path d="M280 55 L315 55 A30 30 0 0 1 315 115 L280 115 Z" fill="#ecfdf5"/>
+    <line x1="345" y1="85" x2="390" y2="85"/>
+    <!-- OR: дизъюнктор -->
+    <line x1="460" y1="70" x2="505" y2="70"/>
+    <line x1="460" y1="100" x2="505" y2="100"/>
+    <path d="M495 55 Q515 85 495 115 Q545 115 575 85 Q545 55 495 55 Z" fill="#fff7ed"/>
+    <line x1="575" y1="85" x2="625" y2="85"/>
+  </g>
+  <g fill="#1f2937" font-size="15">
+    <text x="22" y="78">A</text><text x="150" y="78">Q</text>
+    <text x="242" y="63">A</text><text x="242" y="93">B</text><text x="370" y="78">Q</text>
+    <text x="462" y="63">A</text><text x="462" y="93">B</text><text x="605" y="78">Q</text>
+  </g>
+  <g fill="#1f2937" font-size="16" font-weight="bold" text-anchor="middle">
+    <text x="95" y="150">Инвертор (NOT)</text>
+    <text x="315" y="150">Конъюнктор (AND)</text>
+    <text x="545" y="150">Дизъюнктор (OR)</text>
+  </g>
+  <g fill="#4b5563" font-size="14" text-anchor="middle">
+    <text x="95" y="175">Q = not A</text>
+    <text x="315" y="175">Q = A and B</text>
+    <text x="545" y="175">Q = A or B</text>
+  </g>
+</svg>

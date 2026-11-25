@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9.2B · Урок 3 · Многотабличные запросы, параметры, итоги и изменение</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+</head>
+<body>
+<script src="../_engine/deck.js"></script>
+<script>
+const L3B_CLASSES = {
+  1: "1й «А»", 2: "3й «А»", 3: "4й «А»", 4: "4й «Б»",
+  5: "6й «А»", 6: "6й «Б»", 7: "6й «В»", 8: "9й «А»", 9: "10й «А»"
+};
+
+const L3B_STUDENTS = [
+  { fio: "Иванов", clsId: 3, height: 156 },
+  { fio: "Петров", clsId: 5, height: 174 },
+  { fio: "Сидоров", clsId: 8, height: 135 },
+  { fio: "Кошкин", clsId: 3, height: 148 },
+  { fio: "Ложкин", clsId: 2, height: 134 },
+  { fio: "Ножкин", clsId: 8, height: 183 },
+  { fio: "Тарелкин", clsId: 5, height: 158 },
+  { fio: "Мискин", clsId: 2, height: 175 },
+  { fio: "Чашкин", clsId: 3, height: 169 }
+];
+
+const L3B_JOIN_PRESETS = {
+  two: {
+    label: "2 таблицы: Комплектующие + Цена",
+    qbe: [
+      { f: "Наименование", t: "Комплектующие", c: "" },
+      { f: "Характеристика", t: "Комплектующие", c: "" },
+      { f: "Цена_тг", t: "Цена", c: "< 50000" }
+    ],
+    sql: "SELECT Комплектующие.Наименование, Комплектующие.Характеристика, Цена.Цена_тг\nFROM Комплектующие INNER JOIN Цена\n  ON Комплектующие.Код_компл = Цена.Код_компл\nWHERE Цена.Цена_тг < 50000;"
+  },
+  three: {
+    label: "3 таблицы: + Магазины (INNER JOIN ×2)",
+    qbe: [
+      { f: "Наименование", t: "Комплектующие", c: "" },
+      { f: "Магазин", t: "Магазины", c: '"Sulpak"' },
+      { f: "Цена_тг", t: "Цена", c: "> 60000" }
+    ],
+    sql: "SELECT Комплектующие.Наименование, Магазины.Магазин, Цена.Цена_тг\nFROM Магазины INNER JOIN (Комплектующие INNER JOIN Цена\n  ON Комплектующие.Код_компл = Цена.Код_компл)\n  ON Магазины.Код_магазина = Цена.Код_магазина\nWHERE Магазины.Магазин = \"Sulpak\" AND Цена.Цена_тг > 60000;"
+  }
+};
+
+const L3B_PC_ROWS = [
+  { name: "Материнская плата", spec: "Gigabyte Z370P D3", shop: "Sulpak", price: 42490 },
+  { name: "Материнская плата", spec: "ASRock Z370 Extreme 4", shop: "Sulpak", price: 69990 },
+  { name: "Видеокарта", spec: "MSI GTX 1050 Ti 4GT OC", shop: "Sulpak", price: 89790 },
+  { name: "Видеокарта", spec: "Asus PH-GT1030-O2G", shop: "Fora", price: 33790 },
+  { name: "Материнская плата", spec: "Gigabyte Z370P D3", shop: "Technodom", price: 39810 },
+  { name: "Видеокарта", spec: "Asus PH-GT1030-O2G", shop: "Technodom", price: 34999 }
+];
+
+const L3B_BLITZ = [
+  { k: "b1", q: "Как в бланке QBE задаётся запрос с параметром?", a: "В строке «Условие отбора» текст подсказки берётся в квадратные скобки, например: [Введите город] или [Введите название магазина]." },
+  { k: "b2", q: "Какие 2 запрета действуют для текста внутри квадратных скобок параметра?", a: "Текст не должен совпадать с существующим именем поля/таблицы, и внутри нельзя ставить точку «.» и восклицательный знак «!»." },
+  { k: "b3", q: "Какая кнопка на ленте включает строку «Групповая операция» (Sum, Avg, Count)?", a: "Кнопка «Σ Итоги» (Итоги) в Режиме конструктора запроса." },
+  { k: "b4", q: "Какой параметр нужно выбрать при вставке копии таблицы перед Запросом на добавление?", a: "«Только структура» — чтобы перенести столбцы без старых записей." },
+  { k: "b5", q: "Можно ли отменить Запрос на обновление или Запрос на удаление кнопкой Ctrl+Z?", a: "НЕТ! Запросы на изменение необратимы — поэтому до нажатия «! Выполнить» обязательно просматривают записи в Режиме таблицы." }
+];
+
+window.L3B_SET_PARAM = function(shop, maxPrice) {
+  window.DECK_STATE.custom.paramShop = shop;
+  window.DECK_STATE.custom.paramMax = maxPrice;
+  window.DECK.render();
+};
+
+window.L3B_FORA_ACT = function(mode) {
+  const c = window.DECK_STATE.custom;
+  if (mode === "preview") {
+    c.foraMode = "preview";
+  } else if (mode === "apply") {
+    c.foraMode = "applied";
+    c.foraRows = c.foraRows.map(r => r.shop === "Fora" ? Object.assign({}, r, { price: Math.round(r.price / 2), updated: true }) : r);
+  } else if (mode === "reset") {
+    c.foraMode = "idle";
+    c.foraRows = L3B_PC_ROWS.map(x => Object.assign({}, x));
+  }
+  window.DECK.render();
+};
+
+initDeck({
+  badge: "🗄 9.2B · Урок 3",
+  title: "Запросы к многотабличным БД: параметры, итоги и изменение",
+  subtitle: "9 класс · 2 четверть · Цель 9.1.2.11 · 80 мин · Мини-СУБД",
+  footer: "НИШ ЕМН г. Кызылорда · 9 класс · 2 четверть · Мини-СУБД (/subd)",
+  initialState: {
+    tabs: { stuFilter: "all", joinType: "two", grpFn: "Sum" },
+    custom: {
+      paramShop: "Sulpak",
+      paramMax: 90000,
+      foraMode: "idle",
+      foraRows: L3B_PC_ROWS.map(x => Object.assign({}, x))
+    }
+  },
+  slides: [
+    {
+      badge: "Этап 1 · Мотивация и цели",
+      shortTitle: "Зачем объединять 3 таблицы в одном запросе",
+      timing: "0–5 мин",
+      source: "КСП 9.2B Урок 3 · SB 9 кл. стр. 85–89",
+      notes: "В базе «Компьютеры и комплектующие» названия товаров в таблице 1, названия магазинов в таблице 2, цены в таблице 3. Чтобы увидеть их вместе, нужны многотабличные запросы! Цель 9.1.2.11.",
+      render() {
+        return `
+          <div class="stack">
+            <div class="text-xs font-bold text-muted" style="text-transform:uppercase;">Информатика · 9 класс · Раздел 9.2B «Многотабличные БД и отчёты» · Урок 3 из 4</div>
+            <h1 class="slide-h1">Многотабличные запросы: параметры, итоги (Σ) и изменение</h1>
+            <p class="lead">Научимся объединять несколько связанных таблиц в одном запросе QBE/SQL, задавать параметры <span class="mono">[...]</span>, считать итоги по группам и применять запросы на изменение.</p>
+            <div class="box-primary text-xs">
+              <div class="box-title mono">Цель обучения 9.1.2.11</div>
+              Создавать запросы, используя извлечённые данные (из 1 или нескольких связанных таблиц), включая запросы с параметрами, групповые операции и запросы на изменение (обновление, добавление, удаление).
+            </div>
+            <div class="grid-3 text-xs">
+              <div class="box-white"><strong>Выборка + Параметр</strong><br>Объединение 2–3 таблиц и диалог <span class="mono">[Введите значение]</span> перед запуском.</div>
+              <div class="box-white"><strong>Σ Итоги по группам</strong><br>Функции <span class="mono">Group By, Sum, Avg, Count, Min, Max</span> по магазинам.</div>
+              <div class="box-white"><strong>Запросы на изменение</strong><br>Массовое обновление цен (<span class="mono">[цена]/2</span>), добавление и удаление строк.</div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Возможности и алгоритм",
+      shortTitle: "6 возможностей запросов и алгоритм QBE",
+      timing: "5–12 мин",
+      source: "SB 9 кл. стр. 85–86 · Планирование многотабличного запроса",
+      notes: "Повторите отличия Мастера и Конструктора и пройдите 6 шагов построения многотабличного запроса (обязательно проверять линии связей между таблицами в окне Конструктора!).",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">6 возможностей запросов и алгоритм создания в Конструкторе</h2>
+            <div class="grid-2 text-xs">
+              <div class="box-primary stack">
+                <div class="box-title">Что умеет запрос к нескольким таблицам</div>
+                <div>1. Выбирать нужные поля сразу из <strong>2–3 связанных таблиц</strong>.</div>
+                <div>2. Фильтровать записи сложными условиями (<span class="mono">И / ИЛИ</span>).</div>
+                <div>3. Сортировать результат по нескольким полям.</div>
+                <div>4. Выполнять арифметические расчёты в новых столбцах.</div>
+                <div>5. Группировать записи и считать итоги (<span class="mono">Sum, Count, Avg</span>).</div>
+                <div>6. Массово обновлять, добавлять и удалять строки.</div>
+              </div>
+              <div class="box-white stack">
+                <div class="box-title" style="color:var(--accent);">6 шагов в Конструкторе (для нескольких таблиц)</div>
+                <div><strong>Шаг 1.</strong> Создание → <strong>Конструктор запросов</strong>.</div>
+                <div><strong>Шаг 2.</strong> Добавить <strong>все</strong> таблицы, участвующие в связке (напр. 2 или 3).</div>
+                <div><strong>Шаг 3.</strong> <strong>Проверить линии связей!</strong> (Иначе получится декартово произведение).</div>
+                <div><strong>Шаг 4.</strong> Перенести нужные поля из разных таблиц в бланк QBE.</div>
+                <div><strong>Шаг 5.</strong> Настроить сортировку и условия отбора (<span class="mono">Условие отбора</span>).</div>
+                <div><strong>Шаг 6.</strong> Нажать <strong>! Выполнить</strong> и сохранить запрос.</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Задача SB «Классы и Ученики»",
+      shortTitle: "Интерактивный пример SB: «Классы и Ученики»",
+      timing: "12–21 мин",
+      source: "SB 9 кл. стр. 85 · Таблицы «Классы» и «Ученики»",
+      notes: "На точных данных учебника SB покажите, как запрос объединяет две таблицы по полю «Код класса». Проверите вопрос SB: «В каком классе учится ученик наибольшего роста?» -> Ножкин (183 см), код класса 8 -> 9й «А»!",
+      render(st) {
+        const sf = st.tabs.stuFilter || "all";
+        let list = L3B_STUDENTS.map(s => Object.assign({ clsName: L3B_CLASSES[s.clsId] }, s));
+        if (sf === "9a") list = list.filter(s => s.clsId === 8);
+        else if (sf === "tall") list = list.filter(s => s.height >= 170).sort((a,b) => b.height - a.height);
+        else if (sf === "4a") list = list.filter(s => s.clsId === 3);
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <h2 class="slide-h2">Пример SB: поиск по 2 таблицам «Классы» и «Ученики»</h2>
+              <div class="flex-row">
+                <button type="button" class="btn ${sf === "all" ? "btn-primary" : ""}" onclick="DECK.setTab('stuFilter','all')">Все (9)</button>
+                <button type="button" class="btn ${sf === "9a" ? "btn-accent" : ""}" onclick="DECK.setTab('stuFilter','9a')">Только 9й «А» (Код=8)</button>
+                <button type="button" class="btn ${sf === "tall" ? "btn-primary" : ""}" onclick="DECK.setTab('stuFilter','tall')">Рост ≥ 170 см</button>
+                <button type="button" class="btn ${sf === "4a" ? "btn-primary" : ""}" onclick="DECK.setTab('stuFilter','4a')">4й «А» (Код=3)</button>
+              </div>
+            </div>
+            <div class="grid-2">
+              <div class="stack">
+                <div class="box-title">Исходные таблицы («Классы» 1 → ∞ «Ученики»)</div>
+                <div class="box text-xs">
+                  <strong>Справочник «Классы»:</strong><br>
+                  <span class="mono">1: 1й «А» · 2: 3й «А» · 3: 4й «А» · 4: 4й «Б» · 5: 6й «А» · 6: 6й «Б» · 7: 6й «В» · 8: 9й «А» · 9: 10й «А»</span>
+                </div>
+                <div class="box-primary text-xs">
+                  <strong>Вопрос SB:</strong> <em>«В каком классе учится ученик наибольшего роста?»</em><br>
+                  Наибольший рост — <strong>Ножкин (183 см)</strong> → Код класса <span class="mono">8</span> → по таблице «Классы» это <strong>9й «А»</strong>!
+                </div>
+              </div>
+              <div class="stack">
+                <div class="box-title" style="color:var(--accent);">Результат объединённого запроса</div>
+                <table class="data-table">
+                  <thead><tr><th>Фамилия</th><th>Код класса (FK)</th><th>Название класса (из «Классы»)</th><th>Рост (см)</th></tr></thead>
+                  <tbody>
+                    ${list.map(s => `<tr style="${s.height === 183 ? "background:var(--success-soft);font-weight:700;" : ""}"><td>${s.fio}</td><td class="mono">${s.clsId}</td><td><strong>${s.clsName}</strong></td><td class="mono">${s.height}</td></tr>`).join("")}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · QBE ⇄ SQL (INNER JOIN)",
+      shortTitle: "Многотабличный бланк QBE ⇄ SQL INNER JOIN",
+      timing: "21–29 мин",
+      source: "QBE и Режим SQL · База «Компьютеры и комплектующие»",
+      notes: "Переключайтесь между запросом к 2 и 3 таблицам. Ученики видят, как в строке QBE «Имя таблицы» указывается источник каждого поля, а в SQL-коде появляется INNER JOIN ... ON.",
+      render(st) {
+        const jt = st.tabs.joinType || "two";
+        const j = L3B_JOIN_PRESETS[jt];
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <h2 class="slide-h2">Многотабличный QBE ⇄ SQL (<span class="mono">INNER JOIN</span>)</h2>
+              <div class="flex-row">
+                <button type="button" class="btn ${jt === "two" ? "btn-primary" : ""}" onclick="DECK.setTab('joinType','two')">${L3B_JOIN_PRESETS.two.label}</button>
+                <button type="button" class="btn ${jt === "three" ? "btn-accent" : ""}" onclick="DECK.setTab('joinType','three')">${L3B_JOIN_PRESETS.three.label}</button>
+              </div>
+            </div>
+            <div class="box-title">Бланк Конструктора QBE (обратите внимание на строку «Имя таблицы»)</div>
+            <table class="data-table">
+              <thead><tr><th>Строка QBE</th>${j.qbe.map(x => `<th class="mono">${x.f}</th>`).join("")}</tr></thead>
+              <tbody>
+                <tr><td>Имя таблицы</td>${j.qbe.map(x => `<td class="mono font-bold">${x.t}</td>`).join("")}</tr>
+                <tr><td>Вывод</td>${j.qbe.map(() => `<td>☑</td>`).join("")}</tr>
+                <tr><td>Условие отбора</td>${j.qbe.map(x => `<td class="mono font-bold">${DECK_ESC(x.c)}</td>`).join("")}</tr>
+              </tbody>
+            </table>
+            <div class="box-title" style="color:var(--accent);">SQL-код, который Access строит автоматически</div>
+            <pre class="code-block" style="font-size:12px;">${DECK_ESC(j.sql)}</pre>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Запрос с параметром",
+      shortTitle: "Запрос с параметром [...] и живой симулятор",
+      timing: "29–38 мин",
+      source: "SB 9 кл. стр. 87–88 · Пример «Книжный магазин» и 2 правила",
+      notes: "Подчеркните 3 строгих правила из учебника: (1) фраза в квадратных скобках [...], (2) НЕ совпадает с именем поля/таблицы, (3) БЕЗ символов «.» и «!». Несколько параметров задаются поочерёдно слева направо!",
+      render(st) {
+        const shop = st.custom.paramShop || "Sulpak";
+        const maxP = Number(st.custom.paramMax || 90000);
+        const filtered = L3B_PC_ROWS.filter(r => r.shop === shop && r.price <= maxP);
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Запрос с параметром: правила учебника и симулятор</h2>
+            <div class="grid-2 text-xs">
+              <div class="box-primary stack">
+                <div class="box-title">Синтаксис и пример SB «Книжный магазин»</div>
+                <div>В строке «Условие отбора» приглашение пользователю пишут в <strong>квадратных скобках</strong>: <span class="mono font-bold">[Введите город]</span>.</div>
+                <div>Если параметров несколько (например, <span class="mono">[Введите издательство]</span> и <span class="mono">[Введите год издания]</span>), диалоговые окна появляются <strong>поочерёдно</strong> в порядке расположения в бланке!</div>
+                <div class="box-danger">
+                  <strong>Строгий запрет SB:</strong> текст внутри <span class="mono">[...]</span> <strong>НЕ может совпадать с именем поля/таблицы</strong> и <strong>НЕ может содержать «.» и «!»</strong>!
+                </div>
+              </div>
+              <div class="box-white stack" style="border:2px solid var(--primary);">
+                <div class="box-title">Симулятор 2 диалоговых окон Access</div>
+                <div class="flex-row text-xs">
+                  <strong>1) [Введите магазин]:</strong>
+                  ${["Sulpak","Fora","Technodom"].map(s => `<button type="button" class="btn ${shop === s ? "btn-primary" : ""}" style="padding:2px 8px;" onclick="L3B_SET_PARAM('${s}',${maxP})">${s}</button>`).join("")}
+                </div>
+                <div class="flex-row text-xs">
+                  <strong>2) Цена ≤ [Макс. цена]:</strong>
+                  ${[40000, 70000, 90000].map(p => `<button type="button" class="btn mono ${maxP === p ? "btn-accent" : ""}" style="padding:2px 8px;" onclick="L3B_SET_PARAM('${shop}',${p})">${p.toLocaleString("ru-RU")} ₸</button>`).join("")}
+                </div>
+                <table class="data-table">
+                  <thead><tr><th>Товар</th><th>Магазин</th><th>Цена (₸)</th></tr></thead>
+                  <tbody>
+                    ${filtered.length ? filtered.map(r => `<tr><td>${r.name} (${r.spec})</td><td>${r.shop}</td><td class="mono font-bold">${r.price.toLocaleString("ru-RU")}</td></tr>`).join("") : `<tr><td colspan="3" class="text-muted">Ничего не найдено ≤ ${maxP} ₸ в ${shop}.</td></tr>`}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Групповые операции",
+      shortTitle: "Кнопка Σ Итоги: Group By, Sum, Avg, Count, Min, Max",
+      timing: "38–46 мин",
+      source: "SB 9 кл. · Итоговые запросы (Σ Итоги)",
+      notes: "Переключайте агрегатную функцию (Sum / Count / Avg / Min / Max) и покажите, как Access сворачивает 6 строк прайса в 3 группы по магазинам.",
+      render(st) {
+        const fn = st.tabs.grpFn || "Sum";
+        const shops = ["Sulpak", "Fora", "Technodom"];
+        const calc = (arr) => {
+          if (fn === "Sum") return arr.reduce((a,b) => a + b.price, 0).toLocaleString("ru-RU") + " ₸";
+          if (fn === "Count") return arr.length + " шт.";
+          if (fn === "Avg") return Math.round(arr.reduce((a,b) => a + b.price, 0) / arr.length).toLocaleString("ru-RU") + " ₸";
+          if (fn === "Min") return Math.min(...arr.map(x => x.price)).toLocaleString("ru-RU") + " ₸";
+          return Math.max(...arr.map(x => x.price)).toLocaleString("ru-RU") + " ₸";
+        };
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <h2 class="slide-h2">Групповые операции (<span class="mono">Σ Итоги</span>) в Конструкторе</h2>
+              <div class="flex-row">
+                ${[["Sum","Sum (Сумма)"],["Count","Count (Кол-во)"],["Avg","Avg (Среднее)"],["Min","Min"],["Max","Max"]].map(([k,lbl]) => `<button type="button" class="btn ${fn === k ? "btn-primary" : ""}" style="font-size:11px;" onclick="DECK.setTab('grpFn','${k}')">${lbl}</button>`).join("")}
+              </div>
+            </div>
+            <div class="box-primary text-xs">
+              Нажмите кнопку <strong>Σ Итоги</strong> на вкладке «Конструктор»: в бланке QBE появится строка <strong>«Групповая операция»</strong>. Для поля «Магазин» оставляют <strong>Группировка (Group By)</strong>, а для поля «Цена» выбирают итоговую функцию (<span class="mono font-bold">${fn}</span>)!
+            </div>
+            <table class="data-table">
+              <thead><tr><th>Магазин (Group By)</th><th>Функция: <span class="mono">${fn}([Цена])</span></th><th>Входные цены магазина</th></tr></thead>
+              <tbody>
+                ${shops.map(sh => {
+                  const arr = L3B_PC_ROWS.filter(x => x.shop === sh);
+                  return `<tr><td><strong>${sh}</strong></td><td class="mono font-bold">${calc(arr)}</td><td class="mono text-xs">${arr.map(x => x.price.toLocaleString("ru-RU")).join(" · ")}</td></tr>`;
+                }).join("")}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Запросы на изменение",
+      shortTitle: "4 запроса на изменение (+ Перекрёстный) и алгоритм",
+      timing: "46–55 мин",
+      source: "SB 9 кл. стр. 88–89 · Запросы на изменение",
+      notes: "Разберите все типы запросов на ленте Access (Обновление, Добавление с копированием «Только структура», Удаление, Создание таблицы и упоминание Перекрёстного запроса). Предупредите о необратимости!",
+      render() {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Виды запросов на изменение (+ Перекрёстный запрос)</h2>
+            <div class="grid-2 text-xs">
+              <div class="box-primary">
+                <div class="box-title">1. Запрос на обновление</div>
+                Массово изменяет значения в существующих строках по заданному условию (напр. снизить цену на 50%: в строке <strong>Обновление</strong> пишут <span class="mono">[Цена]/2</span>).
+              </div>
+              <div class="box-accent">
+                <div class="box-title" style="color:var(--accent);">2. Запрос на добавление (4 шага SB)</div>
+                Дописывает отобранные строки в конец другой таблицы:<br>
+                <strong>1.</strong> Копировать исходную таблицу → <strong>2.</strong> Вставить как <strong>«Только структура»</strong> → <strong>3.</strong> Создать Запрос на добавление → <strong>4.</strong> Выполнить!
+              </div>
+              <div class="box-danger">
+                <div class="box-title" style="color:var(--danger);">3. Запрос на удаление</div>
+                Безвозвратно удаляет из таблицы все записи, попавшие под <span class="mono">Условие отбора</span> (напр. устаревшие заказы).
+              </div>
+              <div class="box-white">
+                <div class="box-title">4. Создание таблицы + Перекрёстный запрос</div>
+                • <strong>Создание таблицы</strong> сохраняет выборку как новую независимую таблицу.<br>
+                • <strong>Перекрёстный запрос</strong> сводит данные в матрицу (строки × столбцы, как сводная таблица Excel).
+              </div>
+            </div>
+            <div class="box-danger text-xs">
+              <strong>Внимание! Необратимая операция:</strong> после нажатия красной кнопки <strong>! Выполнить</strong> запросы на обновление и удаление <strong>НЕЛЬЗЯ отменить</strong> кнопкой «Отменить» (Ctrl+Z)! Всегда сначала нажмите кнопку <strong>«Режим таблицы»</strong> (просмотр) и убедитесь, что выбрались правильные строки!
+            </div>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Этап 2 · Живой кейс SB «Fora»",
+      shortTitle: "Интерактивный кейс SB: «Скидка 50% в Fora» ([цена]/2)",
+      timing: "55–63 мин",
+      source: "SB 9 кл. стр. 89 · Пример со скидкой 50%",
+      notes: "Нажимая «1. Предпросмотр», ученики видят подсветку только строк Fora; затем «2. ! Выполнить» делит цену Fora пополам; затем можно нажать «↺ Откатить демо» (подчёркивая, что в реальном Access отката нет!).",
+      render(st) {
+        const c = st.custom;
+        return `
+          <div class="stack">
+            <div class="flex-between">
+              <h2 class="slide-h2">Кейс SB: Запрос на обновление «Скидка 50% в магазине Fora»</h2>
+              <div class="flex-row">
+                <button type="button" class="btn btn-primary" onclick="L3B_FORA_ACT('preview')">1. Предпросмотр (Режим таблицы)</button>
+                <button type="button" class="btn btn-accent" onclick="L3B_FORA_ACT('apply')">2. ! Выполнить обновление</button>
+                <button type="button" class="btn" onclick="L3B_FORA_ACT('reset')">↺ Откатить (только демо)</button>
+              </div>
+            </div>
+            <table class="data-table">
+              <thead><tr><th>Бланк QBE (Обновление)</th><th>Поле: Цена</th><th>Поле: Магазин</th></tr></thead>
+              <tbody>
+                <tr><td>Имя таблицы</td><td class="mono">Цена</td><td class="mono">Магазины</td></tr>
+                <tr><td><strong>Обновление:</strong></td><td class="mono font-bold">[цена]/2</td><td></td></tr>
+                <tr><td><strong>Условие отбора:</strong></td><td></td><td class="mono font-bold">"Fora"</td></tr>
+              </tbody>
+            </table>
+            <table class="data-table">
+              <thead><tr><th>Товар</th><th>Магазин</th><th>Цена (тенге)</th><th>Статус</th></tr></thead>
+              <tbody>
+                ${c.foraRows.map(r => {
+                  const isFora = r.shop === "Fora";
+                  const bg = r.updated ? "background:var(--success-soft);font-weight:700;" : (c.foraMode === "preview" && isFora ? "background:var(--warning-soft);font-weight:700;" : "");
+                  return `<tr style="${bg}"><td>${r.name} (${r.spec})</td><td><strong>${r.shop}</strong></td><td class="mono">${r.price.toLocaleString("ru-RU")} ₸</td><td class="text-xs">${r.updated ? "✓ Обновлено (-50%)" : (c.foraMode === "preview" && isFora ? "⚠ Попадёт под обновление" : "Без изменений")}</td></tr>`;
+                }).join("")}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+    },
+    {
+      badge: "Мини-СУБД · Практика",
+      pillClass: "pill-accent",
+      shortTitle: "Мини-СУБД: Запросы к 2–3 таблицам и обновление",
+      timing: "63–75 мин",
+      source: "Мини-СУБД (/subd) · g9b-l3-zaprosy, t9, t10, t11, g9b-p3-fora, g9b-p3-udalenie",
+      notes: "В Мини-СУБД ученики решают: «Запросы к базе „Компьютеры и комплектующие“» (g9b-l3-zaprosy), «Запрос с групповыми операциями» (t9), «Запрос к трём таблицам» (t10), «Запрос на обновление» (t11), доп. «Акция в магазине Fora» (g9b-p3-fora) и «Запрос на удаление» (g9b-p3-udalenie).",
+      render(st, api) {
+        return api.renderMiniSubdTask({
+          key: "g9b3",
+          title: "Практика в Мини-СУБД: Многотабличные запросы",
+          summary: "Создайте запросы с объединением 2–3 таблиц, группировкой (Σ Итоги) и обновлением цен со скидкой.",
+          taskName: "1) g9b-l3-zaprosy · 2) Запрос с групповыми операциями (t9) · 3) Запрос к трём таблицам (t10) · 4) Запрос на обновление (t11) · Доп.: g9b-p3-fora, g9b-p3-udalenie",
+          steps: ["Нажмите «✓ Задания»", "Начните с «Запросы к базе „Компьютеры и комплектующие“»", "Затем t9, t10 и t11"],
+          meta: "Цель 9.1.2.11 · Практика"
+        });
+      }
+    },
+    {
+      badge: "Этап 3 · Блиц и ДЗ",
+      shortTitle: "Блиц-проверка (5 вопросов) и ДЗ",
+      timing: "75–80 мин",
+      source: "КСП 9.2B Урок 3 · ДЗ g9b-hw3-parametry",
+      notes: "Проверьте понимание правил параметров, Σ Итоги, вставки «Только структура» и необратимости запросов на изменение. Выдайте ДЗ «Запросы с параметрами» (g9b-hw3-parametry).",
+      render(st) {
+        return `
+          <div class="stack">
+            <h2 class="slide-h2">Итоговый блиц урока 3 и домашнее задание</h2>
+            <div class="stack" style="gap:6px;">
+              ${L3B_BLITZ.map((b, i) => `
+                <button type="button" class="interactive-card ${st.revealed[b.k] ? "revealed" : ""}" style="padding:8px 12px;" onclick="DECK.toggleReveal('${b.k}')">
+                  <div class="font-bold text-xs">${i + 1}. ${b.q}</div>
+                  <div class="text-xs" style="margin-top:3px;">${st.revealed[b.k] ? b.a : "Нажмите для проверки →"}</div>
+                </button>
+              `).join("")}
+            </div>
+            <div class="box-primary flex-between text-xs">
+              <div><strong>Домашнее задание в Мини-СУБД (/subd):</strong> выполнить <strong>«Запросы с параметрами»</strong> (g9b-hw3-parametry) и при желании «Акция в магазине Fora».</div>
+              <a class="btn btn-accent" href="/subd" target="_blank" rel="noopener noreferrer">Открыть Мини-СУБД ↗</a>
+            </div>
+          </div>
+        `;
+      }
+    }
+  ]
+});
+</script>
+</body>
+</html>

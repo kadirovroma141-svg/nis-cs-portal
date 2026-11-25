@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>8.3А · Урок 6 · Цикл со счётчиком for. Операторы break и continue</title>
+  <link rel="stylesheet" href="../_engine/deck.css" />
+  <link rel="stylesheet" href="../_engine/lesson.css" />
+</head>
+<body class="lesson">
+<script src="../_engine/deck.js"></script>
+<script src="../_engine/lesson.js"></script>
+<script>
+/*
+ * 8.3А «Циклические алгоритмы (C++)», тема «Программирование циклических алгоритмов со счётчиком», урок 1 (КСП) —
+ * «Программирование циклических алгоритмов со счётчиком. Операторы break и continue».
+ * Цель обучения (КТП 2026): 8.4.3.4 разрабатывать программу, используя цикл со счётчиком (for).
+ * Ход урока — КСП content/lesson-plans/g8-programmirovanie-tsiklicheskikh-algoritmov-so-schetchikom.json, урок 1.
+ * Содержание — только из материалов: SB 8 кл. стр. 117, 128–132; «Циклы for while» слайды 7–18, 23.
+ * Слайд 13 презентации учителя с ошибкой (for по i, а меняется N) и ответ «a = 3» слайда 16 (это число повторений,
+ * a станет 4) — не воспроизводятся; значения a посчитаны по коду.
+ * Подготовка к СОЧ 3 четверти («дополни программу» с заголовком for, РО, 2 балла): своё задание, задания СОЧ не повторяются.
+ */
+
+/* ---------- общие помощники раздела 8.3А: код C++, трассировка по шагам, блок-схемы ---------- */
+const { src, reveal, statements, quiz, matcher, orderGame, errorTable } = LESSON;
+const S = () => window.DECK_STATE;
+const SB = "Учебник 8 кл., ";
+const TA = "Презентация «Типы алгоритмов и логика C++», ";
+const CA = "Презентация «Циклические алгоритмы в C++», ";
+const PF = "Презентация «Циклы for while», ";
+const RL = "Рабочий лист «Типы алгоритмов и логика в C++», ";
+const H = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+/* Код C++: num — нумерация строк, hl — подсвеченные строки, size — кегль. */
+function code(txt, o = {}) {
+  const lines = txt.replace(/^\n/, "").replace(/\n\s*$/, "").split("\n");
+  const size = o.size || 15;
+  const body = lines
+    .map((l, i) => {
+      const n = o.num ? `<span style="opacity:.45;display:inline-block;width:2.1em;user-select:none">${i + 1}</span>` : "";
+      const on = (o.hl || []).includes(i + 1);
+      return `<span style="display:block;${on ? "background:rgba(255,196,0,.22);" : ""}">${n}${H(l) || " "}</span>`;
+    })
+    .join("");
+  return `<pre class="code-block" style="font-size:${size}px;line-height:1.42;margin:0;${o.style || ""}">${body}</pre>`;
+}
+
+/* Пошаговая трассировка: строки таблицы открываются по одной; пустые строки — бланк для учеников. */
+function stepper(key, head, rows, o = {}) {
+  const n = Math.min(Number(S().selected[key] || 0), rows.length);
+  const fs = o.size || 16;
+  const th = head.map((h) => `<th style="padding:5px 8px;">${h}</th>`).join("");
+  const tr = rows
+    .map((r, i) => {
+      const on = i < n;
+      const cur = i === n - 1;
+      return `<tr style="${cur ? "background:var(--primary-soft);" : ""}">${r
+        .map((c) => `<td style="padding:4px 8px;">${on ? c : "&nbsp;"}</td>`)
+        .join("")}</tr>`;
+    })
+    .join("");
+  const btn = (t, v, p = "") => `<button type="button" class="btn ${p}" onclick="DECK.setSelected('${key}','${v}')">${t}</button>`;
+  return `<table class="t" style="font-size:${fs}px;"><tr>${th}</tr>${tr}</table>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      ${btn("Следующий шаг ▶", n + 1 > rows.length ? rows.length : n + 1, "btn-primary")}${btn("Показать всё", rows.length)}${btn("Сначала", 0)}
+      <span class="score">Шаг ${n} из ${rows.length}</span>
+    </div>`;
+}
+
+/* Блок-схемы: T — начало/конец, P — действие, IO — ввод/вывод, D — условие, HX — блок «цикл», A — стрелка. */
+function tx(x, y, t, fs = 15) {
+  const L = String(t).split("|");
+  const lh = fs + 3;
+  const y0 = y - ((L.length - 1) * lh) / 2 + fs * 0.36;
+  return `<text x="${x}" y="${y0}" text-anchor="middle" style="font-size:${fs}px">${L.map((s, i) => `<tspan x="${x}" dy="${i ? lh : 0}">${H(s)}</tspan>`).join("")}</text>`;
+}
+const fc = {
+  T: (x, y, w, h, t, fs) => `<rect class="blk-a" x="${x - w / 2}" y="${y - h / 2}" width="${w}" height="${h}" rx="${h / 2}"/>${tx(x, y, t, fs)}`,
+  P: (x, y, w, h, t, fs) => `<rect class="blk" x="${x - w / 2}" y="${y - h / 2}" width="${w}" height="${h}" rx="5"/>${tx(x, y, t, fs)}`,
+  IO: (x, y, w, h, t, fs) => `<polygon class="blk" points="${x - w / 2 + 14},${y - h / 2} ${x + w / 2},${y - h / 2} ${x + w / 2 - 14},${y + h / 2} ${x - w / 2},${y + h / 2}"/>${tx(x, y, t, fs)}`,
+  D: (x, y, w, h, t, fs) => `<polygon class="blk-p" points="${x},${y - h / 2} ${x + w / 2},${y} ${x},${y + h / 2} ${x - w / 2},${y}"/>${tx(x, y, t, fs)}`,
+  HX: (x, y, w, h, t, fs) => `<polygon class="blk-p" points="${x - w / 2 + 16},${y - h / 2} ${x + w / 2 - 16},${y - h / 2} ${x + w / 2},${y} ${x + w / 2 - 16},${y + h / 2} ${x - w / 2 + 16},${y + h / 2} ${x - w / 2},${y}"/>${tx(x, y, t, fs)}`,
+  A: (d) => `<path class="ar" d="${d}"/>`,
+  L: (x, y, t, a = "middle") => `<text class="s" x="${x}" y="${y}" text-anchor="${a}">${H(t)}</text>`,
+};
+function svg(w, h, inner, label, maxH) {
+  return `<svg class="dia" viewBox="0 0 ${w} ${h}" role="img" aria-label="${label}" style="${maxH ? `max-height:${maxH}px;` : ""}"><defs><marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--primary)"/></marker></defs>${inner}</svg>`;
+}
+const fizminutka = (src0) => ({
+  badge: "Физминутка",
+  shortTitle: "Физминутка",
+  timing: src0.timing,
+  source: src0.source,
+  notes: "Упражнения для глаз, шеи и кистей рук после работы за компьютером — 3 минуты. Проверьте посадку и расстояние до монитора.",
+  render() {
+    return `<div class="body" style="align-items:center;justify-content:center;text-align:center;">
+      <div style="font-size:72px;">🧘</div>
+      <h2 class="slide-h2">Физминутка · 3 минуты</h2>
+      <p class="lead">Упражнения для глаз, шеи и кистей рук</p>
+    </div>${src(src0.source)}`;
+  },
+});
+
+
+/* Блок-схема цикла for с блоком «цикл» (перерисовано по SB стр. 128, «Блок-схема к примеру 1») */
+const DIA_FOR = svg(440, 400,
+  fc.T(170, 24, 130, 36, "Начало") + fc.A("M170 42 V64") +
+  fc.IO(170, 88, 170, 44, "Ввод number") + fc.A("M170 110 V132") +
+  fc.HX(170, 160, 250, 52, "i = 1; i <= 10; i++") +
+  fc.A("M170 186 V214") +
+  fc.IO(170, 238, 190, 44, "Вывод i*number") +
+  `<path d="M170 260 V290 H22 V160" stroke="var(--primary)" stroke-width="2.5" fill="none"/>` + fc.A("M22 160 H43") +
+  fc.A("M295 160 H360 V322") + fc.L(340, 150, "конец цикла") +
+  fc.T(360, 344, 120, 36, "Конец") +
+  fc.L(70, 316, "тело цикла"), "Блок-схема цикла for: блок «цикл» с начальным значением, условием и шагом", 360);
+
+initDeck({
+  badge: "8.3А · Урок 6",
+  title: "Цикл со счётчиком for. Операторы break и continue",
+  subtitle: "8 класс · 3 четверть · цель 8.4.3.4 · 80 минут",
+  footer: "НИШ ЕМН г. Кызылорда · Информатика · 8 класс · Раздел 8.3А «Циклические алгоритмы (C++)»",
+  slides: [
+    /* ---------------- НАЧАЛО УРОКА (10 мин) ---------------- */
+    {
+      badge: "Начало урока",
+      shortTitle: "Тема, цели и критерии",
+      timing: "0–3 мин",
+      source: "КТП 2026; КСП урока",
+      notes: "Приветствие. Тема, цель, критерий: по ним ученики проверят себя в конце урока.",
+      render() {
+        return `<div class="hero">
+          <div>
+            <div class="hero-kicker">Раздел 8.3А · Программирование циклических алгоритмов со счётчиком</div>
+            <h1>Цикл со счётчиком for. Операторы break и continue</h1>
+            <div class="goal"><b>8.4.3.4</b> — разрабатывать программу, используя цикл со счётчиком (for).</div>
+          </div>
+          <div class="stack text-sm">
+            <div class="card"><h3>🎯 Цели урока</h3>
+              <p><b>Все:</b> называют части заголовка for; пишут цикл for с шагом +1.<br>
+              <b>Большинство:</b> определяют число повторений; используют шаг −1 и i += 3; заменяют for на while; заполняют трассировочную таблицу.<br>
+              <b>Некоторые:</b> используют break и continue и предлагают решение без них.</p></div>
+            <div class="card"><h3>✅ Критерий оценивания</h3><p>Разрабатывает программу, используя цикл со счётчиком (for).</p></div>
+          </div>
+        </div>${src("КТП 2026 (цель 8.4.3.4); КСП урока «…со счётчиком»")}`;
+      },
+    },
+    {
+      badge: "Начало урока · актуализация",
+      shortTitle: "Кубы чисел от 1 до 8",
+      timing: "3–10 мин",
+      source: PF + "слайды 9, 12; " + SB + "стр. 117",
+      notes: "Стимулирующие вопросы: как выглядит блок-схема цикла со счётчиком? Какие параметры нужно указать? Можно ли завершить цикл преждевременно? Задача: кубы чисел от 1 до 8 — решите известным способом (while). Откройте ответ про три действия с N.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;">
+          <div class="stack">
+            <h2 class="slide-h2">Вывести кубы целых чисел от 1 до 8</h2>
+            <p class="text-sm">Особенность: одинаковые действия выполняются 8 раз. Можно ли решить известными методами?</p>
+            ${code("int N, cubeN;\nN = 1;\nwhile (N <= 8) {\n  cubeN = N*N*N;\n  cout << cubeN;\n  N++;\n}", { size: 17 })}
+          </div>
+          <div class="stack">
+            <div class="card text-sm"><p><b>Цикл</b> — многократное выполнение одинаковой последовательности действий: с <b>известным</b> числом шагов и с <b>неизвестным</b> числом шагов (цикл с условием).</p></div>
+            ${reveal("r-3", "Три действия с N", "<code>N = 1;</code> — начальное значение, <code>N &lt;= 8</code> — условие, <code>N++;</code> — изменение. В цикле <b>for</b> все три действия записываются в одной строке — заголовке цикла.")}
+            <div class="note">Цикл с параметром на блок-схеме — блок-<b>шестиугольник</b>: начальное значение, конечное значение и шаг.</div>
+          </div>
+        </div></div>${src(PF + "слайды 9, 12; " + SB + "стр. 117 (рис. 3, блок «цикл»)")}`;
+      },
+    },
+
+    /* ---------------- СЕРЕДИНА УРОКА (60 мин) ---------------- */
+    {
+      badge: "Новое · цикл for",
+      shortTitle: "Общая форма for",
+      timing: "10–15 мин",
+      source: SB + "стр. 128; " + PF + "слайд 8",
+      notes: "Фронтально: общая форма и три шага работы цикла. Ученики хором называют части заголовка, на которые вы указываете.",
+      render() {
+        return `<div class="body">
+          ${code("for (объявление переменной с начальным значением; условие; инкремент/декремент счётчика)\n{ тело цикла; }", { size: 17 })}
+          <div class="grid-2" style="gap:18px;">
+            <div class="stack">
+              ${code("for (int i = 0; i < 9; i++) {\n  cout << (i*i) << endl; }", { size: 16 })}
+              <div class="card text-xs"><p>Шаг <b>+1</b>: i = 0, 1, 2, … 8</p></div>
+              ${code("for (int i = 9; i > 0; i--) {\n  cout << (i*i) << endl; }", { size: 16 })}
+              <div class="card text-xs"><p>Шаг <b>−1</b>: i = 9, 8, … 1</p></div>
+            </div>
+            <div class="steps text-sm">
+              <div class="step"><span><b>Инициализация</b>: определяем переменную-счётчик и присваиваем ей начальное значение.</span></div>
+              <div class="step"><span><b>Условие</b>: пока оно истинно, цикл продолжается; стало ложным — цикл завершается.</span></div>
+              <div class="step"><span><b>Изменение счётчика</b> после каждого прохода — увеличиваем или уменьшаем.</span></div>
+            </div>
+          </div>
+        </div>${src(SB + "стр. 128 (структура цикла for, шаг +1 и −1, три шага работы); " + PF + "слайд 8")}`;
+      },
+    },
+    {
+      badge: "Новое · цикл for",
+      shortTitle: "Блок-схема и заголовок",
+      timing: "15–20 мин",
+      source: SB + "стр. 128; " + PF + "слайды 11, 13–14",
+      notes: "Разберите блок-схему с блоком «цикл». Затем задача: кубы от 8 до 1 в обратном порядке — ученики записывают заголовок в тетради; откройте ответ.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;grid-template-columns:0.9fr 1.1fr;align-items:center;">
+          <div>${DIA_FOR}</div>
+          <div class="stack">
+            <h3 style="margin:0;">Кубы от 1 до 8</h3>
+            ${code("for (N = 1; N <= 8; N++)\n{\n  cubeN = N*N*N;\n  cout << cubeN;\n}", { size: 16 })}
+            <div class="card text-xs"><p><code>N = 1</code> — начальное значение; <code>N &lt;= 8</code> — цикл работает, пока условие верно; <code>N++</code> — изменение на каждом шаге.</p></div>
+            <h3 style="margin:0;">Кубы от 8 до 1 (в обратном порядке): for ( ? )</h3>
+            ${reveal("r-back", "Заголовок", "<code>for (N = 8; N &gt;= 1; N--)</code> — переменная цикла должна уменьшаться.")}
+          </div>
+        </div></div>${src(SB + "стр. 128 (блок-схема к примеру 1); " + PF + "слайды 11, 13, 14")}`;
+      },
+    },
+    {
+      badge: "Фронтально → индивидуально",
+      shortTitle: "Таблица умножения",
+      timing: "20–30 мин",
+      source: SB + "стр. 128–129",
+      notes: "Пример 1: разберите трассировочную таблицу по шагам (ввод 7). Затем задание 1 (стр. 129): таблица сложения от 10 до 1 для введённого числа — индивидуально, с трассировочной таблицей.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:18px;grid-template-columns:1fr 1fr;">
+          <div class="stack">
+            ${code('int number;\ncout << "Введите число для вывода таблицы умножения: ";\ncin >> number;\nfor (int i = 1; i <= 10; ++i) {\n  cout << number << " * " << i << " = " << (number * i) << endl; }', { size: 13 })}
+            <div class="card text-sm"><h3>Задание 1 (стр. 129)</h3><p>Таблица <b>сложения</b> от 10 до 1 для введённого числа. Каким будет заголовок цикла?</p></div>
+            ${reveal("r-add", "Заголовок", "<code>for (int i = 10; i &gt;= 1; i--)</code>, в теле: <code>cout &lt;&lt; number &lt;&lt; \" + \" &lt;&lt; i &lt;&lt; \" = \" &lt;&lt; (number + i) &lt;&lt; endl;</code> <span class='text-xs'>(условный пример)</span>")}
+          </div>
+          <div class="stack"><h3 style="margin:0;">Трассировка, ввод: 7</h3>
+            ${stepper("tm", ["Итерация", "i", "i <= 10", "Вывод"], [
+              ["1", "1", "true", "7 * 1 = 7"], ["2", "2", "true", "7 * 2 = 14"], ["3", "3", "true", "7 * 3 = 21"],
+              ["4", "4", "true", "7 * 4 = 28"], ["5", "5", "true", "7 * 5 = 35"], ["6", "6", "true", "7 * 6 = 42"],
+              ["7", "7", "true", "7 * 7 = 49"], ["8", "8", "true", "7 * 8 = 56"], ["9", "9", "true", "7 * 9 = 63"],
+              ["10", "10", "true", "7 * 10 = 70"], ["—", "11", "false", "выход из цикла"],
+            ], { size: 14 })}</div>
+        </div></div>${src(SB + "стр. 128 (пример 1), стр. 129 (трассировочная таблица к примеру 1, задание 1)")}`;
+      },
+    },
+    {
+      badge: "В парах · число повторений",
+      shortTitle: "Сколько раз выполняется цикл?",
+      timing: "30–37 мин",
+      source: PF + "слайд 16; " + SB + "стр. 129",
+      notes: "Пары определяют число повторений; щёлкните ответ в строке. Затем откройте значения a после цикла. Последняя строка — пример 2 (стр. 129): шаг i += 3.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:18px;grid-template-columns:1.45fr 0.55fr;">
+          <div>${matcher("cnt", [["0", "0 раз"], ["3", "3 раза"], ["10", "10 раз"], ["inf", "зацикливание"]], [
+            { t: "<code>a = 1; for (i = 1; i &lt; 4; i++) a++;</code>", ans: "3" },
+            { t: "<code>a = 1; for (i = 1; i &lt; 4; i++) a = a + i;</code>", ans: "3" },
+            { t: "<code>a = 1; b = 2; for (i = 3; i &gt;= 1; i--) a += b;</code>", ans: "3" },
+            { t: "<code>a = 1; for (i = 1; i &gt;= 3; i--) a = a + 1;</code>", ans: "0" },
+            { t: "<code>a = 1; for (i = 1; i &lt;= 4; i--) a++;</code>", ans: "inf" },
+            { t: "<code>for (int i = 3; i &lt;= 30; i += 3) cout &lt;&lt; i;</code>", ans: "10" },
+          ])}</div>
+          <div class="stack text-sm">${reveal("r-a", "Чему равно a?", "1) a = 4<br>2) a = 7<br>3) a = 7<br>4) a = 1 — условие ложно сразу<br>5) i уменьшается, условие i &lt;= 4 всегда истинно<br>6) выводит 3, 6, … 30")}</div>
+        </div></div>${src(PF + "слайд 16 (значения a посчитаны по коду); " + SB + "стр. 129 (пример 2)")}`;
+      },
+    },
+    {
+      badge: "Новое · замена циклов",
+      shortTitle: "for ↔ while",
+      timing: "37–42 мин",
+      source: PF + "слайды 15, 17; " + SB + "стр. 129",
+      notes: "Сравните две программы «сумма чисел от 0 до n». Сформулируйте правило замены. Вопрос: когда удобнее for?",
+      render() {
+        return `<div class="body">
+          <div class="grid-2" style="gap:18px;">
+            <div class="stack"><h3 style="margin:0;">while</h3>${code('int n, s = 0, i = 0;\ncin >> n;\nwhile (i <= n)\n{ s = s + i; i++; }\ncout << "сумма чисел:" << s;', { size: 15.5 })}</div>
+            <div class="stack"><h3 style="margin:0;">for</h3>${code('int n, s = 0;\ncin >> n;\nfor (int i = 0; i <= n; i++)\n{ s = s + i; }\ncout << "сумма чисел:" << s;', { size: 15.5 })}</div>
+          </div>
+          <div class="grid-2" style="gap:18px;">
+            <div class="card text-sm"><p><code>i = 1; while (i &lt;= 10) { …; i++; }</code><br>⇔ <code>for (i = 1; i &lt;= 10; i++) { … }</code></p></div>
+            <div class="stack">${reveal("r-rule", "Правило", "В C++ замена цикла for на while и наоборот возможна <b>всегда</b>. Цикл <b>for</b> удобно использовать, когда заранее известно количество итераций.")}</div>
+          </div>
+        </div>${src(PF + "слайды 15, 17; " + SB + "стр. 129")}`;
+      },
+    },
+    fizminutka({ timing: "42–45 мин", source: "КСП урока" }),
+    {
+      badge: "Новое · break",
+      shortTitle: "Оператор break",
+      timing: "45–50 мин",
+      source: SB + "стр. 130–131",
+      notes: "break немедленно прекращает цикл, управление переходит к инструкции после цикла. Разберите поиск первого високосного года. Вопрос: что выведет программа для 2021 и 2030? Откройте ответ.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:18px;grid-template-columns:1.25fr 0.75fr;">
+          ${code('bool leapYearFound = false;\nfor (int year = startYear; year <= endYear; year++) {\n  if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)) {\n    cout << "Первый високосный год: " << year << endl;\n    leapYearFound = true;\n    break; // прерываем цикл\n  }\n}\nif (!leapYearFound) {\n  cout << "Нет високосных лет." << endl; }', { size: 13.5, hl: [6] })}
+          <div class="stack text-sm">
+            <div class="def" style="font-size:17px;"><b>break</b> прерывает выполнение цикла: управление передаётся инструкции, следующей за циклом.</div>
+            <div class="card"><p>Високосный год делится на 4, но не на 100, или делится на 400.</p></div>
+            ${reveal("r-leap", "2021 … 2030?", "Проверяются 2021, 2022, 2023, 2024 — найден <b>2024</b>, break: 2025–2030 уже не проверяются.")}
+          </div>
+        </div></div>${src(SB + "стр. 130 (break, условие високосного года), стр. 131 (код)")}`;
+      },
+    },
+    {
+      badge: "Новое · continue",
+      shortTitle: "Оператор continue",
+      timing: "50–55 мин",
+      source: SB + "стр. 131–132",
+      notes: "continue сразу переходит в конец тела цикла — к следующей итерации. Затем «Код 1» и «Код 2» (стр. 132): какую задачу решает каждый? Ученики пишут вывод в тетради, затем откройте ответы.",
+      render() {
+        return `<div class="body">
+          <div class="grid-2" style="gap:16px;grid-template-columns:1fr 1fr;">
+            <div class="stack">
+              <div class="def" style="font-size:17px;"><b>continue</b> позволяет сразу перейти в конец тела цикла, пропуская код под ним, — текущая итерация завершается раньше времени.</div>
+              ${code('for (int i = a; i <= b; i++) {\n  if (i <= 0) {\n    continue; }\n  cout << i << " ";\n}', { size: 15 })}
+              ${reveal("r-pos", "a = −2, b = 3?", "Выводятся только положительные числа: <b>1 2 3</b>")}
+            </div>
+            <div class="stack">
+              <div class="grid-2" style="gap:10px;">
+                <div class="stack" style="gap:4px;"><b class="text-xs">Код 1</b>${code("int some = 0;\nwhile (some < 10)\n{\n  some++;\n  if (some % 2 == 0)\n    continue;\n  cout << some << endl;\n}", { size: 13 })}</div>
+                <div class="stack" style="gap:4px;"><b class="text-xs">Код 2</b>${code("int some = 0;\nwhile (some < 10)\n{\n  if (some == 5)\n    break;\n  some++;\n  cout << some << endl;\n}", { size: 13 })}</div>
+              </div>
+              <div class="grid-2" style="gap:10px;">
+                <div class="stack">${reveal("r-k1", "Что выведет Код 1?", "1 3 5 7 9 — нечётные числа")}</div>
+                <div class="stack">${reveal("r-k2", "Что выведет Код 2?", "1 2 3 4 5 — при some = 5 break")}</div>
+              </div>
+            </div>
+          </div>
+        </div>${src(SB + "стр. 131 (continue), стр. 132 (код continue, Код 1 и Код 2, задание 4)")}`;
+      },
+    },
+    {
+      badge: "Практикум · формат СОЧ",
+      shortTitle: "Практикум по уровням",
+      timing: "55–70 мин",
+      source: PF + "слайд 18; " + SB + "стр. 129, 131; спецификация СОЧ 8 кл.",
+      notes: "Индивидуально по уровням. Начните с задания в формате суммативного (дополни заголовок for, 2 балла), затем задания слайда 18. Сильным — задание 1 (стр. 131): високосный год без break.",
+      render() {
+        const on = S().revealed["r-for5"];
+        const g = (t) => (on ? t : "_____");
+        return `<div class="body"><div class="grid-2" style="gap:20px;grid-template-columns:1fr 1fr;">
+          <div class="stack">
+            <h3 style="margin:0;">Дополни программу: вывести числа, кратные 5, от 5 до 50 <span class="text-muted">[2]</span></h3>
+            ${code(`for (int i = ${g("5")}; ${g("i <= 50")}; ${g("i += 5")})\n{ cout << i << endl; }`, { size: 17 })}
+            <button type="button" class="btn btn-primary reveal-btn" onclick="DECK.toggleReveal('r-for5')">${on ? "Скрыть" : "Показать ответ"}</button>
+            <div class="card text-xs"><h3>Дескрипторы</h3><p>— записывает начальное значение и условие — 1;<br>— записывает шаг изменения счётчика — 1.</p></div>
+          </div>
+          <div class="stack text-sm">
+            <div class="card"><h3>Слайд 18 презентации</h3><p>1. Квадраты чисел от 10 до 20 включительно.<br>2. Числа от 35 до 87, которые при делении на 7 дают остаток 1, 2 или 5.<br>3. Таблица умножения введённого числа от 1 до 9.</p></div>
+            <div class="card"><h3>Учебник</h3><p>Стр. 129: задание 2 (только нечётные множители) или 3 (сумма чётных чисел от a до b).<br>Стр. 131: задание 1 — без break.</p></div>
+          </div>
+        </div></div>${src(PF + "слайд 18; " + SB + "стр. 129 (задания 2–3), стр. 131 (задание 1); спецификация СОЧ 8 кл. (3 четверть, формат задания 6)")}`;
+      },
+    },
+
+    /* ---------------- КОНЕЦ УРОКА (10 мин) ---------------- */
+    {
+      badge: "Конец урока · трассировка",
+      shortTitle: "Нечётные числа от 1 до 29",
+      timing: "70–75 мин",
+      source: PF + "слайд 23",
+      notes: "Формативное оценивание (слайд 23): ученики заполняют трассировочную таблицу в тетради, затем самопроверка по шагам.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;grid-template-columns:0.8fr 1.2fr;align-items:start;">
+          ${code("for (int i = 1; i <= 29; i++)\n{\n  if (i % 2 == 1)\n  {\n    cout << i << endl;\n  }\n}", { size: 17 })}
+          <div class="stack">${stepper("t29", ["i", "i <= 29", "i % 2 == 1", "Вывод"], [
+            ["1", "true", "true", "1"], ["2", "true", "false", "—"], ["3", "true", "true", "3"],
+            ["4", "true", "false", "—"], ["5", "true", "true", "5"], ["…", "…", "…", "…"],
+            ["29", "true", "true", "29"], ["30", "false", "", "выход из цикла"],
+          ], { size: 16 })}</div>
+        </div></div>${src(PF + "слайд 23 (задание 1)")}`;
+      },
+    },
+    {
+      badge: "Конец урока · проверь себя",
+      shortTitle: "Проверь себя",
+      timing: "75–77 мин",
+      source: SB + "стр. 128–132; " + CA + "стр. 19",
+      notes: "Ученики отвечают карточками a–d; щёлкните вариант. Вопрос 1 — «Проверь себя» (стр. 129): что такое итерация.",
+      render() {
+        return `<div class="body"><div class="grid-2 quizgrid" style="gap:14px;">
+          ${quiz("q1", "1. Итерация — это…", ["однократное выполнение тела цикла", "условие цикла", "переменная цикла", "конец программы"], 0)}
+          ${quiz("q2", "2. Что делает break внутри цикла?", ["пропускает одну итерацию", "немедленно прекращает цикл", "начинает цикл заново", "увеличивает счётчик"], 1)}
+          ${quiz("q3", "3. Что делает continue?", ["завершает программу", "прерывает цикл", "переходит к следующей итерации", "выводит число"], 2)}
+          ${quiz("q4", "4. Когда удобно использовать for?", ["когда условие неизвестно", "только для ввода пароля", "когда тело выполнится хотя бы раз", "когда заранее известно количество итераций"], 3)}
+        </div></div>${src(SB + "стр. 129 (итерация, когда удобен for), стр. 130–131 (break, continue); " + CA + "стр. 19 (глоссарий)")}`;
+      },
+    },
+    {
+      badge: "Конец урока · рефлексия",
+      shortTitle: "Рефлексия и домашнее задание",
+      timing: "77–80 мин",
+      source: SB + "стр. 129, 132; КСП урока",
+      notes: "Ученики составляют предложение о своей работе, опираясь на запись for (start; end; step). Домашнее задание.",
+      render() {
+        return `<div class="body"><div class="grid-2" style="gap:22px;">
+          <div class="stack">
+            <h2 class="slide-h2">Составь предложение о своей работе</h2>
+            ${code("for (start; end; step) {\n  // тело цикла\n}", { size: 18 })}
+            <div class="note">«Я начал(а) с …, продолжал(а), пока …, и на каждом шаге …»</div>
+          </div>
+          <div class="stack">
+            <h2 class="slide-h2">Домашнее задание</h2>
+            <div class="card"><h3>📝 Стр. 129, Проверь себя 3</h3><p>Используя цикл со счётчиком, выведи все делители числа n.</p></div>
+            <div class="card"><h3>📝 Стр. 132, Проверь себя 4</h3><p>Найди первое число в заданном диапазоне, которое делится на 7 и 9 без остатка.</p></div>
+            <div class="card"><h3>💻 Тест</h3><p>Тестовые задания на App.online.nis.edu.kz.</p></div>
+          </div>
+        </div></div>${src(SB + "стр. 129, 132 (Проверь себя); КСП урока")}`;
+      },
+    },
+  ],
+});
+
+</script>
+</body>
+</html>

@@ -1,0 +1,1190 @@
+{
+  "topic": "g8-programmirovanie-tsiklicheskikh-algoritmov-so-schetchikom",
+  "summary": "Цикл со счётчиком for в C++: заголовок (начальное значение, условие, шаг), блок-схема цикла с параметром, число повторений, трассировка, замена for на while, операторы break и continue.",
+  "theory": [
+    {
+      "title": "Цикл со счётчиком for",
+      "objectives": [
+        "8.4.3.4"
+      ],
+      "blocks": [
+        {
+          "type": "definition",
+          "term": "Цикл со счётчиком (for)",
+          "content": "Цикл, который позволяет проводить итерации — выполнять набор инструкций нужное количество раз. Его удобно использовать, когда **заранее известно** количество итераций."
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "Общая форма оператора цикла for",
+          "content": "for (нач. значение счётчика; условие цикла; изменение счётчика)\n{\n    // тело цикла\n}"
+        },
+        {
+          "type": "steps",
+          "title": "Как работает for",
+          "items": [
+            "**Инициализация:** в начале цикла объявляем переменную-счётчик и присваиваем ей начальное значение.",
+            "**Условие:** пока оно истинно, цикл продолжается; когда становится ложным — цикл завершается.",
+            "**Изменение счётчика:** после каждого прохода значение счётчика увеличивается или уменьшается — это шаг цикла."
+          ]
+        },
+        {
+          "type": "comparison",
+          "title": "Шаг цикла",
+          "columns": [
+            "Код",
+            "Шаг",
+            "Значения i"
+          ],
+          "rows": [
+            [
+              "`for (int i = 0; i < 9; i++)`",
+              "+1",
+              "0, 1, …, 8"
+            ],
+            [
+              "`for (int i = 9; i > 0; i--)`",
+              "−1",
+              "9, 8, …, 1"
+            ],
+            [
+              "`for (int i = 3; i <= 30; i += 3)`",
+              "+3",
+              "3, 6, …, 30"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": "На блок-схеме цикл с параметром изображают **шестиугольником**, в котором указывают начальное значение, конечное значение (условие) и шаг. Например, поездка до школы: проехать 9 остановок и выйти на десятой."
+        },
+        {
+          "type": "diagram",
+          "format": "mermaid",
+          "caption": "Цикл с параметром: «от 1 до 9 с шагом 1»",
+          "content": "flowchart TD\n  A([Начало]) --> B{{\"от 1 до 9 с шагом 1\"}}\n  B -- \"тело цикла\" --> C[\"Проезжай остановку\"]\n  C --> B\n  B -- \"цикл завершён\" --> D[\"Выходи на остановке\"]\n  D --> E([Конец])"
+        },
+        {
+          "type": "example",
+          "title": "Таблица умножения",
+          "content": "```cpp\n#include <iostream>\nusing namespace std;\nint main() {\n    int number;\n    cout << \"Введите число для вывода таблицы умножения: \";\n    cin >> number;\n    for (int i = 1; i <= 10; ++i) {\n        cout << number << \" * \" << i << \" = \" << (number * i) << endl; }\n    return 0; }\n```\n\nПри вводе 7 программа выведет «7 * 1 = 7» … «7 * 10 = 70»."
+        },
+        {
+          "type": "diagram",
+          "format": "mermaid",
+          "caption": "Блок-схема к таблице умножения",
+          "content": "flowchart TD\n  A([Начало]) --> B[/\"Ввод number\"/]\n  B --> C{{\"i = 1; i <= 10; i++\"}}\n  C -- \"тело цикла\" --> D[/\"Вывод i*number\"/]\n  D --> C\n  C -- \"цикл завершён\" --> E([Конец])"
+        },
+        {
+          "type": "example",
+          "title": "Трассировка таблицы умножения при number = 7 (фрагмент)",
+          "content": "| number | i | i <= 10 | Вывод |\n|---|---|---|---|\n| 7 | 1 | true | 7 * 1 = 7 |\n| | 2 | true | 7 * 2 = 14 |\n| | 3 | true | 7 * 3 = 21 |\n| | … | … | … |\n| | 10 | true | 7 * 10 = 70 |\n| | 11 | false | |"
+        }
+      ]
+    },
+    {
+      "title": "Сколько раз выполняется цикл?",
+      "objectives": [
+        "8.4.3.4"
+      ],
+      "blocks": [
+        {
+          "type": "example",
+          "title": "Кубы чисел от 1 до 8 и от 8 до 1",
+          "content": "```cpp\nfor (N = 1; N <= 8; N++)\n{\n    cubeN = N*N*N;\n    cout << cubeN;\n}\n```\n\nВ заголовке: `N = 1` — начальное значение, `N <= 8` — цикл работает, пока это условие верно, `N++` — изменение на каждом шаге. Чтобы вывести кубы в обратном порядке, переменная цикла должна уменьшаться: `for (N = 8; N >= 1; N--)`."
+        },
+        {
+          "type": "comparison",
+          "title": "Разбор циклов",
+          "columns": [
+            "Фрагмент",
+            "Повторений",
+            "Результат"
+          ],
+          "rows": [
+            [
+              "`a = 1; for (i = 1; i < 4; i++) a++;`",
+              "3",
+              "a = 4"
+            ],
+            [
+              "`a = 1; b = 2; for (i = 3; i >= 1; i--) a += b;`",
+              "3",
+              "a = 7"
+            ],
+            [
+              "`a = 1; for (i = 1; i >= 3; i--) a = a + 1;`",
+              "0 (условие сразу ложно)",
+              "a = 1"
+            ],
+            [
+              "`a = 1; for (i = 1; i <= 4; i--) a++;`",
+              "бесконечно",
+              "зацикливание: i уменьшается и всегда <= 4"
+            ]
+          ]
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "Числа, кратные 3 и не больше 30: шаг 3",
+          "content": "for (int i = 3; i <= 30; i += 3)\n{   cout << \"i = \" << i << endl;   }"
+        }
+      ]
+    },
+    {
+      "title": "Замена for на while и наоборот",
+      "objectives": [
+        "8.4.3.4"
+      ],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "content": "В цикле `while` три действия со счётчиком записаны в разных местах: начальное значение — до цикла, условие — в скобках, изменение — в теле. В `for` все три собраны в заголовке. В языке C++ замена `for` на `while` и наоборот возможна всегда."
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "Цикл while …",
+          "content": "i = 1;\nwhile (i <= 10) {\n    // тело цикла\n    i++;\n}\n\ni = a;\nwhile (i >= b) {\n    // тело цикла\n    i--;\n}"
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "… и то же самое через for",
+          "content": "for (i = 1; i <= 10; i++) {\n    // тело цикла\n}\n\nfor (i = a; i >= b; i--) {\n    // тело цикла\n}"
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "Сумма чисел от 0 до n через for (вариант с while — в теме «Цикл с предусловием»)",
+          "content": "#include <iostream>\nusing namespace std;\nint main() {\n    int n, s = 0;\n    cout << \"введите число\";\n    cin >> n;\n    for (int i = 0; i <= n; i++)\n    {  s = s + i;  }\n    cout << \"сумма чисел:\" << s;\n    return 0;\n}"
+        }
+      ]
+    },
+    {
+      "title": "Операторы break и continue",
+      "objectives": [
+        "8.4.3.4"
+      ],
+      "blocks": [
+        {
+          "type": "definition",
+          "term": "break",
+          "content": "Прерывает выполнение цикла: цикл немедленно прекращается, управление передаётся на инструкцию, следующую за циклом. Нужен, например, чтобы прекратить поиск после нахождения нужного элемента."
+        },
+        {
+          "type": "definition",
+          "term": "continue",
+          "content": "Сразу переходит в конец тела цикла, пропуская код под ним, — текущая итерация завершается раньше, цикл продолжается со следующей. Полезен, чтобы пропустить обработку определённых элементов (например, деление на ноль или неподходящий ввод)."
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "break: первый високосный год между двумя годами",
+          "content": "bool leapYearFound = false;\nfor (int year = startYear; year <= endYear; year++) {\n    if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)) {\n        cout << \"Первый високосный год: \" << year << endl;\n        leapYearFound = true;\n        break;   // прерываем цикл после первого найденного года\n    }\n}\nif (!leapYearFound) {\n    cout << \"Високосных лет нет.\" << endl; }"
+        },
+        {
+          "type": "code",
+          "language": "cpp",
+          "caption": "continue: вывод только положительных чисел от a до b",
+          "content": "for (int i = a; i <= b; i++) {\n    if (i <= 0) {\n        continue;\n    }\n    cout << i << \" \";\n}"
+        },
+        {
+          "type": "example",
+          "title": "break и continue в while",
+          "content": "Код 1 выводит нечётные числа 1, 3, 5, 7, 9 (чётные пропускает `continue`):\n\n```cpp\nint some = 0;\nwhile (some < 10) {\n    some++;\n    if (some % 2 == 0)\n        continue;\n    cout << some << endl;\n}\n```\n\nКод 2 выводит 1, 2, 3, 4, 5 и прерывается при some == 5:\n\n```cpp\nint some = 0;\nwhile (some < 10) {\n    if (some == 5)\n        break;\n    some++;\n    cout << some << endl;\n}\n```"
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "key": "g8-for-range-count",
+      "title": "Количество итераций for",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.4"
+      ],
+      "practice": true,
+      "text": "Сколько раз выполнится тело цикла `for (int i = 0; i < 5; i++)`?",
+      "options": [
+        {
+          "key": "A",
+          "content": "4 раза"
+        },
+        {
+          "key": "B",
+          "content": "5 раз (для i от 0 до 4)"
+        },
+        {
+          "key": "C",
+          "content": "6 раз (для i от 0 до 5)"
+        },
+        {
+          "key": "D",
+          "content": "Бесконечно"
+        }
+      ],
+      "scheme": {
+        "mark_scheme": "B (5 раз) — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "model_answer": "B",
+        "explanation": "i принимает значения 0, 1, 2, 3, 4; при i = 5 условие i < 5 ложно."
+      },
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 128; Циклы for while.pptx, слайды 8, 16"
+    },
+    {
+      "key": "g8-fr-header-match",
+      "title": "Части заголовка for",
+      "type": "matching",
+      "marks": 3,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.4"
+      ],
+      "text": "Сопоставьте часть заголовка `for (int i = 1; i <= 10; i++)` с её назначением.",
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "int i = 1"
+          },
+          {
+            "key": "L2",
+            "text": "i <= 10"
+          },
+          {
+            "key": "L3",
+            "text": "i++"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "Начальное значение счётчика"
+          },
+          {
+            "key": "R2",
+            "text": "Условие продолжения цикла"
+          },
+          {
+            "key": "R3",
+            "text": "Изменение счётчика (шаг)"
+          }
+        ]
+      },
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 128; Циклы for while.pptx, слайды 8, 13",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "По 1 баллу за пару.",
+        "accepted": {
+          "pairs": {
+            "L1": "R1",
+            "L2": "R2",
+            "L3": "R3"
+          }
+        },
+        "explanation": "Инициализация; цикл работает, пока условие истинно; после каждого прохода счётчик меняется."
+      }
+    },
+    {
+      "key": "g8-fr-a-plus",
+      "title": "Значение после цикла",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "easy",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.4"
+      ],
+      "text": "Чему равно a после выполнения фрагмента?\n\n```cpp\nint a = 2;\nfor (int i = 1; i <= 5; i++) a++;\n```",
+      "source": "teacher",
+      "source_reference": "Циклы for while.pptx, слайд 16",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "7 — 1 балл.",
+        "accepted": {
+          "values": [
+            "7"
+          ],
+          "numeric": true
+        },
+        "explanation": "Тело выполняется 5 раз (i = 1…5): 2 + 5 = 7."
+      }
+    },
+    {
+      "key": "g8-fr-a-plus-b",
+      "title": "Шаг −1",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.4"
+      ],
+      "text": "Чему равно a после выполнения фрагмента?\n\n```cpp\nint a = 0, b = 5;\nfor (int i = 4; i >= 1; i--) a += b;\n```",
+      "source": "teacher",
+      "source_reference": "Циклы for while.pptx, слайд 16",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "20 — 1 балл.",
+        "accepted": {
+          "values": [
+            "20"
+          ],
+          "numeric": true
+        },
+        "explanation": "i = 4, 3, 2, 1 — четыре итерации, по 5: a = 20."
+      }
+    },
+    {
+      "key": "g8-fr-zero",
+      "title": "Ни одного раза",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "analyse",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.4"
+      ],
+      "text": "Сколько раз выполнится тело цикла `for (int i = 1; i >= 3; i--)`?",
+      "options": [
+        {
+          "key": "A",
+          "content": "0 раз"
+        },
+        {
+          "key": "B",
+          "content": "1 раз"
+        },
+        {
+          "key": "C",
+          "content": "3 раза"
+        },
+        {
+          "key": "D",
+          "content": "Бесконечно"
+        }
+      ],
+      "source": "teacher",
+      "source_reference": "Циклы for while.pptx, слайд 16",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "A — 1 балл.",
+        "accepted": {
+          "correct": "A"
+        },
+        "model_answer": "A",
+        "explanation": "При i = 1 условие i >= 3 сразу ложно."
+      }
+    },
+    {
+      "key": "g8-fr-endless",
+      "title": "Зацикливание",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "analyse",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.4"
+      ],
+      "text": "Что произойдёт при выполнении `for (int i = 1; i <= 4; i--) a++;`?",
+      "options": [
+        {
+          "key": "A",
+          "content": "Тело выполнится 4 раза"
+        },
+        {
+          "key": "B",
+          "content": "Тело не выполнится ни разу"
+        },
+        {
+          "key": "C",
+          "content": "Зацикливание: i уменьшается и всегда <= 4"
+        },
+        {
+          "key": "D",
+          "content": "Ошибка компиляции"
+        }
+      ],
+      "source": "teacher",
+      "source_reference": "Циклы for while.pptx, слайд 16",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "C — 1 балл.",
+        "accepted": {
+          "correct": "C"
+        },
+        "model_answer": "C",
+        "explanation": "Счётчик уменьшается, условие i <= 4 никогда не станет ложным."
+      }
+    },
+    {
+      "key": "g8-fr-reverse-blanks",
+      "title": "Обратный порядок",
+      "type": "fill_blank",
+      "marks": 3,
+      "difficulty": "medium",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.4"
+      ],
+      "text": "Допишите заголовок цикла, чтобы вывести кубы чисел от 9 до 1 (в обратном порядке).\n\n```cpp\nfor (N = [[1]]; N [[2]] 1; N[[3]])\n{\n    cubeN = N*N*N;\n    cout << cubeN << endl;\n}\n```",
+      "content": {
+        "blank_count": 3
+      },
+      "source": "teacher",
+      "source_reference": "Циклы for while.pptx, слайд 14",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "[[1]] 9 (1); [[2]] >= (1); [[3]] -- (1).",
+        "accepted": {
+          "blanks": [
+            [
+              "9"
+            ],
+            [
+              ">="
+            ],
+            [
+              "--",
+              "-=1"
+            ]
+          ],
+          "ignore_spaces": true
+        },
+        "explanation": "Переменная цикла должна уменьшаться от 9 до 1 включительно."
+      }
+    },
+    {
+      "key": "g8-fr-step4",
+      "title": "Шаг 4",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.4"
+      ],
+      "text": "Сколько чисел выведет фрагмент?\n\n```cpp\nfor (int i = 4; i <= 30; i += 4)\n{   cout << \"i = \" << i << endl;   }\n```",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 129 (пример 2)",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "7 — 1 балл.",
+        "accepted": {
+          "values": [
+            "7"
+          ],
+          "numeric": true
+        },
+        "explanation": "4, 8, 12, 16, 20, 24, 28 — 7 чисел; 32 > 30."
+      }
+    },
+    {
+      "key": "g8-fr-trace-table3",
+      "title": "Трассировка: таблица умножения",
+      "type": "trace_table",
+      "marks": 5,
+      "difficulty": "medium",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.4"
+      ],
+      "text": "Заполните трассировочную таблицу для number = 3. Условия записывайте словами true или false; если вывода нет, ставьте «-».\n\n```cpp\nfor (int i = 1; i <= 4; ++i) {\n    cout << number * i << endl; }\n```",
+      "content": {
+        "columns": [
+          "i",
+          "i <= 4",
+          "Вывод"
+        ],
+        "rows": 5,
+        "prefill": [
+          [
+            "1",
+            null,
+            null
+          ],
+          [
+            "2",
+            null,
+            null
+          ],
+          [
+            "3",
+            null,
+            null
+          ],
+          [
+            "4",
+            null,
+            null
+          ],
+          [
+            "5",
+            null,
+            null
+          ]
+        ]
+      },
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 128–129; G8_Информатика_TG_RU_07.02.25_ФИНАЛ 1.pdf, стр. 107–108",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "По 1 баллу за строку.",
+        "accepted": {
+          "rows": [
+            [
+              null,
+              "true",
+              "3"
+            ],
+            [
+              null,
+              "true",
+              "6"
+            ],
+            [
+              null,
+              "true",
+              "9"
+            ],
+            [
+              null,
+              "true",
+              "12"
+            ],
+            [
+              null,
+              "false",
+              "-"
+            ]
+          ]
+        },
+        "explanation": "При i = 1…4 условие истинно и выводится 3 · i; при i = 5 условие ложно, вывода нет."
+      }
+    },
+    {
+      "key": "g8-fr-break-continue",
+      "title": "break или continue",
+      "type": "matching",
+      "marks": 2,
+      "difficulty": "easy",
+      "command_word": "identify",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.4"
+      ],
+      "text": "Сопоставьте оператор с его действием.",
+      "content": {
+        "left": [
+          {
+            "key": "L1",
+            "text": "break"
+          },
+          {
+            "key": "L2",
+            "text": "continue"
+          }
+        ],
+        "right": [
+          {
+            "key": "R1",
+            "text": "Немедленно прекращает цикл, управление передаётся инструкции после цикла"
+          },
+          {
+            "key": "R2",
+            "text": "Пропускает оставшийся код текущей итерации и переходит к следующей"
+          },
+          {
+            "key": "R3",
+            "text": "Объявляет переменную цикла"
+          }
+        ]
+      },
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 130–131",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "По 1 баллу за пару.",
+        "accepted": {
+          "pairs": {
+            "L1": "R1",
+            "L2": "R2"
+          }
+        },
+        "explanation": "break прерывает цикл, continue завершает только текущую итерацию."
+      }
+    },
+    {
+      "key": "g8-fr-break-count",
+      "title": "Сколько чисел до break",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.4"
+      ],
+      "text": "Сколько чисел выведет фрагмент?\n\n```cpp\nint some = 0;\nwhile (some < 10) {\n    if (some == 3)\n        break;\n    some++;\n    cout << some << endl;\n}\n```",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 132 (код 2)",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "3 — 1 балл.",
+        "accepted": {
+          "values": [
+            "3"
+          ],
+          "numeric": true
+        },
+        "explanation": "Выводятся 1, 2, 3; при some == 3 срабатывает break."
+      }
+    },
+    {
+      "key": "g8-fr-continue-count",
+      "title": "Сколько чисел с continue",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.4"
+      ],
+      "text": "Сколько чисел выведет фрагмент?\n\n```cpp\nint some = 0;\nwhile (some < 8) {\n    some++;\n    if (some % 2 == 0)\n        continue;\n    cout << some << endl;\n}\n```",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 132 (код 1)",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "4 — 1 балл.",
+        "accepted": {
+          "values": [
+            "4"
+          ],
+          "numeric": true
+        },
+        "explanation": "Выводятся нечётные 1, 3, 5, 7; чётные пропускает continue."
+      }
+    },
+    {
+      "key": "g8-fr-for-to-while",
+      "title": "Замени for на while",
+      "type": "fill_blank",
+      "marks": 3,
+      "difficulty": "medium",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.4"
+      ],
+      "text": "Перепишите `for (i = 1; i <= 10; i++) { … }` с помощью while.\n\n```cpp\ni = [[1]];\nwhile (i [[2]] 10) {\n    // тело цикла\n    [[3]];\n}\n```",
+      "content": {
+        "blank_count": 3
+      },
+      "source": "teacher",
+      "source_reference": "Циклы for while.pptx, слайд 17",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "[[1]] 1 (1); [[2]] <= (1); [[3]] i++ (1).",
+        "accepted": {
+          "blanks": [
+            [
+              "1"
+            ],
+            [
+              "<="
+            ],
+            [
+              "i++",
+              "++i",
+              "i=i+1",
+              "i+=1"
+            ]
+          ],
+          "ignore_spaces": true
+        },
+        "explanation": "Начальное значение — до цикла, условие — в скобках while, изменение счётчика — в конце тела."
+      }
+    },
+    {
+      "key": "g8-fr-even-sum",
+      "title": "Сумма чётных",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.4"
+      ],
+      "text": "Программа находит сумму всех чётных чисел в диапазоне от a до b:\n\n```cpp\nint s = 0;\nfor (int i = a; i <= b; i++)\n    if (i % 2 == 0) s = s + i;\ncout << s;\n```\n\nЧто она выведет при a = 1, b = 10?",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 129 (задание 3)",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "30 — 1 балл.",
+        "accepted": {
+          "values": [
+            "30"
+          ],
+          "numeric": true
+        },
+        "explanation": "2 + 4 + 6 + 8 + 10 = 30."
+      }
+    },
+    {
+      "key": "g8-fr-leap",
+      "title": "Первый високосный год",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "medium",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.4"
+      ],
+      "text": "Программа с `break` (см. теорию) ищет первый високосный год между 2021 и 2030. Какой год она выведет?",
+      "source": "teacher",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 130–131",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "2024 — 1 балл.",
+        "accepted": {
+          "values": [
+            "2024"
+          ],
+          "numeric": true
+        },
+        "explanation": "2024 делится на 4 и не делится на 100; после него break прерывает цикл."
+      }
+    },
+    {
+      "key": "g8-fr-squares-code",
+      "title": "Программа: квадраты чисел",
+      "type": "code_completion",
+      "marks": 3,
+      "difficulty": "medium",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "8.4.3.4"
+      ],
+      "text": "Напишите программу на C++ с циклом `for`, которая выводит на экран квадраты чисел от 5 до 15 включительно.",
+      "content": {
+        "starter_code": "#include <iostream>\nusing namespace std;\nint main() {\n\n    return 0;\n}"
+      },
+      "source": "teacher",
+      "source_reference": "Циклы for while.pptx, слайд 18 (задание 1)",
+      "practice": true,
+      "scheme": {
+        "mark_scheme": "- заголовок for с начальным значением 5 (1)\n- условие i <= 15 и шаг i++ (1)\n- вывод i*i в теле цикла (1)",
+        "points": [
+          {
+            "criterion": "Начальное значение 5",
+            "marks": 1
+          },
+          {
+            "criterion": "Условие i <= 15 и шаг +1",
+            "marks": 1
+          },
+          {
+            "criterion": "Вывод квадрата в теле цикла",
+            "marks": 1
+          }
+        ],
+        "model_answer": "```cpp\n#include <iostream>\nusing namespace std;\nint main() {\n    for (int i = 5; i <= 15; i++) {\n        cout << i * i << endl;\n    }\n    return 0;\n}\n```"
+      }
+    },
+    {
+      "key": "g8-fr-exam-1",
+      "title": "Число итераций",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "exam",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.4"
+      ],
+      "text": "Сколько раз выполнится тело цикла `for (int i = 2; i <= 14; i += 3)`?",
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 128–129",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "5 — 1 балл.",
+        "accepted": {
+          "values": [
+            "5"
+          ],
+          "numeric": true
+        },
+        "explanation": "i = 2, 5, 8, 11, 14 — пять значений."
+      }
+    },
+    {
+      "key": "g8-fr-exam-2",
+      "title": "Сумма в цикле",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "exam",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.4"
+      ],
+      "text": "Что выведет фрагмент?\n\n```cpp\nint s = 0;\nfor (int i = 1; i <= 6; i++) s = s + i;\ncout << s;\n```",
+      "source": "nis_style",
+      "source_reference": "Циклы for while.pptx, слайд 15",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "21 — 1 балл.",
+        "accepted": {
+          "values": [
+            "21"
+          ],
+          "numeric": true
+        },
+        "explanation": "1 + 2 + 3 + 4 + 5 + 6 = 21."
+      }
+    },
+    {
+      "key": "g8-fr-exam-3",
+      "title": "Трассировка: шаг −2",
+      "type": "trace_table",
+      "marks": 4,
+      "difficulty": "exam",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.4"
+      ],
+      "text": "Заполните трассировочную таблицу. Условия записывайте словами true или false; если вывода нет, ставьте «-».\n\n```cpp\nfor (int i = 10; i >= 4; i -= 2)\n    cout << i * i << endl;\n```",
+      "content": {
+        "columns": [
+          "i",
+          "i >= 4",
+          "Вывод"
+        ],
+        "rows": 5,
+        "prefill": [
+          [
+            "10",
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ]
+        ]
+      },
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 128–129; Циклы for while.pptx, слайды 6, 23",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "5 строк, оценивается по строкам (4 балла пропорционально): 10 true 100; 8 true 64; 6 true 36; 4 true 16; 2 false -.",
+        "accepted": {
+          "rows": [
+            [
+              null,
+              "true",
+              "100"
+            ],
+            [
+              "8",
+              "true",
+              "64"
+            ],
+            [
+              "6",
+              "true",
+              "36"
+            ],
+            [
+              "4",
+              "true",
+              "16"
+            ],
+            [
+              "2",
+              "false",
+              "-"
+            ]
+          ]
+        },
+        "explanation": "i уменьшается на 2: 10, 8, 6, 4 — условие истинно; при i = 2 ложно, цикл завершён."
+      }
+    },
+    {
+      "key": "g8-fr-exam-4",
+      "title": "Действие continue",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "exam",
+      "command_word": "state",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.4"
+      ],
+      "text": "Что делает оператор `continue` внутри цикла?",
+      "options": [
+        {
+          "key": "A",
+          "content": "Прекращает цикл полностью"
+        },
+        {
+          "key": "B",
+          "content": "Пропускает оставшийся код текущей итерации и переходит к следующей"
+        },
+        {
+          "key": "C",
+          "content": "Повторяет текущую итерацию ещё раз"
+        },
+        {
+          "key": "D",
+          "content": "Завершает программу"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 131",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "B — 1 балл.",
+        "accepted": {
+          "correct": "B"
+        },
+        "model_answer": "B",
+        "explanation": "continue завершает только текущую итерацию."
+      }
+    },
+    {
+      "key": "g8-fr-exam-5",
+      "title": "Поиск с break",
+      "type": "calculation",
+      "marks": 1,
+      "difficulty": "exam",
+      "command_word": "calculate",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.4"
+      ],
+      "text": "Что выведет фрагмент?\n\n```cpp\nfor (int i = 1; i <= 100; i++) {\n    if (i % 4 == 0 && i % 6 == 0) {\n        cout << i;\n        break;\n    }\n}\n```",
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 130, 132 (Проверь себя 4)",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "12 — 1 балл.",
+        "accepted": {
+          "values": [
+            "12"
+          ],
+          "numeric": true
+        },
+        "explanation": "Первое число, делящееся на 4 и 6, — 12; break прерывает цикл."
+      }
+    },
+    {
+      "key": "g8-fr-exam-6",
+      "title": "while → for",
+      "type": "fill_blank",
+      "marks": 3,
+      "difficulty": "exam",
+      "command_word": "complete",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.4"
+      ],
+      "text": "Перепишите цикл while с помощью for.\n\n```cpp\ni = a;\nwhile (i >= b) {\n    // тело цикла\n    i--;\n}\n```\n\n`for (i = [[1]]; i [[2]] b; [[3]])`",
+      "content": {
+        "blank_count": 3
+      },
+      "source": "nis_style",
+      "source_reference": "Циклы for while.pptx, слайд 17",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "[[1]] a (1); [[2]] >= (1); [[3]] i-- (1).",
+        "accepted": {
+          "blanks": [
+            [
+              "a"
+            ],
+            [
+              ">="
+            ],
+            [
+              "i--",
+              "--i",
+              "i=i-1",
+              "i-=1"
+            ]
+          ],
+          "ignore_spaces": true
+        },
+        "explanation": "Все три действия со счётчиком переносятся в заголовок for."
+      }
+    },
+    {
+      "key": "g8-fr-exam-7",
+      "title": "Программа: делители числа",
+      "type": "code_completion",
+      "marks": 3,
+      "difficulty": "exam",
+      "command_word": "write",
+      "grading": "AI",
+      "objectives": [
+        "8.4.3.4"
+      ],
+      "text": "Напишите программу на C++ с циклом со счётчиком: пользователь вводит n, программа выводит все делители числа n.",
+      "content": {
+        "starter_code": "#include <iostream>\nusing namespace std;\nint main() {\n\n    return 0;\n}"
+      },
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 129 (Проверь себя 3)",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "- ввод n (1)\n- for от 1 до n включительно (1)\n- проверка n % i == 0 и вывод i (1)",
+        "points": [
+          {
+            "criterion": "Ввод n",
+            "marks": 1
+          },
+          {
+            "criterion": "Цикл for от 1 до n",
+            "marks": 1
+          },
+          {
+            "criterion": "Условие n % i == 0 и вывод делителя",
+            "marks": 1
+          }
+        ],
+        "model_answer": "```cpp\n#include <iostream>\nusing namespace std;\nint main() {\n    int n;\n    cin >> n;\n    for (int i = 1; i <= n; i++) {\n        if (n % i == 0)\n            cout << i << \" \";\n    }\n    return 0;\n}\n```"
+      }
+    },
+    {
+      "key": "g8-fr-exam-8",
+      "title": "for или while",
+      "type": "short_answer",
+      "marks": 2,
+      "difficulty": "exam",
+      "command_word": "explain",
+      "grading": "AI",
+      "objectives": [
+        "8.4.3.4"
+      ],
+      "text": "Когда удобнее использовать цикл `for`, а когда — `while`? Приведите по одному примеру задачи.",
+      "content": {
+        "answer_lines": 4
+      },
+      "source": "nis_style",
+      "source_reference": "G8_Информатика_SB_RU_04.02. 2025_ФИНАЛ_Исправлен.pdf, стр. 118, 129; C  _Loops_Automation (1).pdf, стр. 4",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "for — когда заранее известно количество итераций (пример: таблица умножения от 1 до 10) (1); while — когда число повторений заранее неизвестно, цикл идёт, пока условие истинно (пример: запрос пароля, сумма цифр) (1).",
+        "points": [
+          {
+            "criterion": "for — известное число повторений, с примером",
+            "marks": 1
+          },
+          {
+            "criterion": "while — число повторений неизвестно, повтор пока условие истинно, с примером",
+            "marks": 1
+          }
+        ],
+        "model_answer": "for удобно использовать, когда заранее известно количество итераций, например вывести таблицу умножения от 1 до 10. while — когда неизвестно, сколько будет повторений, цикл идёт, пока условие истинно, например запрашивать пароль, пока не введут правильный."
+      }
+    },
+    {
+      "key": "g8-fr-exam-9",
+      "title": "Бесконечный for",
+      "type": "mcq",
+      "marks": 1,
+      "difficulty": "exam",
+      "command_word": "analyse",
+      "grading": "AUTO",
+      "objectives": [
+        "8.4.3.4"
+      ],
+      "text": "Какой из циклов будет выполняться бесконечно?",
+      "options": [
+        {
+          "key": "A",
+          "content": "`for (int i = 1; i <= 5; i++)`"
+        },
+        {
+          "key": "B",
+          "content": "`for (int i = 5; i >= 1; i--)`"
+        },
+        {
+          "key": "C",
+          "content": "`for (int i = 1; i <= 5; i--)`"
+        },
+        {
+          "key": "D",
+          "content": "`for (int i = 5; i <= 1; i++)`"
+        }
+      ],
+      "source": "nis_style",
+      "source_reference": "Циклы for while.pptx, слайд 16",
+      "practice": false,
+      "scheme": {
+        "mark_scheme": "C — 1 балл.",
+        "accepted": {
+          "correct": "C"
+        },
+        "model_answer": "C",
+        "explanation": "i уменьшается и всегда остаётся <= 5 — зацикливание."
+      }
+    }
+  ],
+  "topic_exam": {
+    "duration": 22,
+    "title": "Цикл со счётчиком — экзамен",
+    "instructions": "Ответьте на **все** вопросы. Код записан на C++. В трассировочных таблицах условия записывайте словами true или false. Всего: 17 баллов. Время: 22 минуты.",
+    "questions": [
+      "g8-fr-exam-1",
+      "g8-fr-exam-2",
+      "g8-fr-exam-3",
+      "g8-fr-exam-4",
+      "g8-fr-exam-5",
+      "g8-fr-exam-6",
+      "g8-fr-exam-7",
+      "g8-fr-exam-8",
+      "g8-fr-exam-9"
+    ]
+  }
+}
